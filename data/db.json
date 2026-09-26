@@ -4686,6 +4686,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_3_bazadze",
+              "webName": "Bazadze",
+              "clubId": "SCH_12_3",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -4966,6 +4977,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_1_katamadze",
+              "webName": "E. Katamadze",
+              "clubId": "SCH_10_1",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         }
@@ -5082,9 +5104,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_bazadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 33.5,
+        "bank": 28.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5405,9 +5434,16 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_katamadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 46,
+        "bank": 38,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
