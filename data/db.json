@@ -4698,7 +4698,19 @@
           "rank": 7,
           "previousRank": 7,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_custom_1790194618189",
+              "webName": "Tsiskara",
+              "clubId": "SCH_11_5",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790454966962",
@@ -4904,8 +4916,16 @@
       "squad": {
         "teamName": "JogaBonito",
         "managerName": "tsiskara",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_custom_1790194618189",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 45.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
