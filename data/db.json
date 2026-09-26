@@ -4797,7 +4797,7 @@
           "gwPoints": 0,
           "rank": 10,
           "previousRank": 10,
-          "activeChip": null,
+          "activeChip": "wildcard",
           "lineup": []
         },
         {
@@ -5112,7 +5112,7 @@
         "bank": 55,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
-        "activeChip": null,
+        "activeChip": "wildcard",
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
