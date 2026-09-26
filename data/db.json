@@ -6596,6 +6596,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_9_3_kachkachashvili",
+              "webName": "Kachkachashvili",
+              "clubId": "SCH_9_3",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ]
         },
@@ -8380,9 +8391,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_3_kachkachashvili",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 10.6,
+        "bank": 5.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
