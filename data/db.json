@@ -6487,8 +6487,8 @@
               "points": 0
             },
             {
-              "playerId": "p_12_7_mekravishvili",
-              "webName": "Mekravishvili",
+              "playerId": "p_12_7_gvaridzishvili",
+              "webName": "G.Gvaridzishvili",
               "clubId": "SCH_12_7",
               "position": "DEF",
               "isStarter": true,
@@ -8154,14 +8154,14 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_12_7_mekravishvili",
+            "playerId": "p_12_7_gvaridzishvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 38.5,
+        "bank": 37,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
