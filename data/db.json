@@ -6818,19 +6818,7 @@
           "rank": 32,
           "previousRank": 32,
           "activeChip": null,
-          "lineup": [
-            {
-              "playerId": "p_12_3_peikrishvili",
-              "webName": "Peikrishvili",
-              "clubId": "SCH_12_3",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            }
-          ]
+          "lineup": []
         },
         {
           "id": "user_1790462654632",
