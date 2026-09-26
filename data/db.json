@@ -6487,6 +6487,17 @@
               "points": 0
             },
             {
+              "playerId": "p_11_7_vezdeni",
+              "webName": "Vezdeni",
+              "clubId": "SCH_11_7",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
+            },
+            {
               "playerId": "p_11_4_mshvidobadze",
               "webName": "Mshvidobadze",
               "clubId": "SCH_11_4",
@@ -8332,6 +8343,13 @@
             "isViceCaptain": false
           },
           {
+            "playerId": "p_11_7_vezdeni",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
             "playerId": "p_11_4_mshvidobadze",
             "isStarter": false,
             "benchOrder": 2,
@@ -8339,7 +8357,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 4.4,
+        "bank": 0.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
