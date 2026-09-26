@@ -6775,6 +6775,17 @@
           "previousRank": 30,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790461971729",
+          "managerName": "Nikolozi",
+          "teamName": "Badri",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 31,
+          "previousRank": 31,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8575,6 +8586,26 @@
         }
       },
       "joinedAt": "2026-09-26T22:02:37.511Z"
+    },
+    "user_1790461971729": {
+      "id": "user_1790461971729",
+      "managerName": "Nikolozi",
+      "teamName": "Badri",
+      "squad": {
+        "teamName": "Badri",
+        "managerName": "Nikolozi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T22:32:51.737Z"
     }
   },
   "users": {
@@ -8991,6 +9022,20 @@
       "teamName": "Lomebi",
       "token": "70221a550602bb589cd15776685f992a5fae366435364c67c715e0ee51d968b2",
       "createdAt": "2026-09-26T22:02:37.511Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790461971729": {
+      "id": "user_1790461971729",
+      "username": "kolia",
+      "email": "nkhikhadze7@gmail.com",
+      "passwordHash": "5fc2a077a94f6a92bc365576af6166e2d27a951cb0f65242f7da3b61b39500fa8ed84df7b54e31439e7260e6cbba82b639f7d086f80a9d7731a60dabf3b8e81d",
+      "salt": "e82194cd4ac0981740aea8c947ed42dc",
+      "managerName": "Nikolozi",
+      "teamName": "Badri",
+      "token": "9292ac50582417e647394f410408a12f8f200100308ef3e0ecfa017d73f104e7",
+      "createdAt": "2026-09-26T22:32:51.737Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
