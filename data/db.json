@@ -4741,6 +4741,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_11_7_jojua",
+              "webName": "Jojua",
+              "clubId": "SCH_11_7",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ]
         },
@@ -4955,24 +4966,13 @@
               "points": 0
             },
             {
-              "playerId": "p_12_6_chachia",
-              "webName": "Chachia",
-              "clubId": "SCH_12_6",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_shengelia",
               "webName": "N. Shengelia",
               "clubId": "SCH_10_1",
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -5142,6 +5142,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_rati",
+              "webName": "Rati",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5163,6 +5174,17 @@
               "isStarter": true,
               "isCaptain": true,
               "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_1_shengelia",
+              "webName": "N. Shengelia",
+              "clubId": "SCH_10_1",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             }
@@ -5998,6 +6020,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_2_sebua",
+              "webName": "Sebua",
+              "clubId": "SCH_12_2",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6105,9 +6138,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_jojua",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 10.3,
+        "bank": 3.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6357,18 +6397,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_6_chachia",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_10_1_shengelia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_zarno",
@@ -6385,7 +6418,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 17.7,
+        "bank": 26.2,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6502,9 +6535,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_rati",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 36.3,
+        "bank": 27,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6530,9 +6570,16 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_shengelia",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 49.5,
+        "bank": 40.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
@@ -7245,9 +7292,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_2_sebua",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 25,
+        "bank": 20.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7431,7 +7485,7 @@
       "salt": "919793fbdba66926e0621065feba5d64",
       "managerName": "tsiskara",
       "teamName": "JogaBonito",
-      "token": "1e2163f980a0cb5ab1b3f1b602834a4249976259c21a3f4fe7acc694ebedde1e",
+      "token": "40947f8c6888267a27aef464a1aeb7587ae412d629e971a682018fc0286ff6fb",
       "createdAt": "2026-09-26T20:35:16.369Z",
       "role": "user",
       "isAdmin": false,
