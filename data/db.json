@@ -4720,6 +4720,17 @@
           "previousRank": 10,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790455065876",
+          "managerName": "Nikoloz kevlishvili",
+          "teamName": "12/7",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 11,
+          "previousRank": 11,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -4945,6 +4956,26 @@
         }
       },
       "joinedAt": "2026-09-26T20:36:50.999Z"
+    },
+    "user_1790455065876": {
+      "id": "user_1790455065876",
+      "managerName": "Nikoloz kevlishvili",
+      "teamName": "12/7",
+      "squad": {
+        "teamName": "12/7",
+        "managerName": "Nikoloz kevlishvili",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T20:37:45.878Z"
     }
   },
   "users": {
@@ -4959,7 +4990,7 @@
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
       "isAdmin": true,
-      "token": "e949e9df80fe95b57c9307a367a553db6031ecff785fb12cb8677983942c2027"
+      "token": "95a74b0d20a3b2cfd57110646011bbdea6579bdffa46301dd329dfde347ebeaf"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
@@ -5081,6 +5112,20 @@
       "teamName": "Rogers, Morgan Rogers",
       "token": "141cd62a59606b686450006828d2a7db7016b6afec998060f932c27b92320cfd",
       "createdAt": "2026-09-26T20:36:50.999Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790455065876": {
+      "id": "user_1790455065876",
+      "username": "kevlo",
+      "email": "kevlo@fantasy.pl",
+      "passwordHash": "9066c15ec7df2361479aca2a51862999f25bb6e2e5ad66fb5b92e4d1855c798a6ab95a8d6fd9b3a53329fb32fd84e245aa486cd2b410f2399dccb7b8bff2f786",
+      "salt": "791a3bb4721ddd75ef7e540331dd4a68",
+      "managerName": "Nikoloz kevlishvili",
+      "teamName": "12/7",
+      "token": "b92b12f306058730667410e44f96cad9efb09cfe9a6fee3e278f4c535e9e4635",
+      "createdAt": "2026-09-26T20:37:45.877Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
