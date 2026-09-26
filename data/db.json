@@ -4752,6 +4752,28 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_2_kupreishvili",
+              "webName": "N. Kupreishvili",
+              "clubId": "SCH_10_2",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_3_kapanadze",
+              "webName": "S. Kapanadze",
+              "clubId": "SCH_10_3",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 1,
+              "points": 0
             }
           ]
         },
@@ -5207,6 +5229,17 @@
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_3_berikelashvili",
+              "webName": "Berikelashvili",
+              "clubId": "SCH_12_3",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             }
@@ -5734,17 +5767,6 @@
               "points": 0
             },
             {
-              "playerId": "p_11_2_surmava",
-              "webName": "Surmava",
-              "clubId": "SCH_11_2",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_rati",
               "webName": "Rati",
               "clubId": "SCH_11_5",
@@ -5771,10 +5793,10 @@
               "webName": "N. Shengelia",
               "clubId": "SCH_10_1",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             }
           ]
@@ -6107,9 +6129,23 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_2_kupreishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_3_kapanadze",
+            "isStarter": false,
+            "benchOrder": 1,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 33.8,
+        "bank": 25.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6581,9 +6617,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
+          },
+          {
+            "playerId": "p_12_3_berikelashvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 46.5,
+        "bank": 38.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6996,13 +7039,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_11_2_surmava",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
@@ -7018,13 +7054,13 @@
           },
           {
             "playerId": "p_10_1_shengelia",
-            "isStarter": false,
-            "benchOrder": 1,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 15.6,
+        "bank": 19.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
