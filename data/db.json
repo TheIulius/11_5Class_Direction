@@ -5079,6 +5079,17 @@
           "previousRank": 16,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790455501478",
+          "managerName": "Saba",
+          "teamName": "10/2",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 17,
+          "previousRank": 17,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -5613,6 +5624,26 @@
         }
       },
       "joinedAt": "2026-09-26T20:44:31.753Z"
+    },
+    "user_1790455501478": {
+      "id": "user_1790455501478",
+      "managerName": "Saba",
+      "teamName": "10/2",
+      "squad": {
+        "teamName": "10/2",
+        "managerName": "Saba",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T20:45:01.489Z"
     }
   },
   "users": {
@@ -5833,6 +5864,20 @@
       "teamName": "Poliklinka fc",
       "token": "6cbf442f080d114ac755cf8674063ee4ef904a64c87bda67acafaf7e4146e890",
       "createdAt": "2026-09-26T20:44:31.753Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790455501478": {
+      "id": "user_1790455501478",
+      "username": "shubitidzesaba79",
+      "email": "shubitidzesaba00@gmail.com",
+      "passwordHash": "fd7ea99f2c339b12e094cf865cd5c52d78409486d0c5e7258a80a451173166a53f5fbb5d4e9b3530fae99a777e3e9932a65532bf41a1c7e12e84333592588f65",
+      "salt": "e3bdfb5c03c65b10eb96581387d04467",
+      "managerName": "Saba",
+      "teamName": "10/2",
+      "token": "9de704509eb9acfada238cb3bf92ab9b7c4ffd48a0abeb52f52baeebec4ccac8",
+      "createdAt": "2026-09-26T20:45:01.489Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
