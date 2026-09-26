@@ -4955,24 +4955,13 @@
               "points": 0
             },
             {
-              "playerId": "p_10_1_katamadze",
-              "webName": "E. Katamadze",
-              "clubId": "SCH_10_1",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_shengelia",
               "webName": "N. Shengelia",
               "clubId": "SCH_10_1",
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -5878,17 +5867,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_2_gorozia",
-              "webName": "Gorozia",
-              "clubId": "SCH_12_2",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_3_vashakmadze",
               "webName": "Vashakmadze",
               "clubId": "SCH_12_3",
@@ -6279,18 +6257,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_katamadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_10_1_shengelia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_zarno",
@@ -6300,7 +6271,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 23.7,
+        "bank": 31.7,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7091,13 +7062,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_12_2_gorozia",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_3_vashakmadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -7112,7 +7076,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 20.5,
+        "bank": 28.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
