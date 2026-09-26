@@ -4821,10 +4821,10 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_11_2_japaridze",
-              "webName": "Japaridze",
-              "clubId": "SCH_11_2",
-              "position": "MID",
+              "playerId": "p_zarno",
+              "webName": "Zarno",
+              "clubId": "SCH_11_5",
+              "position": "DEF",
               "isStarter": true,
               "isCaptain": true,
               "isViceCaptain": false,
@@ -5396,6 +5396,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
               "points": 0
             }
           ]
@@ -6485,14 +6496,14 @@
         "managerName": "Aleksandre",
         "players": [
           {
-            "playerId": "p_11_2_japaridze",
+            "playerId": "p_zarno",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           }
         ],
-        "bank": 49,
+        "bank": 48.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6933,9 +6944,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_vashakmadze",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 12.8,
+        "bank": 4.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
