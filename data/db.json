@@ -6531,10 +6531,10 @@
               "points": 0
             },
             {
-              "playerId": "p_12_7_manjavidze",
-              "webName": "Manjavidze",
-              "clubId": "SCH_12_7",
-              "position": "MID",
+              "playerId": "p_12_2_giguashvili",
+              "webName": "Giguashvili",
+              "clubId": "SCH_12_2",
+              "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -6542,9 +6542,9 @@
               "points": 0
             },
             {
-              "playerId": "p_12_2_giguashvili",
-              "webName": "Giguashvili",
-              "clubId": "SCH_12_2",
+              "playerId": "p_12_3_muradashvili",
+              "webName": "Muradashvili",
+              "clubId": "SCH_12_3",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
@@ -8270,21 +8270,21 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_7_manjavidze",
+            "playerId": "p_12_2_giguashvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_2_giguashvili",
+            "playerId": "p_12_3_muradashvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 16.3,
+        "bank": 17.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -8838,8 +8838,7 @@
       "createdAt": "2026-09-26T21:24:47.366Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": true,
-      "token": "a8a36d0648788e0d44bf2bc0158da1afb303c3603e3180e0b4aa5141136503cb"
+      "isApproved": true
     },
     "user_1790457888966": {
       "id": "user_1790457888966",
