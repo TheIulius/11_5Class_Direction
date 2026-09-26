@@ -4741,7 +4741,8 @@
       "teamName": "giorgievski's tractati",
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
-      "isAdmin": true
+      "isAdmin": true,
+      "token": "ffca250b381e956d9844fbc8d2cdea5ecf1c96906fdc67734798ab710a0fa294"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
