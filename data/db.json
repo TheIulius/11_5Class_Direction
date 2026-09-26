@@ -6265,24 +6265,13 @@
               "points": 0
             },
             {
-              "playerId": "p_12_3_berikelashvili",
-              "webName": "Berikelashvili",
-              "clubId": "SCH_12_3",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_custom_1790194618189",
               "webName": "Tsiskara",
               "clubId": "SCH_11_5",
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -6313,6 +6302,17 @@
               "webName": "Futkara",
               "clubId": "SCH_11_5",
               "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_3_palelashvili",
+              "webName": "Palelashvili",
+              "clubId": "SCH_12_3",
+              "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -7984,18 +7984,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_3_berikelashvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_custom_1790194618189",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_10_6_qeldishvili",
@@ -8017,9 +8010,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_palelashvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 11.9,
+        "bank": 14.4,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
