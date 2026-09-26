@@ -6485,6 +6485,17 @@
               "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_7_mekravishvili",
+              "webName": "Mekravishvili",
+              "clubId": "SCH_12_7",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -8141,9 +8152,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
+          },
+          {
+            "playerId": "p_12_7_mekravishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 43,
+        "bank": 38.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
