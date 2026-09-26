@@ -4852,6 +4852,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_11_7_sujashvili",
+              "webName": "Sujashvili",
+              "clubId": "SCH_11_7",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -6836,9 +6847,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_sujashvili",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 4,
+        "bank": 0,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
