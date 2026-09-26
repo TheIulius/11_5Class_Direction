@@ -6521,9 +6521,9 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_10_5_shakarishvili",
-              "webName": "Shakarishvili",
-              "clubId": "SCH_10_5",
+              "playerId": "p_11_2_chiqvinidze",
+              "webName": "Chiqvinidze",
+              "clubId": "SCH_11_2",
               "position": "GKP",
               "isStarter": true,
               "isCaptain": true,
@@ -8333,7 +8333,7 @@
         "managerName": "Mariam",
         "players": [
           {
-            "playerId": "p_10_5_shakarishvili",
+            "playerId": "p_11_2_chiqvinidze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
@@ -8382,9 +8382,9 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 9.1,
+        "bank": 10.6,
         "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
+        "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
           "triple_captain": false,
