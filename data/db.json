@@ -5521,6 +5521,17 @@
           "previousRank": 22,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790456463804",
+          "managerName": "Gega",
+          "teamName": "Kai bichebi",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 23,
+          "previousRank": 23,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -6415,6 +6426,26 @@
         }
       },
       "joinedAt": "2026-09-26T21:00:44.485Z"
+    },
+    "user_1790456463804": {
+      "id": "user_1790456463804",
+      "managerName": "Gega",
+      "teamName": "Kai bichebi",
+      "squad": {
+        "teamName": "Kai bichebi",
+        "managerName": "Gega",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:01:03.805Z"
     }
   },
   "users": {
@@ -6718,6 +6749,20 @@
       "teamName": "fc tomakak",
       "token": "5662606ea7b463e8a3510bd058846f776f0f1a515451299647a5bff0309a6ed1",
       "createdAt": "2026-09-26T21:00:44.485Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790456463804": {
+      "id": "user_1790456463804",
+      "username": "gegbeng",
+      "email": "gregorivashakmadze@gmail.com",
+      "passwordHash": "7b7495d27380109750b0f2283a09ccfc997f25488a599bd78f58affc13401fc9930998cb6a9e0747873309f510095ad5882a09f5004fe928eb8c40bf441e6a45",
+      "salt": "e5b6870e363e311b968d01a2561b6784",
+      "managerName": "Gega",
+      "teamName": "Kai bichebi",
+      "token": "60ef01e59717cffa7b1cae64e54e4f109c64cde4ae7706e4bbb9815ead48f49d",
+      "createdAt": "2026-09-26T21:01:03.805Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
