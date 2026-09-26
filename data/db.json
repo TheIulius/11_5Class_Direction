@@ -5811,17 +5811,6 @@
               "points": 0
             },
             {
-              "playerId": "p_10_1_chikovani",
-              "webName": "Chikovani",
-              "clubId": "SCH_10_1",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_shengelia",
               "webName": "N. Shengelia",
               "clubId": "SCH_10_1",
@@ -7122,13 +7111,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_chikovani",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_1_shengelia",
             "isStarter": false,
             "benchOrder": 1,
@@ -7143,7 +7125,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 3.9,
+        "bank": 10.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
