@@ -6554,6 +6554,28 @@
           "previousRank": 26,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790459227435",
+          "managerName": "Rusudan",
+          "teamName": "Bitsadze",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 27,
+          "previousRank": 27,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790459230337",
+          "managerName": "Nodari",
+          "teamName": "Vortex",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 28,
+          "previousRank": 28,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8161,6 +8183,46 @@
         }
       },
       "joinedAt": "2026-09-26T21:32:06.968Z"
+    },
+    "user_1790459227435": {
+      "id": "user_1790459227435",
+      "managerName": "Rusudan",
+      "teamName": "Bitsadze",
+      "squad": {
+        "teamName": "Bitsadze",
+        "managerName": "Rusudan",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:47:07.436Z"
+    },
+    "user_1790459230337": {
+      "id": "user_1790459230337",
+      "managerName": "Nodari",
+      "teamName": "Vortex",
+      "squad": {
+        "teamName": "Vortex",
+        "managerName": "Nodari",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:47:10.337Z"
     }
   },
   "users": {
@@ -8521,6 +8583,34 @@
       "teamName": "Gvanira",
       "token": "5f0d37d96e1e85cfec8abbc0549518b6f13358aa54ae4aeae7be49c10a1aeac3",
       "createdAt": "2026-09-26T21:32:06.968Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790459227435": {
+      "id": "user_1790459227435",
+      "username": "rusudan",
+      "email": "rusudan@fantasy.pl",
+      "passwordHash": "08240ec37fe780bdfb76e59b465a20cb46e33b3eec687605c2ebb6574eb85841f93ea1a06ee31f318834c272329c27f6fed52d9e9717a4031749f1a504072801",
+      "salt": "cfb7344f8621a19481672dc4e25b0904",
+      "managerName": "Rusudan",
+      "teamName": "Bitsadze",
+      "token": "94374a58e3b068c56b53520999cd359a02ab1cd2cf9fa5bdde4770dd3c9293df",
+      "createdAt": "2026-09-26T21:47:07.436Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790459230337": {
+      "id": "user_1790459230337",
+      "username": "nodar kupreishvili",
+      "email": "kupreishvilinodo@gmail.com",
+      "passwordHash": "f92761e8c2f6dc948f17808a0d2d36fd294553771e894b51eec04423b8ba3d5758fbc7ba37b8d88ee846745c29ce29e678aa49cdc730161078328c9672523668",
+      "salt": "1808668a8470757fa40e1d2e197937ad",
+      "managerName": "Nodari",
+      "teamName": "Vortex",
+      "token": "843f6f0c87ea634b6203fd18f343f34dcaacdeb518ef3026090b63e6f686ca6a",
+      "createdAt": "2026-09-26T21:47:10.337Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
