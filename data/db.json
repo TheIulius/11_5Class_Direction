@@ -6664,6 +6664,17 @@
           "previousRank": 28,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790459997943",
+          "managerName": "Alex",
+          "teamName": "Gand onianebi",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 29,
+          "previousRank": 29,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8367,6 +8378,26 @@
         }
       },
       "joinedAt": "2026-09-26T21:47:10.337Z"
+    },
+    "user_1790459997943": {
+      "id": "user_1790459997943",
+      "managerName": "Alex",
+      "teamName": "Gand onianebi",
+      "squad": {
+        "teamName": "Gand onianebi",
+        "managerName": "Alex",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:59:57.944Z"
     }
   },
   "users": {
@@ -8754,6 +8785,20 @@
       "teamName": "Vortex",
       "token": "843f6f0c87ea634b6203fd18f343f34dcaacdeb518ef3026090b63e6f686ca6a",
       "createdAt": "2026-09-26T21:47:10.337Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790459997943": {
+      "id": "user_1790459997943",
+      "username": "demnas_fanpage",
+      "email": "atop84468@gmail.com",
+      "passwordHash": "3305c7d7468c0f4c1e1a23cfb45805820e80aaa4f6a4af63f89c615d1095cdecb0a4758323a3b5f5a040b09f17e9ed9518ed328044eafa0af7bfa10c074136f3",
+      "salt": "4af5a070c3168b83620ea1158fefd5b3",
+      "managerName": "Alex",
+      "teamName": "Gand onianebi",
+      "token": "c19b2f2224dc674415a317fad438a71f2ce819808e1484e8fbc1654082e8f6d2",
+      "createdAt": "2026-09-26T21:59:57.944Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
