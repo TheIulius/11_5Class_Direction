@@ -6056,6 +6056,17 @@
           "previousRank": 28,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790457888966",
+          "managerName": "Vano",
+          "teamName": "zria",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 29,
+          "previousRank": 29,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -7371,6 +7382,26 @@
         }
       },
       "joinedAt": "2026-09-26T21:24:47.366Z"
+    },
+    "user_1790457888966": {
+      "id": "user_1790457888966",
+      "managerName": "Vano",
+      "teamName": "zria",
+      "squad": {
+        "teamName": "zria",
+        "managerName": "Vano",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:24:48.967Z"
     }
   },
   "users": {
@@ -7760,6 +7791,20 @@
       "teamName": "Cheesepizza",
       "token": "a6e8fc589786fe46991a3ec47326fb756e42fe506367d974bbd64260d6aa4625",
       "createdAt": "2026-09-26T21:24:47.366Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790457888966": {
+      "id": "user_1790457888966",
+      "username": "niora",
+      "email": "vanoelizbarashvili290@gmail.com",
+      "passwordHash": "8e0efb0ecb6bac2cd5f0ced3f016237c0f5c47ce811af57df1fb559c7e62651bcbe001a637b373ab4a75e1598bdf87761342dc3d38fdab6ed31915852efb3670",
+      "salt": "bde7389e0eb066583aee81b09a00a4c1",
+      "managerName": "Vano",
+      "teamName": "zria",
+      "token": "e25a0907f44a4e288ed8323832d31269feceb8e4e7d08571ef410dbc47ef703a",
+      "createdAt": "2026-09-26T21:24:48.967Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
