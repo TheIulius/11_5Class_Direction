@@ -4776,7 +4776,19 @@
           "rank": 11,
           "previousRank": 11,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_12_7_kevlishvili",
+              "webName": "Kevlishvili",
+              "clubId": "SCH_12_7",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         }
       ]
     }
@@ -5040,8 +5052,16 @@
       "squad": {
         "teamName": "12/7",
         "managerName": "Nikoloz kevlishvili",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_12_7_kevlishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 47,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
