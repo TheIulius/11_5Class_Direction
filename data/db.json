@@ -5352,6 +5352,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_9_4_obolashvili",
+              "webName": "Obolashvili",
+              "clubId": "SCH_9_4",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -5440,6 +5451,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_1_gogsadze",
+              "webName": "Gogsadze",
+              "clubId": "SCH_10_1",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
               "points": 0
             }
           ]
@@ -6333,9 +6355,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_4_obolashvili",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 4.1,
+        "bank": 0.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6403,9 +6432,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_gogsadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 8,
+        "bank": 4,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
