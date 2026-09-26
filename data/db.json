@@ -5243,6 +5243,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_10_3_gagua",
+              "webName": "Gagua",
+              "clubId": "SCH_10_3",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ]
         },
@@ -5608,17 +5619,6 @@
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_custom_1790259242808",
-              "webName": "Topuria",
-              "clubId": "SCH_11_3",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -6484,9 +6484,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_3_gagua",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 11,
+        "bank": 7,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6773,13 +6780,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790259242808",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_11_4_gogoladze",
             "isStarter": true,
             "benchOrder": 0,
@@ -6815,7 +6815,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 9.5,
+        "bank": 13.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
