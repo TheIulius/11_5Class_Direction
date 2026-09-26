@@ -6494,7 +6494,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -6505,7 +6505,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             }
           ]
@@ -6818,7 +6818,19 @@
           "rank": 32,
           "previousRank": 32,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_12_3_peikrishvili",
+              "webName": "Peikrishvili",
+              "clubId": "SCH_12_3",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790462654632",
@@ -8333,14 +8345,14 @@
           {
             "playerId": "p_11_7_vezdeni",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_11_4_mshvidobadze",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           }
