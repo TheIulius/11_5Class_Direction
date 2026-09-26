@@ -5277,24 +5277,13 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_10_1_gogsadze",
-              "webName": "Gogsadze",
-              "clubId": "SCH_10_1",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_katamadze",
               "webName": "E. Katamadze",
               "clubId": "SCH_10_1",
               "position": "MID",
               "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -5305,7 +5294,7 @@
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -6054,25 +6043,18 @@
         "managerName": "Sandro",
         "players": [
           {
-            "playerId": "p_10_1_gogsadze",
+            "playerId": "p_10_1_katamadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_katamadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_custom_1790194618189",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_custom_1790279796584",
@@ -6082,7 +6064,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 24.9,
+        "bank": 28.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
