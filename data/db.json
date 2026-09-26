@@ -5219,6 +5219,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_11_2_japaridze",
+              "webName": "Japaridze",
+              "clubId": "SCH_11_2",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6673,9 +6684,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_2_japaridze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 23.8,
+        "bank": 17.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
