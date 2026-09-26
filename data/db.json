@@ -6526,7 +6526,7 @@
               "clubId": "SCH_11_2",
               "position": "GKP",
               "isStarter": true,
-              "isCaptain": true,
+              "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -6548,7 +6548,7 @@
               "clubId": "SCH_11_5",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": false,
+              "isCaptain": true,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -8358,7 +8358,7 @@
             "playerId": "p_11_2_chiqvinidze",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": true,
+            "isCaptain": false,
             "isViceCaptain": false
           },
           {
@@ -8372,7 +8372,7 @@
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
+            "isCaptain": true,
             "isViceCaptain": false
           },
           {
