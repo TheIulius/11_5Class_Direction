@@ -4778,17 +4778,6 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790192251639",
-              "webName": "Kurtsikidze",
-              "clubId": "SCH_11_3",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_11_6_barbaqadze",
               "webName": "Barbaqadze",
               "clubId": "SCH_11_6",
@@ -5068,6 +5057,17 @@
               "points": 0
             }
           ]
+        },
+        {
+          "id": "user_1790455471750",
+          "managerName": "Giorguna",
+          "teamName": "Poliklinka fc",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 16,
+          "previousRank": 16,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -5281,13 +5281,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790192251639",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_11_6_barbaqadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -5323,7 +5316,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 1.6,
+        "bank": 10.4,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5582,6 +5575,26 @@
         }
       },
       "joinedAt": "2026-09-26T20:41:03.797Z"
+    },
+    "user_1790455471750": {
+      "id": "user_1790455471750",
+      "managerName": "Giorguna",
+      "teamName": "Poliklinka fc",
+      "squad": {
+        "teamName": "Poliklinka fc",
+        "managerName": "Giorguna",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T20:44:31.753Z"
     }
   },
   "users": {
@@ -5791,6 +5804,20 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
+    },
+    "user_1790455471750": {
+      "id": "user_1790455471750",
+      "username": "jorjigio",
+      "email": "modebadzegiorgi525@gmail.com",
+      "passwordHash": "c675dc398be6d990d59c59c31f0af1f4e9e365cfdb675cd973a0d4167c33b13c9282382a053da7d360fdbea29ae8dcce4e9c1ece56008d93239460ed699fcc31",
+      "salt": "d1fbc0c022a7ba70f0b59b6833d8a8ba",
+      "managerName": "Giorguna",
+      "teamName": "Poliklinka fc",
+      "token": "6cbf442f080d114ac755cf8674063ee4ef904a64c87bda67acafaf7e4146e890",
+      "createdAt": "2026-09-26T20:44:31.753Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
     }
   },
   "deadline": {
