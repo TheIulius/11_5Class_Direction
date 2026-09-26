@@ -6571,7 +6571,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -6582,7 +6582,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 3,
               "points": 0
             }
           ]
@@ -6616,17 +6616,6 @@
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_custom_1790166342439",
-              "webName": "Samada",
-              "clubId": "SCH_11_5",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -6672,17 +6661,6 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 1,
-              "points": 0
-            },
-            {
-              "playerId": "p_11_4_bulia",
-              "webName": "Bulia",
-              "clubId": "SCH_11_4",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 2,
               "points": 0
             }
           ]
@@ -8415,14 +8393,14 @@
           {
             "playerId": "p_11_7_vezdeni",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_11_4_mshvidobadze",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           }
@@ -8462,13 +8440,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790166342439",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
@@ -8495,16 +8466,9 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_11_4_bulia",
-            "isStarter": false,
-            "benchOrder": 2,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 5,
+        "bank": 16.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
