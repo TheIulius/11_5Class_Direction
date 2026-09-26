@@ -5352,6 +5352,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_11_7_guniava",
+              "webName": "Guniava",
+              "clubId": "SCH_11_7",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6211,9 +6222,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_guniava",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 15.1,
+        "bank": 11.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
