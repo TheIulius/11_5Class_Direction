@@ -6653,17 +6653,6 @@
               "points": 0
             },
             {
-              "playerId": "p_10_2_nijaradze",
-              "webName": "Nijaradze",
-              "clubId": "SCH_10_2",
-              "position": "MID",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
               "playerId": "p_custom_1790194618189",
               "webName": "Tsiskara",
               "clubId": "SCH_11_5",
@@ -8472,13 +8461,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_2_nijaradze",
-            "isStarter": false,
-            "benchOrder": 1,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_custom_1790194618189",
             "isStarter": true,
             "benchOrder": 0,
@@ -8486,7 +8468,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 7.2,
+        "bank": 13.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
