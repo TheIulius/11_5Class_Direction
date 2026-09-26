@@ -5887,6 +5887,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_1_bagauri",
+              "webName": "Bagauri",
+              "clubId": "SCH_12_1",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5931,17 +5942,6 @@
           "gwPoints": 0,
           "rank": 27,
           "previousRank": 27,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
-          "id": "user_1790457467684",
-          "managerName": "Luka",
-          "teamName": "10/5",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 28,
-          "previousRank": 28,
           "activeChip": null,
           "lineup": []
         }
@@ -7074,9 +7074,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_1_bagauri",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 28.5,
+        "bank": 21,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7167,26 +7174,6 @@
         }
       },
       "joinedAt": "2026-09-26T21:13:24.922Z"
-    },
-    "user_1790457467684": {
-      "id": "user_1790457467684",
-      "managerName": "Luka",
-      "teamName": "10/5",
-      "squad": {
-        "teamName": "10/5",
-        "managerName": "Luka",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T21:17:47.712Z"
     }
   },
   "users": {
@@ -7565,20 +7552,6 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": false
-    },
-    "user_1790457467684": {
-      "id": "user_1790457467684",
-      "username": "shakara01",
-      "email": "shakarishvililuka10@gmail.com",
-      "passwordHash": "e96edb6da246fe771569fe55f6c07a482c4f5e3b93d752a11bd329b8de2bceaebe85224144d3ee6ea3f5058a2d53fcacbd5ce5f926f54e16a5ab5e2e4c8ca9ba",
-      "salt": "f84afe2ddea2bddaf1eea8415e7d44ea",
-      "managerName": "Luka",
-      "teamName": "10/5",
-      "token": "59d363bcda7d8f43ed1aca2a1205109c2704b4f6256f74ec3d963a501bd331f2",
-      "createdAt": "2026-09-26T21:17:47.686Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
     }
   },
   "deadline": {
@@ -7600,6 +7573,7 @@
     "user_1790427011158",
     "user_1790455208277",
     "user_1790456444484",
-    "user_1790455699799"
+    "user_1790455699799",
+    "user_1790457467684"
   ]
 }
