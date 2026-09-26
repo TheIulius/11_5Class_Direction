@@ -5231,6 +5231,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_6_kupradze",
+              "webName": "Kupradze",
+              "clubId": "SCH_12_6",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6098,6 +6109,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_12_3_khikhadze",
+              "webName": "Khikhadze",
+              "clubId": "SCH_12_3",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ]
         },
@@ -6705,9 +6727,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_6_kupradze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 36,
+        "bank": 29,
         "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
@@ -7442,9 +7471,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_khikhadze",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 14,
+        "bank": 7.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
