@@ -5321,17 +5321,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_2_giguashvili",
-              "webName": "Giguashvili",
-              "clubId": "SCH_12_2",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_11_7_guniava",
               "webName": "Guniava",
               "clubId": "SCH_11_7",
@@ -6181,13 +6170,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_2_giguashvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_11_7_guniava",
             "isStarter": false,
             "benchOrder": 1,
@@ -6195,7 +6177,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 5.6,
+        "bank": 11.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
