@@ -4786,6 +4786,17 @@
               "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_1_chikovani",
+              "webName": "Chikovani",
+              "clubId": "SCH_10_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5220,6 +5231,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_11_2_shengelia",
+              "webName": "Shengelia",
+              "clubId": "SCH_11_2",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -5308,6 +5330,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
               "points": 0
             }
           ]
@@ -5979,24 +6012,13 @@
           "lineup": []
         },
         {
-          "id": "user_1790455948490",
-          "managerName": "Levan",
-          "teamName": "DRM team",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 18,
-          "previousRank": 18,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790456175424",
           "managerName": "elene",
           "teamName": "elene",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 19,
-          "previousRank": 19,
+          "rank": 18,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": []
         },
@@ -6006,8 +6028,8 @@
           "teamName": "Kcls gamarjvebuli",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 20,
-          "previousRank": 20,
+          "rank": 19,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": [
             {
@@ -6073,8 +6095,8 @@
           "teamName": "Kai bichebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 21,
-          "previousRank": 21,
+          "rank": 20,
+          "previousRank": 20,
           "activeChip": null,
           "lineup": [
             {
@@ -6124,24 +6146,13 @@
           ]
         },
         {
-          "id": "user_1790456561751",
-          "managerName": "Giorgi",
-          "teamName": "10/5",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 22,
-          "previousRank": 22,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790456870935",
           "managerName": "Nika",
           "teamName": "Upamaldini Fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 23,
-          "previousRank": 23,
+          "rank": 21,
+          "previousRank": 21,
           "activeChip": null,
           "lineup": [
             {
@@ -6246,24 +6257,13 @@
           ]
         },
         {
-          "id": "user_1790456876038",
-          "managerName": "Rabola",
-          "teamName": "Rabola",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 24,
-          "previousRank": 24,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790457033332",
           "managerName": "Nini",
           "teamName": "Ar vici",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 25,
-          "previousRank": 25,
+          "rank": 22,
+          "previousRank": 22,
           "activeChip": null,
           "lineup": []
         },
@@ -6273,8 +6273,8 @@
           "teamName": "bostanshekatamo",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 26,
-          "previousRank": 26,
+          "rank": 23,
+          "previousRank": 23,
           "activeChip": null,
           "lineup": []
         },
@@ -6284,8 +6284,8 @@
           "teamName": "Cheesepizza",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 27,
-          "previousRank": 27,
+          "rank": 24,
+          "previousRank": 24,
           "activeChip": null,
           "lineup": []
         },
@@ -6295,8 +6295,8 @@
           "teamName": "zria",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 28,
-          "previousRank": 28,
+          "rank": 25,
+          "previousRank": 25,
           "activeChip": null,
           "lineup": []
         },
@@ -6306,8 +6306,8 @@
           "teamName": "Shakara & CO",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 29,
-          "previousRank": 29,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": [
             {
@@ -6329,8 +6329,8 @@
           "teamName": "Gvanira",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 30,
-          "previousRank": 30,
+          "rank": 27,
+          "previousRank": 27,
           "activeChip": null,
           "lineup": []
         }
@@ -6496,9 +6496,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
+          },
+          {
+            "playerId": "p_10_1_chikovani",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 39.7,
+        "bank": 33,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6841,9 +6848,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_2_shengelia",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 5.5,
+        "bank": 0.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6911,9 +6925,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_vashakmadze",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 12.8,
+        "bank": 4.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
@@ -7455,26 +7476,6 @@
       },
       "joinedAt": "2026-09-26T20:50:08.606Z"
     },
-    "user_1790455948490": {
-      "id": "user_1790455948490",
-      "managerName": "Levan",
-      "teamName": "DRM team",
-      "squad": {
-        "teamName": "DRM team",
-        "managerName": "Levan",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T20:52:28.492Z"
-    },
     "user_1790456175424": {
       "id": "user_1790456175424",
       "managerName": "elene",
@@ -7600,26 +7601,6 @@
       },
       "joinedAt": "2026-09-26T21:01:03.805Z"
     },
-    "user_1790456561751": {
-      "id": "user_1790456561751",
-      "managerName": "Giorgi",
-      "teamName": "10/5",
-      "squad": {
-        "teamName": "10/5",
-        "managerName": "Giorgi",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T21:02:41.752Z"
-    },
     "user_1790456870935": {
       "id": "user_1790456870935",
       "managerName": "Nika",
@@ -7703,26 +7684,6 @@
         }
       },
       "joinedAt": "2026-09-26T21:07:50.935Z"
-    },
-    "user_1790456876038": {
-      "id": "user_1790456876038",
-      "managerName": "Rabola",
-      "teamName": "Rabola",
-      "squad": {
-        "teamName": "Rabola",
-        "managerName": "Rabola",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T21:07:56.038Z"
     },
     "user_1790457033332": {
       "id": "user_1790457033332",
@@ -8090,20 +8051,6 @@
       "isAdmin": false,
       "isApproved": true
     },
-    "user_1790455948490": {
-      "id": "user_1790455948490",
-      "username": "levan_kakush1",
-      "email": "levanikakushadze@gmail.com",
-      "passwordHash": "71f8e226ea19c436f82938952b741f2959a790f64b1b5cc245ef91fac370855544c39e133361d6c43b725d9ac73a8c03d0727a639b837234581b7133f02a5d97",
-      "salt": "2f7d3f8e77c8d96bb7e39344cb7a2531",
-      "managerName": "Levan",
-      "teamName": "DRM team",
-      "token": "4e6244510bca5e0d49e1c5ec842360093bc3168a00cee4219dd4fade9321c4f1",
-      "createdAt": "2026-09-26T20:52:28.492Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
     "user_1790456175424": {
       "id": "user_1790456175424",
       "username": "elene",
@@ -8145,20 +8092,6 @@
       "isAdmin": false,
       "isApproved": true
     },
-    "user_1790456561751": {
-      "id": "user_1790456561751",
-      "username": "jajana",
-      "email": "gjajanidze04@gmail.com",
-      "passwordHash": "29c019a45ae8bc7f7ed66196632466cf169b7b395f4b74a2c88333a706ff712935eb94db7a778e639da2b980dd3898c4a8a6e65c29ebd7b28ac8447fd06b4ce0",
-      "salt": "49b4b5321ca916130b5258c9c01a1731",
-      "managerName": "Giorgi",
-      "teamName": "10/5",
-      "token": "32b72ce3f9b408a2ea9897a8c7cfa45c65a937f9586a9833fca545d12e326e15",
-      "createdAt": "2026-09-26T21:02:41.752Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
     "user_1790456870935": {
       "id": "user_1790456870935",
       "username": "upamaldini fc",
@@ -8172,20 +8105,6 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
-    },
-    "user_1790456876038": {
-      "id": "user_1790456876038",
-      "username": "rabola",
-      "email": "rabola@fantasy.pl",
-      "passwordHash": "0df3ac20c80c4f38dfd5f8eb6c1458aa62c75908f7fed9394ace4eb8e38d110b46a8907ebf1a53d94640876fd72f51de033142cca56d03896f9e17bfd9654796",
-      "salt": "5a31d2a2458baf4fd722c7f00e8e33c2",
-      "managerName": "Rabola",
-      "teamName": "Rabola",
-      "token": "0c73af3ca1ad84e5ed6376e925553b79b363bd8d8563f7cfcf2bb29a77f92a7f",
-      "createdAt": "2026-09-26T21:07:56.038Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
     },
     "user_1790457033332": {
       "id": "user_1790457033332",
@@ -8293,6 +8212,9 @@
     "user_1790456444484",
     "user_1790455699799",
     "user_1790457467684",
-    "user_1790456921021"
+    "user_1790456921021",
+    "user_1790456876038",
+    "user_1790456561751",
+    "user_1790455948490"
   ]
 }
