@@ -5065,9 +5065,9 @@
               "points": 0
             },
             {
-              "playerId": "p_rati",
-              "webName": "Rati",
-              "clubId": "SCH_11_5",
+              "playerId": "p_custom_1790192251639",
+              "webName": "Kurtsikidze",
+              "clubId": "SCH_11_3",
               "position": "FWD",
               "isStarter": false,
               "isCaptain": false,
@@ -5967,16 +5967,16 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_rati",
+            "playerId": "p_custom_1790192251639",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 0.8,
+        "bank": 1.3,
         "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
+        "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
           "triple_captain": false,
