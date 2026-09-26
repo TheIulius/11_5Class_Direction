@@ -4608,7 +4608,19 @@
           "rank": 2,
           "previousRank": 2,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_1_chikovani",
+              "webName": "Chikovani",
+              "clubId": "SCH_10_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790449130368",
@@ -4632,8 +4644,16 @@
       "squad": {
         "teamName": "giorgievski's tractati",
         "managerName": "Ilia",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_10_1_chikovani",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 48.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
