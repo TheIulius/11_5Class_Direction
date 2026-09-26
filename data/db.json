@@ -5185,6 +5185,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_9_2_laliashvili",
+              "webName": "Laliashvili",
+              "clubId": "SCH_9_2",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -7112,9 +7123,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_2_laliashvili",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 5.5,
+        "bank": 1.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
