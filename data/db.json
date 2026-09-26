@@ -6355,17 +6355,6 @@
               "points": 0
             },
             {
-              "playerId": "p_rati",
-              "webName": "Rati",
-              "clubId": "SCH_11_5",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_3_vashakmadze",
               "webName": "Vashakmadze",
               "clubId": "SCH_12_3",
@@ -7855,13 +7844,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_rati",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_3_vashakmadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -7876,7 +7858,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 14.2,
+        "bank": 23.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
