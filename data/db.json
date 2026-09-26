@@ -4821,9 +4821,9 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_zarno",
-              "webName": "Zarno",
-              "clubId": "SCH_11_5",
+              "playerId": "p_10_1_chikovani",
+              "webName": "Chikovani",
+              "clubId": "SCH_10_1",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": true,
@@ -6298,7 +6298,19 @@
           "rank": 30,
           "previousRank": 30,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_5_shakarishvili",
+              "webName": "Shakarishvili",
+              "clubId": "SCH_10_5",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790458326878",
@@ -6496,14 +6508,14 @@
         "managerName": "Aleksandre",
         "players": [
           {
-            "playerId": "p_zarno",
+            "playerId": "p_10_1_chikovani",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           }
         ],
-        "bank": 48.5,
+        "bank": 48.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7794,8 +7806,16 @@
       "squad": {
         "teamName": "Shakara & CO",
         "managerName": "Luka",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_10_5_shakarishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 49,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
