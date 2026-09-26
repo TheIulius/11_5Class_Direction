@@ -6531,6 +6531,17 @@
               "points": 0
             },
             {
+              "playerId": "p_12_7_manjavidze",
+              "webName": "Manjavidze",
+              "clubId": "SCH_12_7",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
               "playerId": "p_12_2_giguashvili",
               "webName": "Giguashvili",
               "clubId": "SCH_12_2",
@@ -6546,17 +6557,6 @@
               "webName": "Muradashvili",
               "clubId": "SCH_12_3",
               "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_7_manjavidze",
-              "webName": "Manjavidze",
-              "clubId": "SCH_12_7",
-              "position": "MID",
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -8281,6 +8281,13 @@
             "isViceCaptain": false
           },
           {
+            "playerId": "p_12_7_manjavidze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
             "playerId": "p_12_2_giguashvili",
             "isStarter": true,
             "benchOrder": 0,
@@ -8289,13 +8296,6 @@
           },
           {
             "playerId": "p_12_3_muradashvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_12_7_manjavidze",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
@@ -8856,7 +8856,8 @@
       "createdAt": "2026-09-26T21:24:47.366Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": true
+      "isApproved": true,
+      "token": "a8a36d0648788e0d44bf2bc0158da1afb303c3603e3180e0b4aa5141136503cb"
     },
     "user_1790457888966": {
       "id": "user_1790457888966",
