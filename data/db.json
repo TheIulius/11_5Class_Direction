@@ -4741,19 +4741,21 @@
       "teamName": "giorgievski's tractati",
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
-      "isAdmin": true
+      "isAdmin": true,
+      "token": "92307ad356ec706670ef3ed7dc8661a9d5cff61ae5fa09c21b13bc216ab10471"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
       "username": "chaga",
       "email": "chaga@fantasy.pl",
-      "passwordHash": "39f1ea921b69f059ae60f7057426b4c50a16f96d00f248f9f8dc002dba66af3e78a2c40f1673f275188a5f952424b3243c490845e13048600bf14cb89ef0dbee",
-      "salt": "29c1f7c3ae344032980cba1fb37c163a",
+      "passwordHash": "012b224b68ec3de46a01a3bcc8302dac475b354ebc42d171a653209039e05a2cd88dd4703da02af707a6a4418c88b4873302b295d15a46523fded1e5da3cf415",
+      "salt": "d7ce8dffc024f9021dc8642fc95fb73b",
       "managerName": "Nika",
       "teamName": "Chaga XI",
       "createdAt": "2026-09-25T17:38:18.197Z",
       "role": "admin",
-      "isAdmin": true
+      "isAdmin": true,
+      "token": "e382619c4cbf71d742cc27b940a7fdde16728717b5657a2d90db5991226ded02"
     },
     "user_1790449130368": {
       "id": "user_1790449130368",
