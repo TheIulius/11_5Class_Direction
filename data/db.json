@@ -6819,6 +6819,17 @@
           "previousRank": 32,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790462654632",
+          "managerName": "Luka",
+          "teamName": "Alphebi",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 33,
+          "previousRank": 33,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8673,6 +8684,26 @@
         }
       },
       "joinedAt": "2026-09-26T22:35:43.821Z"
+    },
+    "user_1790462654632": {
+      "id": "user_1790462654632",
+      "managerName": "Luka",
+      "teamName": "Alphebi",
+      "squad": {
+        "teamName": "Alphebi",
+        "managerName": "Luka",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T22:44:14.633Z"
     }
   },
   "users": {
@@ -9120,6 +9151,20 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
+    },
+    "user_1790462654632": {
+      "id": "user_1790462654632",
+      "username": "lukapro",
+      "email": "lukatyemaladze5@gmail.com",
+      "passwordHash": "3a909e249d09e87f5150a6ca06eb1d62d920a83e922eb7c7ccfec3485360e951c118566579a0124f9ad745529987c060a0862e6883ca80f1acd04e0348aad5b6",
+      "salt": "6e66d34f2c1130f417546f4d97259b71",
+      "managerName": "Luka",
+      "teamName": "Alphebi",
+      "token": "e314c772eec8b5d2e550564a032732f74ce7cd0c95751dacd488cff94b509718",
+      "createdAt": "2026-09-26T22:44:14.633Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
     }
   },
   "deadline": {
