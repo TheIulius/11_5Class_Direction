@@ -5116,7 +5116,7 @@
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -5127,7 +5127,7 @@
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -6585,7 +6585,19 @@
           "rank": 23,
           "previousRank": 23,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_5_shakarishvili",
+              "webName": "Shakarishvili",
+              "clubId": "SCH_10_5",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790457888966",
@@ -7179,14 +7191,14 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_10_1_katamadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_dito",
@@ -8339,8 +8351,16 @@
       "squad": {
         "teamName": "Cheesepizza",
         "managerName": "Mariam",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_10_5_shakarishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 49,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
