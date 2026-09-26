@@ -4797,6 +4797,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_giorguna",
+              "webName": "Giorguna",
+              "clubId": "SCH_11_1",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5141,6 +5152,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_10_6_bagashvili",
+              "webName": "Bagashvili",
+              "clubId": "SCH_10_6",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -5245,24 +5267,13 @@
           ]
         },
         {
-          "id": "user_1790455208277",
-          "managerName": "Andria",
-          "teamName": "Fc wurwu",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 13,
-          "previousRank": 13,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790455242152",
           "managerName": "Sandro",
           "teamName": "Parto FC",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 14,
-          "previousRank": 14,
+          "rank": 13,
+          "previousRank": 13,
           "activeChip": null,
           "lineup": [
             {
@@ -5317,8 +5328,8 @@
           "teamName": "10/1",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 15,
-          "previousRank": 15,
+          "rank": 14,
+          "previousRank": 14,
           "activeChip": null,
           "lineup": [
             {
@@ -5362,8 +5373,8 @@
           "teamName": "Poliklinka fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 16,
-          "previousRank": 16,
+          "rank": 15,
+          "previousRank": 15,
           "activeChip": null,
           "lineup": [
             {
@@ -5385,8 +5396,8 @@
           "teamName": "10/2",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 17,
-          "previousRank": 17,
+          "rank": 16,
+          "previousRank": 16,
           "activeChip": null,
           "lineup": []
         },
@@ -5396,8 +5407,8 @@
           "teamName": "11.4",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 18,
-          "previousRank": 18,
+          "rank": 17,
+          "previousRank": 17,
           "activeChip": null,
           "lineup": []
         },
@@ -5407,8 +5418,8 @@
           "teamName": "EliteXI",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 19,
-          "previousRank": 19,
+          "rank": 18,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": []
         },
@@ -5418,8 +5429,8 @@
           "teamName": "DRM team",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 20,
-          "previousRank": 20,
+          "rank": 19,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": []
         },
@@ -5429,8 +5440,8 @@
           "teamName": "elene",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 21,
-          "previousRank": 21,
+          "rank": 20,
+          "previousRank": 20,
           "activeChip": null,
           "lineup": []
         }
@@ -5631,9 +5642,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_giorguna",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 27.2,
+        "bank": 19.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5929,9 +5947,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_6_bagashvili",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 6.3,
+        "bank": 2,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6019,26 +6044,6 @@
         }
       },
       "joinedAt": "2026-09-26T20:39:18.452Z"
-    },
-    "user_1790455208277": {
-      "id": "user_1790455208277",
-      "managerName": "Andria",
-      "teamName": "Fc wurwu",
-      "squad": {
-        "teamName": "Fc wurwu",
-        "managerName": "Andria",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T20:40:08.352Z"
     },
     "user_1790455242152": {
       "id": "user_1790455242152",
@@ -6425,20 +6430,6 @@
       "isAdmin": false,
       "isApproved": true
     },
-    "user_1790455208277": {
-      "id": "user_1790455208277",
-      "username": "andria_wur",
-      "email": "andriatsurtsumia74@gmail.com",
-      "passwordHash": "3eed25c3b11bf33667e565e6188f5e935d3f4566258965d423ca98bdd90ffedf04a5ce30ac5a0a4e1dfa31bfb3dddb61059e52a6b30ebf61e412e3f2c7a8f2bd",
-      "salt": "d6102920b39ef725f2505cda2a8be822",
-      "managerName": "Andria",
-      "teamName": "Fc wurwu",
-      "token": "fb67e95b258d2a3c4ff501990c42bb5b108e658696e101f645adda7549a0d950",
-      "createdAt": "2026-09-26T20:40:08.352Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": true
-    },
     "user_1790455242152": {
       "id": "user_1790455242152",
       "username": "gaga_partova",
@@ -6568,6 +6559,7 @@
     "user_1790448778211",
     "user_1790449499450",
     "user_1790426603326",
-    "user_1790427011158"
+    "user_1790427011158",
+    "user_1790455208277"
   ]
 }
