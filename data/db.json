@@ -6508,6 +6508,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_11_7_vezdeni",
+              "webName": "Vezdeni",
+              "clubId": "SCH_11_7",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -8074,9 +8085,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_vezdeni",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 16.5,
+        "bank": 12.2,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
