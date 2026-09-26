@@ -6520,17 +6520,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_7_mekravishvili",
-              "webName": "Mekravishvili",
-              "clubId": "SCH_12_7",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_7_manjavidze",
               "webName": "Manjavidze",
               "clubId": "SCH_12_7",
@@ -8308,13 +8297,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_7_mekravishvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_7_manjavidze",
             "isStarter": true,
             "benchOrder": 0,
@@ -8343,7 +8325,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 6.3,
+        "bank": 10.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
