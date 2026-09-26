@@ -5580,7 +5580,19 @@
           "rank": 6,
           "previousRank": 6,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_custom_1790166332280",
+              "webName": "Futkara",
+              "clubId": "SCH_11_5",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790449499450",
@@ -5886,7 +5898,7 @@
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
       "isAdmin": true,
-      "token": "f66ee8696a52941c2d28990a7121aa2ca4f56e7024817b89a955dd5fbeeae15b"
+      "token": "696ce7a57717739de6521b2c6c03b21274e0876a68f7f339d628414b890f6efd"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
