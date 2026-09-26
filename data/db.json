@@ -5299,10 +5299,10 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790279796584",
-              "webName": "Kila",
-              "clubId": "SCH_11_4",
-              "position": "MID",
+              "playerId": "p_10_1_shengelia",
+              "webName": "N. Shengelia",
+              "clubId": "SCH_10_1",
+              "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -6057,7 +6057,7 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790279796584",
+            "playerId": "p_10_1_shengelia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
