@@ -6364,7 +6364,19 @@
           "rank": 22,
           "previousRank": 22,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_12_6_dzagania",
+              "webName": "Dzagania",
+              "clubId": "SCH_12_6",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790457887365",
@@ -7887,8 +7899,16 @@
       "squad": {
         "teamName": "bostanshekatamo",
         "managerName": "Nika",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_12_6_dzagania",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 49.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
