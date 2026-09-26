@@ -5378,24 +5378,13 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_10_5_shakarishvili",
-              "webName": "Shakarishvili",
-              "clubId": "SCH_10_5",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_shengelia",
               "webName": "N. Shengelia",
               "clubId": "SCH_10_1",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -5406,7 +5395,7 @@
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -5508,6 +5497,17 @@
           "gwPoints": 0,
           "rank": 21,
           "previousRank": 21,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790456444484",
+          "managerName": "toma",
+          "teamName": "fc tomakak",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 22,
+          "previousRank": 22,
           "activeChip": null,
           "lineup": []
         }
@@ -6211,25 +6211,18 @@
         "managerName": "Giorguna",
         "players": [
           {
-            "playerId": "p_10_5_shakarishvili",
+            "playerId": "p_10_1_shengelia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_shengelia",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_giorguna",
@@ -6253,7 +6246,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 5.1,
+        "bank": 11.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6384,6 +6377,26 @@
         }
       },
       "joinedAt": "2026-09-26T21:00:37.988Z"
+    },
+    "user_1790456444484": {
+      "id": "user_1790456444484",
+      "managerName": "toma",
+      "teamName": "fc tomakak",
+      "squad": {
+        "teamName": "fc tomakak",
+        "managerName": "toma",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:00:44.485Z"
     }
   },
   "users": {
@@ -6675,6 +6688,20 @@
       "teamName": "Kcls gamarjvebuli",
       "token": "9b33633ed3356f7a06663d67fb3c960ff76a1218e8d12b84698ca963dbbe7ae0",
       "createdAt": "2026-09-26T21:00:37.988Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790456444484": {
+      "id": "user_1790456444484",
+      "username": "toma_iobidze10",
+      "email": "iobidzetom@gmail.com",
+      "passwordHash": "2fb47e1e77433b822fbe242d8e11be617a20ab55e77b47c84ad059d2155e7363f78f68c1ac8da3725d344ff0f57ca15648d70d1b5ad0e73e4255323651470d55",
+      "salt": "3d6ef7702265e35cd70d4b3590ff838f",
+      "managerName": "toma",
+      "teamName": "fc tomakak",
+      "token": "5662606ea7b463e8a3510bd058846f776f0f1a515451299647a5bff0309a6ed1",
+      "createdAt": "2026-09-26T21:00:44.485Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
