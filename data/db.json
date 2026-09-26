@@ -5698,6 +5698,17 @@
           "previousRank": 26,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790456921021",
+          "managerName": "Iva",
+          "teamName": "IvaHavertz",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 27,
+          "previousRank": 27,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -6757,6 +6768,26 @@
         }
       },
       "joinedAt": "2026-09-26T21:07:56.038Z"
+    },
+    "user_1790456921021": {
+      "id": "user_1790456921021",
+      "managerName": "Iva",
+      "teamName": "IvaHavertz",
+      "squad": {
+        "teamName": "IvaHavertz",
+        "managerName": "Iva",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:08:41.021Z"
     }
   },
   "users": {
@@ -7117,6 +7148,20 @@
       "teamName": "Rabola",
       "token": "0c73af3ca1ad84e5ed6376e925553b79b363bd8d8563f7cfcf2bb29a77f92a7f",
       "createdAt": "2026-09-26T21:07:56.038Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790456921021": {
+      "id": "user_1790456921021",
+      "username": "ivadavai",
+      "email": "ivadavai@fantasy.pl",
+      "passwordHash": "b98caf32037722b4140e4a7c0817344cde6ceb9ca2ff93570d286e91ba40221b330b29a75e6afe230777dc7178b6d62dd76f82e616bc594196f6da91577846d2",
+      "salt": "c5bf9bb57f27d499e58674dc0672ad05",
+      "managerName": "Iva",
+      "teamName": "IvaHavertz",
+      "token": "0476b8e78ba7d9ed47b2140242ab2a476a1151a9b02ef46bf2fda4f05921e0c6",
+      "createdAt": "2026-09-26T21:08:41.021Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
