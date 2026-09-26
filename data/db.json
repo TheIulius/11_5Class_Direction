@@ -5164,6 +5164,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_11_4_gogoladze",
+              "webName": "Gogoladze",
+              "clubId": "SCH_11_4",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5820,6 +5831,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_custom_1790259242808",
+              "webName": "Topuria",
+              "clubId": "SCH_11_3",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ]
         },
@@ -5954,17 +5976,6 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_custom_1790166332280",
-              "webName": "Futkara",
-              "clubId": "SCH_11_5",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
             }
           ]
         },
@@ -6001,24 +6012,13 @@
               "points": 0
             },
             {
-              "playerId": "p_12_3_vashakmadze",
-              "webName": "Vashakmadze",
-              "clubId": "SCH_12_3",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_2_giguashvili",
               "webName": "Giguashvili",
               "clubId": "SCH_12_2",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -6131,6 +6131,17 @@
           "gwPoints": 0,
           "rank": 29,
           "previousRank": 29,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790457927606",
+          "managerName": "Luka",
+          "teamName": "Shakara & CO",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 30,
+          "previousRank": 30,
           "activeChip": null,
           "lineup": []
         }
@@ -6605,9 +6616,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_4_gogoladze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 27,
+        "bank": 20.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7116,9 +7134,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_custom_1790259242808",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 7.9,
+        "bank": 3.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7280,16 +7305,9 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_custom_1790166332280",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
           }
         ],
-        "bank": 40.5,
+        "bank": 46.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7337,18 +7355,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_3_vashakmadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_12_2_giguashvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_12_7_mekravishvili",
@@ -7379,7 +7390,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 13,
+        "bank": 21.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7510,6 +7521,26 @@
         }
       },
       "joinedAt": "2026-09-26T21:24:48.967Z"
+    },
+    "user_1790457927606": {
+      "id": "user_1790457927606",
+      "managerName": "Luka",
+      "teamName": "Shakara & CO",
+      "squad": {
+        "teamName": "Shakara & CO",
+        "managerName": "Luka",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:25:27.645Z"
     }
   },
   "users": {
@@ -7912,6 +7943,20 @@
       "teamName": "zria",
       "token": "e25a0907f44a4e288ed8323832d31269feceb8e4e7d08571ef410dbc47ef703a",
       "createdAt": "2026-09-26T21:24:48.967Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790457927606": {
+      "id": "user_1790457927606",
+      "username": "shakara001",
+      "email": "shakara001@fantasy.pl",
+      "passwordHash": "11578a2a76b3a097e2a094d172bc8e35915d79ad0826c2c4357e7665993e4915d0bd3adcf1f583ba1b7b789788714d39906095cbcf875af9f1925f4149c327d3",
+      "salt": "c5c49cb76d9b35868fdbef81c2fc14dd",
+      "managerName": "Luka",
+      "teamName": "Shakara & CO",
+      "token": "378db44ddc8b4f0b9f287e3399006fd63c1a106e9cd4fcb6c5a866afc7275af1",
+      "createdAt": "2026-09-26T21:25:27.645Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
