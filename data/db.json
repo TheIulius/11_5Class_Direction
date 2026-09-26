@@ -4699,17 +4699,6 @@
               "points": 0
             },
             {
-              "playerId": "p_10_6_xixadze",
-              "webName": "Xixadze",
-              "clubId": "SCH_10_6",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_6_avalishvili",
               "webName": "Avalishvili",
               "clubId": "SCH_12_6",
@@ -4718,17 +4707,6 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_6_gvaridzishvili",
-              "webName": "Gvaridzishvili",
-              "clubId": "SCH_10_6",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
               "points": 0
             }
           ]
@@ -4781,6 +4759,17 @@
               "webName": "Rati",
               "clubId": "SCH_11_5",
               "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_giorguna",
+              "webName": "Giorguna",
+              "clubId": "SCH_11_1",
+              "position": "MID",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -5456,28 +5445,14 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_6_xixadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_6_avalishvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_10_6_gvaridzishvili",
-            "isStarter": false,
-            "benchOrder": 1,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 10.3,
+        "bank": 20.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5524,9 +5499,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_giorguna",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 23.6,
+        "bank": 15.7,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6095,7 +6077,7 @@
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
       "isAdmin": true,
-      "token": "e949e9df80fe95b57c9307a367a553db6031ecff785fb12cb8677983942c2027"
+      "token": "2188be34943369898c3be2c9059cfa4b8aff0de90ddd79bb1b34d4e766dcef39"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
