@@ -19,6 +19,7 @@ app.use(express.json());
 
 // Moderator / Admin privilege designations
 export const ADMIN_USERNAMES = ['theiulius', 'chaga'];
+export const INITIAL_BUDGET = 55.0;
 
 export function isUserAdmin(username?: string): boolean {
   if (!username) return false;
@@ -49,7 +50,7 @@ app.get('/api/state', (req: Request, res: Response) => {
           teamName: user.teamName,
           managerName: user.managerName,
           players: [],
-          bank: 60.0,
+          bank: INITIAL_BUDGET,
           freeTransfers: 1,
           transfersMadeThisGW: 0,
           activeChip: null,
@@ -80,6 +81,7 @@ app.get('/api/state', (req: Request, res: Response) => {
     fixtures: data.fixtures,
     leagues: data.leagues,
     managers: managersList,
+    registeredManagersCount: Object.keys(data.users || {}).length || managersList.length,
     activeManager: manager,
     currentUserApproved: isApproved,
     deadline: data.deadline || null,
@@ -110,7 +112,7 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
           teamName: leagueMember.teamName,
           managerName: leagueMember.managerName,
           players: [],
-          bank: 60.0,
+          bank: INITIAL_BUDGET,
           freeTransfers: 1,
           transfersMadeThisGW: 0,
           activeChip: null,
@@ -231,7 +233,7 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
       teamName: teamName.trim(),
       managerName: managerName.trim(),
       players: [],
-      bank: 60.0,
+      bank: INITIAL_BUDGET,
       freeTransfers: 1,
       transfersMadeThisGW: 0,
       activeChip: null,
@@ -383,7 +385,7 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
         teamName: user.teamName,
         managerName: user.managerName,
         players: [],
-        bank: 60.0,
+        bank: INITIAL_BUDGET,
         freeTransfers: 1,
         transfersMadeThisGW: 0,
         activeChip: null,
@@ -454,7 +456,7 @@ app.get('/api/auth/me', async (req: Request, res: Response) => {
         teamName: user.teamName,
         managerName: user.managerName,
         players: [],
-        bank: 60.0,
+        bank: INITIAL_BUDGET,
         freeTransfers: 1,
         transfersMadeThisGW: 0,
         activeChip: null,
@@ -558,7 +560,7 @@ app.post('/api/manager/login', (req: Request, res: Response) => {
         teamName: teamName.trim(),
         managerName: managerName.trim(),
         players: [],
-        bank: 60.0,
+        bank: INITIAL_BUDGET,
         freeTransfers: 1,
         transfersMadeThisGW: 0,
         activeChip: null,
@@ -625,7 +627,7 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
         teamName: teamName || user?.teamName || 'My Squad XI',
         managerName: user?.managerName || 'My Team Manager',
         players: players || [],
-        bank: typeof bank === 'number' ? Math.round(bank * 10) / 10 : 60.0,
+        bank: typeof bank === 'number' ? Math.round(bank * 10) / 10 : INITIAL_BUDGET,
         freeTransfers: 1,
         transfersMadeThisGW: 0,
         activeChip: null,
@@ -728,7 +730,7 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
       manager.squad.bank = Math.round(bank * 10) / 10;
     } else {
       const totalCost = players.reduce((sum: number, sp: any) => sum + (data.players[sp.playerId]?.cost || 0), 0);
-      manager.squad.bank = Math.max(0, Math.round((60.0 - totalCost) * 10) / 10);
+      manager.squad.bank = Math.max(0, Math.round((INITIAL_BUDGET - totalCost) * 10) / 10);
     }
   }
 
@@ -779,7 +781,7 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
           teamName: user.teamName,
           managerName: user.managerName,
           players: [],
-          bank: 60.0,
+          bank: INITIAL_BUDGET,
           freeTransfers: 1,
           transfersMadeThisGW: 0,
           activeChip: null,
@@ -840,7 +842,7 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
           teamName: user.teamName,
           managerName: user.managerName,
           players: [],
-          bank: 60.0,
+          bank: INITIAL_BUDGET,
           freeTransfers: 1,
           transfersMadeThisGW: 0,
           activeChip: null,
@@ -1012,7 +1014,7 @@ function recalculateAllManagersLeaguePoints(data: any) {
           teamName: u.teamName || `${u.username} XI`,
           managerName: u.managerName || u.username,
           players: [],
-          bank: 60.0,
+          bank: INITIAL_BUDGET,
           freeTransfers: 1,
           transfersMadeThisGW: 0,
           activeChip: null,
@@ -1986,7 +1988,7 @@ app.post('/api/admin/user/create', (req: Request, res: Response) => {
       teamName: teamName.trim(),
       managerName: managerName.trim(),
       players: [],
-      bank: 60.0,
+      bank: INITIAL_BUDGET,
       freeTransfers: 1,
       transfersMadeThisGW: 0,
       activeChip: null,
@@ -2117,7 +2119,7 @@ app.post('/api/admin/user/reset', (req: Request, res: Response) => {
       teamName: user.teamName,
       managerName: user.managerName,
       players: [],
-      bank: 60.0,
+      bank: INITIAL_BUDGET,
       freeTransfers: 1,
       transfersMadeThisGW: 0,
       activeChip: null,
@@ -2161,7 +2163,7 @@ app.post('/api/admin/user/reset', (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    message: `Everything for @${user.username} (${user.managerName}) has been reset: squad emptied, bank £60.0m, chips and points reset to 0.`,
+    message: `Everything for @${user.username} (${user.managerName}) has been reset: squad emptied, bank £${INITIAL_BUDGET.toFixed(1)}m, chips and points reset to 0.`,
   });
 });
 

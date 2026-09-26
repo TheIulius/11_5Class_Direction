@@ -99,6 +99,12 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                 </ul>
                 <div className="pt-2 text-slate-400 text-[11px] space-y-1">
                   <p>
+                    💰 <strong className="text-slate-200">{lang === 'geo' ? 'სასტარტო ბიუჯეტი:' : 'Transfer Budget:'}</strong>{' '}
+                    {lang === 'geo'
+                      ? 'გუნდის შესადგენად თითოეულ მენეჯერს აქვს 55.0 მილიონი (£55.0m).'
+                      : 'Each manager starts with a total budget of £55.0m.'}
+                  </p>
+                  <p>
                     ⚠️ <strong className="text-slate-200">{lang === 'geo' ? 'კლასის ლიმიტი:' : 'Class Limit:'}</strong>{' '}
                     {lang === 'geo'
                       ? 'ერთი და იგივე კლასიდან (მაგ. 11/5, 9/2) ნებადართულია მაქსიმუმ 2 მოთამაშე.'

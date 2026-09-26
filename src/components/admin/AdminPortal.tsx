@@ -1628,7 +1628,7 @@ export const AdminPortal: React.FC = () => {
                           onClick={() => handleResetUserEverything(u.id, u.username, u.managerName)}
                           disabled={actionInProgressUserId === u.id}
                           className="p-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-400 hover:bg-amber-500/20 hover:text-amber-300 transition-colors cursor-pointer"
-                          title={`Reset everything for @${u.username} (lineup to 0, bank to £60m, chips and points reset)`}
+                          title={`Reset everything for @${u.username} (lineup to 0, bank to £55m, chips and points reset)`}
                         >
                           <RotateCcw className={`w-3 h-3 ${actionInProgressUserId === u.id ? 'animate-spin' : ''}`} />
                         </button>

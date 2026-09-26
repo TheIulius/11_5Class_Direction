@@ -24,6 +24,8 @@ import {
 import { canSwapPlayers, normalizeSquadLineup, isValidFormation, sanitizeCaptaincy } from '../engine/formations';
 import * as api from '../services/api';
 
+export const INITIAL_BUDGET = 55.0;
+
 export type TabType = 'team' | 'transfers' | 'standings' | 'leagues' | 'fixtures' | 'dev';
 
 export interface ManagerSummary {
@@ -38,6 +40,7 @@ interface FPLContextType {
   addClub: (club: { name: string; shortName?: string; primaryColor?: string; secondaryColor?: string }) => Promise<Club>;
   squad: Squad;
   fixtures: Fixture[];
+  registeredManagersCount: number;
   leagues: League[];
   currentGW: number;
   activeTab: TabType;
@@ -265,7 +268,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       teamName: '',
       managerName: '',
       players: [],
-      bank: 60.0,
+      bank: INITIAL_BUDGET,
       freeTransfers: 1,
       transfersMadeThisGW: 0,
       activeChip: null,
@@ -436,7 +439,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   activeSq = { ...activeSq, players: normalized };
                 } else if (validPlayers.length > 0) {
                   const totalCost = validPlayers.reduce((sum: number, sp: SquadPlayer) => sum + (allP[sp.playerId]?.cost || 0), 0);
-                  const bank = Math.max(0, Math.round((60.0 - totalCost) * 10) / 10);
+                  const bank = Math.max(0, Math.round((INITIAL_BUDGET - totalCost) * 10) / 10);
                   const normalized = normalizeSquadLineup(validPlayers, allP);
                   activeSq = { ...activeSq, players: normalized, bank };
                 }
@@ -499,7 +502,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       // Safety check: if ALL players appear invalid, this is a database sync error, do not wipe!
       if (hadGhost && validPlayers.length > 0) {
         const totalCost = validPlayers.reduce((sum: number, sp: SquadPlayer) => sum + (players[sp.playerId]?.cost || 0), 0);
-        const correctBank = Math.max(0, Math.round((60.0 - totalCost) * 10) / 10);
+        const correctBank = Math.max(0, Math.round((INITIAL_BUDGET - totalCost) * 10) / 10);
         const normalized = normalizeSquadLineup(validPlayers, players);
         const updatedSquad: Squad = {
           ...squad,
@@ -609,7 +612,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         teamName,
         managerName,
         players: [],
-        bank: 60.0,
+        bank: INITIAL_BUDGET,
         freeTransfers: 1,
         transfersMadeThisGW: 0,
         activeChip: null,
@@ -639,7 +642,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         teamName: res.user.teamName,
         managerName: res.user.managerName,
         players: [],
-        bank: 60.0,
+        bank: INITIAL_BUDGET,
         freeTransfers: 1,
         transfersMadeThisGW: 0,
         activeChip: null,
@@ -679,7 +682,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         teamName: res.user.teamName,
         managerName: res.user.managerName,
         players: [],
-        bank: 60.0,
+        bank: INITIAL_BUDGET,
         freeTransfers: 1,
         transfersMadeThisGW: 0,
         activeChip: null,
@@ -709,7 +712,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       teamName: '',
       managerName: '',
       players: [],
-      bank: 60.0,
+      bank: INITIAL_BUDGET,
       freeTransfers: 1,
       transfersMadeThisGW: 0,
       activeChip: null,
@@ -781,7 +784,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
 
       const totalCost = targetPlayers.reduce((sum, sp) => sum + (players[sp.playerId]?.cost || 0), 0);
-      const calculatedBank = Math.max(0, Math.round((60.0 - totalCost) * 10) / 10);
+      const calculatedBank = Math.max(0, Math.round((INITIAL_BUDGET - totalCost) * 10) / 10);
 
       const updatedSquad: Squad = {
         ...squad,
@@ -812,7 +815,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Buy a player from market into squad using available £60.0m budget
+  // Buy a player from market into squad using available £55.0m budget
   const buyPlayer = (playerId: string): { success: boolean; message?: string } => {
     if (isSquadLocked) {
       return { success: false, message: 'Lineups are locked. The deadline has passed.' };
@@ -1623,6 +1626,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setLeagues((prev) => prev.filter((l) => l.id !== leagueId));
   };
 
+  const registeredManagersCount = useMemo(() => {
+    return availableManagers.length || (leagues.find((l) => l.isGlobal)?.members?.length) || 0;
+  }, [availableManagers, leagues]);
+
   return (
     <FPLContext.Provider
       value={{
@@ -1631,6 +1638,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         addClub,
         squad,
         fixtures,
+        registeredManagersCount,
         addFixture,
         updateFixture,
         deleteFixture,

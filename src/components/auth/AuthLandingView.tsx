@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
 import { useFPL } from '../../context/FPLContext';
-import { Lock, Key, User, Sparkles, Copy, Check, Phone } from 'lucide-react';
+import { Lock, Key, User, Sparkles, Copy, Check, Phone, Users, HeartHandshake, Coins, Heart, Info } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const AuthLandingView: React.FC = () => {
-  const { loginUser, registerUser, paymentSettings } = useFPL();
+  const { loginUser, registerUser, paymentSettings, registeredManagersCount, availableManagers, leagues } = useFPL();
   const [tab, setTab] = useState<'login' | 'register'>('login');
+
+  const managersCount = registeredManagersCount || availableManagers?.length || (leagues?.find((l) => l.isGlobal)?.members?.length) || 0;
+  const entryFee = paymentSettings?.entryFeeGEL || 3;
+  const totalFundsRaisedGEL = managersCount * entryFee;
 
   // Login inputs
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -118,6 +122,58 @@ export const AuthLandingView: React.FC = () => {
           </div>
         </div>
 
+        {/* Dynamic Tournament Impact & Charity Counter */}
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+          {/* 1. Registered Managers Counter */}
+          <div className="relative overflow-hidden rounded-2xl p-3 sm:p-3.5 bg-gradient-to-br from-emerald-950/70 via-slate-900/90 to-slate-950 border border-emerald-500/30 shadow-lg shadow-emerald-950/40 backdrop-blur-xl group hover:border-emerald-500/50 transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-xl pointer-events-none -mr-8 -mt-8" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-xs">
+                <Users className="w-3.5 h-3.5" />
+              </div>
+              <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live
+              </span>
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-2xl sm:text-3xl font-black text-white tracking-tight font-display tabular-nums">
+                {managersCount}
+              </div>
+              <div className="text-[10px] sm:text-[11px] font-bold text-slate-200 uppercase tracking-tight leading-tight">
+                Registered Managers
+              </div>
+              <div className="text-[9px] text-emerald-400/90 font-medium tracking-tight">
+                რეგისტრირებული მენეჯერი
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Funds Raised for Charity Counter */}
+          <div className="relative overflow-hidden rounded-2xl p-3 sm:p-3.5 bg-gradient-to-br from-amber-950/70 via-slate-900/90 to-slate-950 border border-amber-500/30 shadow-lg shadow-amber-950/40 backdrop-blur-xl group hover:border-amber-500/50 transition-all">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-xl pointer-events-none -mr-8 -mt-8" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="w-7 h-7 rounded-xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-xs">
+                <HeartHandshake className="w-3.5 h-3.5" />
+              </div>
+              <span className="px-1.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                Charity
+              </span>
+            </div>
+            <div className="space-y-0.5">
+              <div className="text-2xl sm:text-3xl font-black text-amber-300 tracking-tight font-display tabular-nums flex items-baseline gap-1">
+                {totalFundsRaisedGEL} <span className="text-base sm:text-lg font-bold text-amber-400/90">₾</span>
+              </div>
+              <div className="text-[10px] sm:text-[11px] font-bold text-slate-200 uppercase tracking-tight leading-tight">
+                Funds Raised
+              </div>
+              <div className="text-[9px] text-amber-400/90 font-medium tracking-tight">
+                ქველმოქმედებისთვის
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Main Authentication Card */}
         <div className="rounded-3xl bg-slate-900/90 border border-white/10 p-5 sm:p-6 shadow-2xl backdrop-blur-xl space-y-4">
           {/* Tab Switcher */}
@@ -206,16 +262,31 @@ export const AuthLandingView: React.FC = () => {
               <div className="p-3 rounded-2xl bg-slate-950/80 border border-white/5 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[11px] font-bold text-slate-200 flex items-center gap-1.5">
-                    💳 Charity Entry Fee
+                    <HeartHandshake className="w-3.5 h-3.5 text-pink-400" />
+                    Charity Entry Fee / საქველმოქმედო შენატანი
                   </span>
                   <span className="px-2 py-0.5 rounded-full text-[11px] font-black bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                     {paymentSettings?.entryFeeGEL || 3}.00 ₾
                   </span>
                 </div>
 
-                <p className="text-[10px] text-slate-400 leading-relaxed">
-                  Transfer <strong className="text-slate-200">3 ₾</strong> to one of the accounts below. In the transfer description, <strong className="text-amber-400">write your username</strong> so we can verify your payment.
-                </p>
+                {/* Highlight that 100% of money is for charity and organizer contact note */}
+                <div className="rounded-xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-amber-500/10 border border-emerald-500/30 p-2.5 space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-emerald-300 font-black text-[11px]">
+                    <span className="text-base leading-none">❤️</span>
+                    <span>100% Goes to Charity / სრულიად ქველმოქმედებისთვის</span>
+                  </div>
+                  <p className="text-[10px] text-slate-200 leading-relaxed font-medium">
+                    შემოსული თანხა (<strong className="text-emerald-400 font-bold">{paymentSettings?.entryFeeGEL || 3} ₾</strong>) <strong className="text-white underline decoration-emerald-400 decoration-1">სრულად მოხმარდება საქველმოქმედო მიზნებს</strong>. გადარიცხვისას დანიშნულებაში <strong className="text-amber-300">მიუთითეთ თქვენი username</strong>, რათა დაგიდასტუროთ მონაწილეობა.
+                  </p>
+                  <div className="text-[9.5px] text-slate-300/90 leading-snug pt-1 border-t border-white/5 flex items-start gap-1 font-medium">
+                    <span className="shrink-0 text-amber-400">💡</span>
+                    <span>
+                      დამატებითი დეტალებისთვის ან კითხვების შემთხვევაში, გთხოვთ დაუკავშირდეთ ერთ-ერთ ორგანიზატორს ქვემოთ.
+                      <span className="block text-slate-400 italic text-[9px] mt-0.5">For more details or questions, please contact one of the organizers below.</span>
+                    </span>
+                  </div>
+                </div>
 
                 {/* Bank Account Numbers */}
                 <div className="space-y-2">
@@ -272,7 +343,13 @@ export const AuthLandingView: React.FC = () => {
 
                 {/* Organizer Contact Info */}
                 <div className="rounded-xl bg-slate-800/60 border border-white/5 p-2.5 space-y-2.5">
-                  <p className="text-[10px] font-bold text-slate-300">📞 Organizer Contacts</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] font-bold text-slate-200 flex items-center gap-1.5">
+                      <Phone className="w-3 h-3 text-emerald-400" />
+                      Organizer Contacts / ორგანიზატორები
+                    </p>
+                    <span className="text-[9px] text-slate-400">დეტალებისთვის დაგვიკავშირდით</span>
+                  </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {/* Ilia */}

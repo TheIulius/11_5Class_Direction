@@ -104,7 +104,7 @@ function getDefaultData(): DatabaseSchema {
       teamName: 'Apex XI',
       managerName: 'Apex Manager',
       players: [],
-      bank: 60.0,
+      bank: 55.0,
       freeTransfers: 1,
       transfersMadeThisGW: 0,
       activeChip: null,
@@ -216,7 +216,7 @@ class Database {
               const validPlayers = m.squad.players.filter((sp) => Boolean(this.data.players[sp.playerId]));
               if (validPlayers.length !== m.squad.players.length && validPlayers.length > 0) {
                 const totalCost = validPlayers.reduce((sum, sp) => sum + (this.data.players[sp.playerId]?.cost || 0), 0);
-                m.squad.bank = Math.max(0, Math.round((60.0 - totalCost) * 10) / 10);
+                m.squad.bank = Math.max(0, Math.round((55.0 - totalCost) * 10) / 10);
                 m.squad.players = validPlayers;
                 squadsChanged = true;
               }

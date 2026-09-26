@@ -36,6 +36,7 @@ export const TopHeader: React.FC = () => {
     isSquadLocked,
     isDemoMode,
     exitDemoMode,
+    registeredManagersCount,
   } = useFPL();
 
   const [timeLeft, setTimeLeft] = useState<string>('');
@@ -112,6 +113,16 @@ export const TopHeader: React.FC = () => {
               <span className="text-[10px] md:text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/[0.09]">
                 GW {currentGW}
               </span>
+              {registeredManagersCount > 0 && (
+                <span
+                  className="text-[9px] sm:text-[10px] md:text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.06] flex items-center gap-1 shrink-0"
+                  title={`${registeredManagersCount} რეგისტრირებული მენეჯერი / Registered Managers`}
+                >
+                  <Users className="w-2.5 h-2.5 text-emerald-500/70 dark:text-emerald-400/70" />
+                  <span>{registeredManagersCount}</span>
+                  <span className="hidden md:inline text-[9px] text-slate-400/80 font-sans font-medium">managers</span>
+                </span>
+              )}
               {deadline && (
                 <span
                   className={`text-[9px] md:text-xs font-mono font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 border ${
