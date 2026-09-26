@@ -4778,17 +4778,6 @@
               "points": 0
             },
             {
-              "playerId": "p_11_6_barbaqadze",
-              "webName": "Barbaqadze",
-              "clubId": "SCH_11_6",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_9_3_tvauri",
               "webName": "Tvauri",
               "clubId": "SCH_9_3",
@@ -5380,13 +5369,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_11_6_barbaqadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_9_3_tvauri",
             "isStarter": true,
             "benchOrder": 0,
@@ -5422,7 +5404,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 2.6,
+        "bank": 8.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5849,7 +5831,6 @@
       "salt": "755995c2b72284c9737d3f08102ce4a2",
       "managerName": "Giorgi",
       "teamName": "Fc chilhura",
-      "token": "ee92147175750d7a0bdd123319eeb6ef130f954e7a5293dd3a31dffaa437b261",
       "createdAt": "2026-09-26T20:34:52.416Z",
       "role": "user",
       "isAdmin": false,
