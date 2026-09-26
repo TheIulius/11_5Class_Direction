@@ -4810,17 +4810,6 @@
               "points": 0
             },
             {
-              "playerId": "p_11_4_mshvidobadze",
-              "webName": "Mshvidobadze",
-              "clubId": "SCH_11_4",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_9_6_chigladze",
               "webName": "Chigladze",
               "clubId": "SCH_9_6",
@@ -6589,13 +6578,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_4_mshvidobadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_9_6_chigladze",
             "isStarter": true,
             "benchOrder": 0,
@@ -6603,7 +6585,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 12.8,
+        "bank": 19.2,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
