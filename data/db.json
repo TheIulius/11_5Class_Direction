@@ -6750,7 +6750,8 @@
       "createdAt": "2026-09-26T20:36:06.963Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": false
+      "isApproved": false,
+      "token": "781405ce05ad79e9455005f6e379c107b6c4e884edf51977b2ff505a5df5eb88"
     },
     "user_1790455001790": {
       "id": "user_1790455001790",
