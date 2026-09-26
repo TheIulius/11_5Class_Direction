@@ -5341,6 +5341,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_11_2_chiqvinidze",
+              "webName": "Chiqvinidze",
+              "clubId": "SCH_11_2",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6171,9 +6182,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_2_chiqvinidze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 19.6,
+        "bank": 15.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
