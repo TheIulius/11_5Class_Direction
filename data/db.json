@@ -4819,19 +4819,7 @@
           "rank": 3,
           "previousRank": 3,
           "activeChip": null,
-          "lineup": [
-            {
-              "playerId": "p_11_2_japaridze",
-              "webName": "Japaridze",
-              "clubId": "SCH_11_2",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            }
-          ]
+          "lineup": []
         },
         {
           "id": "user_1790454858175",
@@ -5058,6 +5046,17 @@
               "playerId": "p_dito",
               "webName": "Dito",
               "clubId": "SCH_11_5",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_6_mzhavanadze",
+              "webName": "Mzhavanadze",
+              "clubId": "SCH_9_6",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
@@ -6582,9 +6581,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_6_mzhavanadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 31.1,
+        "bank": 25.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
