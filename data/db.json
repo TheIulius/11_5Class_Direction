@@ -6508,17 +6508,6 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_9_4_sapanadze",
-              "webName": "Sapanadze",
-              "clubId": "SCH_9_4",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
             }
           ]
         },
@@ -8085,16 +8074,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_9_4_sapanadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 12.5,
+        "bank": 16.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
