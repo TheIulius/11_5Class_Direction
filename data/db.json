@@ -6499,17 +6499,6 @@
               "points": 0
             },
             {
-              "playerId": "p_11_7_vezdeni",
-              "webName": "Vezdeni",
-              "clubId": "SCH_11_7",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_rati",
               "webName": "Rati",
               "clubId": "SCH_11_5",
@@ -8113,13 +8102,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_7_vezdeni",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
@@ -8134,7 +8116,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 7.9,
+        "bank": 12.2,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
