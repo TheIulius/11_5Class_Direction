@@ -5990,24 +5990,13 @@
           ]
         },
         {
-          "id": "user_1790455501478",
-          "managerName": "Saba",
-          "teamName": "10/2",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 16,
-          "previousRank": 16,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790455808605",
           "managerName": "Giorgi",
           "teamName": "EliteXI",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 17,
-          "previousRank": 17,
+          "rank": 16,
+          "previousRank": 16,
           "activeChip": null,
           "lineup": []
         },
@@ -6017,8 +6006,8 @@
           "teamName": "elene",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 18,
-          "previousRank": 18,
+          "rank": 17,
+          "previousRank": 17,
           "activeChip": null,
           "lineup": []
         },
@@ -6028,8 +6017,8 @@
           "teamName": "Kcls gamarjvebuli",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 19,
-          "previousRank": 19,
+          "rank": 18,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": [
             {
@@ -6095,8 +6084,8 @@
           "teamName": "Kai bichebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 20,
-          "previousRank": 20,
+          "rank": 19,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": [
             {
@@ -6151,8 +6140,8 @@
           "teamName": "Upamaldini Fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 21,
-          "previousRank": 21,
+          "rank": 20,
+          "previousRank": 20,
           "activeChip": null,
           "lineup": [
             {
@@ -6262,8 +6251,8 @@
           "teamName": "Ar vici",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 22,
-          "previousRank": 22,
+          "rank": 21,
+          "previousRank": 21,
           "activeChip": null,
           "lineup": []
         },
@@ -6273,8 +6262,8 @@
           "teamName": "bostanshekatamo",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 23,
-          "previousRank": 23,
+          "rank": 22,
+          "previousRank": 22,
           "activeChip": null,
           "lineup": []
         },
@@ -6284,8 +6273,8 @@
           "teamName": "Cheesepizza",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 24,
-          "previousRank": 24,
+          "rank": 23,
+          "previousRank": 23,
           "activeChip": null,
           "lineup": []
         },
@@ -6295,8 +6284,8 @@
           "teamName": "zria",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 25,
-          "previousRank": 25,
+          "rank": 24,
+          "previousRank": 24,
           "activeChip": null,
           "lineup": []
         },
@@ -6306,8 +6295,8 @@
           "teamName": "Shakara & CO",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 26,
-          "previousRank": 26,
+          "rank": 25,
+          "previousRank": 25,
           "activeChip": null,
           "lineup": [
             {
@@ -6329,8 +6318,8 @@
           "teamName": "Gvanira",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 27,
-          "previousRank": 27,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": []
         }
@@ -7436,26 +7425,6 @@
       },
       "joinedAt": "2026-09-26T20:44:31.753Z"
     },
-    "user_1790455501478": {
-      "id": "user_1790455501478",
-      "managerName": "Saba",
-      "teamName": "10/2",
-      "squad": {
-        "teamName": "10/2",
-        "managerName": "Saba",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T20:45:01.489Z"
-    },
     "user_1790455808605": {
       "id": "user_1790455808605",
       "managerName": "Giorgi",
@@ -8023,20 +7992,6 @@
       "isAdmin": false,
       "isApproved": true
     },
-    "user_1790455501478": {
-      "id": "user_1790455501478",
-      "username": "shubitidzesaba79",
-      "email": "shubitidzesaba00@gmail.com",
-      "passwordHash": "fd7ea99f2c339b12e094cf865cd5c52d78409486d0c5e7258a80a451173166a53f5fbb5d4e9b3530fae99a777e3e9932a65532bf41a1c7e12e84333592588f65",
-      "salt": "e3bdfb5c03c65b10eb96581387d04467",
-      "managerName": "Saba",
-      "teamName": "10/2",
-      "token": "9de704509eb9acfada238cb3bf92ab9b7c4ffd48a0abeb52f52baeebec4ccac8",
-      "createdAt": "2026-09-26T20:45:01.489Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
     "user_1790455808605": {
       "id": "user_1790455808605",
       "username": "giorgi getia",
@@ -8215,6 +8170,7 @@
     "user_1790456921021",
     "user_1790456876038",
     "user_1790456561751",
-    "user_1790455948490"
+    "user_1790455948490",
+    "user_1790455501478"
   ]
 }
