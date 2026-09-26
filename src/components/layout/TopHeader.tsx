@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
 import { Sparkles, Wrench, Users, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Clock, Eye, Shield, BookOpen } from 'lucide-react';
-import { RulesModal } from '../common/RulesModal';
 
 interface TabItem {
   id: TabType;
@@ -28,6 +27,7 @@ export const TopHeader: React.FC = () => {
     isModerator,
     authUser,
     setIsAuthModalOpen,
+    setIsRulesModalOpen,
     leagues,
     currentManager,
     theme,
@@ -40,7 +40,6 @@ export const TopHeader: React.FC = () => {
   } = useFPL();
 
   const [timeLeft, setTimeLeft] = useState<string>('');
-  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
 
   useEffect(() => {
     if (!deadline) {
@@ -281,9 +280,6 @@ export const TopHeader: React.FC = () => {
           </div>
         </div>
       )}
-
-      {/* Official Rules & Scoring Modal */}
-      <RulesModal isOpen={isRulesModalOpen} onClose={() => setIsRulesModalOpen(false)} />
     </header>
   );
 };

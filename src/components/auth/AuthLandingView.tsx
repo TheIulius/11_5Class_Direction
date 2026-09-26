@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useFPL } from '../../context/FPLContext';
-import { Lock, Key, User, Sparkles, Copy, Check, Phone, Users, HeartHandshake, Coins, Heart, Info } from 'lucide-react';
+import { Lock, Key, User, Sparkles, Copy, Check, Phone, Users, HeartHandshake, Coins, Heart, Info, BookOpen } from 'lucide-react';
+import { RulesModal } from '../common/RulesModal';
 import confetti from 'canvas-confetti';
 
 export const AuthLandingView: React.FC = () => {
-  const { loginUser, registerUser, paymentSettings, registeredManagersCount, availableManagers, leagues } = useFPL();
+  const { loginUser, registerUser, paymentSettings, registeredManagersCount, availableManagers, leagues, isRulesModalOpen, setIsRulesModalOpen } = useFPL();
   const [tab, setTab] = useState<'login' | 'register'>('login');
 
   const managersCount = registeredManagersCount || availableManagers?.length || (leagues?.find((l) => l.isGlobal)?.members?.length) || 0;
@@ -119,6 +120,16 @@ export const AuthLandingView: React.FC = () => {
               Komarovi <span className="text-emerald-400">Charity League</span>
             </h1>
             <p className="text-xs text-slate-400 font-medium">Official School Fantasy Football Tournament</p>
+            <div className="pt-2 flex items-center justify-center">
+              <button
+                type="button"
+                onClick={() => setIsRulesModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold bg-white/5 hover:bg-emerald-500/15 text-slate-300 hover:text-emerald-300 border border-white/10 hover:border-emerald-500/30 transition-all cursor-pointer shadow-xs"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+                <span>ტურნირის წესები & ქულები / Official Rules</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -501,6 +512,9 @@ export const AuthLandingView: React.FC = () => {
           <p>© Komarovi Charity League (KCL) • Created by Theiulius & Chaga</p>
         </footer>
       </div>
+
+      {/* Official Rules Modal */}
+      <RulesModal isOpen={isRulesModalOpen} onClose={() => setIsRulesModalOpen(false)} />
     </div>
   );
 };

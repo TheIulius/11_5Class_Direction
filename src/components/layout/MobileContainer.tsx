@@ -3,6 +3,7 @@ import { TopHeader } from './TopHeader';
 import { BottomNav } from './BottomNav';
 import { ManagerModal } from './ManagerModal';
 import { AuthModal } from './AuthModal';
+import { RulesModal } from '../common/RulesModal';
 import { useFPL } from '../../context/FPLContext';
 
 interface MobileContainerProps {
@@ -15,6 +16,8 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
     setIsManagerModalOpen,
     isAuthModalOpen,
     setIsAuthModalOpen,
+    isRulesModalOpen,
+    setIsRulesModalOpen,
     activeTab,
   } = useFPL();
 
@@ -58,6 +61,12 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* Official Rules & Scoring Modal */}
+      <RulesModal
+        isOpen={isRulesModalOpen}
+        onClose={() => setIsRulesModalOpen(false)}
       />
     </div>
   );

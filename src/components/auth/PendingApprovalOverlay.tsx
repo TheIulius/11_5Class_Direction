@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { useFPL } from '../../context/FPLContext';
-import { Clock, Copy, Check, Phone, RefreshCw, LogOut } from 'lucide-react';
+import { Clock, Copy, Check, Phone, RefreshCw, LogOut, BookOpen } from 'lucide-react';
+import { RulesModal } from '../common/RulesModal';
 
 export const PendingApprovalOverlay: React.FC = () => {
-  const { authUser, logoutUser, refreshServerState, checkAuthSession } = useFPL();
+  const { authUser, logoutUser, refreshServerState, checkAuthSession, isRulesModalOpen, setIsRulesModalOpen } = useFPL();
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
@@ -225,6 +226,15 @@ export const PendingApprovalOverlay: React.FC = () => {
 
           <button
             type="button"
+            onClick={() => setIsRulesModalOpen(true)}
+            className="w-full py-2 rounded-xl text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 border border-emerald-500/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+            <span>ტურნირის წესები & ქულები / Rules</span>
+          </button>
+
+          <button
+            type="button"
             onClick={logoutUser}
             className="w-full py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
           >
@@ -233,6 +243,9 @@ export const PendingApprovalOverlay: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* Rules Modal */}
+      <RulesModal isOpen={isRulesModalOpen} onClose={() => setIsRulesModalOpen(false)} />
     </div>
   );
 };

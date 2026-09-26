@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, BookOpen, Shield, Award, Clock, AlertTriangle, Building, MapPin } from 'lucide-react';
 
@@ -9,20 +10,49 @@ interface RulesModalProps {
 
 export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
   const [lang, setLang] = useState<'geo' | 'eng'>('geo');
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
+  useEffect(() => {
+    if (!isOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!mounted || typeof document === 'undefined') return null;
+
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-          className="w-full max-w-2xl my-auto rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto"
+          onClick={onClose}
         >
-          {/* Header */}
-          <div className="p-4 sm:p-5 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 15 }}
+            transition={{ duration: 0.2 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-2xl my-auto rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+          >
+            {/* Header */}
+            <div className="p-4 sm:p-5 border-b border-slate-800/80 flex items-center justify-between bg-slate-950/50 shrink-0">
             <div className="flex items-center gap-2.5">
               <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
                 <BookOpen className="w-5 h-5" />
@@ -66,7 +96,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Modal Body */}
-          <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-xs text-slate-300">
+          <div className="p-4 sm:p-6 flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-6 text-xs text-slate-300">
             {/* 1. Squad Requirements */}
             <div className="space-y-2">
               <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
@@ -332,16 +362,18 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
           </div>
 
           {/* Footer */}
-          <div className="p-3 sm:p-4 border-t border-slate-800 bg-slate-950/50 flex justify-end">
+          <div className="p-3 sm:p-4 border-t border-slate-800 bg-slate-950/50 flex justify-end shrink-0">
             <button
               onClick={onClose}
-              className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-colors shadow-sm"
+              className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-colors shadow-sm cursor-pointer"
             >
               {lang === 'geo' ? 'გასაგებია' : 'Got It'}
             </button>
           </div>
         </motion.div>
       </div>
-    </AnimatePresence>
+      )}
+    </AnimatePresence>,
+    document.body
   );
 };

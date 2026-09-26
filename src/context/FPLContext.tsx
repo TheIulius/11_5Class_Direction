@@ -105,6 +105,8 @@ interface FPLContextType {
   authToken: string | null;
   isAuthModalOpen: boolean;
   setIsAuthModalOpen: (open: boolean) => void;
+  isRulesModalOpen: boolean;
+  setIsRulesModalOpen: (open: boolean) => void;
   loginUser: (login: string, pass: string) => Promise<void>;
   registerUser: (data: { username: string; email?: string; password: string; managerName: string; teamName: string; activationCode?: string }) => Promise<void>;
   logoutUser: () => void;
@@ -152,6 +154,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   });
 
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState<boolean>(false);
 
   const [currentManagerId, setCurrentManagerId] = useState<string>(() => {
     const savedAuthUser = localStorage.getItem(STORAGE_KEY_AUTH_USER);
@@ -1688,6 +1691,8 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         authToken,
         isAuthModalOpen,
         setIsAuthModalOpen,
+        isRulesModalOpen,
+        setIsRulesModalOpen,
         loginUser,
         registerUser,
         logoutUser,
