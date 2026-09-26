@@ -5569,7 +5569,30 @@
           "rank": 5,
           "previousRank": 5,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_rati",
+              "webName": "Rati",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_chaga",
+              "webName": "Chaga",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         }
       ]
     }
@@ -5841,7 +5864,6 @@
       "salt": "29c1f7c3ae344032980cba1fb37c163a",
       "managerName": "Nika",
       "teamName": "Chaga XI",
-      "token": "729ee14940867e2584517d6d75e59ed457884a3764edcbaa58eb6deaf1b13372",
       "createdAt": "2026-09-25T17:38:18.197Z",
       "role": "admin",
       "isAdmin": true
@@ -5886,7 +5908,7 @@
   },
   "deadline": {
     "gameweek": 1,
-    "deadlineTime": "2026-09-28T19:56:02.390Z"
+    "deadlineTime": "2026-09-28T19:55:25.266Z"
   },
   "paymentSettings": {
     "bogLink": "https://egreve.bog.ge/KCL26_charity",
