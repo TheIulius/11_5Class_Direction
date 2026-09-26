@@ -4988,17 +4988,6 @@
               "points": 0
             },
             {
-              "playerId": "p_giorguna",
-              "webName": "Giorguna",
-              "clubId": "SCH_11_1",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_dito",
               "webName": "Dito",
               "clubId": "SCH_11_5",
@@ -6731,13 +6720,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_giorguna",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_dito",
             "isStarter": true,
             "benchOrder": 0,
@@ -6752,7 +6734,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 12.1,
+        "bank": 20,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
