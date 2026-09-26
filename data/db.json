@@ -5036,6 +5036,17 @@
               "webName": "Mshvidobadze",
               "clubId": "SCH_11_4",
               "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_custom_1790192251639",
+              "webName": "Kurtsikidze",
+              "clubId": "SCH_11_3",
+              "position": "FWD",
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -5218,6 +5229,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 2,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_6_chaladze",
+              "webName": "Chaladze",
+              "clubId": "SCH_11_6",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
               "points": 0
             }
           ]
@@ -5475,6 +5497,17 @@
           "gwPoints": 0,
           "rank": 20,
           "previousRank": 20,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790456437987",
+          "managerName": "Faris mwyemsi",
+          "teamName": "Kcls gamarjvebuli",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 21,
+          "previousRank": 21,
           "activeChip": null,
           "lineup": []
         }
@@ -5892,13 +5925,20 @@
           },
           {
             "playerId": "p_11_4_mshvidobadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_custom_1790192251639",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 16.6,
+        "bank": 7.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6036,9 +6076,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_6_chaladze",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 4.3,
+        "bank": 0.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6317,6 +6364,26 @@
         }
       },
       "joinedAt": "2026-09-26T20:56:15.425Z"
+    },
+    "user_1790456437987": {
+      "id": "user_1790456437987",
+      "managerName": "Faris mwyemsi",
+      "teamName": "Kcls gamarjvebuli",
+      "squad": {
+        "teamName": "Kcls gamarjvebuli",
+        "managerName": "Faris mwyemsi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:00:37.988Z"
     }
   },
   "users": {
@@ -6597,6 +6664,20 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
+    },
+    "user_1790456437987": {
+      "id": "user_1790456437987",
+      "username": "tarkasha",
+      "email": "tarkasha@fantasy.pl",
+      "passwordHash": "5d984762c36942c34e265cad5a9f6164d619fbf3fb87343c1432fec0e96c665d73c6b6140b0f7952c548270e9abb74928c4050cf5ff832b729eadce924b954d4",
+      "salt": "3a9de66f6c70c1eae7696ce454c2dfb8",
+      "managerName": "Faris mwyemsi",
+      "teamName": "Kcls gamarjvebuli",
+      "token": "9b33633ed3356f7a06663d67fb3c960ff76a1218e8d12b84698ca963dbbe7ae0",
+      "createdAt": "2026-09-26T21:00:37.988Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
     }
   },
   "deadline": {
