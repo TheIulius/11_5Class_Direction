@@ -1533,7 +1533,7 @@
       "webName": "Chiqvinidze",
       "clubId": "SCH_11_2",
       "position": "GKP",
-      "cost": 4.5,
+      "cost": 4,
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
@@ -3829,7 +3829,7 @@
       "webName": "Bostoganashvili",
       "clubId": "SCH_12_6",
       "position": "GKP",
-      "cost": 3.5,
+      "cost": 4,
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
@@ -5791,7 +5791,8 @@
       "teamName": "giorgievski's tractati",
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
-      "isAdmin": true
+      "isAdmin": true,
+      "token": "f66ee8696a52941c2d28990a7121aa2ca4f56e7024817b89a955dd5fbeeae15b"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
@@ -5801,7 +5802,6 @@
       "salt": "29c1f7c3ae344032980cba1fb37c163a",
       "managerName": "Nika",
       "teamName": "Chaga XI",
-      "token": "729ee14940867e2584517d6d75e59ed457884a3764edcbaa58eb6deaf1b13372",
       "createdAt": "2026-09-25T17:38:18.197Z",
       "role": "admin",
       "isAdmin": true
@@ -5823,7 +5823,7 @@
   },
   "deadline": {
     "gameweek": 1,
-    "deadlineTime": "2026-09-28T19:56:02.390Z"
+    "deadlineTime": "2026-09-28T19:55:25.266Z"
   },
   "paymentSettings": {
     "bogLink": "https://egreve.bog.ge/KCL26_charity",
