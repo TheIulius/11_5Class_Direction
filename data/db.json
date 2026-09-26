@@ -4877,6 +4877,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_dadu",
+              "webName": "Dadu",
+              "clubId": "SCH_11_1",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5251,9 +5262,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_dadu",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 34.5,
+        "bank": 29,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
