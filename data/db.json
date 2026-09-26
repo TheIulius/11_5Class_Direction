@@ -4753,6 +4753,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_rati",
+              "webName": "Rati",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5143,7 +5154,19 @@
           "rank": 14,
           "previousRank": 14,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_1_gogsadze",
+              "webName": "Gogsadze",
+              "clubId": "SCH_10_1",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790455263797",
@@ -5403,9 +5426,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_rati",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 32.9,
+        "bank": 23.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5770,8 +5800,16 @@
       "squad": {
         "teamName": "Parto FC",
         "managerName": "Sandro",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_10_1_gogsadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 51,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
