@@ -5352,6 +5352,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_9_2_gogichashvili",
+              "webName": "Gogichashvili",
+              "clubId": "SCH_9_2",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -5619,6 +5630,28 @@
           "gwPoints": 0,
           "rank": 24,
           "previousRank": 24,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790456870935",
+          "managerName": "Nika",
+          "teamName": "Upamaldini Fc",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 25,
+          "previousRank": 25,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790456876038",
+          "managerName": "Rabola",
+          "teamName": "Rabola",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": []
         }
@@ -6278,9 +6311,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_2_gogichashvili",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 4.1,
+        "bank": 0.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6605,6 +6645,46 @@
         }
       },
       "joinedAt": "2026-09-26T21:02:41.752Z"
+    },
+    "user_1790456870935": {
+      "id": "user_1790456870935",
+      "managerName": "Nika",
+      "teamName": "Upamaldini Fc",
+      "squad": {
+        "teamName": "Upamaldini Fc",
+        "managerName": "Nika",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:07:50.935Z"
+    },
+    "user_1790456876038": {
+      "id": "user_1790456876038",
+      "managerName": "Rabola",
+      "teamName": "Rabola",
+      "squad": {
+        "teamName": "Rabola",
+        "managerName": "Rabola",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T21:07:56.038Z"
     }
   },
   "users": {
@@ -6743,7 +6823,8 @@
       "createdAt": "2026-09-26T20:36:50.999Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": true
+      "isApproved": true,
+      "token": "8f2bdf1e6998704a26723fdcd93307847fe5c063eddbd0f566bebf92ff565b54"
     },
     "user_1790455065876": {
       "id": "user_1790455065876",
@@ -6937,6 +7018,34 @@
       "teamName": "10/5",
       "token": "32b72ce3f9b408a2ea9897a8c7cfa45c65a937f9586a9833fca545d12e326e15",
       "createdAt": "2026-09-26T21:02:41.752Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790456870935": {
+      "id": "user_1790456870935",
+      "username": "upamaldini fc",
+      "email": "nikolozkirtadze18@gmail.com",
+      "passwordHash": "ce943dcea5933a44ec8a7df0f9e509de097589d6a70722da2a6c416a7936da662b65f4a87fa48136c8be40437fedd736421c56046f72993d71fb2f2d00dd8a2f",
+      "salt": "f84f84df268259eb3f5e1611e2213397",
+      "managerName": "Nika",
+      "teamName": "Upamaldini Fc",
+      "token": "1fbb709743f8c9cea7607009969d40194e8472e3b845c25b0f67c91c6d9f0a5d",
+      "createdAt": "2026-09-26T21:07:50.935Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790456876038": {
+      "id": "user_1790456876038",
+      "username": "rabola",
+      "email": "rabola@fantasy.pl",
+      "passwordHash": "0df3ac20c80c4f38dfd5f8eb6c1458aa62c75908f7fed9394ace4eb8e38d110b46a8907ebf1a53d94640876fd72f51de033142cca56d03896f9e17bfd9654796",
+      "salt": "5a31d2a2458baf4fd722c7f00e8e33c2",
+      "managerName": "Rabola",
+      "teamName": "Rabola",
+      "token": "0c73af3ca1ad84e5ed6376e925553b79b363bd8d8563f7cfcf2bb29a77f92a7f",
+      "createdAt": "2026-09-26T21:07:56.038Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
