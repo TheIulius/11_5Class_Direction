@@ -5888,7 +5888,19 @@
           "rank": 21,
           "previousRank": 21,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790456561751",
@@ -5923,24 +5935,13 @@
               "points": 0
             },
             {
-              "playerId": "p_12_3_vashakmadze",
-              "webName": "Vashakmadze",
-              "clubId": "SCH_12_3",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_2_giguashvili",
               "webName": "Giguashvili",
               "clubId": "SCH_12_2",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -7138,8 +7139,16 @@
       "squad": {
         "teamName": "Kai bichebi",
         "managerName": "Gega",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_12_3_vashakmadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 46.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7187,18 +7196,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_3_vashakmadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_12_2_giguashvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_12_7_kopaleishvili",
@@ -7229,7 +7231,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 11,
+        "bank": 19.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
