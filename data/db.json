@@ -5400,24 +5400,13 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_giorguna",
-              "webName": "Giorguna",
-              "clubId": "SCH_11_1",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_rati",
               "webName": "Rati",
               "clubId": "SCH_11_5",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -5428,7 +5417,7 @@
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -6247,25 +6236,18 @@
         "managerName": "Giorguna",
         "players": [
           {
-            "playerId": "p_giorguna",
+            "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_rati",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_10_1_shengelia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_custom_1790194618189",
@@ -6275,7 +6257,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 19.7,
+        "bank": 27.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
