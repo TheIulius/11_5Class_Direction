@@ -4753,8 +4753,7 @@
       "teamName": "Chaga XI",
       "createdAt": "2026-09-25T17:38:18.197Z",
       "role": "admin",
-      "isAdmin": true,
-      "token": "e382619c4cbf71d742cc27b940a7fdde16728717b5657a2d90db5991226ded02"
+      "isAdmin": true
     },
     "user_1790449130368": {
       "id": "user_1790449130368",
