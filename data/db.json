@@ -4664,6 +4664,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_3_muradashvili",
+              "webName": "Muradashvili",
+              "clubId": "SCH_12_3",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -4800,6 +4811,17 @@
               "points": 0
             }
           ]
+        },
+        {
+          "id": "user_1790455158411",
+          "managerName": "Aleksandre turkadze",
+          "teamName": "Fc tuki",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 12,
+          "previousRank": 12,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -4900,9 +4922,16 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_muradashvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 47,
+        "bank": 41,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5090,6 +5119,26 @@
         }
       },
       "joinedAt": "2026-09-26T20:37:45.878Z"
+    },
+    "user_1790455158411": {
+      "id": "user_1790455158411",
+      "managerName": "Aleksandre turkadze",
+      "teamName": "Fc tuki",
+      "squad": {
+        "teamName": "Fc tuki",
+        "managerName": "Aleksandre turkadze",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T20:39:18.452Z"
     }
   },
   "users": {
@@ -5243,6 +5292,20 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
+    },
+    "user_1790455158411": {
+      "id": "user_1790455158411",
+      "username": "tukii",
+      "email": "tukii@fantasy.pl",
+      "passwordHash": "4f023ba28e313f4ac6d17e9410fa4f49e3fba6369ea07b9577660c5f95b9a5cfd148ce7c766a51e467e0ba999c5ff1ba174aefacf43062ac791dbf1251b4b800",
+      "salt": "cc669d692f5bfecc3cf90b215a998201",
+      "managerName": "Aleksandre turkadze",
+      "teamName": "Fc tuki",
+      "token": "da71623424648b7ea3693ccb30d4a9ebb255e5b6b1b5cb92560e958b02bae754",
+      "createdAt": "2026-09-26T20:39:18.452Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
     }
   },
   "deadline": {
