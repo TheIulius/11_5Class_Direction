@@ -5519,6 +5519,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_12_1_nikaidze",
+              "webName": "Nikaidze",
+              "clubId": "SCH_12_1",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ]
         },
@@ -7545,9 +7556,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_1_nikaidze",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 9.6,
+        "bank": 4.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
