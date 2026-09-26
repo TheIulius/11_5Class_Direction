@@ -4876,6 +4876,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_custom_1790194618189",
+              "webName": "Tsiskara",
+              "clubId": "SCH_11_5",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -4926,6 +4937,17 @@
               "playerId": "p_dadu",
               "webName": "Dadu",
               "clubId": "SCH_11_1",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_1_katamadze",
+              "webName": "E. Katamadze",
+              "clubId": "SCH_10_1",
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
@@ -5327,9 +5349,16 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_custom_1790194618189",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 49,
+        "bank": 39.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5376,9 +5405,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_katamadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 29,
+        "bank": 21,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
