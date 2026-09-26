@@ -6375,6 +6375,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_6_aplakovi",
+              "webName": "Aplakovi",
+              "clubId": "SCH_12_6",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -7906,9 +7917,16 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_6_aplakovi",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 49.5,
+        "bank": 43,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
