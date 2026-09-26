@@ -5264,6 +5264,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_11_4_bulia",
+              "webName": "Bulia",
+              "clubId": "SCH_11_4",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -5552,6 +5563,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_2_surmava",
+              "webName": "Surmava",
+              "clubId": "SCH_11_2",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
               "points": 0
             }
           ]
@@ -6321,9 +6343,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_4_bulia",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 4.3,
+        "bank": 0,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6545,9 +6574,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_2_surmava",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 8.5,
+        "bank": 4.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
