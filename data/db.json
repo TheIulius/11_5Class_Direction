@@ -5459,10 +5459,10 @@
               "webName": "Surmava",
               "clubId": "SCH_11_2",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
+              "isViceCaptain": false,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -5514,10 +5514,10 @@
               "webName": "Chikovani",
               "clubId": "SCH_10_1",
               "position": "DEF",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
+              "isViceCaptain": true,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -7528,10 +7528,10 @@
           },
           {
             "playerId": "p_11_2_surmava",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 1,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_10_1_gogsadze",
@@ -7563,10 +7563,10 @@
           },
           {
             "playerId": "p_10_1_chikovani",
-            "isStarter": false,
-            "benchOrder": 1,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_12_1_nikaidze",
