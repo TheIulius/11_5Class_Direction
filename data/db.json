@@ -4608,7 +4608,30 @@
           "rank": 2,
           "previousRank": 2,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_1_chikovani",
+              "webName": "Chikovani",
+              "clubId": "SCH_10_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_1_shengelia",
+              "webName": "N. Shengelia",
+              "clubId": "SCH_10_1",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790449130368",
@@ -4618,6 +4641,17 @@
           "gwPoints": 0,
           "rank": 3,
           "previousRank": 3,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790454858175",
+          "managerName": "Tato kopaleishvili",
+          "teamName": "12-7",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 4,
+          "previousRank": 4,
           "activeChip": null,
           "lineup": []
         }
@@ -4705,6 +4739,26 @@
       "joinedAt": "2026-09-26T18:58:50.369Z",
       "totalPoints": 0,
       "gameweekPoints": 0
+    },
+    "user_1790454858175": {
+      "id": "user_1790454858175",
+      "managerName": "Tato kopaleishvili",
+      "teamName": "12-7",
+      "squad": {
+        "teamName": "12-7",
+        "managerName": "Tato kopaleishvili",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T20:34:18.176Z"
     }
   },
   "users": {
@@ -4746,6 +4800,20 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
+    },
+    "user_1790454858175": {
+      "id": "user_1790454858175",
+      "username": "tatooo",
+      "email": "kopaleishvilitato11@gmail.con",
+      "passwordHash": "020596f7a066c94377d127e9f98dd7cf5cb9c7700549405dfe97e63959792c73d251e8b8b952a016a4a02d24e7d7ca9d746c7ae1e4ffbe0434354b08ee07bac6",
+      "salt": "1983e3730198de66a1b445b8ccc4c481",
+      "managerName": "Tato kopaleishvili",
+      "teamName": "12-7",
+      "token": "1e492075c0da8d66ba0261698029e6565e9f8269315e8e907c89b352c38121d5",
+      "createdAt": "2026-09-26T20:34:18.176Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
     }
   },
   "deadline": {
