@@ -4933,17 +4933,6 @@
               "points": 0
             },
             {
-              "playerId": "p_zarno",
-              "webName": "Zarno",
-              "clubId": "SCH_11_5",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_11_6_amiko",
               "webName": "Amiko",
               "clubId": "SCH_11_6",
@@ -5104,17 +5093,6 @@
               "webName": "E. Katamadze",
               "clubId": "SCH_10_1",
               "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_5_shakarishvili",
-              "webName": "Shakarishvili",
-              "clubId": "SCH_10_5",
-              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -5618,13 +5596,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_zarno",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_11_6_amiko",
             "isStarter": true,
             "benchOrder": 0,
@@ -5639,7 +5610,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 20.7,
+        "bank": 27.2,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5758,13 +5729,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_5_shakarishvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_custom_1790273600180",
             "isStarter": false,
             "benchOrder": 1,
@@ -5772,7 +5736,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 4.3,
+        "bank": 10.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
