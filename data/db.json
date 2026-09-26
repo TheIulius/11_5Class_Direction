@@ -6469,10 +6469,10 @@
               "webName": "Aplakovi",
               "clubId": "SCH_11_4",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -6480,10 +6480,10 @@
               "webName": "Dadu",
               "clubId": "SCH_11_1",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -8274,15 +8274,15 @@
           },
           {
             "playerId": "p_custom_1790259253781",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_dadu",
-            "isStarter": false,
-            "benchOrder": 1,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
