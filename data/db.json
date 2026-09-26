@@ -4730,6 +4730,17 @@
               "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_4_lobzhanidze",
+              "webName": "Lobzhanidze",
+              "clubId": "SCH_10_4",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6004,9 +6015,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
+          },
+          {
+            "playerId": "p_10_4_lobzhanidze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 39.3,
+        "bank": 34.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
