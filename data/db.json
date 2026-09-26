@@ -5654,17 +5654,6 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790244156863",
-              "webName": "Atunashvili",
-              "clubId": "SCH_11_3",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_11_6_gardafxadze",
               "webName": "Gardafxadze",
               "clubId": "SCH_11_6",
@@ -6708,13 +6697,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790244156863",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_11_6_gardafxadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -6722,7 +6704,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 19.5,
+        "bank": 28.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
