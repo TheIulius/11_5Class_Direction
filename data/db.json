@@ -5414,6 +5414,17 @@
               "webName": "Tvauri",
               "clubId": "SCH_9_3",
               "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_1_davitadze",
+              "webName": "Davitadze",
+              "clubId": "SCH_9_1",
+              "position": "MID",
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -5512,24 +5523,13 @@
           "lineup": []
         },
         {
-          "id": "user_1790455699799",
-          "managerName": "Mate",
-          "teamName": "11.4",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 17,
-          "previousRank": 17,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790455808605",
           "managerName": "Giorgi",
           "teamName": "EliteXI",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 18,
-          "previousRank": 18,
+          "rank": 17,
+          "previousRank": 17,
           "activeChip": null,
           "lineup": []
         },
@@ -5539,8 +5539,8 @@
           "teamName": "DRM team",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 19,
-          "previousRank": 19,
+          "rank": 18,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": []
         },
@@ -5550,8 +5550,8 @@
           "teamName": "elene",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 20,
-          "previousRank": 20,
+          "rank": 19,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": []
         },
@@ -5561,8 +5561,8 @@
           "teamName": "Kcls gamarjvebuli",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 21,
-          "previousRank": 21,
+          "rank": 20,
+          "previousRank": 20,
           "activeChip": null,
           "lineup": [
             {
@@ -5606,8 +5606,8 @@
           "teamName": "Kai bichebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 22,
-          "previousRank": 22,
+          "rank": 21,
+          "previousRank": 21,
           "activeChip": null,
           "lineup": []
         },
@@ -5617,8 +5617,8 @@
           "teamName": "10/5",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 23,
-          "previousRank": 23,
+          "rank": 22,
+          "previousRank": 22,
           "activeChip": null,
           "lineup": []
         },
@@ -5628,8 +5628,8 @@
           "teamName": "Upamaldini Fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 24,
-          "previousRank": 24,
+          "rank": 23,
+          "previousRank": 23,
           "activeChip": null,
           "lineup": []
         },
@@ -5639,8 +5639,8 @@
           "teamName": "Rabola",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 25,
-          "previousRank": 25,
+          "rank": 24,
+          "previousRank": 24,
           "activeChip": null,
           "lineup": []
         },
@@ -5650,8 +5650,8 @@
           "teamName": "IvaHavertz",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 26,
-          "previousRank": 26,
+          "rank": 25,
+          "previousRank": 25,
           "activeChip": null,
           "lineup": []
         },
@@ -5661,8 +5661,8 @@
           "teamName": "Ar vici",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 27,
-          "previousRank": 27,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": []
         }
@@ -6374,13 +6374,20 @@
           },
           {
             "playerId": "p_9_3_tvauri",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_1_davitadze",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 12,
+        "bank": 8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6474,26 +6481,6 @@
         }
       },
       "joinedAt": "2026-09-26T20:45:01.489Z"
-    },
-    "user_1790455699799": {
-      "id": "user_1790455699799",
-      "managerName": "Mate",
-      "teamName": "11.4",
-      "squad": {
-        "teamName": "11.4",
-        "managerName": "Mate",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T20:48:19.800Z"
     },
     "user_1790455808605": {
       "id": "user_1790455808605",
@@ -6941,20 +6928,6 @@
       "isAdmin": false,
       "isApproved": false
     },
-    "user_1790455699799": {
-      "id": "user_1790455699799",
-      "username": "abdaubda",
-      "email": "matemshvidobadze@gmail.com",
-      "passwordHash": "a17ff20daf11558f1c71c6e64b075b51ceba911869a2e3881e264bb5a0ec0c5b1e997f3f404c1245fd6074c9176679a1ab126d3f86b546cef786ec461863415b",
-      "salt": "910c2241850623338c9d887680b90dd2",
-      "managerName": "Mate",
-      "teamName": "11.4",
-      "token": "6ecfb8ea79f69af7b914209819a506ab7a5e4978005e7bb25dbb9fba3f5111d0",
-      "createdAt": "2026-09-26T20:48:19.800Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
     "user_1790455808605": {
       "id": "user_1790455808605",
       "username": "giorgi getia",
@@ -7114,6 +7087,7 @@
     "user_1790426603326",
     "user_1790427011158",
     "user_1790455208277",
-    "user_1790456444484"
+    "user_1790456444484",
+    "user_1790455699799"
   ]
 }
