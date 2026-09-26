@@ -4933,7 +4933,19 @@
           "rank": 12,
           "previousRank": 12,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_1_gogsadze",
+              "webName": "Gogsadze",
+              "clubId": "SCH_10_1",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790455208277",
@@ -5378,8 +5390,16 @@
       "squad": {
         "teamName": "Fc tuki",
         "managerName": "Aleksandre turkadze",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_10_1_gogsadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 51,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
