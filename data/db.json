@@ -5164,17 +5164,6 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_9_1_g__kordzadze",
-              "webName": "G. Kordzadze",
-              "clubId": "SCH_9_1",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
             }
           ]
         },
@@ -5879,16 +5868,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_9_1_g__kordzadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 19.3,
+        "bank": 23.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
