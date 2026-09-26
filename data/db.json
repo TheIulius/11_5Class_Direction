@@ -5110,7 +5110,19 @@
           "rank": 9,
           "previousRank": 9,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_custom_1790166375573",
+              "webName": "Kakabadze",
+              "clubId": "SCH_11_5",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790455010999",
@@ -5693,10 +5705,10 @@
               "webName": "Surmava",
               "clubId": "SCH_11_2",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -5726,10 +5738,10 @@
               "webName": "Chikovani",
               "clubId": "SCH_10_1",
               "position": "DEF",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -6439,8 +6451,16 @@
       "squad": {
         "teamName": "Scootaloo",
         "managerName": "Gurika",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_custom_1790166375573",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 51,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6889,8 +6909,8 @@
           },
           {
             "playerId": "p_11_2_surmava",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -6910,8 +6930,8 @@
           },
           {
             "playerId": "p_10_1_chikovani",
-            "isStarter": false,
-            "benchOrder": 1,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
