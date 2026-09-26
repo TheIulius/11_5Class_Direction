@@ -5657,24 +5657,13 @@
               "points": 0
             },
             {
-              "playerId": "p_zurashvili",
-              "webName": "Zurashvili",
-              "clubId": "SCH_11_1",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_11_7_tsasidze",
               "webName": "Tsasidze",
               "clubId": "SCH_11_7",
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -6869,18 +6858,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_zurashvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_11_7_tsasidze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_11_2_surmava",
@@ -6918,7 +6900,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 3.9,
+        "bank": 8.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
