@@ -5765,6 +5765,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_liparteliani",
+              "webName": "Liparteliani",
+              "clubId": "SCH_11_1",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6891,9 +6902,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_liparteliani",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 20.1,
+        "bank": 16.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
