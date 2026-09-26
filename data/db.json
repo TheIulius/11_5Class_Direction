@@ -4655,13 +4655,24 @@
           "activeChip": null,
           "lineup": [
             {
+              "playerId": "p_12_7_kopaleishvili",
+              "webName": "Kopaleishvili",
+              "clubId": "SCH_12_7",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
               "playerId": "p_12_7_kevlishvili",
               "webName": "Kevlishvili",
               "clubId": "SCH_12_7",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
+              "isCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -4670,17 +4681,6 @@
               "webName": "Muradashvili",
               "clubId": "SCH_12_3",
               "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_7_kopaleishvili",
-              "webName": "Kopaleishvili",
-              "clubId": "SCH_12_7",
-              "position": "MID",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -4698,7 +4698,19 @@
           "rank": 5,
           "previousRank": 5,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_1_shengelia",
+              "webName": "N. Shengelia",
+              "clubId": "SCH_10_1",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790454892416",
@@ -4744,9 +4756,9 @@
               "points": 0
             },
             {
-              "playerId": "p_chaga",
-              "webName": "Chaga",
-              "clubId": "SCH_11_5",
+              "playerId": "p_custom_1790192251639",
+              "webName": "Kurtsikidze",
+              "clubId": "SCH_11_3",
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
@@ -4755,10 +4767,10 @@
               "points": 0
             },
             {
-              "playerId": "p_9_6_chigladze",
-              "webName": "Chigladze",
-              "clubId": "SCH_9_6",
-              "position": "FWD",
+              "playerId": "p_11_6_barbaqadze",
+              "webName": "Barbaqadze",
+              "clubId": "SCH_11_6",
+              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -4834,10 +4846,10 @@
               "points": 0
             },
             {
-              "playerId": "p_12_7_kopaleishvili",
-              "webName": "Kopaleishvili",
-              "clubId": "SCH_12_7",
-              "position": "MID",
+              "playerId": "p_12_3_bazadze",
+              "webName": "Bazadze",
+              "clubId": "SCH_12_3",
+              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": true,
@@ -4984,21 +4996,21 @@
         "managerName": "Tato kopaleishvili",
         "players": [
           {
-            "playerId": "p_12_7_kevlishvili",
+            "playerId": "p_12_7_kopaleishvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_3_muradashvili",
+            "playerId": "p_12_7_kevlishvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
           },
           {
-            "playerId": "p_12_7_kopaleishvili",
+            "playerId": "p_12_3_muradashvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
@@ -5024,8 +5036,16 @@
       "squad": {
         "teamName": "Bzkddshvc",
         "managerName": "ale",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_10_1_shengelia",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 46,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5080,21 +5100,21 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_chaga",
+            "playerId": "p_custom_1790192251639",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_6_chigladze",
+            "playerId": "p_11_6_barbaqadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 20.9,
+        "bank": 23.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5190,14 +5210,14 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_7_kopaleishvili",
+            "playerId": "p_12_3_bazadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
           }
         ],
-        "bank": 39.5,
+        "bank": 42,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5302,7 +5322,7 @@
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
       "isAdmin": true,
-      "token": "95a74b0d20a3b2cfd57110646011bbdea6579bdffa46301dd329dfde347ebeaf"
+      "token": "e949e9df80fe95b57c9307a367a553db6031ecff785fb12cb8677983942c2027"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
