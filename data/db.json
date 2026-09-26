@@ -4674,6 +4674,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_custom_1790194825803",
+              "webName": "Tsiskara Jr.",
+              "clubId": "SCH_9_5",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ]
         },
@@ -5628,8 +5639,8 @@
               "clubId": "SCH_11_1",
               "position": "GKP",
               "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -5640,7 +5651,7 @@
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -5673,17 +5684,6 @@
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_1_shengelia",
-              "webName": "N. Shengelia",
-              "clubId": "SCH_10_1",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": true,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -5865,6 +5865,17 @@
               "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_2_gorozia",
+              "webName": "Gorozia",
+              "clubId": "SCH_12_2",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6009,9 +6020,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_custom_1790194825803",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 11.5,
+        "bank": 5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -6772,15 +6790,15 @@
             "playerId": "p_liparteliani",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
+            "isCaptain": true,
+            "isViceCaptain": false
           },
           {
             "playerId": "p_zurashvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_custom_1790259242808",
@@ -6801,13 +6819,6 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_10_1_shengelia",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": true,
             "isViceCaptain": false
           },
           {
@@ -6832,7 +6843,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0.5,
+        "bank": 9.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7027,9 +7038,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
+          },
+          {
+            "playerId": "p_12_2_gorozia",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 41.5,
+        "bank": 33.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
