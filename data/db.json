@@ -4708,6 +4708,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_6_chachia",
+              "webName": "Chachia",
+              "clubId": "SCH_12_6",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -4766,10 +4777,10 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790194618189",
-              "webName": "Tsiskara",
+              "playerId": "p_dito",
+              "webName": "Dito",
               "clubId": "SCH_11_5",
-              "position": "MID",
+              "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -5173,8 +5184,8 @@
           "teamName": "Parto FC",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 14,
-          "previousRank": 14,
+          "rank": 13,
+          "previousRank": 13,
           "activeChip": null,
           "lineup": [
             {
@@ -5229,8 +5240,8 @@
           "teamName": "10/1",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 15,
-          "previousRank": 15,
+          "rank": 14,
+          "previousRank": 14,
           "activeChip": null,
           "lineup": [
             {
@@ -5265,6 +5276,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5274,8 +5296,8 @@
           "teamName": "Poliklinka fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 16,
-          "previousRank": 16,
+          "rank": 15,
+          "previousRank": 15,
           "activeChip": null,
           "lineup": [
             {
@@ -5288,6 +5310,28 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_1_shengelia",
+              "webName": "N. Shengelia",
+              "clubId": "SCH_10_1",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_rati",
+              "webName": "Rati",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -5297,8 +5341,8 @@
           "teamName": "10/2",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 17,
-          "previousRank": 17,
+          "rank": 16,
+          "previousRank": 16,
           "activeChip": null,
           "lineup": []
         },
@@ -5308,8 +5352,8 @@
           "teamName": "11.4",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 18,
-          "previousRank": 18,
+          "rank": 17,
+          "previousRank": 17,
           "activeChip": null,
           "lineup": []
         },
@@ -5319,8 +5363,8 @@
           "teamName": "EliteXI",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 19,
-          "previousRank": 19,
+          "rank": 18,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": []
         },
@@ -5330,8 +5374,8 @@
           "teamName": "DRM team",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 20,
-          "previousRank": 20,
+          "rank": 19,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": []
         },
@@ -5341,8 +5385,8 @@
           "teamName": "elene",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 21,
-          "previousRank": 21,
+          "rank": 20,
+          "previousRank": 20,
           "activeChip": null,
           "lineup": []
         }
@@ -5473,9 +5517,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_6_chachia",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 20.5,
+        "bank": 12,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5524,14 +5575,14 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_custom_1790194618189",
+            "playerId": "p_dito",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 15.7,
+        "bank": 17.7,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5960,9 +6011,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_vashakmadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 28.5,
+        "bank": 20,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5988,9 +6046,23 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_shengelia",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
+          },
+          {
+            "playerId": "p_rati",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 49,
+        "bank": 30.7,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
