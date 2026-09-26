@@ -5656,17 +5656,6 @@
               "points": 0
             },
             {
-              "playerId": "p_11_4_gogoladze",
-              "webName": "Gogoladze",
-              "clubId": "SCH_11_4",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_rati",
               "webName": "Rati",
               "clubId": "SCH_11_5",
@@ -5893,6 +5882,17 @@
               "webName": "Vashakmadze",
               "clubId": "SCH_12_3",
               "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_2_sebua",
+              "webName": "Sebua",
+              "clubId": "SCH_12_2",
+              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -6834,13 +6834,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_4_gogoladze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
@@ -6876,7 +6869,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 2.8,
+        "bank": 8.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -7092,9 +7085,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_2_sebua",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 25,
+        "bank": 20.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
