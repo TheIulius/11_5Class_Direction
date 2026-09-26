@@ -6044,24 +6044,13 @@
               "points": 0
             },
             {
-              "playerId": "p_12_3_vashakmadze",
-              "webName": "Vashakmadze",
-              "clubId": "SCH_12_3",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_6_chachia",
               "webName": "Chachia",
               "clubId": "SCH_12_6",
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -7499,18 +7488,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_3_vashakmadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_12_6_chachia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_11_6_gardafxadze",
@@ -7527,7 +7509,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 16.1,
+        "bank": 24.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
