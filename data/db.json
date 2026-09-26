@@ -5488,17 +5488,6 @@
               "points": 0
             },
             {
-              "playerId": "p_11_4_mshvidobadze",
-              "webName": "Mshvidobadze",
-              "clubId": "SCH_11_4",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_custom_1790192251639",
               "webName": "Kurtsikidze",
               "clubId": "SCH_11_3",
@@ -6807,7 +6796,19 @@
           "rank": 32,
           "previousRank": 32,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_12_3_peikrishvili",
+              "webName": "Peikrishvili",
+              "clubId": "SCH_12_3",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790462654632",
@@ -7525,13 +7526,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_4_mshvidobadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_custom_1790192251639",
             "isStarter": true,
             "benchOrder": 0,
@@ -7553,7 +7547,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 3.3,
+        "bank": 9.7,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
