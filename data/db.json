@@ -5984,8 +5984,8 @@
           "teamName": "EliteXI",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 17,
-          "previousRank": 17,
+          "rank": 16,
+          "previousRank": 16,
           "activeChip": null,
           "lineup": []
         },
@@ -5995,8 +5995,8 @@
           "teamName": "elene",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 18,
-          "previousRank": 18,
+          "rank": 17,
+          "previousRank": 17,
           "activeChip": null,
           "lineup": []
         },
@@ -6006,8 +6006,8 @@
           "teamName": "Kcls gamarjvebuli",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 19,
-          "previousRank": 19,
+          "rank": 18,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": [
             {
@@ -6062,8 +6062,8 @@
           "teamName": "Kai bichebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 20,
-          "previousRank": 20,
+          "rank": 19,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": [
             {
@@ -6096,8 +6096,8 @@
           "teamName": "Upamaldini Fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 21,
-          "previousRank": 21,
+          "rank": 20,
+          "previousRank": 20,
           "activeChip": null,
           "lineup": [
             {
@@ -6207,8 +6207,8 @@
           "teamName": "Ar vici",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 22,
-          "previousRank": 22,
+          "rank": 21,
+          "previousRank": 21,
           "activeChip": null,
           "lineup": []
         },
@@ -6218,8 +6218,8 @@
           "teamName": "bostanshekatamo",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 23,
-          "previousRank": 23,
+          "rank": 22,
+          "previousRank": 22,
           "activeChip": null,
           "lineup": []
         },
@@ -6229,8 +6229,8 @@
           "teamName": "Cheesepizza",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 24,
-          "previousRank": 24,
+          "rank": 23,
+          "previousRank": 23,
           "activeChip": null,
           "lineup": []
         },
@@ -6240,8 +6240,8 @@
           "teamName": "zria",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 25,
-          "previousRank": 25,
+          "rank": 24,
+          "previousRank": 24,
           "activeChip": null,
           "lineup": []
         },
@@ -6251,8 +6251,8 @@
           "teamName": "Shakara & CO",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 26,
-          "previousRank": 26,
+          "rank": 25,
+          "previousRank": 25,
           "activeChip": null,
           "lineup": [
             {
@@ -6274,8 +6274,8 @@
           "teamName": "Gvanira",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 27,
-          "previousRank": 27,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": []
         }
@@ -7959,7 +7959,8 @@
       "createdAt": "2026-09-26T21:00:37.988Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": true
+      "isApproved": true,
+      "token": "a57ac5b6b518e01e93d25bca4ba5d3ab9a9af85e200a27305d43dfeacec0a38e"
     },
     "user_1790456463804": {
       "id": "user_1790456463804",
