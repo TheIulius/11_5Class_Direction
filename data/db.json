@@ -5133,17 +5133,6 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790273600180",
-              "webName": "Mandara",
-              "clubId": "SCH_11_5",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_5_shakarishvili",
               "webName": "Shakarishvili",
               "clubId": "SCH_10_5",
@@ -5871,13 +5860,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_custom_1790273600180",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_5_shakarishvili",
             "isStarter": true,
             "benchOrder": 0,
@@ -5899,7 +5881,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 3.3,
+        "bank": 8.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
