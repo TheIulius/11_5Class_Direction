@@ -4741,6 +4741,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_5_tevdoradze",
+              "webName": "Tevdoradze",
+              "clubId": "SCH_10_5",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6022,9 +6033,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_5_tevdoradze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 34.5,
+        "bank": 29.4,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
