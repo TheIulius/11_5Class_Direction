@@ -4655,10 +4655,10 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_12_7_kevlishvili",
-              "webName": "Kevlishvili",
+              "playerId": "p_12_7_kopaleishvili",
+              "webName": "Kopaleishvili",
               "clubId": "SCH_12_7",
-              "position": "FWD",
+              "position": "MID",
               "isStarter": true,
               "isCaptain": true,
               "isViceCaptain": false,
@@ -4698,19 +4698,7 @@
           "rank": 7,
           "previousRank": 7,
           "activeChip": null,
-          "lineup": [
-            {
-              "playerId": "p_custom_1790194618189",
-              "webName": "Tsiskara",
-              "clubId": "SCH_11_5",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            }
-          ]
+          "lineup": []
         },
         {
           "id": "user_1790454966962",
@@ -4850,14 +4838,14 @@
         "managerName": "Tato kopaleishvili",
         "players": [
           {
-            "playerId": "p_12_7_kevlishvili",
+            "playerId": "p_12_7_kopaleishvili",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           }
         ],
-        "bank": 47,
+        "bank": 47.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -5030,7 +5018,7 @@
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
       "isAdmin": true,
-      "token": "95a74b0d20a3b2cfd57110646011bbdea6579bdffa46301dd329dfde347ebeaf"
+      "token": "e949e9df80fe95b57c9307a367a553db6031ecff785fb12cb8677983942c2027"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
