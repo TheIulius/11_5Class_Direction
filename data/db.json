@@ -5333,6 +5333,17 @@
           "previousRank": 19,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790455948490",
+          "managerName": "Levan",
+          "teamName": "DRM team",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 20,
+          "previousRank": 20,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -6068,6 +6079,26 @@
         }
       },
       "joinedAt": "2026-09-26T20:50:08.606Z"
+    },
+    "user_1790455948490": {
+      "id": "user_1790455948490",
+      "managerName": "Levan",
+      "teamName": "DRM team",
+      "squad": {
+        "teamName": "DRM team",
+        "managerName": "Levan",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-26T20:52:28.492Z"
     }
   },
   "users": {
@@ -6330,6 +6361,20 @@
       "teamName": "EliteXI",
       "token": "68c355d28293387c28b7661940c96077d15482422839bdd535c5b7abf81117ba",
       "createdAt": "2026-09-26T20:50:08.606Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790455948490": {
+      "id": "user_1790455948490",
+      "username": "levan_kakush1",
+      "email": "levanikakushadze@gmail.com",
+      "passwordHash": "71f8e226ea19c436f82938952b741f2959a790f64b1b5cc245ef91fac370855544c39e133361d6c43b725d9ac73a8c03d0727a639b837234581b7133f02a5d97",
+      "salt": "2f7d3f8e77c8d96bb7e39344cb7a2531",
+      "managerName": "Levan",
+      "teamName": "DRM team",
+      "token": "4b8c44fbd735d3995c6d7957dd85392df966efafcc141b750ee164bb54786877",
+      "createdAt": "2026-09-26T20:52:28.492Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
