@@ -1281,7 +1281,7 @@
       "webName": "Chiqvinidze",
       "clubId": "SCH_11_2",
       "position": "GKP",
-      "cost": 4,
+      "cost": 4.5,
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
@@ -4597,8 +4597,7 @@
           "rank": 1,
           "previousRank": 1,
           "activeChip": null,
-          "lineup": [      
-          ]
+          "lineup": []
         },
         {
           "id": "user_1790353103544",
@@ -4609,8 +4608,7 @@
           "rank": 2,
           "previousRank": 2,
           "activeChip": null,
-          "lineup": [
-          ]
+          "lineup": []
         },
         {
           "id": "user_1790449130368",
@@ -4621,8 +4619,7 @@
           "rank": 3,
           "previousRank": 3,
           "activeChip": null,
-          "lineup": [
-          ]
+          "lineup": []
         }
       ]
     }
@@ -4635,8 +4632,7 @@
       "squad": {
         "teamName": "giorgievski's tractati",
         "managerName": "Ilia",
-        "players": [
-        ],
+        "players": [],
         "bank": 55,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
@@ -4658,8 +4654,7 @@
       "squad": {
         "teamName": "Chaga XI",
         "managerName": "Nika",
-        "players": [
-        ],
+        "players": [],
         "bank": 55,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
@@ -4681,8 +4676,7 @@
       "squad": {
         "teamName": "Sirebi FC",
         "managerName": "Aleksandre",
-        "players": [
-        ],
+        "players": [],
         "bank": 55,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
