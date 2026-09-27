@@ -5121,17 +5121,6 @@
               "points": 0
             },
             {
-              "playerId": "p_9_3_tvauri",
-              "webName": "Tvauri",
-              "clubId": "SCH_9_3",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
               "playerId": "p_9_6_gugoadze",
               "webName": "Gugoadze",
               "clubId": "SCH_9_6",
@@ -5139,7 +5128,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -5150,7 +5139,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             }
           ]
@@ -7294,28 +7283,21 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_3_tvauri",
+            "playerId": "p_9_6_gugoadze",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_6_gugoadze",
+            "playerId": "p_10_1_shengelia",
             "isStarter": false,
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_10_1_shengelia",
-            "isStarter": false,
-            "benchOrder": 3,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 4,
+        "bank": 8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
