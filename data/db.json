@@ -10036,7 +10036,7 @@
       "createdAt": "2026-09-27T06:47:18.323Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": false
+      "isApproved": true
     },
     "user_1790492992563": {
       "id": "user_1790492992563",
