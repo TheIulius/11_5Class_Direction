@@ -6119,7 +6119,19 @@
           "rank": 16,
           "previousRank": 16,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_9_2_makharoblidze",
+              "webName": "Makharoblidze",
+              "clubId": "SCH_9_2",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790456175424",
@@ -8228,8 +8240,16 @@
       "squad": {
         "teamName": "EliteXI",
         "managerName": "Giorgi",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_9_2_makharoblidze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 47,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
