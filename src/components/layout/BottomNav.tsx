@@ -20,10 +20,12 @@ const TABS: TabItem[] = [
 export const BottomNav: React.FC = () => {
   const { activeTab, setActiveTab, isDevAuthenticated, isModerator } = useFPL();
 
+  const visibleTabs = TABS.filter((tab) => tab.id !== 'dev' || isModerator);
+
   return (
     <nav className="md:hidden fixed bottom-1.5 left-2.5 right-2.5 z-40 max-w-[430px] mx-auto select-none">
       <div className="flex items-center justify-around py-1 px-1 rounded-2xl bg-slate-950/90 dark:bg-[#0a0f1a]/95 backdrop-blur-2xl border border-white/[0.10] shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
-        {TABS.map((tab) => {
+        {visibleTabs.map((tab) => {
           const isDev = tab.id === 'dev';
           const Icon = isDev && isModerator ? Shield : tab.icon;
           const isActive = activeTab === tab.id;

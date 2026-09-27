@@ -331,15 +331,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return clean === 'theiulius' || clean === 'chaga' || authUser.role === 'admin' || authUser.isAdmin === true;
   }, [authUser]);
 
-  const [devAuthenticatedState, setDevAuthenticatedState] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('fpl_dev_auth') === 'true';
-    } catch {
-      return false;
-    }
-  });
-
-  const isDevAuthenticated = isModerator || devAuthenticatedState;
+  const isDevAuthenticated = isModerator;
   const [selectedPlayerForSwap, setSelectedPlayerForSwap] = useState<string | null>(null);
   const [transferOutPlayerId, setTransferOutPlayerId] = useState<string | null>(null);
 
@@ -773,28 +765,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   };
 
-  // Dev Login (Server-Verified or Instant Moderator Recognition)
-  const devLogin = async (pass?: string): Promise<boolean> => {
-    if (isModerator) {
-      setDevAuthenticatedState(true);
-      try { localStorage.setItem('fpl_dev_auth', 'true'); } catch {}
-      return true;
-    }
-    try {
-      const res = await api.adminLoginApi(pass);
-      if (res.success) {
-        setDevAuthenticatedState(true);
-        try { localStorage.setItem('fpl_dev_auth', 'true'); } catch {}
-        return true;
-      }
-      return false;
-    } catch {
-      return false;
-    }
+  // Dev Login (Bound strictly to Moderator Accounts)
+  const devLogin = async (_pass?: string): Promise<boolean> => {
+    return isModerator;
   };
 
   const devLogout = () => {
-    setDevAuthenticatedState(false);
     try { localStorage.removeItem('fpl_dev_auth'); } catch {}
   };
 

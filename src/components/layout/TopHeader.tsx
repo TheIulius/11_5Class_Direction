@@ -106,25 +106,21 @@ export const TopHeader: React.FC = () => {
           />
           <div>
             <div className="flex items-center space-x-1.5 md:space-x-2">
-              <h1 className="text-xs sm:text-sm md:text-base font-extrabold tracking-tight text-slate-900 dark:text-white uppercase flex items-center gap-1 font-display">
-                Komarovi <span className="text-slate-500 dark:text-slate-300">League</span>
+              <h1 className="text-sm md:text-base font-black tracking-wider text-slate-900 dark:text-white uppercase font-display leading-tight">
+                KCL
               </h1>
-              <span className="text-[10px] md:text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.06] text-slate-700 dark:text-slate-200 border border-slate-200/80 dark:border-white/[0.09]">
-                GW {currentGW}
-              </span>
               {registeredManagersCount > 0 && (
                 <span
-                  className="text-[9px] sm:text-[10px] md:text-xs font-mono font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.06] flex items-center gap-1 shrink-0"
+                  className="text-[9px] sm:text-[10px] md:text-xs font-mono font-semibold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.06] flex items-center gap-1 shrink-0"
                   title={`${registeredManagersCount} რეგისტრირებული მენეჯერი / Registered Managers`}
                 >
                   <Users className="w-2.5 h-2.5 text-emerald-500/70 dark:text-emerald-400/70" />
                   <span>{registeredManagersCount}</span>
-                  <span className="hidden md:inline text-[9px] text-slate-400/80 font-sans font-medium">managers</span>
                 </span>
               )}
               {deadline && (
                 <span
-                  className={`text-[9px] md:text-xs font-mono font-semibold px-2 py-0.5 rounded-md flex items-center gap-1 border ${
+                  className={`text-[9px] md:text-xs font-mono font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-1 border ${
                     isSquadLocked
                       ? 'bg-rose-500/10 text-rose-400 border-rose-500/25'
                       : 'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/[0.08]'
@@ -136,17 +132,22 @@ export const TopHeader: React.FC = () => {
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5">
+
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 shrink-0">
+                GW {currentGW}
+              </span>
+              <span className="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
+              <span className="truncate max-w-[110px] sm:max-w-[180px] md:max-w-[260px] text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {authUser?.teamName || squad.teamName}
+              </span>
               <button
+                type="button"
                 onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
-                className="text-[11px] md:text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 transition-colors text-left"
+                className="text-[9px] md:text-[10px] font-mono font-bold bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.10] hover:border-emerald-500/50 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer shrink-0"
+                title="Click to switch account"
               >
-                <span className="truncate max-w-[120px] md:max-w-[260px] font-semibold text-slate-700 dark:text-slate-300">
-                  {authUser?.teamName || squad.teamName}
-                </span>
-                <span className="text-[9px] bg-slate-100 dark:bg-white/[0.06] px-1.5 py-0.2 rounded text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.06]">
-                  {isDemoMode ? 'Demo View' : authUser ? `@${authUser.username}` : 'Sign In'}
-                </span>
+                {isDemoMode ? 'Demo' : authUser ? `@${authUser.username}` : 'Sign In'}
               </button>
             </div>
           </div>
@@ -178,38 +179,28 @@ export const TopHeader: React.FC = () => {
             )}
           </button>
 
-          {/* Account Login / Profile Button - Refined Slate Surface */}
-          <button
-            onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
-            className="p-1.5 md:px-3 md:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/[0.09]"
-            title={isDemoMode ? 'Exit Demo Mode' : authUser ? `Logged in as @${authUser.username}` : 'Sign In'}
-            aria-label="Account"
-          >
-            <Users className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-            <span className="hidden md:inline">{isDemoMode ? 'Demo' : authUser ? authUser.managerName.split(' ')[0] : 'Sign In'}</span>
-            {authUser && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
-          </button>
-
-          {/* Developer / Moderator Portal shortcut button (mobile only) */}
-          <button
-            onClick={() => setActiveTab('dev')}
-            className={`md:hidden p-1.5 rounded-full transition-all border ${
-              activeTab === 'dev'
-                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 border-transparent font-bold'
-                : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/[0.09]'
-            }`}
-            title={isModerator ? 'Moderator Console' : 'Dev Portal'}
-            aria-label={isModerator ? 'Moderator Console' : 'Dev Portal'}
-          >
-            {isModerator ? <Shield className="w-4 h-4 text-amber-400" /> : <Wrench className="w-4 h-4" />}
-          </button>
+          {/* Developer / Moderator Portal shortcut button (mobile only, ADMINS ONLY) */}
+          {isModerator && (
+            <button
+              onClick={() => setActiveTab('dev')}
+              className={`md:hidden p-1.5 rounded-full transition-all border ${
+                activeTab === 'dev'
+                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 border-transparent font-bold'
+                  : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/[0.09]'
+              }`}
+              title="Moderator Console"
+              aria-label="Moderator Console"
+            >
+              <Shield className="w-4 h-4 text-amber-400" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Desktop Navigation Tabs Bar */}
       <nav className="hidden md:flex items-center justify-center bg-slate-50 dark:bg-[#070b12] border-t border-slate-200 dark:border-slate-800/80 select-none">
         <div className="w-full max-w-6xl mx-auto flex items-center justify-center gap-1.5 px-6 py-1.5">
-          {DESKTOP_TABS.map((tab) => {
+          {DESKTOP_TABS.filter((tab) => tab.id !== 'dev' || isModerator).map((tab) => {
             const Icon = tab.id === 'dev' && isModerator ? Shield : tab.icon;
             const isActive = activeTab === tab.id;
             const isDev = tab.id === 'dev';

@@ -10,7 +10,7 @@ import { AuthLandingView } from './components/auth/AuthLandingView';
 import { PendingApprovalOverlay } from './components/auth/PendingApprovalOverlay';
 
 const AppContent: React.FC = () => {
-  const { activeTab, authUser } = useFPL();
+  const { activeTab, authUser, isModerator } = useFPL();
 
   if (!authUser) {
     return <AuthLandingView />;
@@ -31,7 +31,7 @@ const AppContent: React.FC = () => {
           <StandingsView />
         )}
         {activeTab === 'fixtures' && <FixturesView />}
-        {activeTab === 'dev' && <AdminPortal />}
+        {activeTab === 'dev' && (isModerator ? <AdminPortal /> : <PickTeamView />)}
       </MobileContainer>
     </div>
   );
