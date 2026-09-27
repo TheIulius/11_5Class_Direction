@@ -6152,6 +6152,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_1_gogsadze",
+              "webName": "Gogsadze",
+              "clubId": "SCH_10_1",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -7149,7 +7160,7 @@
               "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -7169,10 +7180,10 @@
               "webName": "Mandara",
               "clubId": "SCH_11_5",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -7192,8 +7203,8 @@
               "clubId": "SCH_11_4",
               "position": "MID",
               "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -7205,7 +7216,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -7213,10 +7224,10 @@
               "webName": "Zarno",
               "clubId": "SCH_11_5",
               "position": "DEF",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -7227,7 +7238,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -7236,7 +7247,7 @@
               "clubId": "SCH_11_6",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": true,
+              "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -9378,7 +9389,7 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_zurashvili",
@@ -9405,8 +9416,8 @@
             "playerId": "p_custom_1790279796584",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
+            "isCaptain": true,
+            "isViceCaptain": false
           },
           {
             "playerId": "p_custom_1790192301338",
@@ -9433,7 +9444,7 @@
             "playerId": "p_11_6_yarala",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": true,
+            "isCaptain": false,
             "isViceCaptain": false
           }
         ],
@@ -9941,7 +9952,7 @@
       "salt": "4f5b8015c0de0116b43a826cca35ca6b",
       "managerName": "Levan",
       "teamName": "DRM team",
-      "token": "034f17ea5c677364c3d717639a34c42cfc290cbdc90348b0a72f2e4f28f0b36e",
+      "token": "c21ef3f51fc25354a26acb61b76ff78bbb02dd32622b70d5e22e8ac1f7950917",
       "createdAt": "2026-09-27T06:32:55.286Z",
       "role": "user",
       "isAdmin": false,
