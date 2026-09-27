@@ -7351,6 +7351,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_1_chikovani",
+              "webName": "Chikovani",
+              "clubId": "SCH_10_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -7373,6 +7384,17 @@
           "gwPoints": 0,
           "rank": 41,
           "previousRank": 41,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790496803713",
+          "managerName": "Mereba",
+          "teamName": "Fc mereba",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 42,
+          "previousRank": 42,
           "activeChip": null,
           "lineup": []
         }
@@ -9649,9 +9671,16 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_chikovani",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 47,
+        "bank": 40.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -9702,6 +9731,26 @@
         }
       },
       "joinedAt": "2026-09-27T08:12:05.102Z"
+    },
+    "user_1790496803713": {
+      "id": "user_1790496803713",
+      "managerName": "Mereba",
+      "teamName": "Fc mereba",
+      "squad": {
+        "teamName": "Fc mereba",
+        "managerName": "Mereba",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T08:13:23.807Z"
     }
   },
   "users": {
@@ -9780,7 +9829,7 @@
       "salt": "755995c2b72284c9737d3f08102ce4a2",
       "managerName": "Giorgi",
       "teamName": "Fc chilhura",
-      "token": "704ab21337cde3c5d6088362de440372992885c9bdf75885533eb0344c6348e9",
+      "token": "ee92147175750d7a0bdd123319eeb6ef130f954e7a5293dd3a31dffaa437b261",
       "createdAt": "2026-09-26T20:34:52.416Z",
       "role": "user",
       "isAdmin": false,
@@ -10268,6 +10317,20 @@
       "teamName": "11/3",
       "token": "f733d9d9be3d1bc468692ea7599a74a1e3d1a86ad300cfe15e30aacf2c750200",
       "createdAt": "2026-09-27T08:12:05.102Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790496803713": {
+      "id": "user_1790496803713",
+      "username": "mereba fpl",
+      "email": "nnikadze31@gmail.com",
+      "passwordHash": "1e0526c1a5e2ea42f02fbb23839865bbc9dfccf027395fffe142150b9a0183f56e8e2a4481decd041bcdbbd1d4921100bcea766f5638932803f5b4c16948d124",
+      "salt": "c8c2bfa38205917d2d6cb67bb2c59e7a",
+      "managerName": "Mereba",
+      "teamName": "Fc mereba",
+      "token": "012128d4752cf7f3f1ce98d09c8af90ca6437429ec88eecf57c7684b7c113f4b",
+      "createdAt": "2026-09-27T08:13:23.807Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
