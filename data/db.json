@@ -6952,7 +6952,19 @@
           "rank": 36,
           "previousRank": 36,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_custom_1790194825803",
+              "webName": "Tsiskara Jr.",
+              "clubId": "SCH_9_5",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790486210241",
@@ -9033,8 +9045,16 @@
       "squad": {
         "teamName": "tsotne",
         "managerName": "tsotne",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_custom_1790194825803",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 48.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
