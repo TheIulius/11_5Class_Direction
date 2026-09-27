@@ -6929,17 +6929,6 @@
               "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_rati",
-              "webName": "Rati",
-              "clubId": "SCH_11_5",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
             }
           ]
         }
@@ -8933,16 +8922,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
-          },
-          {
-            "playerId": "p_rati",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 32.5,
+        "bank": 41.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
