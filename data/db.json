@@ -7031,9 +7031,9 @@
               "points": 0
             },
             {
-              "playerId": "p_9_5_asatiani",
-              "webName": "Asatiani",
-              "clubId": "SCH_9_5",
+              "playerId": "p_12_7_vadachkoria",
+              "webName": "Vadachkoria",
+              "clubId": "SCH_12_7",
               "position": "MID",
               "isStarter": false,
               "isCaptain": false,
@@ -9239,7 +9239,7 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_5_asatiani",
+            "playerId": "p_12_7_vadachkoria",
             "isStarter": false,
             "benchOrder": 2,
             "isCaptain": false,
@@ -9253,9 +9253,9 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 1.1,
+        "bank": 2.1,
         "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
+        "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
           "triple_captain": false,
@@ -10050,7 +10050,7 @@
       "createdAt": "2026-09-27T07:09:52.565Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": false
+      "isApproved": true
     },
     "user_1790493050486": {
       "id": "user_1790493050486",
