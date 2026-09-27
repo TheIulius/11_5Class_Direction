@@ -1599,14 +1599,12 @@ export async function syncDatabaseFromGitHub(explicitToken?: string): Promise<{ 
 
     const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
     const remoteData = JSON.parse(remoteRaw);
-    const localData = db.getData();
 
-    const changed = mergeDatabases(localData, remoteData);
-    if (changed) {
-      db.saveSilent();
-      console.log('[GitHub Sync] Remote changes merged into local database.');
-    }
-    return { success: true, changed };
+    // Overwrite local memory and disk directly with the fresh remote database
+    db.setData(remoteData);
+    console.log('[GitHub Sync] Remote database loaded into memory.');
+
+    return { success: true, changed: true };
   } catch (err: any) {
     console.warn('[GitHub Sync] Error syncing from GitHub:', err?.message || err);
     return { success: false, changed: false, error: err?.message };
@@ -1644,9 +1642,10 @@ export async function commitDbToGitHub(message: string, explicitToken?: string) 
         try {
           const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
           const remoteData = JSON.parse(remoteRaw);
-          const changed = mergeDatabases(data, remoteData);
+          // In commitDbToGitHub, ensure remoteData takes priority during merge:
+          const changed = mergeDatabases(remoteData, data); // remoteData is base, local data applies on top
           if (changed) {
-            db.saveSilent();
+            db.setData(remoteData);
           }
         } catch (parseErr) {
           console.warn('Failed to parse remote db.json during commit merge:', parseErr);
