@@ -6202,10 +6202,10 @@
               "webName": "Surmava",
               "clubId": "SCH_11_2",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -6213,10 +6213,10 @@
               "webName": "Topuria",
               "clubId": "SCH_11_3",
               "position": "DEF",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -8273,15 +8273,15 @@
           },
           {
             "playerId": "p_11_2_surmava",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_custom_1790259242808",
-            "isStarter": false,
-            "benchOrder": 2,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
