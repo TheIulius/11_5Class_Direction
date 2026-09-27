@@ -7007,6 +7007,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_12_6_dzagania",
+              "webName": "Dzagania",
+              "clubId": "SCH_12_6",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -9146,9 +9157,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_6_dzagania",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 18.6,
+        "bank": 13.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
