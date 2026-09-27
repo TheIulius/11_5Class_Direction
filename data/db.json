@@ -7173,7 +7173,7 @@
           "gwPoints": 0,
           "rank": 36,
           "previousRank": 36,
-          "activeChip": "triple_captain",
+          "activeChip": "bench_boost",
           "lineup": [
             {
               "playerId": "p_liparteliani",
@@ -9487,7 +9487,7 @@
         "bank": 0.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
-        "activeChip": "triple_captain",
+        "activeChip": "bench_boost",
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
