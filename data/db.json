@@ -6908,6 +6908,17 @@
           "previousRank": 37,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790487478795",
+          "managerName": "Giorgi",
+          "teamName": "Vortex",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 38,
+          "previousRank": 38,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8884,6 +8895,26 @@
         }
       },
       "joinedAt": "2026-09-27T05:16:50.243Z"
+    },
+    "user_1790487478795": {
+      "id": "user_1790487478795",
+      "managerName": "Giorgi",
+      "teamName": "Vortex",
+      "squad": {
+        "teamName": "Vortex",
+        "managerName": "Giorgi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T05:37:58.796Z"
     }
   },
   "users": {
@@ -9396,6 +9427,20 @@
       "teamName": "10/2",
       "token": "c53c26c5071b844b33704087e62f917977e14888da118791b4212bb54b3dcbe4",
       "createdAt": "2026-09-27T05:16:50.243Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790487478795": {
+      "id": "user_1790487478795",
+      "username": "jorabidzia",
+      "email": "gioturqia13@gmail.com",
+      "passwordHash": "6103d5bc3d01aaac209ccceacb0da0a11397dc54f25cbda2485d4ca9454cc828d0aa38b7214b39ce9d4073fe127de056e03a11ece2514de7dff98ee1e7d0d457",
+      "salt": "69bf39ee322b33cdfe2b015f489eddfc",
+      "managerName": "Giorgi",
+      "teamName": "Vortex",
+      "token": "4539b64b0be2a1d0d506145bacc8f5da927b67d54ecf0026ee6844a9f1b3fbea",
+      "createdAt": "2026-09-27T05:37:58.796Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
