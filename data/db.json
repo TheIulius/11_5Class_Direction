@@ -6822,35 +6822,13 @@
           "lineup": []
         },
         {
-          "id": "user_1790459230337",
-          "managerName": "Nodari",
-          "teamName": "Vortex",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 26,
-          "previousRank": 26,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
-          "id": "user_1790460157493",
-          "managerName": "Saba",
-          "teamName": "Lomebi",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 27,
-          "previousRank": 27,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790461971729",
           "managerName": "Nikolozi",
           "teamName": "Badri",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 28,
-          "previousRank": 28,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": []
         },
@@ -6860,8 +6838,8 @@
           "teamName": "Pansioni",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 29,
-          "previousRank": 29,
+          "rank": 27,
+          "previousRank": 27,
           "activeChip": null,
           "lineup": [
             {
@@ -6883,8 +6861,8 @@
           "teamName": "Alphebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 30,
-          "previousRank": 30,
+          "rank": 28,
+          "previousRank": 28,
           "activeChip": null,
           "lineup": []
         },
@@ -6894,8 +6872,8 @@
           "teamName": "Chiyliyo",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 31,
-          "previousRank": 31,
+          "rank": 29,
+          "previousRank": 29,
           "activeChip": null,
           "lineup": []
         },
@@ -6905,8 +6883,8 @@
           "teamName": "Svbsv",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 32,
-          "previousRank": 32,
+          "rank": 30,
+          "previousRank": 30,
           "activeChip": null,
           "lineup": []
         },
@@ -6916,8 +6894,8 @@
           "teamName": "tsotne",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 33,
-          "previousRank": 33,
+          "rank": 31,
+          "previousRank": 31,
           "activeChip": null,
           "lineup": [
             {
@@ -7027,8 +7005,8 @@
           "teamName": "10/2",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 34,
-          "previousRank": 34,
+          "rank": 32,
+          "previousRank": 32,
           "activeChip": null,
           "lineup": []
         },
@@ -7038,8 +7016,8 @@
           "teamName": "Vortex",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 35,
-          "previousRank": 35,
+          "rank": 33,
+          "previousRank": 33,
           "activeChip": null,
           "lineup": [
             {
@@ -7116,8 +7094,8 @@
           "teamName": "DRM team",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 36,
-          "previousRank": 36,
+          "rank": 34,
+          "previousRank": 34,
           "activeChip": null,
           "lineup": []
         },
@@ -7127,8 +7105,8 @@
           "teamName": "FC badri",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 37,
-          "previousRank": 37,
+          "rank": 35,
+          "previousRank": 35,
           "activeChip": null,
           "lineup": []
         },
@@ -7138,8 +7116,8 @@
           "teamName": "9/5",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 38,
-          "previousRank": 38,
+          "rank": 36,
+          "previousRank": 36,
           "activeChip": null,
           "lineup": []
         },
@@ -7149,8 +7127,8 @@
           "teamName": "Zurias biwebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 39,
-          "previousRank": 39,
+          "rank": 37,
+          "previousRank": 37,
           "activeChip": null,
           "lineup": []
         },
@@ -7160,8 +7138,8 @@
           "teamName": "Fc 9/5",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 40,
-          "previousRank": 40,
+          "rank": 38,
+          "previousRank": 38,
           "activeChip": null,
           "lineup": []
         },
@@ -7171,8 +7149,8 @@
           "teamName": "Zestafoni fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 41,
-          "previousRank": 41,
+          "rank": 39,
+          "previousRank": 39,
           "activeChip": null,
           "lineup": []
         }
@@ -8940,46 +8918,6 @@
       },
       "joinedAt": "2026-09-26T21:47:07.436Z"
     },
-    "user_1790459230337": {
-      "id": "user_1790459230337",
-      "managerName": "Nodari",
-      "teamName": "Vortex",
-      "squad": {
-        "teamName": "Vortex",
-        "managerName": "Nodari",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T21:47:10.337Z"
-    },
-    "user_1790460157493": {
-      "id": "user_1790460157493",
-      "managerName": "Saba",
-      "teamName": "Lomebi",
-      "squad": {
-        "teamName": "Lomebi",
-        "managerName": "Saba",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T22:02:37.511Z"
-    },
     "user_1790461971729": {
       "id": "user_1790461971729",
       "managerName": "Nikolozi",
@@ -9723,34 +9661,6 @@
       "isAdmin": false,
       "isApproved": true
     },
-    "user_1790459230337": {
-      "id": "user_1790459230337",
-      "username": "nodar kupreishvili",
-      "email": "kupreishvilinodo@gmail.com",
-      "passwordHash": "f92761e8c2f6dc948f17808a0d2d36fd294553771e894b51eec04423b8ba3d5758fbc7ba37b8d88ee846745c29ce29e678aa49cdc730161078328c9672523668",
-      "salt": "1808668a8470757fa40e1d2e197937ad",
-      "managerName": "Nodari",
-      "teamName": "Vortex",
-      "token": "843f6f0c87ea634b6203fd18f343f34dcaacdeb518ef3026090b63e6f686ca6a",
-      "createdAt": "2026-09-26T21:47:10.337Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
-    "user_1790460157493": {
-      "id": "user_1790460157493",
-      "username": "lutisab9",
-      "email": "lutidzesaba9@gmail.com",
-      "passwordHash": "5da067096361d3b6d92519fe37def0c5b515164c9a73af123d969c00cc030590e484b42e62529739e1fbb34bc6301e1dbfbac7eff3ebfc43de643be446b568b7",
-      "salt": "23015382fbb8f762be167911e888b523",
-      "managerName": "Saba",
-      "teamName": "Lomebi",
-      "token": "70221a550602bb589cd15776685f992a5fae366435364c67c715e0ee51d968b2",
-      "createdAt": "2026-09-26T22:02:37.511Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
     "user_1790461971729": {
       "id": "user_1790461971729",
       "username": "kolia",
@@ -9974,6 +9884,8 @@
     "user_1790455501478",
     "user_1790457888966",
     "user_1790458326878",
-    "user_1790459997943"
+    "user_1790459997943",
+    "user_1790459230337",
+    "user_1790460157493"
   ]
 }
