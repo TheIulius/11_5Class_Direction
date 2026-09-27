@@ -1630,8 +1630,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const registeredManagersCount = useMemo(() => {
-    return availableManagers.length || (leagues.find((l) => l.isGlobal)?.members?.length) || 0;
-  }, [availableManagers, leagues]);
+  const approved = availableManagers.filter(
+    (m: any) => Boolean(m.isApproved) || Boolean(m.isAdmin)
+  );
+
+  return approved.length || (leagues.find((l) => l.isGlobal)?.members?.length) || 0;
+}, [availableManagers, leagues]);
 
   return (
     <FPLContext.Provider
