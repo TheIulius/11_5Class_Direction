@@ -7197,6 +7197,17 @@
           "previousRank": 43,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790493234744",
+          "managerName": "Kaki",
+          "teamName": "Zestafoni fc",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 44,
+          "previousRank": 44,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -9436,6 +9447,26 @@
         }
       },
       "joinedAt": "2026-09-27T07:10:50.493Z"
+    },
+    "user_1790493234744": {
+      "id": "user_1790493234744",
+      "managerName": "Kaki",
+      "teamName": "Zestafoni fc",
+      "squad": {
+        "teamName": "Zestafoni fc",
+        "managerName": "Kaki",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T07:13:54.745Z"
     }
   },
   "users": {
@@ -10030,6 +10061,20 @@
       "teamName": "Fc 9/5",
       "token": "333c1743699e7b382c1599888584ec43b64d2231108ef0652d8d87a0860bbf13",
       "createdAt": "2026-09-27T07:10:50.493Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790493234744": {
+      "id": "user_1790493234744",
+      "username": "kaki",
+      "email": "akakiguruli27@gmail.com",
+      "passwordHash": "cdac2cf7eb1cd0c4b0277d1f4a6a0cff7b6436b272b20d6217ff1c3d4c79b75858a92af145dbcaec8ec122659b49cd4b8c264dccd7ab176cf6b73851c19f3387",
+      "salt": "3752819c3049b46085d8e2b360cda9ee",
+      "managerName": "Kaki",
+      "teamName": "Zestafoni fc",
+      "token": "8b34ae489a04abdfdd3cff83bfa452cd77ea12c93ec78919863507800e44c5cf",
+      "createdAt": "2026-09-27T07:13:54.745Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
