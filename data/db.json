@@ -6229,6 +6229,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_11_7_tsasidze",
+              "webName": "Tsasidze",
+              "clubId": "SCH_11_7",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -8291,9 +8302,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_tsasidze",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 4.3,
+        "bank": 0.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
