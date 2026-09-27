@@ -7175,6 +7175,17 @@
           "previousRank": 42,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790493050486",
+          "managerName": "Giorgi",
+          "teamName": "Fc 9/5",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 43,
+          "previousRank": 43,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -9387,6 +9398,26 @@
         }
       },
       "joinedAt": "2026-09-27T07:09:52.565Z"
+    },
+    "user_1790493050486": {
+      "id": "user_1790493050486",
+      "managerName": "Giorgi",
+      "teamName": "Fc 9/5",
+      "squad": {
+        "teamName": "Fc 9/5",
+        "managerName": "Giorgi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T07:10:50.493Z"
     }
   },
   "users": {
@@ -9400,7 +9431,8 @@
       "teamName": "giorgievski's tractati",
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
-      "isAdmin": true
+      "isAdmin": true,
+      "token": "048689d057198344a5433143b9ba3610a197f03d3884f3e7b073f382fa0c5f09"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
@@ -9967,6 +9999,20 @@
       "teamName": "Zurias biwebi",
       "token": "76fd65a3505740a7ec34a6c411845f38f00f1caf3b1fd9717d8fbdc279257394",
       "createdAt": "2026-09-27T07:09:52.565Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790493050486": {
+      "id": "user_1790493050486",
+      "username": "gio_mikela",
+      "email": "mikeladzegio2@gmail.com",
+      "passwordHash": "78ba7821c8b75480d755e36c236ca5d7156aff5e279e46c11d2177a37eb617cde9de99038291c1ca55551fc35e04749d9e298a5cd48b7e9d594fee908ac0650c",
+      "salt": "93eb208e3beaea9c651dd80e7b2329e0",
+      "managerName": "Giorgi",
+      "teamName": "Fc 9/5",
+      "token": "333c1743699e7b382c1599888584ec43b64d2231108ef0652d8d87a0860bbf13",
+      "createdAt": "2026-09-27T07:10:50.493Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
