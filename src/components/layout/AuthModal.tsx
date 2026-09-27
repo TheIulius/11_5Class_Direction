@@ -129,9 +129,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 {authUser.managerName.charAt(0).toUpperCase()}
               </div>
               <div>
+                <p className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">@{authUser.username}</p>
                 <h4 className="font-bold text-slate-900 dark:text-white text-base">{authUser.teamName}</h4>
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold">{authUser.managerName}</p>
-                <p className="text-[11px] text-slate-400">@{authUser.username}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{authUser.managerName}</p>
               </div>
             </div>
 

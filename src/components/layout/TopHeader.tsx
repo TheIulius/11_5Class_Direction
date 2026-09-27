@@ -76,16 +76,6 @@ export const TopHeader: React.FC = () => {
               <h1 className="text-sm md:text-base font-black tracking-wider text-slate-900 dark:text-white uppercase font-display leading-tight">
                 KCL
               </h1>
-            </div>
-
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 shrink-0">
-                GW {currentGW}
-              </span>
-              <span className="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
-              <span className="truncate max-w-[110px] sm:max-w-[180px] md:max-w-[260px] text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300">
-                {authUser?.teamName || squad.teamName}
-              </span>
               <button
                 type="button"
                 onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
@@ -94,6 +84,16 @@ export const TopHeader: React.FC = () => {
               >
                 {isDemoMode ? 'Demo' : authUser ? `@${authUser.username}` : 'Sign In'}
               </button>
+            </div>
+
+            <div className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 shrink-0">
+                GW {currentGW}
+              </span>
+              <span className="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
+              <span className="truncate max-w-[140px] sm:max-w-[220px] md:max-w-[320px] text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300">
+                {authUser?.teamName || squad.teamName}
+              </span>
             </div>
           </div>
         </div>
