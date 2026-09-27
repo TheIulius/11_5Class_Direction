@@ -4652,6 +4652,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_custom_1790194825803",
+              "webName": "Tsiskara Jr.",
+              "clubId": "SCH_9_5",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -6957,9 +6968,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_custom_1790194825803",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 19.5,
+        "bank": 13,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
