@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { PitchView } from '../pitch/PitchView';
 import { PlayerCard } from '../pitch/PlayerCard';
 import { PlayerActionSheet } from '../pitch/PlayerActionSheet';
 import { getFormationLayout } from '../../engine/formations';
 import { ChipType } from '../../types/fpl';
-import { Zap, CheckCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, Lock, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Zap, CheckCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, Lock, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
 import { validateSquadComposition } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { TripleCaptainIcon, BenchBoostIcon, WildcardIcon } from '../icons/ChipIcons';
@@ -23,7 +23,38 @@ export const PickTeamView: React.FC = () => {
     isDemoMode,
     currentGW,
     reorderBenchPlayer,
+    deadline,
   } = useFPL();
+
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  useEffect(() => {
+    if (!deadline) {
+      setTimeLeft('');
+      return;
+    }
+    const updateCountdown = () => {
+      const diff = new Date(deadline.deadlineTime).getTime() - Date.now();
+      if (diff <= 0) {
+        setTimeLeft('Locked');
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h`);
+      } else if (hours > 0) {
+        setTimeLeft(`${hours}h ${mins}m`);
+      } else {
+        const secs = Math.floor((diff / 1000) % 60);
+        setTimeLeft(`${mins}m ${secs}s`);
+      }
+    };
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [deadline]);
 
   const [activeSheetPlayerId, setActiveSheetPlayerId] = useState<string | null>(null);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -118,7 +149,7 @@ export const PickTeamView: React.FC = () => {
 
         {/* Monospace Quick Metrics Bar */}
         <div className="flex items-center justify-between flex-wrap gap-2 px-3 py-2 rounded-xl bg-slate-900/80 dark:bg-zinc-950/80 border border-white/10 backdrop-blur-xs">
-          <div className="flex items-center gap-3 sm:gap-4 text-xs font-mono">
+          <div className="flex items-center flex-wrap gap-2.5 sm:gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] uppercase font-bold text-slate-400">VAL</span>
               <span className="font-bold text-slate-100">£{teamValue.toFixed(1)}m</span>
@@ -133,6 +164,25 @@ export const PickTeamView: React.FC = () => {
               <span className="text-[10px] uppercase font-bold text-slate-400">FREE FT</span>
               <span className="font-bold text-cyan-400">{freeTransfersRemaining}</span>
             </div>
+            {deadline && (
+              <>
+                <div className="h-3 w-[1px] bg-white/15" />
+                <div
+                  className="flex items-center gap-1.5"
+                  title={`Deadline: ${new Date(deadline.deadlineTime).toLocaleString()}`}
+                >
+                  <span className="text-[10px] uppercase font-bold text-slate-400">DEADLINE</span>
+                  <span
+                    className={`font-bold flex items-center gap-1 ${
+                      isSquadLocked ? 'text-rose-400' : 'text-amber-400'
+                    }`}
+                  >
+                    <Clock className="w-3 h-3 text-amber-400/80" />
+                    <span>{isSquadLocked ? 'Locked' : timeLeft}</span>
+                  </span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Squad Status Toggle */}

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
-import { Sparkles, Wrench, Users, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Clock, Eye, Shield, BookOpen } from 'lucide-react';
+import { Sparkles, Wrench, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Eye, Shield, BookOpen } from 'lucide-react';
 
 interface TabItem {
   id: TabType;
@@ -32,42 +32,9 @@ export const TopHeader: React.FC = () => {
     currentManager,
     theme,
     toggleTheme,
-    deadline,
-    isSquadLocked,
     isDemoMode,
     exitDemoMode,
-    registeredManagersCount,
   } = useFPL();
-
-  const [timeLeft, setTimeLeft] = useState<string>('');
-
-  useEffect(() => {
-    if (!deadline) {
-      setTimeLeft('');
-      return;
-    }
-    const updateCountdown = () => {
-      const diff = new Date(deadline.deadlineTime).getTime() - Date.now();
-      if (diff <= 0) {
-        setTimeLeft('Locked');
-        return;
-      }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((diff / (1000 * 60)) % 60);
-      if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h`);
-      } else if (hours > 0) {
-        setTimeLeft(`${hours}h ${mins}m`);
-      } else {
-        const secs = Math.floor((diff / 1000) % 60);
-        setTimeLeft(`${mins}m ${secs}s`);
-      }
-    };
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-    return () => clearInterval(timer);
-  }, [deadline]);
 
   const userLeagueMember = leagues.flatMap((l) => l.members).find(
     (m) => m.id === currentManager?.id || m.id === 'user' || (authUser && m.id === authUser.id)
@@ -109,28 +76,6 @@ export const TopHeader: React.FC = () => {
               <h1 className="text-sm md:text-base font-black tracking-wider text-slate-900 dark:text-white uppercase font-display leading-tight">
                 KCL
               </h1>
-              {registeredManagersCount > 0 && (
-                <span
-                  className="text-[9px] sm:text-[10px] md:text-xs font-mono font-semibold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 border border-slate-200/60 dark:border-white/[0.06] flex items-center gap-1 shrink-0"
-                  title={`${registeredManagersCount} რეგისტრირებული მენეჯერი / Registered Managers`}
-                >
-                  <Users className="w-2.5 h-2.5 text-emerald-500/70 dark:text-emerald-400/70" />
-                  <span>{registeredManagersCount}</span>
-                </span>
-              )}
-              {deadline && (
-                <span
-                  className={`text-[9px] md:text-xs font-mono font-semibold px-1.5 py-0.5 rounded-md flex items-center gap-1 border ${
-                    isSquadLocked
-                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/25'
-                      : 'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/[0.08]'
-                  }`}
-                  title={`Deadline: ${new Date(deadline.deadlineTime).toLocaleString()}`}
-                >
-                  <Clock className="w-2.5 h-2.5 md:w-3 md:h-3 text-amber-400/80" />
-                  <span>{isSquadLocked ? 'Locked' : timeLeft}</span>
-                </span>
-              )}
             </div>
 
             <div className="flex items-center gap-1.5 mt-0.5">
