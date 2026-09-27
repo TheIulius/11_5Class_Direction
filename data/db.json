@@ -7351,17 +7351,6 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_10_1_chikovani",
-              "webName": "Chikovani",
-              "clubId": "SCH_10_1",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
             }
           ]
         },
@@ -7373,6 +7362,17 @@
           "gwPoints": 0,
           "rank": 40,
           "previousRank": 40,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790496725100",
+          "managerName": "Giorgi",
+          "teamName": "11/3",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 41,
+          "previousRank": 41,
           "activeChip": null,
           "lineup": []
         }
@@ -9649,16 +9649,9 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_10_1_chikovani",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
           }
         ],
-        "bank": 40.3,
+        "bank": 47,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -9689,6 +9682,26 @@
         }
       },
       "joinedAt": "2026-09-27T08:11:08.503Z"
+    },
+    "user_1790496725100": {
+      "id": "user_1790496725100",
+      "managerName": "Giorgi",
+      "teamName": "11/3",
+      "squad": {
+        "teamName": "11/3",
+        "managerName": "Giorgi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T08:12:05.102Z"
     }
   },
   "users": {
@@ -9767,7 +9780,7 @@
       "salt": "755995c2b72284c9737d3f08102ce4a2",
       "managerName": "Giorgi",
       "teamName": "Fc chilhura",
-      "token": "ee92147175750d7a0bdd123319eeb6ef130f954e7a5293dd3a31dffaa437b261",
+      "token": "704ab21337cde3c5d6088362de440372992885c9bdf75885533eb0344c6348e9",
       "createdAt": "2026-09-26T20:34:52.416Z",
       "role": "user",
       "isAdmin": false,
@@ -10241,6 +10254,20 @@
       "teamName": "Dankaras_Barcelona",
       "token": "08ef21dd3f401259fec7c67d5b51cee0132a8168b46c022a938163c172356e1e",
       "createdAt": "2026-09-27T08:11:08.503Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790496725100": {
+      "id": "user_1790496725100",
+      "username": "atuna",
+      "email": "gioatunashvili5@gmail.com",
+      "passwordHash": "b5003aced78d66ee5fa2cc4b5734e83eb56a4ac8efe6532b7e9f11aac4be7d88e413c068b4d9f817182ce0de247eb44a2bc31470476eabd20f50bdf2fe6afd0a",
+      "salt": "4b2354c89da9a86912db18420f09bc64",
+      "managerName": "Giorgi",
+      "teamName": "11/3",
+      "token": "f733d9d9be3d1bc468692ea7599a74a1e3d1a86ad300cfe15e30aacf2c750200",
+      "createdAt": "2026-09-27T08:12:05.102Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
