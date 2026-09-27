@@ -6827,8 +6827,8 @@
           "teamName": "Badri",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 28,
-          "previousRank": 28,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": []
         },
@@ -6838,8 +6838,8 @@
           "teamName": "Pansioni",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 29,
-          "previousRank": 29,
+          "rank": 27,
+          "previousRank": 27,
           "activeChip": null,
           "lineup": [
             {
@@ -6861,8 +6861,8 @@
           "teamName": "Chiyliyo",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 30,
-          "previousRank": 30,
+          "rank": 28,
+          "previousRank": 28,
           "activeChip": null,
           "lineup": []
         },
@@ -6872,8 +6872,8 @@
           "teamName": "Svbsv",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 31,
-          "previousRank": 31,
+          "rank": 29,
+          "previousRank": 29,
           "activeChip": null,
           "lineup": []
         },
@@ -6883,8 +6883,8 @@
           "teamName": "tsotne",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 32,
-          "previousRank": 32,
+          "rank": 30,
+          "previousRank": 30,
           "activeChip": null,
           "lineup": [
             {
@@ -6994,8 +6994,8 @@
           "teamName": "10/2",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 33,
-          "previousRank": 33,
+          "rank": 31,
+          "previousRank": 31,
           "activeChip": null,
           "lineup": []
         },
@@ -7005,8 +7005,8 @@
           "teamName": "Vortex",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 34,
-          "previousRank": 34,
+          "rank": 32,
+          "previousRank": 32,
           "activeChip": null,
           "lineup": [
             {
@@ -7083,8 +7083,8 @@
           "teamName": "DRM team",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 35,
-          "previousRank": 35,
+          "rank": 33,
+          "previousRank": 33,
           "activeChip": null,
           "lineup": []
         },
@@ -7094,8 +7094,8 @@
           "teamName": "FC badri",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 36,
-          "previousRank": 36,
+          "rank": 34,
+          "previousRank": 34,
           "activeChip": null,
           "lineup": []
         },
@@ -7105,8 +7105,8 @@
           "teamName": "9/5",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 37,
-          "previousRank": 37,
+          "rank": 35,
+          "previousRank": 35,
           "activeChip": null,
           "lineup": []
         },
@@ -7116,10 +7116,22 @@
           "teamName": "Zurias biwebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 38,
-          "previousRank": 38,
+          "rank": 36,
+          "previousRank": 36,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_zurashvili",
+              "webName": "Zurashvili",
+              "clubId": "SCH_11_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790493050486",
@@ -7127,8 +7139,8 @@
           "teamName": "Fc 9/5",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 39,
-          "previousRank": 39,
+          "rank": 37,
+          "previousRank": 37,
           "activeChip": null,
           "lineup": []
         },
@@ -7138,8 +7150,8 @@
           "teamName": "Zestafoni fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 40,
-          "previousRank": 40,
+          "rank": 38,
+          "previousRank": 38,
           "activeChip": null,
           "lineup": []
         }
@@ -9229,8 +9241,16 @@
       "squad": {
         "teamName": "Zurias biwebi",
         "managerName": "Erekle",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_zurashvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 50,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
