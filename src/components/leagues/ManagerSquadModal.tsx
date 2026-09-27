@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useFPL } from '../../context/FPLContext';
 import { fetchManagerSquadApi } from '../../services/api';
 import { Squad } from '../../types/fpl';
@@ -6,7 +7,7 @@ import { GameweekCalculationResult, calculateGameweekSquadPoints } from '../../e
 import { getFormationLayout } from '../../engine/formations';
 import { KitJersey } from '../pitch/KitJersey';
 import { CLUBS } from '../../data/clubs';
-import { ArrowLeft, Award, Activity, Sparkles, X, AlertCircle, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Award, Activity, Sparkles, X, AlertCircle, Loader2, ChevronLeft, ChevronRight, Lock, Users, ChevronDown } from 'lucide-react';
 
 interface ManagerSquadModalProps {
   managerId: string | null;
@@ -14,7 +15,7 @@ interface ManagerSquadModalProps {
 }
 
 export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId, onClose }) => {
-  const { players, currentGW } = useFPL();
+  const { players, currentGW, playerOwnership, isLineupsVisible, authUser } = useFPL();
   const [loading, setLoading] = useState(true);
   const [selectedGW, setSelectedGW] = useState<number>(currentGW);
   const [managerData, setManagerData] = useState<{
@@ -25,6 +26,8 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   } | null>(null);
   const [calcResult, setCalcResult] = useState<GameweekCalculationResult | null>(null);
   const [selectedPlayerForSheet, setSelectedPlayerForSheet] = useState<string | null>(null);
+  const [isLineupHidden, setIsLineupHidden] = useState<boolean>(false);
+  const [showOwnershipList, setShowOwnershipList] = useState<boolean>(false);
 
   useEffect(() => {
     setSelectedGW(currentGW);
@@ -33,10 +36,12 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   useEffect(() => {
     if (!managerId) return;
     setLoading(true);
+    setIsLineupHidden(false);
     fetchManagerSquadApi(managerId)
       .then((data) => {
         setManagerData(data.manager);
         setCalcResult(data.calculationResult);
+        setIsLineupHidden(Boolean(data.isLineupHidden));
       })
       .catch((err) => {
         console.error('Failed to load manager squad:', err);
@@ -48,7 +53,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
 
   // Recalculate if user selects a past Gameweek
   useEffect(() => {
-    if (managerData && selectedGW) {
+    if (managerData && !isLineupHidden && selectedGW && managerData.squad?.players?.length > 0) {
       const pastCalc = calculateGameweekSquadPoints(
         managerData.squad.players,
         players,
@@ -59,7 +64,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
       );
       setCalcResult(pastCalc);
     }
-  }, [selectedGW, managerData, players, currentGW]);
+  }, [selectedGW, managerData, players, currentGW, isLineupHidden]);
 
   if (!managerId) return null;
 
@@ -86,6 +91,8 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   const sheetStats = sheetPlayer ? sheetPlayer.gwStats[currentGW] : null;
   const sheetBreakdown = selectedPlayerForSheet && calcResult ? calcResult.playerPointsBreakdown[selectedPlayerForSheet] : null;
   const sheetSquadPlayer = squadPlayers.find((sp) => sp.playerId === selectedPlayerForSheet);
+  const ownership = selectedPlayerForSheet && playerOwnership ? playerOwnership[selectedPlayerForSheet] : null;
+  const ownershipPercent = ownership?.percent ?? (sheetPlayer?.selectedByPercent ?? 0);
 
   return (
     <div
@@ -133,6 +140,33 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
           <div className="flex-1 flex flex-col items-center justify-center space-y-3">
             <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
             <p className="text-xs text-slate-400 font-medium">Loading squad...</p>
+          </div>
+        ) : isLineupHidden ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
+            {managerData && (
+              <div className="p-4 w-full max-w-sm rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs mb-2">
+                <h3 className="text-base font-black text-slate-900 dark:text-white leading-tight">
+                  {managerData.teamName}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Manager: <strong className="text-slate-800 dark:text-slate-200">{managerData.managerName}</strong>
+                </p>
+              </div>
+            )}
+            <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-inner">
+              <Lock className="w-8 h-8" />
+            </div>
+            <div className="max-w-xs space-y-1.5">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                Lineup is Hidden
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                სასტარტო შემადგენლობა დედლაინის დასრულებამდე დაფარულია.
+              </p>
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                Opponent lineups become visible once the gameweek transfer deadline locks.
+              </p>
+            </div>
           </div>
         ) : managerData && calcResult ? (
           <div className="flex-1 overflow-y-auto overscroll-contain pb-8">
@@ -357,13 +391,16 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
         )}
 
         {/* Player Match Stats Popup Sheet */}
-        {sheetPlayer && (
+        {sheetPlayer && typeof document !== 'undefined' && createPortal(
           <div
-            className="fixed inset-0 z-60 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-xs animate-fade-in md:p-4"
-            onClick={() => setSelectedPlayerForSheet(null)}
+            className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/70 backdrop-blur-sm animate-fade-in p-0 md:p-4 select-none"
+            onClick={() => {
+              setSelectedPlayerForSheet(null);
+              setShowOwnershipList(false);
+            }}
           >
             <div
-              className="w-full max-w-[460px] md:max-w-md bg-white dark:bg-slate-900 rounded-t-3xl md:rounded-2xl border border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-2xl animate-slide-up select-none safe-bottom text-slate-900 dark:text-white"
+              className="w-full max-w-[460px] md:max-w-md bg-white dark:bg-slate-900 rounded-t-3xl md:rounded-3xl border border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-2xl animate-slide-up select-none safe-bottom text-slate-900 dark:text-white max-h-[85vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Drag handle (mobile only) */}
@@ -395,8 +432,11 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                 </div>
 
                 <button
-                  onClick={() => setSelectedPlayerForSheet(null)}
-                  className="p-1 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white bg-slate-100 dark:bg-slate-800"
+                  onClick={() => {
+                    setSelectedPlayerForSheet(null);
+                    setShowOwnershipList(false);
+                  }}
+                  className="p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-white bg-slate-100 dark:bg-slate-800"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -438,8 +478,63 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                   </div>
                 </div>
               </div>
+
+              {/* Ownership Breakdown */}
+              <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+                    <Users className="w-3.5 h-3.5 text-indigo-500" />
+                    <span>Manager Ownership</span>
+                  </div>
+                  <span className="text-xs font-black px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                    {ownershipPercent}% ({ownership?.count || 0} managers)
+                  </span>
+                </div>
+
+                {ownership && ownership.managers && ownership.managers.length > 0 && (
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80">
+                    <button
+                      type="button"
+                      onClick={() => setShowOwnershipList(!showOwnershipList)}
+                      className="w-full flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white py-1 transition-colors"
+                    >
+                      <span>View Managers ({ownership.managers.length})</span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showOwnershipList ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showOwnershipList && (
+                      <div className="mt-2 max-h-36 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-100 dark:divide-slate-800/50">
+                        {ownership.managers.map((m) => (
+                          <div
+                            key={m.id}
+                            className="flex items-center justify-between pt-1.5 text-xs"
+                          >
+                            <div className="truncate pr-2">
+                              <span className="font-bold text-slate-800 dark:text-slate-200 block truncate">{m.teamName}</span>
+                              <span className="text-[10px] text-slate-400 block truncate">{m.managerName}</span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {m.isCaptain && (
+                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-white shadow-xs">
+                                  (C)
+                                </span>
+                              )}
+                              {m.isViceCaptain && (
+                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-600 text-white">
+                                  (V)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     </div>

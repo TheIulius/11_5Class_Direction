@@ -8,7 +8,7 @@ export const AuthLandingView: React.FC = () => {
   const { loginUser, registerUser, paymentSettings, registeredManagersCount, availableManagers, leagues, isRulesModalOpen, setIsRulesModalOpen } = useFPL();
   const [tab, setTab] = useState<'login' | 'register'>('login');
 
-  const managersCount = registeredManagersCount || availableManagers?.length || (leagues?.find((l) => l.isGlobal)?.members?.length) || 0;
+  const managersCount = registeredManagersCount;
   const entryFee = paymentSettings?.entryFeeGEL || 3;
   const totalFundsRaisedGEL = managersCount * entryFee;
 
@@ -103,23 +103,18 @@ export const AuthLandingView: React.FC = () => {
       <div className="w-full max-w-md mx-auto space-y-5 relative z-10 my-auto py-6">
         {/* Tournament Brand Header */}
         <div className="text-center space-y-2.5">
-          <div className="flex items-center justify-center space-x-3">
+          <div className="flex items-center justify-center">
             <img
               src="/kcl-logo.png"
               alt="Komarovi Charity League"
-              className="w-16 h-16 rounded-2xl object-contain shadow-xl border border-white/10"
-            />
-            <img
-              src="/komarovi-logo.png"
-              alt="Komarovi School"
-              className="h-10 w-auto object-contain opacity-85"
+              className="w-20 h-20 rounded-2xl object-contain shadow-2xl border border-white/10"
             />
           </div>
           <div>
             <h1 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-white font-display">
               Komarovi <span className="text-emerald-400">Charity League</span>
             </h1>
-            <p className="text-xs text-slate-400 font-medium">Official School Fantasy Football Tournament</p>
+            <p className="text-xs text-slate-400 font-medium">Official KCL Charity Fantasy Football</p>
             <div className="pt-2 flex items-center justify-center">
               <button
                 type="button"

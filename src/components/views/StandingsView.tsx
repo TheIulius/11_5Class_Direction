@@ -74,7 +74,7 @@ export const StandingsView: React.FC = () => {
                 Standings
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Official School Leaderboard • {members.length} Managers
+                Official KCL Leaderboard • {members.length} Managers
               </p>
             </div>
           </div>

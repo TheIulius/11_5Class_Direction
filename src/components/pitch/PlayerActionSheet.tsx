@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from './KitJersey';
 import { CLUBS } from '../../data/clubs';
-import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity } from 'lucide-react';
+import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, ChevronDown } from 'lucide-react';
 
 interface PlayerActionSheetProps {
   playerId: string | null;
@@ -22,7 +22,10 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
     setTransferOutPlayerId,
     isSquadLocked,
     reorderBenchPlayer,
+    playerOwnership,
   } = useFPL();
+
+  const [showOwnershipList, setShowOwnershipList] = useState(false);
 
   if (!playerId) return null;
 
@@ -39,6 +42,9 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
   const stats = player.gwStats[currentGW];
   const breakdown = calculationResult.playerPointsBreakdown[playerId];
   const currentPts = breakdown ? breakdown.finalPoints : (stats ? player.gwPoints : 0);
+
+  const ownership = playerId && playerOwnership ? playerOwnership[playerId] : null;
+  const ownershipPercent = ownership?.percent ?? (player?.selectedByPercent ?? 0);
 
   const handleStartSwap = () => {
     if (isSquadLocked) return;
@@ -67,11 +73,11 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-black/60 backdrop-blur-xs animate-fade-in md:p-4 select-none"
+      className="fixed inset-0 z-[100] flex items-end md:items-center justify-center bg-black/60 backdrop-blur-xs animate-fade-in md:p-4 select-none"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[480px] md:max-w-md bg-white dark:bg-slate-900 rounded-t-3xl md:rounded-3xl border-t md:border border-x border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-2xl animate-slide-up text-slate-900 dark:text-white safe-bottom"
+        className="w-full max-w-[480px] md:max-w-md bg-white dark:bg-slate-900 rounded-t-3xl md:rounded-3xl border-t md:border border-x border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-2xl animate-slide-up text-slate-900 dark:text-white safe-bottom max-h-[88vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle (mobile only) */}
@@ -96,7 +102,7 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
               <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
                 <span>Cost: <strong className="text-slate-900 dark:text-white">£{player.cost.toFixed(1)}m</strong></span>
                 <span>•</span>
-                <span>Selected: <strong className="text-emerald-600 dark:text-emerald-400">{player.selectedByPercent}%</strong></span>
+                <span>Selected: <strong className="text-emerald-600 dark:text-emerald-400">{ownershipPercent}%</strong></span>
               </div>
             </div>
           </div>
@@ -128,6 +134,60 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
             <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">{currentPts}</span>
             <span className="text-[10px] text-slate-400 block -mt-1">PTS</span>
           </div>
+        </div>
+
+        {/* Ownership Section */}
+        <div className="my-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+              <Users className="w-3.5 h-3.5 text-indigo-500" />
+              <span>Manager Ownership</span>
+            </div>
+            <span className="text-xs font-black px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+              {ownershipPercent}% ({ownership?.count || 0} managers)
+            </span>
+          </div>
+
+          {ownership && ownership.managers && ownership.managers.length > 0 && (
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-800/80">
+              <button
+                type="button"
+                onClick={() => setShowOwnershipList(!showOwnershipList)}
+                className="w-full flex items-center justify-between text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white py-1 transition-colors"
+              >
+                <span>View Managers ({ownership.managers.length})</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${showOwnershipList ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showOwnershipList && (
+                <div className="mt-2 max-h-36 overflow-y-auto space-y-1.5 pr-1 divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {ownership.managers.map((m) => (
+                    <div
+                      key={m.id}
+                      className="flex items-center justify-between pt-1.5 text-xs"
+                    >
+                      <div className="truncate pr-2">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block truncate">{m.teamName}</span>
+                        <span className="text-[10px] text-slate-400 block truncate">{m.managerName}</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {m.isCaptain && (
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-white shadow-xs">
+                            (C)
+                          </span>
+                        )}
+                        {m.isViceCaptain && (
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-slate-600 text-white">
+                            (V)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Lock warning if locked */}

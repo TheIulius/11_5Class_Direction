@@ -142,3 +142,19 @@ export interface AuthUser {
   isAdmin?: boolean;
   isApproved?: boolean;
 }
+
+export type LineupVisibilityMode = 'auto' | 'always_show' | 'always_hide';
+
+export interface PlayerOwnershipManager {
+  id: string;
+  managerName: string;
+  teamName: string;
+  isCaptain?: boolean;
+  isViceCaptain?: boolean;
+}
+
+export interface PlayerOwnership {
+  percent: number;
+  count: number;
+  managers: PlayerOwnershipManager[];
+}

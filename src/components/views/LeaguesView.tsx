@@ -438,7 +438,7 @@ export const LeaguesView: React.FC = () => {
                       {globalLeague.name}
                     </span>
                     <span className="text-[10px] text-slate-400">
-                      Official School-Wide Standings ({globalLeague.members.length} managers)
+                      Official KCL Standings ({globalLeague.members.length} managers)
                     </span>
                   </div>
                 </div>

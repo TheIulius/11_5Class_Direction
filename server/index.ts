@@ -31,6 +31,18 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
+function isDeadlinePassed(data: any): boolean {
+  if (!data.deadline || !data.deadline.deadlineTime) return false;
+  return new Date() >= new Date(data.deadline.deadlineTime);
+}
+
+function isLineupsVisibleForPublic(data: any): boolean {
+  const mode = data.lineupVisibility || 'auto';
+  if (mode === 'always_show') return true;
+  if (mode === 'always_hide') return false;
+  return isDeadlinePassed(data);
+}
+
 // 2. Fetch Global State + Specific Manager Squad
 app.get('/api/state', (req: Request, res: Response) => {
   const data = db.getData();
@@ -65,11 +77,74 @@ app.get('/api/state', (req: Request, res: Response) => {
 
   recalculateAllManagersLeaguePoints(data);
 
-  const managersList = Object.values(data.managers).map((m) => ({
-    id: m.id,
-    managerName: m.managerName,
-    teamName: m.teamName,
-  }));
+  // 1. Approved managers filtering (Task 1)
+  const allUsersList = Object.values(data.users || {});
+  const approvedUsers = allUsersList.filter(
+    (u: any) => isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isApproved)
+  );
+  const approvedUserIds = new Set(approvedUsers.map((u: any) => u.id));
+
+  // Registered managers count: ONLY approved users (who paid and can play)
+  const registeredManagersCount = allUsersList.length > 0
+    ? approvedUsers.length
+    : Object.values(data.managers || {}).length;
+
+  const managersList = Object.values(data.managers).map((m) => {
+    const user = data.users?.[m.id];
+    return {
+      id: m.id,
+      managerName: m.managerName,
+      teamName: m.teamName,
+      isApproved: user ? (isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isApproved)) : false,
+      isAdmin: user ? (isUserAdmin(user.username) || user.role === 'admin') : false,
+    };
+  });
+
+  // 2. Dynamic Player Ownership Calculation (Task 2)
+  const eligibleManagers = Object.values(data.managers || {}).filter((m: any) => {
+    if (allUsersList.length > 0) {
+      return approvedUserIds.has(m.id);
+    }
+    return true;
+  });
+  const totalEligible = eligibleManagers.length || 1;
+
+  const playerOwnership: Record<string, {
+    percent: number;
+    count: number;
+    managers: Array<{ id: string; managerName: string; teamName: string; isCaptain?: boolean; isViceCaptain?: boolean }>;
+  }> = {};
+
+  eligibleManagers.forEach((m: any) => {
+    const squadPlayers = Array.isArray(m.squad?.players) ? m.squad.players : [];
+    squadPlayers.forEach((sp: any) => {
+      if (!playerOwnership[sp.playerId]) {
+        playerOwnership[sp.playerId] = { percent: 0, count: 0, managers: [] };
+      }
+      playerOwnership[sp.playerId].count += 1;
+      playerOwnership[sp.playerId].managers.push({
+        id: m.id,
+        managerName: m.managerName,
+        teamName: m.teamName,
+        isCaptain: Boolean(sp.isCaptain),
+        isViceCaptain: Boolean(sp.isViceCaptain),
+      });
+    });
+  });
+
+  Object.keys(data.players || {}).forEach((pid) => {
+    const info = playerOwnership[pid];
+    if (info) {
+      info.percent = Math.round((info.count / totalEligible) * 100);
+      data.players[pid].selectedByPercent = info.percent;
+    } else {
+      data.players[pid].selectedByPercent = 0;
+    }
+  });
+
+  // 3. Lineup Visibility & Deadline (Task 3)
+  const publicLineupsVisible = isLineupsVisibleForPublic(data);
+  const lineupVisibilityMode = data.lineupVisibility || 'auto';
 
   const queriedUser = managerId ? data.users?.[managerId] : null;
   const isApproved = queriedUser ? (isUserAdmin(queriedUser.username) || Boolean(queriedUser.isApproved)) : false;
@@ -81,9 +156,10 @@ app.get('/api/state', (req: Request, res: Response) => {
     fixtures: data.fixtures,
     leagues: data.leagues,
     managers: managersList,
-    registeredManagersCount:
-    Object.values(data.users || {}).filter((u: any) => isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isApproved)).length ||
-    managersList.length,
+    registeredManagersCount,
+    playerOwnership,
+    lineupVisibility: lineupVisibilityMode,
+    isLineupsVisible: publicLineupsVisible,
     activeManager: manager,
     currentUserApproved: isApproved,
     deadline: data.deadline || null,
@@ -129,6 +205,40 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Manager not found' });
   }
 
+  // Check if viewing other manager lineups is allowed
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const requestingUser = token ? Object.values(data.users || {}).find((u: any) => u.token === token) : null;
+  const isAdmin = requestingUser ? (isUserAdmin(requestingUser.username) || requestingUser.role === 'admin') : false;
+  const isSelf = requestingUser ? requestingUser.id === managerId : false;
+
+  const publicVisible = isLineupsVisibleForPublic(data);
+
+  if (!isAdmin && !isSelf && !publicVisible) {
+    return res.json({
+      success: true,
+      manager: {
+        id: manager.id,
+        managerName: manager.managerName,
+        teamName: manager.teamName,
+        squad: {
+          teamName: manager.squad.teamName,
+          managerName: manager.squad.managerName,
+          players: [],
+          bank: manager.squad.bank,
+          freeTransfers: manager.squad.freeTransfers,
+          transfersMadeThisGW: manager.squad.transfersMadeThisGW,
+          activeChip: null,
+          usedChips: manager.squad.usedChips,
+        },
+        joinedAt: manager.joinedAt,
+      },
+      calculationResult: null,
+      currentGW: data.currentGW,
+      isLineupHidden: true,
+    });
+  }
+
   const calc = calculateGameweekSquadPoints(
     manager.squad.players,
     data.players,
@@ -143,6 +253,7 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
     manager,
     calculationResult: calc,
     currentGW: data.currentGW,
+    isLineupHidden: false,
   });
 });
 
@@ -2291,6 +2402,24 @@ app.post('/api/admin/deadline/clear', (req: Request, res: Response) => {
   data.deadline = null;
   db.save();
   res.json({ success: true, deadline: null });
+});
+
+// Update lineup visibility mode (Task 3)
+app.post('/api/admin/lineup-visibility', (req: Request, res: Response) => {
+  const { mode } = req.body;
+  if (!['auto', 'always_show', 'always_hide'].includes(mode)) {
+    return res.status(400).json({ error: 'Invalid mode. Must be auto, always_show, or always_hide.' });
+  }
+
+  const data = db.getData();
+  data.lineupVisibility = mode;
+  db.save();
+
+  res.json({
+    success: true,
+    lineupVisibility: mode,
+    isLineupsVisible: isLineupsVisibleForPublic(data),
+  });
 });
 
 // --- Batch Match Events (for Match-Day Admin module) ---

@@ -58,7 +58,8 @@ export interface DatabaseSchema {
   paymentSettings?: PaymentSettings;
   activationCodes?: ActivationCode[];
   deletedUserIds?: string[];
-  deadline?: { gameweek: number; deadlineTime: string } | null; // <-- ADD THIS LINE
+  deadline?: { gameweek: number; deadlineTime: string } | null;
+  lineupVisibility?: 'auto' | 'always_show' | 'always_hide';
 }
 
 export function hashPassword(password: string, salt?: string): { hash: string; salt: string } {

@@ -11,6 +11,8 @@ import {
   Club,
   PaymentSettings,
   AuthUser,
+  PlayerOwnership,
+  LineupVisibilityMode,
 } from '../types/fpl';
 import { SEED_PLAYERS, DEFAULT_SQUAD_PLAYER_IDS } from '../data/seedPlayers';
 import { SEED_FIXTURES, SEED_LEAGUES } from '../data/seedFixtures';
@@ -125,6 +127,10 @@ interface FPLContextType {
   isDemoMode: boolean;
   enterDemoMode: () => void;
   exitDemoMode: () => void;
+  playerOwnership: Record<string, PlayerOwnership>;
+  lineupVisibility: LineupVisibilityMode;
+  isLineupsVisible: boolean;
+  setLineupVisibility: (mode: LineupVisibilityMode) => Promise<void>;
 }
 
 const STORAGE_KEY_AUTH_TOKEN = 'fpl_auth_token_v1';
@@ -371,6 +377,30 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, []);
 
+  // Lineup Visibility & Player Ownership (Task 2 & 3)
+  const [lineupVisibility, setLineupVisibilityState] = useState<LineupVisibilityMode>('auto');
+  const [isLineupsVisibleState, setIsLineupsVisible] = useState<boolean>(false);
+  const [playerOwnership, setPlayerOwnership] = useState<Record<string, PlayerOwnership>>({});
+  const [serverManagersCount, setServerManagersCount] = useState<number | null>(null);
+
+  const isLineupsVisible = useMemo(() => {
+    if (lineupVisibility === 'always_show') return true;
+    if (lineupVisibility === 'always_hide') return false;
+    return isSquadLocked;
+  }, [lineupVisibility, isSquadLocked]);
+
+  const setLineupVisibility = useCallback(async (mode: LineupVisibilityMode) => {
+    try {
+      const res = await api.adminSetLineupVisibilityApi(mode);
+      setLineupVisibilityState(mode);
+      if (res && res.isLineupsVisible !== undefined) {
+        setIsLineupsVisible(res.isLineupsVisible);
+      }
+    } catch (err) {
+      console.error('Failed to update lineup visibility:', err);
+    }
+  }, []);
+
   // Payment & Charity Links Settings
   const [paymentSettings, setPaymentSettings] = useState<PaymentSettings>({
     bogLink: 'https://egreve.bog.ge/KCL26_charity',
@@ -422,6 +452,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (data.managers) setAvailableManagers(data.managers);
         if (data.deadline !== undefined) setDeadlineState(data.deadline || null);
         if (data.paymentSettings) setPaymentSettings(data.paymentSettings);
+        if (data.playerOwnership) setPlayerOwnership(data.playerOwnership);
+        if (data.lineupVisibility) setLineupVisibilityState(data.lineupVisibility);
+        if (data.isLineupsVisible !== undefined) setIsLineupsVisible(Boolean(data.isLineupsVisible));
+        if (typeof data.registeredManagersCount === 'number') setServerManagersCount(data.registeredManagersCount);
 
         // ONLY adopt activeManager and its squad if it matches the current user's ID
         if (data.activeManager && authUser && data.activeManager.id === authUser.id) {
@@ -1630,12 +1664,14 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const registeredManagersCount = useMemo(() => {
-  const approved = availableManagers.filter(
-    (m: any) => Boolean(m.isApproved) || Boolean(m.isAdmin)
-  );
-
-  return approved.length || (leagues.find((l) => l.isGlobal)?.members?.length) || 0;
-}, [availableManagers, leagues]);
+    if (typeof serverManagersCount === 'number') {
+      return serverManagersCount;
+    }
+    const approved = availableManagers.filter(
+      (m: any) => Boolean(m.isApproved) || Boolean(m.isAdmin)
+    );
+    return approved.length;
+  }, [serverManagersCount, availableManagers]);
 
   return (
     <FPLContext.Provider
@@ -1715,6 +1751,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isDemoMode,
         enterDemoMode,
         exitDemoMode,
+        playerOwnership,
+        lineupVisibility,
+        isLineupsVisible,
+        setLineupVisibility,
       }}
     >
       {children}

@@ -50,6 +50,8 @@ import {
   UserCheck,
   UserX,
   UserPlus,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import {
   adminFetchUsersApi,
@@ -100,6 +102,9 @@ export const AdminPortal: React.FC = () => {
     setActiveTab,
     paymentSettings,
     updatePaymentSettings,
+    lineupVisibility,
+    isLineupsVisible,
+    setLineupVisibility,
   } = useFPL();
 
   const [pinInput, setPinInput] = useState('');
@@ -1044,6 +1049,97 @@ export const AdminPortal: React.FC = () => {
                     }
                   }}
                 />
+              </div>
+            </div>
+
+            {/* Lineup Visibility Control (Task 3) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900 border border-white/10 space-y-3">
+              <div className="flex items-center justify-between pb-3 border-b border-white/10 flex-wrap gap-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                    <Eye className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-sm text-white">Lineup Visibility for Other Managers</h3>
+                    <p className="text-[11px] text-zinc-400">Control when managers can view each other's squads and starting XIs</p>
+                  </div>
+                </div>
+
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+                  isLineupsVisible
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                }`}>
+                  Current Status: {isLineupsVisible ? 'Lineups Public' : 'Lineups Hidden'}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
+                {/* Auto Mode */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await setLineupVisibility('auto');
+                    showNotification('Lineup visibility set to Auto (Linked to Lock)');
+                  }}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    lineupVisibility === 'auto'
+                      ? 'bg-indigo-500/15 border-indigo-500/50 text-white shadow-sm ring-1 ring-indigo-500/30'
+                      : 'bg-zinc-950/60 border-white/5 text-zinc-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-xs text-white">Auto (Default)</span>
+                    {lineupVisibility === 'auto' && <Check className="w-3.5 h-3.5 text-indigo-400" />}
+                  </div>
+                  <p className="text-[10px] text-zinc-400 leading-tight">
+                    Hidden while transfers are open; automatically visible once lineups lock.
+                  </p>
+                </button>
+
+                {/* Always Show Mode */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await setLineupVisibility('always_show');
+                    showNotification('Lineup visibility set to Always Visible');
+                  }}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    lineupVisibility === 'always_show'
+                      ? 'bg-emerald-500/15 border-emerald-500/50 text-white shadow-sm ring-1 ring-emerald-500/30'
+                      : 'bg-zinc-950/60 border-white/5 text-zinc-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-xs text-white">Always Visible</span>
+                    {lineupVisibility === 'always_show' && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                  </div>
+                  <p className="text-[10px] text-zinc-400 leading-tight">
+                    Force Public: Managers can view other managers' lineups at any time.
+                  </p>
+                </button>
+
+                {/* Always Hide Mode */}
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await setLineupVisibility('always_hide');
+                    showNotification('Lineup visibility set to Always Hidden');
+                  }}
+                  className={`p-3 rounded-xl border text-left transition-all ${
+                    lineupVisibility === 'always_hide'
+                      ? 'bg-rose-500/15 border-rose-500/50 text-white shadow-sm ring-1 ring-rose-500/30'
+                      : 'bg-zinc-950/60 border-white/5 text-zinc-400 hover:text-white hover:bg-white/5'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-xs text-white">Always Hidden</span>
+                    {lineupVisibility === 'always_hide' && <Check className="w-3.5 h-3.5 text-rose-400" />}
+                  </div>
+                  <p className="text-[10px] text-zinc-400 leading-tight">
+                    Force Private: Lineups remain hidden from other managers even after kickoff.
+                  </p>
+                </button>
               </div>
             </div>
 

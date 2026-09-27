@@ -78,13 +78,17 @@ export async function adminLoginApi(password?: string) {
 
 export async function fetchAppState(managerId?: string) {
   const query = managerId ? `?managerId=${encodeURIComponent(managerId)}` : '';
-  const res = await fetch(`${API_BASE}/api/state${query}`);
+  const res = await fetch(`${API_BASE}/api/state${query}`, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch state');
   return res.json();
 }
 
 export async function fetchManagerSquadApi(managerId: string) {
-  const res = await fetch(`${API_BASE}/api/manager/${encodeURIComponent(managerId)}`);
+  const res = await fetch(`${API_BASE}/api/manager/${encodeURIComponent(managerId)}`, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) throw new Error('Failed to fetch manager squad');
   return res.json();
 }
@@ -511,6 +515,17 @@ export async function adminDeleteActivationCodeApi(code: string): Promise<{ succ
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || 'Failed to delete activation code');
+  return data;
+}
+
+export async function adminSetLineupVisibilityApi(mode: 'auto' | 'always_show' | 'always_hide'): Promise<{ success: boolean; lineupVisibility: string; isLineupsVisible: boolean }> {
+  const res = await fetch(`${API_BASE}/api/admin/lineup-visibility`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ mode }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to update lineup visibility');
   return data;
 }
 
