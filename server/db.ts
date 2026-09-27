@@ -304,10 +304,10 @@ class Database {
    * Overwrites the in-memory database with remote data.
    * Defaults triggerCallback to false so syncing does NOT trigger an auto-commit back to GitHub!
    */
-  public setData(newData: DatabaseSchema, triggerCallback: boolean = false): void {
+  public setData(newData: DatabaseSchema): void {
     this.data = newData;
     this.sanitize();
-    this.save(undefined, triggerCallback);
+    this.saveSilent();
   }
 
   public setOnSaveCallback(cb: (reason?: string) => void): void {
