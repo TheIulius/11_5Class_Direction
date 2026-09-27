@@ -6132,9 +6132,9 @@
               "points": 0
             },
             {
-              "playerId": "p_10_1_chikovani",
-              "webName": "Chikovani",
-              "clubId": "SCH_10_1",
+              "playerId": "p_9_2_getia",
+              "webName": "Getia",
+              "clubId": "SCH_9_2",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
@@ -6143,21 +6143,10 @@
               "points": 0
             },
             {
-              "playerId": "p_9_2_getia",
-              "webName": "Getia",
-              "clubId": "SCH_9_2",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_1_katamadze",
-              "webName": "E. Katamadze",
+              "playerId": "p_10_1_chikovani",
+              "webName": "Chikovani",
               "clubId": "SCH_10_1",
-              "position": "MID",
+              "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -8482,21 +8471,14 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_chikovani",
+            "playerId": "p_9_2_getia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
           },
           {
-            "playerId": "p_9_2_getia",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_10_1_katamadze",
+            "playerId": "p_10_1_chikovani",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
@@ -8510,7 +8492,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 20.5,
+        "bank": 28.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -9735,7 +9717,7 @@
       "salt": "f9e43eae5bee3190df1ecb0c1521613c",
       "managerName": "Giorgi",
       "teamName": "EliteXI",
-      "token": "b0c6d049de5731888f99170a6fec180bff44d465255dc0879e292154c89a1325",
+      "token": "ac9c78471fb4e5ab18422eaf45d5265719c9999e5959f679355394711f5a6d9c",
       "createdAt": "2026-09-26T20:50:08.606Z",
       "role": "user",
       "isAdmin": false,
@@ -9970,7 +9952,7 @@
       "salt": "4f5b8015c0de0116b43a826cca35ca6b",
       "managerName": "Levan",
       "teamName": "DRM team",
-      "token": "034f17ea5c677364c3d717639a34c42cfc290cbdc90348b0a72f2e4f28f0b36e",
+      "token": "c21ef3f51fc25354a26acb61b76ff78bbb02dd32622b70d5e22e8ac1f7950917",
       "createdAt": "2026-09-27T06:32:55.286Z",
       "role": "user",
       "isAdmin": false,
