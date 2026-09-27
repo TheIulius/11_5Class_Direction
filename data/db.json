@@ -6700,24 +6700,13 @@
           ]
         },
         {
-          "id": "user_1790457888966",
-          "managerName": "Vano",
-          "teamName": "zria",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 24,
-          "previousRank": 24,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790457927606",
           "managerName": "Luka",
           "teamName": "Shakara & CO",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 25,
-          "previousRank": 25,
+          "rank": 24,
+          "previousRank": 24,
           "activeChip": null,
           "lineup": [
             {
@@ -6827,8 +6816,8 @@
           "teamName": "Gvanira",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 26,
-          "previousRank": 26,
+          "rank": 25,
+          "previousRank": 25,
           "activeChip": null,
           "lineup": []
         },
@@ -6838,8 +6827,8 @@
           "teamName": "Bitsadze",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 27,
-          "previousRank": 27,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": []
         },
@@ -6849,8 +6838,8 @@
           "teamName": "Vortex",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 28,
-          "previousRank": 28,
+          "rank": 27,
+          "previousRank": 27,
           "activeChip": null,
           "lineup": []
         },
@@ -6860,8 +6849,8 @@
           "teamName": "Gand onianebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 29,
-          "previousRank": 29,
+          "rank": 28,
+          "previousRank": 28,
           "activeChip": null,
           "lineup": []
         },
@@ -6871,8 +6860,8 @@
           "teamName": "Lomebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 30,
-          "previousRank": 30,
+          "rank": 29,
+          "previousRank": 29,
           "activeChip": null,
           "lineup": []
         },
@@ -6882,8 +6871,8 @@
           "teamName": "Badri",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 31,
-          "previousRank": 31,
+          "rank": 30,
+          "previousRank": 30,
           "activeChip": null,
           "lineup": []
         },
@@ -6893,8 +6882,8 @@
           "teamName": "Pansioni",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 32,
-          "previousRank": 32,
+          "rank": 31,
+          "previousRank": 31,
           "activeChip": null,
           "lineup": [
             {
@@ -6916,8 +6905,8 @@
           "teamName": "Alphebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 33,
-          "previousRank": 33,
+          "rank": 32,
+          "previousRank": 32,
           "activeChip": null,
           "lineup": []
         },
@@ -6927,8 +6916,8 @@
           "teamName": "Chiyliyo",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 34,
-          "previousRank": 34,
+          "rank": 33,
+          "previousRank": 33,
           "activeChip": null,
           "lineup": []
         },
@@ -6938,8 +6927,8 @@
           "teamName": "Svbsv",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 35,
-          "previousRank": 35,
+          "rank": 34,
+          "previousRank": 34,
           "activeChip": null,
           "lineup": []
         },
@@ -6949,8 +6938,8 @@
           "teamName": "tsotne",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 36,
-          "previousRank": 36,
+          "rank": 35,
+          "previousRank": 35,
           "activeChip": null,
           "lineup": [
             {
@@ -7060,8 +7049,8 @@
           "teamName": "10/2",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 37,
-          "previousRank": 37,
+          "rank": 36,
+          "previousRank": 36,
           "activeChip": null,
           "lineup": []
         },
@@ -7071,8 +7060,8 @@
           "teamName": "Vortex",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 38,
-          "previousRank": 38,
+          "rank": 37,
+          "previousRank": 37,
           "activeChip": null,
           "lineup": [
             {
@@ -7149,8 +7138,8 @@
           "teamName": "DRM team",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 39,
-          "previousRank": 39,
+          "rank": 38,
+          "previousRank": 38,
           "activeChip": null,
           "lineup": []
         },
@@ -7160,8 +7149,8 @@
           "teamName": "FC badri",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 40,
-          "previousRank": 40,
+          "rank": 39,
+          "previousRank": 39,
           "activeChip": null,
           "lineup": []
         },
@@ -7171,8 +7160,8 @@
           "teamName": "9/5",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 41,
-          "previousRank": 41,
+          "rank": 40,
+          "previousRank": 40,
           "activeChip": null,
           "lineup": []
         },
@@ -7182,8 +7171,8 @@
           "teamName": "Zurias biwebi",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 42,
-          "previousRank": 42,
+          "rank": 41,
+          "previousRank": 41,
           "activeChip": null,
           "lineup": []
         },
@@ -7193,8 +7182,8 @@
           "teamName": "Fc 9/5",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 43,
-          "previousRank": 43,
+          "rank": 42,
+          "previousRank": 42,
           "activeChip": null,
           "lineup": []
         },
@@ -7204,8 +7193,8 @@
           "teamName": "Zestafoni fc",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 44,
-          "previousRank": 44,
+          "rank": 43,
+          "previousRank": 43,
           "activeChip": null,
           "lineup": []
         }
@@ -8869,26 +8858,6 @@
       },
       "joinedAt": "2026-09-26T21:24:47.366Z"
     },
-    "user_1790457888966": {
-      "id": "user_1790457888966",
-      "managerName": "Vano",
-      "teamName": "zria",
-      "squad": {
-        "teamName": "zria",
-        "managerName": "Vano",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        }
-      },
-      "joinedAt": "2026-09-26T21:24:48.967Z"
-    },
     "user_1790457927606": {
       "id": "user_1790457927606",
       "managerName": "Luka",
@@ -9788,20 +9757,6 @@
       "isAdmin": false,
       "isApproved": true
     },
-    "user_1790457888966": {
-      "id": "user_1790457888966",
-      "username": "niora",
-      "email": "vanoelizbarashvili290@gmail.com",
-      "passwordHash": "8e0efb0ecb6bac2cd5f0ced3f016237c0f5c47ce811af57df1fb559c7e62651bcbe001a637b373ab4a75e1598bdf87761342dc3d38fdab6ed31915852efb3670",
-      "salt": "bde7389e0eb066583aee81b09a00a4c1",
-      "managerName": "Vano",
-      "teamName": "zria",
-      "token": "e25a0907f44a4e288ed8323832d31269feceb8e4e7d08571ef410dbc47ef703a",
-      "createdAt": "2026-09-26T21:24:48.967Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
     "user_1790457927606": {
       "id": "user_1790457927606",
       "username": "shakara001",
@@ -10106,6 +10061,7 @@
     "user_1790456876038",
     "user_1790456561751",
     "user_1790455948490",
-    "user_1790455501478"
+    "user_1790455501478",
+    "user_1790457888966"
   ]
 }
