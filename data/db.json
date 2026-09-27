@@ -6132,9 +6132,9 @@
               "points": 0
             },
             {
-              "playerId": "p_10_1_chikovani",
-              "webName": "Chikovani",
-              "clubId": "SCH_10_1",
+              "playerId": "p_9_2_getia",
+              "webName": "Getia",
+              "clubId": "SCH_9_2",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
@@ -6143,10 +6143,21 @@
               "points": 0
             },
             {
-              "playerId": "p_9_2_getia",
-              "webName": "Getia",
-              "clubId": "SCH_9_2",
+              "playerId": "p_10_1_chikovani",
+              "webName": "Chikovani",
+              "clubId": "SCH_10_1",
               "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_6_chigladze",
+              "webName": "Chigladze",
+              "clubId": "SCH_9_6",
+              "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -6165,17 +6176,6 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790194618189",
-              "webName": "Tsiskara",
-              "clubId": "SCH_11_5",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_9_4_kuwashvili",
               "webName": "Kuwashvili",
               "clubId": "SCH_9_4",
@@ -6187,9 +6187,9 @@
               "points": 0
             },
             {
-              "playerId": "p_9_6_gugoadze",
-              "webName": "Gugoadze",
-              "clubId": "SCH_9_6",
+              "playerId": "p_custom_1790194618189",
+              "webName": "Tsiskara",
+              "clubId": "SCH_11_5",
               "position": "MID",
               "isStarter": false,
               "isCaptain": false,
@@ -7184,7 +7184,7 @@
           "gwPoints": 0,
           "rank": 36,
           "previousRank": 36,
-          "activeChip": null,
+          "activeChip": "triple_captain",
           "lineup": [
             {
               "playerId": "p_liparteliani",
@@ -7306,6 +7306,17 @@
           "gwPoints": 0,
           "rank": 38,
           "previousRank": 38,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790495813029",
+          "managerName": "Ilia Makharoblidze",
+          "teamName": "9_2",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 39,
+          "previousRank": 39,
           "activeChip": null,
           "lineup": []
         }
@@ -8504,14 +8515,21 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_chikovani",
+            "playerId": "p_9_2_getia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
           },
           {
-            "playerId": "p_9_2_getia",
+            "playerId": "p_10_1_chikovani",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_6_chigladze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
@@ -8525,13 +8543,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_custom_1790194618189",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_9_4_kuwashvili",
             "isStarter": true,
             "benchOrder": 0,
@@ -8539,14 +8550,14 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_6_gugoadze",
+            "playerId": "p_custom_1790194618189",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 11.2,
+        "bank": 9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -9505,7 +9516,7 @@
         "bank": 0.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
-        "activeChip": null,
+        "activeChip": "triple_captain",
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
@@ -9553,6 +9564,26 @@
         }
       },
       "joinedAt": "2026-09-27T07:13:54.745Z"
+    },
+    "user_1790495813029": {
+      "id": "user_1790495813029",
+      "managerName": "Ilia Makharoblidze",
+      "teamName": "9_2",
+      "squad": {
+        "teamName": "9_2",
+        "managerName": "Ilia Makharoblidze",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T07:56:53.030Z"
     }
   },
   "users": {
@@ -9566,8 +9597,7 @@
       "teamName": "giorgievski's tractati",
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
-      "isAdmin": true,
-      "token": "71559d50e12983f912ef5fe62390d540f8cb7d7026deaa0e5ea8cde30ae7702b"
+      "isAdmin": true
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
@@ -9772,7 +9802,7 @@
       "salt": "f9e43eae5bee3190df1ecb0c1521613c",
       "managerName": "Giorgi",
       "teamName": "EliteXI",
-      "token": "b0c6d049de5731888f99170a6fec180bff44d465255dc0879e292154c89a1325",
+      "token": "ac9c78471fb4e5ab18422eaf45d5265719c9999e5959f679355394711f5a6d9c",
       "createdAt": "2026-09-26T20:50:08.606Z",
       "role": "user",
       "isAdmin": false,
@@ -10007,7 +10037,7 @@
       "salt": "4f5b8015c0de0116b43a826cca35ca6b",
       "managerName": "Levan",
       "teamName": "DRM team",
-      "token": "034f17ea5c677364c3d717639a34c42cfc290cbdc90348b0a72f2e4f28f0b36e",
+      "token": "c21ef3f51fc25354a26acb61b76ff78bbb02dd32622b70d5e22e8ac1f7950917",
       "createdAt": "2026-09-27T06:32:55.286Z",
       "role": "user",
       "isAdmin": false,
@@ -10081,6 +10111,20 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
+    },
+    "user_1790495813029": {
+      "id": "user_1790495813029",
+      "username": "ilia makharoblidze",
+      "email": "makharoblidzeilia14@gmail.com",
+      "passwordHash": "805724d3f614a024a8d1aed267e70a9fedee2ac5b5e3218ea3caad79c4566c0e171348809e334f3acc1196a9ac3a501feb34869cf2be8867cdbb5c782853fae6",
+      "salt": "dbb581fe41bf69370aa7ebf58f4ffd40",
+      "managerName": "Ilia Makharoblidze",
+      "teamName": "9_2",
+      "token": "dcc948c0636be1bf2d0375ee0f1dc0654878f4d4e8a0faeb20734e78bf84e996",
+      "createdAt": "2026-09-27T07:56:53.030Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
     }
   },
   "deadline": {
