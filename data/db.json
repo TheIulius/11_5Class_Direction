@@ -10319,7 +10319,7 @@
       "createdAt": "2026-09-27T08:12:05.102Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": false
+      "isApproved": true
     },
     "user_1790496803713": {
       "id": "user_1790496803713",
