@@ -7040,6 +7040,17 @@
               "isViceCaptain": false,
               "benchOrder": 2,
               "points": 0
+            },
+            {
+              "playerId": "p_10_7_shekiladze",
+              "webName": "Shekiladze",
+              "clubId": "SCH_10_7",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
             }
           ]
         },
@@ -9222,9 +9233,16 @@
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_7_shekiladze",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 5.1,
+        "bank": 1.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -9431,8 +9449,7 @@
       "teamName": "giorgievski's tractati",
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
-      "isAdmin": true,
-      "token": "048689d057198344a5433143b9ba3610a197f03d3884f3e7b073f382fa0c5f09"
+      "isAdmin": true
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
