@@ -7418,7 +7418,19 @@
           "rank": 40,
           "previousRank": 40,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_custom_1790166332280",
+              "webName": "Futkara",
+              "clubId": "SCH_11_5",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790496725100",
@@ -9782,8 +9794,16 @@
       "squad": {
         "teamName": "Dankaras_Barcelona",
         "managerName": "Nikoloz Shengelia",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_custom_1790166332280",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 49,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
