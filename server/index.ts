@@ -81,7 +81,9 @@ app.get('/api/state', (req: Request, res: Response) => {
     fixtures: data.fixtures,
     leagues: data.leagues,
     managers: managersList,
-    registeredManagersCount: Object.keys(data.users || {}).length || managersList.length,
+    registeredManagersCount:
+    Object.values(data.users || {}).filter((u: any) => isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isApproved)).length ||
+    managersList.length,
     activeManager: manager,
     currentUserApproved: isApproved,
     deadline: data.deadline || null,
@@ -1628,9 +1630,7 @@ export async function commitDbToGitHub(message: string, explicitToken?: string) 
   }
 
   try {
-    const data = db.getData();
-
-    // 1. Fetch current file SHA & remote content to perform 2-way merge before committing
+    // 1. Fetch current file SHA from GitHub so we can update it without a conflict
     const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -1643,26 +1643,12 @@ export async function commitDbToGitHub(message: string, explicitToken?: string) 
     if (getRes.ok) {
       const getJson: any = await getRes.json();
       sha = getJson.sha;
-      if (getJson.content) {
-        try {
-          const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
-          const remoteData = JSON.parse(remoteRaw);
-          // In commitDbToGitHub, ensure remoteData takes priority during merge:
-          const changed = mergeDatabases(remoteData, data); // remoteData is base, local data applies on top
-          if (changed) {
-            db.setData(remoteData);
-          }
-        } catch (parseErr) {
-          console.warn('Failed to parse remote db.json during commit merge:', parseErr);
-        }
-      }
     }
 
-    // Re-serialize the merged local database
+    // 2. Commit the live in-memory database directly to GitHub
     const contentStr = JSON.stringify(db.getData(), null, 2);
     const base64Content = Buffer.from(contentStr, 'utf-8').toString('base64');
 
-    // 2. Commit file directly to GitHub repo with [skip ci] to avoid build loops
     const commitMsg = message.includes('[skip ci]') ? message : `${message} [skip ci]`;
     const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}`, {
       method: 'PUT',
@@ -1719,7 +1705,7 @@ app.get('/api/admin/db/sync-status', (req: Request, res: Response) => {
     hasServerToken: hasToken,
     owner: process.env.GITHUB_OWNER || 'TheIulius',
     repo: process.env.GITHUB_REPO || 'premier-league-fantasy',
-    branch: process.env.GITHUB_BRANCH || 'main',
+    branch: process.env.GITHUB_BRANCH || 'data',
   });
 });
 
@@ -2422,8 +2408,9 @@ app.use((req: Request, res: Response) => {
   res.sendFile(path.join(clientDist, 'index.html'));
 });
 
-app.listen(PORT, async () => {
-  console.log(`Premier League Fantasy server running on port ${PORT}`);
+// WITH THIS:
+async function startServer() {
+  console.log('[Startup] Syncing latest database from data branch before accepting traffic...');
   try {
     const syncRes = await syncDatabaseFromGitHub();
     if (syncRes.success) {
@@ -2432,7 +2419,13 @@ app.listen(PORT, async () => {
   } catch (e) {
     console.warn('[Startup] Initial GitHub database sync skipped or failed:', e);
   }
-});
+
+  app.listen(PORT, () => {
+    console.log(`Premier League Fantasy server running on port ${PORT}`);
+  });
+}
+
+startServer();
 
 // Periodic background sync from GitHub every 30 seconds to keep multi-container Render instances aligned
 setInterval(() => {
