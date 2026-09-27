@@ -6138,7 +6138,7 @@
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -6182,15 +6182,15 @@
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
             {
-              "playerId": "p_10_5_khachaturiani",
-              "webName": "Khachaturiani",
-              "clubId": "SCH_10_5",
-              "position": "MID",
+              "playerId": "p_10_6_qeldishvili",
+              "webName": "N. Qeldishvili",
+              "clubId": "SCH_10_6",
+              "position": "FWD",
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -6209,10 +6209,10 @@
               "points": 0
             },
             {
-              "playerId": "p_10_6_qeldishvili",
-              "webName": "N. Qeldishvili",
-              "clubId": "SCH_10_6",
-              "position": "FWD",
+              "playerId": "p_10_5_khachaturiani",
+              "webName": "Khachaturiani",
+              "clubId": "SCH_10_5",
+              "position": "MID",
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -8541,7 +8541,7 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_10_1_chikovani",
@@ -8569,10 +8569,10 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
-            "playerId": "p_10_5_khachaturiani",
+            "playerId": "p_10_6_qeldishvili",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
@@ -8586,7 +8586,7 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_6_qeldishvili",
+            "playerId": "p_10_5_khachaturiani",
             "isStarter": false,
             "benchOrder": 3,
             "isCaptain": false,
