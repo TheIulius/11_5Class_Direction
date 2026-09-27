@@ -7384,6 +7384,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_9_2_katamadze",
+              "webName": "Katamadze",
+              "clubId": "SCH_9_2",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         },
@@ -9714,9 +9725,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_2_katamadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 26.3,
+        "bank": 20.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
