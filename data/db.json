@@ -7180,10 +7180,10 @@
               "webName": "Kalandarishvili",
               "clubId": "SCH_11_3",
               "position": "FWD",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -7213,10 +7213,10 @@
               "webName": "Yarala",
               "clubId": "SCH_11_6",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 0,
               "points": 0
             }
           ]
@@ -9367,8 +9367,8 @@
           },
           {
             "playerId": "p_custom_1790192301338",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -9388,8 +9388,8 @@
           },
           {
             "playerId": "p_11_6_yarala",
-            "isStarter": false,
-            "benchOrder": 3,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
