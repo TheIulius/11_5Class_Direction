@@ -7353,6 +7353,17 @@
               "points": 0
             }
           ]
+        },
+        {
+          "id": "user_1790496668502",
+          "managerName": "Nikoloz Shengelia",
+          "teamName": "Dankaras_Barcelona",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 40,
+          "previousRank": 40,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -9640,6 +9651,26 @@
         }
       },
       "joinedAt": "2026-09-27T07:56:53.030Z"
+    },
+    "user_1790496668502": {
+      "id": "user_1790496668502",
+      "managerName": "Nikoloz Shengelia",
+      "teamName": "Dankaras_Barcelona",
+      "squad": {
+        "teamName": "Dankaras_Barcelona",
+        "managerName": "Nikoloz Shengelia",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T08:11:08.503Z"
     }
   },
   "users": {
@@ -10181,6 +10212,20 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": true
+    },
+    "user_1790496668502": {
+      "id": "user_1790496668502",
+      "username": "nikoloz shengelia",
+      "email": "shengelianikoloza7@gmail.com",
+      "passwordHash": "773c8873a059e7ed7c46f10661ac62bab9292168a926c4435e842850c5d9cc9358929fa9ebec66a11fe7900feb2c5b935dd6f8cdeeadec35594989bb56f14181",
+      "salt": "4aa1faf049e3e08d60a54ecf66cc9a55",
+      "managerName": "Nikoloz Shengelia",
+      "teamName": "Dankaras_Barcelona",
+      "token": "08ef21dd3f401259fec7c67d5b51cee0132a8168b46c022a938163c172356e1e",
+      "createdAt": "2026-09-27T08:11:08.503Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
     }
   },
   "deadline": {
