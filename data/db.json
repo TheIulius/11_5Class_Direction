@@ -5088,17 +5088,6 @@
               "points": 0
             },
             {
-              "playerId": "p_9_1_s__kordzadze",
-              "webName": "S. Kordzadze",
-              "clubId": "SCH_9_1",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_katamadze",
               "webName": "E. Katamadze",
               "clubId": "SCH_10_1",
@@ -7284,13 +7273,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_1_s__kordzadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_1_katamadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -7333,7 +7315,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0,
+        "bank": 4,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
