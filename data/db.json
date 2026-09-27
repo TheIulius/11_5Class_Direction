@@ -6998,17 +6998,6 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790166361242",
-              "webName": "Bejana",
-              "clubId": "SCH_11_5",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_custom_1790244156863",
               "webName": "Atunashvili",
               "clubId": "SCH_11_3",
@@ -7379,17 +7368,6 @@
               "webName": "Shakarishvili",
               "clubId": "SCH_10_5",
               "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_9_2_katamadze",
-              "webName": "Katamadze",
-              "clubId": "SCH_9_2",
-              "position": "MID",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -9362,13 +9340,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790166361242",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_custom_1790244156863",
             "isStarter": true,
             "benchOrder": 0,
@@ -9411,7 +9382,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 2.1,
+        "bank": 9.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
@@ -9725,16 +9696,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_9_2_katamadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 20.1,
+        "bank": 26.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -10369,7 +10333,7 @@
       "salt": "4b2354c89da9a86912db18420f09bc64",
       "managerName": "Giorgi",
       "teamName": "11/3",
-      "token": "b6a666fb398ba4ae15e98694d90a6e50275a34c86992f7a9f0f482dab5d163a8",
+      "token": "f733d9d9be3d1bc468692ea7599a74a1e3d1a86ad300cfe15e30aacf2c750200",
       "createdAt": "2026-09-27T08:12:05.102Z",
       "role": "user",
       "isAdmin": false,
