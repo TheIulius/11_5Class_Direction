@@ -68,7 +68,10 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
 
   if (!managerId) return null;
 
-  const squadPlayers = managerData?.squad.players || [];
+  const isSelf = Boolean(authUser?.id && managerId === authUser.id);
+  const shouldHideLineup = (!isSelf && !isLineupsVisible) || isLineupHidden;
+
+  const squadPlayers = shouldHideLineup ? [] : (managerData?.squad.players || []);
   const layout = getFormationLayout(squadPlayers, players);
 
   // Top performer
@@ -141,7 +144,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
             <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
             <p className="text-xs text-slate-400 font-medium">Loading squad...</p>
           </div>
-        ) : isLineupHidden ? (
+        ) : shouldHideLineup ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
             {managerData && (
               <div className="p-4 w-full max-w-sm rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs mb-2">

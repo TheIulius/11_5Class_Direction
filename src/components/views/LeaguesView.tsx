@@ -15,12 +15,13 @@ import {
   Users,
   Eye,
   Sparkles,
+  Lock,
 } from 'lucide-react';
 import { ManagerSquadModal } from '../leagues/ManagerSquadModal';
 import { KitJersey } from '../pitch/KitJersey';
 
 export const LeaguesView: React.FC = () => {
-  const { leagues, createLeague, joinLeague, deleteLeague, currentManager, authUser, currentGW } = useFPL();
+  const { leagues, createLeague, joinLeague, deleteLeague, currentManager, authUser, currentGW, isLineupsVisible } = useFPL();
 
   const globalLeague = leagues.find((l) => l.isGlobal) || leagues[0];
   const privateLeagues = leagues.filter((l) => !l.isGlobal);
@@ -153,7 +154,8 @@ export const LeaguesView: React.FC = () => {
                 const prevRank = member.previousRank || rank;
                 const rankDiff = prevRank - rank;
                 const isCurrentUser = member.id === currentUserId;
-                const lineup: any[] = Array.isArray(member.lineup) ? member.lineup : [];
+                const canViewLineup = isCurrentUser || isLineupsVisible;
+                const lineup: any[] = canViewLineup && Array.isArray(member.lineup) ? member.lineup : [];
                 const starters = lineup.filter((p) => p.isStarter);
                 const bench = lineup.filter((p) => !p.isStarter);
 
@@ -296,6 +298,13 @@ export const LeaguesView: React.FC = () => {
                             </div>
                           ))}
                         </div>
+                      </div>
+                    ) : !canViewLineup ? (
+                      <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-white/[0.05] flex items-center justify-between text-[11px] text-slate-400">
+                        <span className="flex items-center gap-1.5 font-medium text-slate-400">
+                          <Lock className="w-3.5 h-3.5 text-amber-500/80" />
+                          <span>Lineup is hidden until kickoff deadline</span>
+                        </span>
                       </div>
                     ) : (
                       <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-white/[0.05] flex items-center justify-between text-[11px] text-slate-400">

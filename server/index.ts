@@ -149,12 +149,22 @@ app.get('/api/state', (req: Request, res: Response) => {
   const queriedUser = managerId ? data.users?.[managerId] : null;
   const isApproved = queriedUser ? (isUserAdmin(queriedUser.username) || Boolean(queriedUser.isApproved)) : false;
 
+  const sanitizedLeagues = publicLineupsVisible
+    ? data.leagues
+    : (data.leagues || []).map((l: any) => ({
+        ...l,
+        members: (l.members || []).map((m: any) => ({
+          ...m,
+          lineup: m.id === managerId ? m.lineup : [],
+        })),
+      }));
+
   res.json({
     currentGW: data.currentGW,
     players: data.players,
     clubs: data.clubs || CLUBS,
     fixtures: data.fixtures,
-    leagues: data.leagues,
+    leagues: sanitizedLeagues,
     managers: managersList,
     registeredManagersCount,
     playerOwnership,
@@ -214,7 +224,7 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
 
   const publicVisible = isLineupsVisibleForPublic(data);
 
-  if (!isAdmin && !isSelf && !publicVisible) {
+  if (!isSelf && !publicVisible) {
     return res.json({
       success: true,
       manager: {
