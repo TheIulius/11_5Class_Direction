@@ -6154,17 +6154,6 @@
               "points": 0
             },
             {
-              "playerId": "p_9_6_chigladze",
-              "webName": "Chigladze",
-              "clubId": "SCH_9_6",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_custom_1790166332280",
               "webName": "Futkara",
               "clubId": "SCH_11_5",
@@ -8529,13 +8518,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_6_chigladze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_custom_1790166332280",
             "isStarter": true,
             "benchOrder": 0,
@@ -8557,7 +8539,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 9,
+        "bank": 16.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
