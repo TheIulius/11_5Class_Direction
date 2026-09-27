@@ -7119,7 +7119,30 @@
           "rank": 36,
           "previousRank": 36,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_zurashvili",
+              "webName": "Zurashvili",
+              "clubId": "SCH_11_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_6_abuladze",
+              "webName": "Abuladze",
+              "clubId": "SCH_11_6",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         },
         {
           "id": "user_1790493050486",
@@ -9236,9 +9259,16 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_6_abuladze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 50,
+        "bank": 43.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
