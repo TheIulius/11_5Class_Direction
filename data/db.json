@@ -7375,17 +7375,6 @@
               "points": 0
             },
             {
-              "playerId": "p_9_4_keldishvili",
-              "webName": "Keldishvili",
-              "clubId": "SCH_9_4",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_9_2_kakushadze",
               "webName": "Kakushadze",
               "clubId": "SCH_9_2",
@@ -9787,13 +9776,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_4_keldishvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_9_2_kakushadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -9815,7 +9797,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 9.3,
+        "bank": 17.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
