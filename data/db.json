@@ -7109,6 +7109,17 @@
           "previousRank": 40,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790491638320",
+          "managerName": "Giorgi",
+          "teamName": "9/5",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 41,
+          "previousRank": 41,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -9253,6 +9264,26 @@
         }
       },
       "joinedAt": "2026-09-27T06:46:08.898Z"
+    },
+    "user_1790491638320": {
+      "id": "user_1790491638320",
+      "managerName": "Giorgi",
+      "teamName": "9/5",
+      "squad": {
+        "teamName": "9/5",
+        "managerName": "Giorgi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T06:47:18.323Z"
     }
   },
   "users": {
@@ -9807,6 +9838,20 @@
       "teamName": "FC badri",
       "token": "892c717cf695942ddac1735471ad006f105afcde3aa7c325ada73e55073ea8bc",
       "createdAt": "2026-09-27T06:46:08.898Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790491638320": {
+      "id": "user_1790491638320",
+      "username": "asatiani",
+      "email": "asatianigiorgi77@gmail.com",
+      "passwordHash": "de5a11745a463843a70f064ba3557c2b63b815d3895729d950de26e728ed9f480a8bbec716825b97b6cd19daa08080e649226fd9f5e1def6e44396c3fd61866b",
+      "salt": "566f88ccdd0cc6b02d4bb74821b75ff2",
+      "managerName": "Giorgi",
+      "teamName": "9/5",
+      "token": "77963f21ee855821477d83bff630f759cb6b1a87598369b852dee273d0e9600e",
+      "createdAt": "2026-09-27T06:47:18.323Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
