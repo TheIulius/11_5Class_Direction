@@ -6929,6 +6929,17 @@
               "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_2_gogitidze",
+              "webName": "Gogitidze",
+              "clubId": "SCH_10_2",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ]
         }
@@ -8922,9 +8933,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
+          },
+          {
+            "playerId": "p_10_2_gogitidze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 41.8,
+        "bank": 34.4,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
