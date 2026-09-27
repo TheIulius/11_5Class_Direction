@@ -9894,7 +9894,7 @@
       "createdAt": "2026-09-27T06:46:08.898Z",
       "role": "user",
       "isAdmin": false,
-      "isApproved": false
+      "isApproved": true
     },
     "user_1790491638320": {
       "id": "user_1790491638320",
@@ -9904,6 +9904,7 @@
       "salt": "566f88ccdd0cc6b02d4bb74821b75ff2",
       "managerName": "Giorgi",
       "teamName": "9/5",
+      "token": "c4ab3e0127f4f6769afb11dbdf4b57b3d839fc936361747405a8386e524a4a7e",
       "createdAt": "2026-09-27T06:47:18.323Z",
       "role": "user",
       "isAdmin": false,
