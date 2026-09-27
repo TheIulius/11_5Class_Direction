@@ -6875,6 +6875,17 @@
           "previousRank": 34,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790483835161",
+          "managerName": "Fsgsg",
+          "teamName": "Svbsv",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 35,
+          "previousRank": 35,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8791,6 +8802,26 @@
         }
       },
       "joinedAt": "2026-09-26T23:38:28.991Z"
+    },
+    "user_1790483835161": {
+      "id": "user_1790483835161",
+      "managerName": "Fsgsg",
+      "teamName": "Svbsv",
+      "squad": {
+        "teamName": "Svbsv",
+        "managerName": "Fsgsg",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T04:37:15.162Z"
     }
   },
   "users": {
@@ -9262,6 +9293,20 @@
       "teamName": "Chiyliyo",
       "token": "94d129b29feb53c54a3b19691a2cf2ee8c5d8332705e0f93383dfae2ff3d77f8",
       "createdAt": "2026-09-26T23:38:28.991Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790483835161": {
+      "id": "user_1790483835161",
+      "username": "fghh",
+      "email": "fghh@fantasy.pl",
+      "passwordHash": "a8e6efcbf555b32e8b64740fd8f67cd42dbb5f724f8e620088478c9b2cabc27e03adb0915b47623796dd74ca957dc837fa7fe749468e1bb27da10863a5e4cc7d",
+      "salt": "c7003d093ba623586d1d02d6a17fe613",
+      "managerName": "Fsgsg",
+      "teamName": "Svbsv",
+      "token": "efdcc92f25965c81bc5070a4efa311a1206eedd7bb59dfc52b3e5ea0db3cd087",
+      "createdAt": "2026-09-27T04:37:15.162Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
