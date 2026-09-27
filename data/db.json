@@ -7401,10 +7401,10 @@
               "webName": "Vardiashvili",
               "clubId": "SCH_9_4",
               "position": "MID",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -7412,10 +7412,10 @@
               "webName": "Chigladze",
               "clubId": "SCH_9_6",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -9824,15 +9824,15 @@
           },
           {
             "playerId": "p_9_4_vardiashvili",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_9_6_chigladze",
-            "isStarter": false,
-            "benchOrder": 2,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
