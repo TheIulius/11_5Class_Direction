@@ -4636,10 +4636,10 @@
               "webName": "Laliashvili",
               "clubId": "SCH_9_2",
               "position": "MID",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -4691,10 +4691,10 @@
               "webName": "Chaga",
               "clubId": "SCH_11_5",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 0,
               "points": 0
             }
           ]
@@ -6990,8 +6990,8 @@
           },
           {
             "playerId": "p_9_2_laliashvili",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -7025,8 +7025,8 @@
           },
           {
             "playerId": "p_chaga",
-            "isStarter": false,
-            "benchOrder": 3,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
