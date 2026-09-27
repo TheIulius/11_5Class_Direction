@@ -7386,9 +7386,9 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790279796584",
-              "webName": "Kila",
-              "clubId": "SCH_11_4",
+              "playerId": "p_9_2_kakushadze",
+              "webName": "Kakushadze",
+              "clubId": "SCH_9_2",
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
@@ -7428,6 +7428,17 @@
           "gwPoints": 0,
           "rank": 42,
           "previousRank": 42,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790497733098",
+          "managerName": "Alex",
+          "teamName": "Palela fc",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 43,
+          "previousRank": 43,
           "activeChip": null,
           "lineup": []
         }
@@ -9727,14 +9738,14 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_custom_1790279796584",
+            "playerId": "p_9_2_kakushadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 17.3,
+        "bank": 22.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -9805,6 +9816,26 @@
         }
       },
       "joinedAt": "2026-09-27T08:13:23.807Z"
+    },
+    "user_1790497733098": {
+      "id": "user_1790497733098",
+      "managerName": "Alex",
+      "teamName": "Palela fc",
+      "squad": {
+        "teamName": "Palela fc",
+        "managerName": "Alex",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T08:28:53.100Z"
     }
   },
   "users": {
@@ -10385,6 +10416,20 @@
       "teamName": "Fc mereba",
       "token": "012128d4752cf7f3f1ce98d09c8af90ca6437429ec88eecf57c7684b7c113f4b",
       "createdAt": "2026-09-27T08:13:23.807Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790497733098": {
+      "id": "user_1790497733098",
+      "username": "palela",
+      "email": "alexandre26062009@gmail.com",
+      "passwordHash": "17830da65900ceb37152209fff78499dda0bb685d94eba4e46975ffe87431d0d8f12ccd0d29703c4e0de4147dbb54edcb9b49542d3023e6dc33258c51ea207b4",
+      "salt": "b551f06c96a3041f18bb478df8ae3397",
+      "managerName": "Alex",
+      "teamName": "Palela fc",
+      "token": "87728dfaa107453c887409160ba69366453329670aae6d10c524b3c8ec25a137",
+      "createdAt": "2026-09-27T08:28:53.100Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
