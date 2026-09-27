@@ -6118,7 +6118,7 @@
           "gwPoints": 0,
           "rank": 16,
           "previousRank": 16,
-          "activeChip": "triple_captain",
+          "activeChip": null,
           "lineup": [
             {
               "playerId": "p_9_2_makharoblidze",
@@ -8578,7 +8578,7 @@
         "bank": 5.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
-        "activeChip": "triple_captain",
+        "activeChip": null,
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
