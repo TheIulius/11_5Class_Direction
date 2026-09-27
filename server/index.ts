@@ -1569,45 +1569,50 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
 }
 
 export async function syncDatabaseFromGitHub(explicitToken?: string): Promise<{ success: boolean; changed: boolean; error?: string }> {
-  const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN;
-  const owner = process.env.GITHUB_OWNER || 'TheIulius';
-  const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
-  const branch = process.env.GITHUB_BRANCH || 'main';
-  const filePath = 'data/db.json';
-
-  if (!token) {
-    return { success: false, changed: false, error: 'No GitHub token configured' };
-  }
-
+  db.isSyncing = true;
   try {
-    const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'Premier-League-Fantasy-App',
-      },
-    });
-
-    if (!getRes.ok) {
-      return { success: false, changed: false, error: `GitHub fetch returned ${getRes.status}` };
+    const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN;
+    const owner = process.env.GITHUB_OWNER || 'TheIulius';
+    const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
+    const branch = process.env.GITHUB_BRANCH || 'data';
+    const filePath = 'data/db.json';
+  
+    if (!token) {
+      return { success: false, changed: false, error: 'No GitHub token configured' };
     }
-
-    const getJson: any = await getRes.json();
-    if (!getJson.content) {
-      return { success: false, changed: false, error: 'No content in response' };
+  
+    try {
+      const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'Premier-League-Fantasy-App',
+        },
+      });
+  
+      if (!getRes.ok) {
+        return { success: false, changed: false, error: `GitHub fetch returned ${getRes.status}` };
+      }
+  
+      const getJson: any = await getRes.json();
+      if (!getJson.content) {
+        return { success: false, changed: false, error: 'No content in response' };
+      }
+  
+      const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
+      const remoteData = JSON.parse(remoteRaw);
+  
+      // Overwrite local memory and disk directly with the fresh remote database
+      db.setData(remoteData);
+      console.log('[GitHub Sync] Remote database loaded into memory.');
+  
+      return { success: true, changed: true };
+    } catch (err: any) {
+      console.warn('[GitHub Sync] Error syncing from GitHub:', err?.message || err);
+      return { success: false, changed: false, error: err?.message };
     }
-
-    const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
-    const remoteData = JSON.parse(remoteRaw);
-
-    // Overwrite local memory and disk directly with the fresh remote database
-    db.setData(remoteData);
-    console.log('[GitHub Sync] Remote database loaded into memory.');
-
-    return { success: true, changed: true };
-  } catch (err: any) {
-    console.warn('[GitHub Sync] Error syncing from GitHub:', err?.message || err);
-    return { success: false, changed: false, error: err?.message };
+  } finally {
+    db.isSyncing = false;
   }
 }
 
@@ -1615,7 +1620,7 @@ export async function commitDbToGitHub(message: string, explicitToken?: string) 
   const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN;
   const owner = process.env.GITHUB_OWNER || 'TheIulius';
   const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
-  const branch = process.env.GITHUB_BRANCH || 'main';
+  const branch = process.env.GITHUB_BRANCH || 'data';
   const filePath = 'data/db.json';
 
   if (!token) {
@@ -1654,7 +1659,7 @@ export async function commitDbToGitHub(message: string, explicitToken?: string) 
     }
 
     // Re-serialize the merged local database
-    const contentStr = JSON.stringify(data, null, 2);
+    const contentStr = JSON.stringify(db.getData(), null, 2);
     const base64Content = Buffer.from(contentStr, 'utf-8').toString('base64');
 
     // 2. Commit file directly to GitHub repo with [skip ci] to avoid build loops
