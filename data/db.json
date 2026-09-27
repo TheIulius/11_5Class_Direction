@@ -6886,6 +6886,17 @@
           "previousRank": 35,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790485461233",
+          "managerName": "tsotne",
+          "teamName": "tsotne",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 36,
+          "previousRank": 36,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8822,6 +8833,26 @@
         }
       },
       "joinedAt": "2026-09-27T04:37:15.162Z"
+    },
+    "user_1790485461233": {
+      "id": "user_1790485461233",
+      "managerName": "tsotne",
+      "teamName": "tsotne",
+      "squad": {
+        "teamName": "tsotne",
+        "managerName": "tsotne",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T05:04:21.234Z"
     }
   },
   "users": {
@@ -9306,6 +9337,20 @@
       "managerName": "Fsgsg",
       "teamName": "Svbsv",
       "createdAt": "2026-09-27T04:37:15.162Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790485461233": {
+      "id": "user_1790485461233",
+      "username": "tsotne",
+      "email": "tsiskaradzetsotne@gmail.com",
+      "passwordHash": "b34134ae25e9ac99c8bff3ae375b9eb0906589871a8ab431447e2e7ff6ce865e069e6e276c99063879e87181a0f1ff64efdcb64d898e89954f00b10189b6d887",
+      "salt": "8221a4bf0089bcf810a495654558163c",
+      "managerName": "tsotne",
+      "teamName": "tsotne",
+      "token": "d530c156d077fb44207c3ed1a7154f49f793ece5b04a95ddc8eb6b9afbb1cd7f",
+      "createdAt": "2026-09-27T05:04:21.234Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
