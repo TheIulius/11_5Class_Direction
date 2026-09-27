@@ -5119,17 +5119,6 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_9_3_tvauri",
-              "webName": "Tvauri",
-              "clubId": "SCH_9_3",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
             }
           ]
         },
@@ -7270,16 +7259,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_9_3_tvauri",
-            "isStarter": false,
-            "benchOrder": 1,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 13.6,
+        "bank": 17.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
