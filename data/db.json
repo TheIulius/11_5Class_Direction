@@ -7159,7 +7159,7 @@
               "clubId": "SCH_11_1",
               "position": "DEF",
               "isStarter": true,
-              "isCaptain": true,
+              "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -7236,7 +7236,7 @@
               "clubId": "SCH_11_6",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": false,
+              "isCaptain": true,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -9377,7 +9377,7 @@
             "playerId": "p_zurashvili",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": true,
+            "isCaptain": false,
             "isViceCaptain": false
           },
           {
@@ -9426,7 +9426,7 @@
             "playerId": "p_11_6_yarala",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
+            "isCaptain": true,
             "isViceCaptain": false
           }
         ],
