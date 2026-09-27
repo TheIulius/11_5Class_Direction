@@ -1,9 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { fileURLToPath } from 'node:url';
 import { Player, Fixture, League, Squad, Club } from '../src/types/fpl';
-import { SEED_PLAYERS, DEFAULT_SQUAD_PLAYER_IDS } from '../src/data/seedPlayers';
+import { SEED_PLAYERS } from '../src/data/seedPlayers';
 import { SEED_FIXTURES, SEED_LEAGUES } from '../src/data/seedFixtures';
 import { CLUBS } from '../src/data/clubs';
 
@@ -55,7 +54,7 @@ export interface DatabaseSchema {
   fixtures: Fixture[];
   leagues: League[];
   managers: Record<string, ManagerProfile>;
-  users: Record<string, UserAccount>; // Keyed by user ID
+  users: Record<string, UserAccount>;
   paymentSettings?: PaymentSettings;
   activationCodes?: ActivationCode[];
   deletedUserIds?: string[];
@@ -94,6 +93,7 @@ function getDefaultData(): DatabaseSchema {
     teamName: 'Apex XI',
     token: 'token_apex_demo',
     createdAt: new Date().toISOString(),
+    isApproved: true,
   };
 
   const defaultManager: ManagerProfile = {
@@ -141,6 +141,8 @@ function getDefaultData(): DatabaseSchema {
 
 class Database {
   private data: DatabaseSchema;
+  private onSaveCallback?: (reason?: string) => void;
+  public isSyncing: boolean = false; // Safety lock to prevent auto-commits during startup/sync
 
   constructor() {
     if (!fs.existsSync(DATA_DIR)) {
@@ -151,146 +153,162 @@ class Database {
       try {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         this.data = JSON.parse(raw);
-        if (!this.data.users) {
-          this.data.users = {};
-        }
-        if (!this.data.paymentSettings) {
-          this.data.paymentSettings = {
-            bogLink: 'https://egreve.bog.ge/KCL26_charity',
-            tbcLink: '',
-            entryFeeGEL: 3,
-            requireActivationCode: false,
-          };
-        } else if (!this.data.paymentSettings.bogLink) {
-          this.data.paymentSettings.bogLink = 'https://egreve.bog.ge/KCL26_charity';
-        }
-        if (!Array.isArray(this.data.activationCodes)) {
-          this.data.activationCodes = [];
-        }
-        // Grant permanent moderator / admin privileges to designated accounts
-        Object.values(this.data.users).forEach((u) => {
-          const lower = u.username.toLowerCase();
-          if (lower === 'theiulius' || lower === 'chaga') {
-            u.role = 'admin';
-            u.isAdmin = true;
-          }
-        });
-        if (
-          !this.data.clubs ||
-          Object.keys(this.data.clubs).some((k) => k === 'ARS' || k === 'CHE' || k === 'WOL' || k === 'SCH_10' || k === 'SCH_TCH') ||
-          !('SCH_9_1' in this.data.clubs)
-        ) {
-          this.data.clubs = { ...CLUBS };
-          this.save();
-        }
-        // Cleanse any legacy Premier League fixtures or random teacher/10th grade fixtures
-        const legacyClubCodes = new Set(['ARS', 'AVL', 'BOU', 'BRE', 'BHA', 'CHE', 'CRY', 'EVE', 'FUL', 'IPS', 'LEI', 'LIV', 'MCI', 'MUN', 'NEW', 'NFO', 'SOU', 'TOT', 'WHU', 'WOL', 'SCH_10', 'SCH_12', 'SCH_TCH']);
-        const hasLegacyFixtures = Array.isArray(this.data.fixtures) && this.data.fixtures.some((f) => legacyClubCodes.has(f.homeClubId) || legacyClubCodes.has(f.awayClubId));
-        if (hasLegacyFixtures || !this.data.fixtures || this.data.fixtures.length === 0) {
-          this.data.fixtures = [...SEED_FIXTURES];
-          this.save();
-        }
-        // Ensure Rati is always marked as FWD
-        if (this.data.players && this.data.players['p_rati'] && this.data.players['p_rati'].position !== 'FWD') {
-          this.data.players['p_rati'].position = 'FWD';
-          this.save();
-        }
-        // Auto-merge any newly added SEED_PLAYERS into existing database without overwriting existing player stats
-        if (this.data.players) {
-          let seedAdded = false;
-          SEED_PLAYERS.forEach((sp) => {
-            if (!this.data.players[sp.id]) {
-              this.data.players[sp.id] = sp;
-              seedAdded = true;
-            }
-          });
-          if (seedAdded) {
-            this.save();
-          }
-        }
-        // Sanitize manager squads: auto-remove deleted ghost players and enforce strict single-captain integrity
-        if (this.data.players && Object.keys(this.data.players).length >= 50 && this.data.managers) {
-          let squadsChanged = false;
-          Object.values(this.data.managers).forEach((m) => {
-            if (m.squad && Array.isArray(m.squad.players) && m.squad.players.length > 0) {
-              const validPlayers = m.squad.players.filter((sp) => Boolean(this.data.players[sp.playerId]));
-              if (validPlayers.length !== m.squad.players.length && validPlayers.length > 0) {
-                const totalCost = validPlayers.reduce((sum, sp) => sum + (this.data.players[sp.playerId]?.cost || 0), 0);
-                m.squad.bank = Math.max(0, Math.round((55.0 - totalCost) * 10) / 10);
-                m.squad.players = validPlayers;
-                squadsChanged = true;
-              }
-
-              // Strict single captain & vice-captain integrity
-              const starters = m.squad.players.filter((sp: any) => sp.isStarter);
-              const captains = starters.filter((sp: any) => sp.isCaptain);
-              if (captains.length > 1 || (starters.length > 0 && !captains.length)) {
-                const capId = captains[0]?.playerId || starters[0]?.playerId;
-                const remaining = starters.filter((sp: any) => sp.playerId !== capId);
-                const viceId = remaining.find((sp: any) => sp.isViceCaptain)?.playerId || remaining[0]?.playerId;
-
-                m.squad.players = m.squad.players.map((sp: any) => {
-                  if (!sp.isStarter) return { ...sp, isCaptain: false, isViceCaptain: false };
-                  return {
-                    ...sp,
-                    isCaptain: sp.playerId === capId,
-                    isViceCaptain: sp.playerId === viceId,
-                  };
-                });
-                squadsChanged = true;
-              }
-            }
-          });
-          if (squadsChanged) {
-            this.saveSilent();
-          }
-        }
-
-        // Clean up orphaned demo managers that have no user account
-        if (this.data.users && Object.keys(this.data.users).length > 0) {
-          const validUserIds = new Set(Object.keys(this.data.users));
-          if (this.data.managers) {
-            let removedOrphans = false;
-            for (const mid of Object.keys(this.data.managers)) {
-              if (!validUserIds.has(mid)) {
-                delete this.data.managers[mid];
-                removedOrphans = true;
-              }
-            }
-            const globalLeague = this.data.leagues?.find((l) => l.isGlobal);
-            if (globalLeague && Array.isArray(globalLeague.members)) {
-              const beforeLen = globalLeague.members.length;
-              globalLeague.members = globalLeague.members.filter((m) => validUserIds.has(m.id));
-              if (globalLeague.members.length !== beforeLen) {
-                removedOrphans = true;
-              }
-            }
-            if (removedOrphans) {
-              this.saveSilent();
-            }
-          }
-        }
+        this.sanitize();
+        this.saveSilent();
       } catch (err) {
         console.error('Error reading db.json, initializing with default data', err);
         this.data = getDefaultData();
-        this.save();
+        this.saveSilent();
       }
     } else {
       this.data = getDefaultData();
-      this.save();
+      this.saveSilent();
     }
+  }
+
+  /**
+   * Sanitizes and enforces database integrity (admins, clubs, legacy fixtures, captain rules).
+   * Runs both on startup and whenever new data is loaded from GitHub.
+   */
+  public sanitize(): boolean {
+    if (!this.data) return false;
+    let modified = false;
+
+    if (!this.data.users) {
+      this.data.users = {};
+      modified = true;
+    }
+
+    if (!this.data.paymentSettings) {
+      this.data.paymentSettings = {
+        bogLink: 'https://egreve.bog.ge/KCL26_charity',
+        tbcLink: '',
+        entryFeeGEL: 3,
+        requireActivationCode: false,
+      };
+      modified = true;
+    } else if (!this.data.paymentSettings.bogLink) {
+      this.data.paymentSettings.bogLink = 'https://egreve.bog.ge/KCL26_charity';
+      modified = true;
+    }
+
+    if (!Array.isArray(this.data.activationCodes)) {
+      this.data.activationCodes = [];
+      modified = true;
+    }
+
+    // Grant permanent moderator / admin privileges to designated accounts
+    Object.values(this.data.users).forEach((u) => {
+      const lower = u.username.toLowerCase();
+      if (lower === 'theiulius' || lower === 'chaga') {
+        u.role = 'admin';
+        u.isAdmin = true;
+        u.isApproved = true;
+      }
+    });
+
+    // Ensure valid school clubs
+    if (
+      !this.data.clubs ||
+      Object.keys(this.data.clubs).some((k) => k === 'ARS' || k === 'CHE' || k === 'WOL' || k === 'SCH_10' || k === 'SCH_TCH') ||
+      !('SCH_9_1' in this.data.clubs)
+    ) {
+      this.data.clubs = { ...CLUBS };
+      modified = true;
+    }
+
+    // Cleanse any legacy Premier League fixtures
+    const legacyClubCodes = new Set(['ARS', 'AVL', 'BOU', 'BRE', 'BHA', 'CHE', 'CRY', 'EVE', 'FUL', 'IPS', 'LEI', 'LIV', 'MCI', 'MUN', 'NEW', 'NFO', 'SOU', 'TOT', 'WHU', 'WOL', 'SCH_10', 'SCH_12', 'SCH_TCH']);
+    const hasLegacyFixtures = Array.isArray(this.data.fixtures) && this.data.fixtures.some((f) => legacyClubCodes.has(f.homeClubId) || legacyClubCodes.has(f.awayClubId));
+    if (hasLegacyFixtures || !this.data.fixtures || this.data.fixtures.length === 0) {
+      this.data.fixtures = [...SEED_FIXTURES];
+      modified = true;
+    }
+
+    // Ensure Rati is always marked as FWD
+    if (this.data.players && this.data.players['p_rati'] && this.data.players['p_rati'].position !== 'FWD') {
+      this.data.players['p_rati'].position = 'FWD';
+      modified = true;
+    }
+
+    // Auto-merge newly added seed players without overwriting existing player stats/costs
+    if (this.data.players) {
+      SEED_PLAYERS.forEach((sp) => {
+        if (!this.data.players[sp.id]) {
+          this.data.players[sp.id] = sp;
+          modified = true;
+        }
+      });
+    }
+
+    // Sanitize manager squads: enforce valid players and single-captain integrity
+    if (this.data.players && Object.keys(this.data.players).length >= 50 && this.data.managers) {
+      Object.values(this.data.managers).forEach((m) => {
+        if (m.squad && Array.isArray(m.squad.players) && m.squad.players.length > 0) {
+          const validPlayers = m.squad.players.filter((sp) => Boolean(this.data.players[sp.playerId]));
+          if (validPlayers.length !== m.squad.players.length && validPlayers.length > 0) {
+            const totalCost = validPlayers.reduce((sum, sp) => sum + (this.data.players[sp.playerId]?.cost || 0), 0);
+            m.squad.bank = Math.max(0, Math.round((55.0 - totalCost) * 10) / 10);
+            m.squad.players = validPlayers;
+            modified = true;
+          }
+
+          const starters = m.squad.players.filter((sp: any) => sp.isStarter);
+          const captains = starters.filter((sp: any) => sp.isCaptain);
+          if (captains.length > 1 || (starters.length > 0 && !captains.length)) {
+            const capId = captains[0]?.playerId || starters[0]?.playerId;
+            const remaining = starters.filter((sp: any) => sp.playerId !== capId);
+            const viceId = remaining.find((sp: any) => sp.isViceCaptain)?.playerId || remaining[0]?.playerId;
+
+            m.squad.players = m.squad.players.map((sp: any) => {
+              if (!sp.isStarter) return { ...sp, isCaptain: false, isViceCaptain: false };
+              return {
+                ...sp,
+                isCaptain: sp.playerId === capId,
+                isViceCaptain: sp.playerId === viceId,
+              };
+            });
+            modified = true;
+          }
+        }
+      });
+    }
+
+    // Clean up orphaned demo managers that have no user account
+    if (this.data.users && Object.keys(this.data.users).length > 0 && this.data.managers) {
+      const validUserIds = new Set(Object.keys(this.data.users));
+      for (const mid of Object.keys(this.data.managers)) {
+        if (!validUserIds.has(mid)) {
+          delete this.data.managers[mid];
+          modified = true;
+        }
+      }
+      const globalLeague = this.data.leagues?.find((l) => l.isGlobal);
+      if (globalLeague && Array.isArray(globalLeague.members)) {
+        const beforeLen = globalLeague.members.length;
+        globalLeague.members = globalLeague.members.filter((m) => validUserIds.has(m.id));
+        if (globalLeague.members.length !== beforeLen) {
+          modified = true;
+        }
+      }
+    }
+
+    return modified;
   }
 
   public getData(): DatabaseSchema {
     return this.data;
   }
 
-  public setData(newData: DatabaseSchema): void {
+  /**
+   * Overwrites the in-memory database with remote data.
+   * Defaults triggerCallback to false so syncing does NOT trigger an auto-commit back to GitHub!
+   */
+  public setData(newData: DatabaseSchema, triggerCallback: boolean = false): void {
     this.data = newData;
-    this.save();
+    this.sanitize();
+    this.save(undefined, triggerCallback);
   }
-
-  private onSaveCallback?: (reason?: string) => void;
 
   public setOnSaveCallback(cb: (reason?: string) => void): void {
     this.onSaveCallback = cb;
@@ -301,7 +319,9 @@ class Database {
       const tempFile = DB_FILE + '.tmp';
       fs.writeFileSync(tempFile, JSON.stringify(this.data, null, 2), 'utf-8');
       fs.renameSync(tempFile, DB_FILE);
-      if (triggerCallback && this.onSaveCallback) {
+
+      // Only invoke GitHub commit callback if NOT syncing and explicitly requested
+      if (triggerCallback && this.onSaveCallback && !this.isSyncing) {
         this.onSaveCallback(reason);
       }
     } catch (err) {
@@ -355,7 +375,7 @@ class Database {
         });
       });
     }
-    this.save();
+    this.saveSilent();
   }
 }
 
