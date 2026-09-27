@@ -29,7 +29,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
       {!isDevMode && <TopHeader />}
 
       {/* Main Scrollable View Area */}
-      <main className={`flex-1 w-full overflow-y-auto overscroll-contain ${isDevMode ? 'p-0 pb-10' : 'pb-20 md:pb-10'}`}>
+      <main className={`flex-1 w-full ${isDevMode ? 'p-0 pb-10' : 'pb-20 md:pb-10'}`}>
         <div className={`w-full ${isDevMode ? 'max-w-7xl mx-auto px-1 sm:px-2' : 'max-w-6xl mx-auto px-2 sm:px-4 md:px-6'}`}>
           {children}
         </div>
