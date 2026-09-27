@@ -4625,10 +4625,10 @@
               "webName": "S. Kordzadze",
               "clubId": "SCH_9_1",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -4680,10 +4680,10 @@
               "webName": "Tsiskara Jr.",
               "clubId": "SCH_9_5",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -6983,8 +6983,8 @@
           },
           {
             "playerId": "p_9_1_s__kordzadze",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -7018,8 +7018,8 @@
           },
           {
             "playerId": "p_custom_1790194825803",
-            "isStarter": false,
-            "benchOrder": 2,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
