@@ -7164,6 +7164,17 @@
           "previousRank": 41,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790492992563",
+          "managerName": "Erekle",
+          "teamName": "Zurias biwebi",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 42,
+          "previousRank": 42,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -9356,6 +9367,26 @@
         }
       },
       "joinedAt": "2026-09-27T06:47:18.323Z"
+    },
+    "user_1790492992563": {
+      "id": "user_1790492992563",
+      "managerName": "Erekle",
+      "teamName": "Zurias biwebi",
+      "squad": {
+        "teamName": "Zurias biwebi",
+        "managerName": "Erekle",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T07:09:52.565Z"
     }
   },
   "users": {
@@ -9923,6 +9954,20 @@
       "managerName": "Giorgi",
       "teamName": "9/5",
       "createdAt": "2026-09-27T06:47:18.323Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790492992563": {
+      "id": "user_1790492992563",
+      "username": "zuria",
+      "email": "ereklezurashvili@gmail.com",
+      "passwordHash": "259531ed9bbdc0ecb0e1e065d3686d7c857b926ee4977394de086984e19e706278fe0245715d09e85e1d059f1d9ca15831434db837e246208b019deb2cf1828b",
+      "salt": "f97b7edd27bfeb4c9e2dd4bf4032e68c",
+      "managerName": "Erekle",
+      "teamName": "Zurias biwebi",
+      "token": "76fd65a3505740a7ec34a6c411845f38f00f1caf3b1fd9717d8fbdc279257394",
+      "createdAt": "2026-09-27T07:09:52.565Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
