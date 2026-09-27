@@ -6897,6 +6897,17 @@
           "previousRank": 36,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790486210241",
+          "managerName": "Dg",
+          "teamName": "10/2",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 37,
+          "previousRank": 37,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -8853,6 +8864,26 @@
         }
       },
       "joinedAt": "2026-09-27T05:04:21.234Z"
+    },
+    "user_1790486210241": {
+      "id": "user_1790486210241",
+      "managerName": "Dg",
+      "teamName": "10/2",
+      "squad": {
+        "teamName": "10/2",
+        "managerName": "Dg",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T05:16:50.243Z"
     }
   },
   "users": {
@@ -9351,6 +9382,20 @@
       "teamName": "tsotne",
       "token": "d530c156d077fb44207c3ed1a7154f49f793ece5b04a95ddc8eb6b9afbb1cd7f",
       "createdAt": "2026-09-27T05:04:21.234Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790486210241": {
+      "id": "user_1790486210241",
+      "username": "demetre777",
+      "email": "yiroskuchispireli@gmail.com",
+      "passwordHash": "ea1749a2ccb3c7287ebe1a9620edf1cb5fe816dc371455ebe73c131024a6572d22fa2c6ff77a0aa66a38ec73db3fe5e45e66b20d506e62c5c2db53fc29d47d3d",
+      "salt": "6aba2ee2394f8c92a0aa2b4b4a1bf513",
+      "managerName": "Dg",
+      "teamName": "10/2",
+      "token": "c53c26c5071b844b33704087e62f917977e14888da118791b4212bb54b3dcbe4",
+      "createdAt": "2026-09-27T05:16:50.243Z",
       "role": "user",
       "isAdmin": false,
       "isApproved": false
