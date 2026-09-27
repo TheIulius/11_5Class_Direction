@@ -58,6 +58,7 @@ export interface DatabaseSchema {
   paymentSettings?: PaymentSettings;
   activationCodes?: ActivationCode[];
   deletedUserIds?: string[];
+  deadline?: { gameweek: number; deadlineTime: string } | null; // <-- ADD THIS LINE
 }
 
 export function hashPassword(password: string, salt?: string): { hash: string; salt: string } {
