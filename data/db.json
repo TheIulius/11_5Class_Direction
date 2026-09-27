@@ -6976,10 +6976,10 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790166361242",
-              "webName": "Bejana",
-              "clubId": "SCH_11_5",
-              "position": "FWD",
+              "playerId": "p_custom_1790279796584",
+              "webName": "Kila",
+              "clubId": "SCH_11_4",
+              "position": "MID",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -9083,14 +9083,14 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790166361242",
+            "playerId": "p_custom_1790279796584",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 33.7,
+        "bank": 31.7,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
