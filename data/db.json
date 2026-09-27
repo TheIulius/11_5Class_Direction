@@ -6918,7 +6918,19 @@
           "rank": 38,
           "previousRank": 38,
           "activeChip": null,
-          "lineup": []
+          "lineup": [
+            {
+              "playerId": "p_10_2_turkia",
+              "webName": "Turkia",
+              "clubId": "SCH_10_2",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ]
         }
       ]
     }
@@ -8903,8 +8915,16 @@
       "squad": {
         "teamName": "Vortex",
         "managerName": "Giorgi",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_10_2_turkia",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 50.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
