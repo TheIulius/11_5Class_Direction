@@ -5066,23 +5066,12 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_custom_1790193250055",
-              "webName": "Gabela",
-              "clubId": "SCH_11_3",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_dito",
               "webName": "Dito",
               "clubId": "SCH_11_5",
               "position": "DEF",
               "isStarter": true,
-              "isCaptain": false,
+              "isCaptain": true,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -7237,17 +7226,10 @@
         "managerName": "Giorgi",
         "players": [
           {
-            "playerId": "p_custom_1790193250055",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": true,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_dito",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
+            "isCaptain": true,
             "isViceCaptain": false
           },
           {
@@ -7279,7 +7261,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 13.6,
+        "bank": 17.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
