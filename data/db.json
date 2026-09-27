@@ -7119,19 +7119,7 @@
           "rank": 36,
           "previousRank": 36,
           "activeChip": null,
-          "lineup": [
-            {
-              "playerId": "p_zurashvili",
-              "webName": "Zurashvili",
-              "clubId": "SCH_11_1",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            }
-          ]
+          "lineup": []
         },
         {
           "id": "user_1790493050486",
@@ -9314,8 +9302,7 @@
       "teamName": "giorgievski's tractati",
       "createdAt": "2026-09-25T16:18:23.548Z",
       "role": "admin",
-      "isAdmin": true,
-      "token": "4a6dc90cfee62c19902f9724696fb6c414b2cf505f01537ff0b43786d7f34f1d"
+      "isAdmin": true
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
@@ -9860,8 +9847,8 @@
     "user_1790457888966",
     "user_1790458326878",
     "user_1790459997943",
-    "user_1790462654632",
     "user_1790459230337",
-    "user_1790460157493"
+    "user_1790460157493",
+    "user_1790462654632"
   ]
 }
