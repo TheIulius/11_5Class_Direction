@@ -7384,17 +7384,6 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_11_2_meqvabishvili",
-              "webName": "Meqvabishvili",
-              "clubId": "SCH_11_2",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
             }
           ]
         },
@@ -9725,16 +9714,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_11_2_meqvabishvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 17.3,
+        "bank": 26.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
