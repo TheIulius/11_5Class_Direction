@@ -1414,6 +1414,14 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setPlayers((prev) => {
       const existing = prev[playerId];
       if (!existing) return prev;
+      if (updates.cost !== undefined && updates.cost !== existing.cost) {
+        if (updates.previousCost === undefined) {
+          updates.previousCost = existing.previousCost ?? existing.cost;
+        }
+        if (updates.priceChange === undefined) {
+          updates.priceChange = Math.round((updates.cost - updates.previousCost) * 10) / 10;
+        }
+      }
       return {
         ...prev,
         [playerId]: { ...existing, ...updates },

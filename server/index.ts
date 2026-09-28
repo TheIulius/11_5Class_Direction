@@ -1353,7 +1353,11 @@ app.post('/api/admin/player', (req: Request, res: Response) => {
     const p = data.players[playerId];
     if (p) {
       if (updates.cost !== undefined) {
-        updates.cost = Math.max(4.0, Math.round(Number(updates.cost) * 10) / 10);
+        updates.cost = Math.max(1.0, Math.round(Number(updates.cost) * 10) / 10);
+        if (updates.previousCost === undefined && updates.cost !== p.cost) {
+          updates.previousCost = p.previousCost ?? p.cost;
+          updates.priceChange = Math.round((updates.cost - updates.previousCost) * 10) / 10;
+        }
       }
       Object.assign(p, updates);
       db.save();

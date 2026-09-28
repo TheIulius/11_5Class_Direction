@@ -41,6 +41,8 @@ export interface Player {
   gwStats: Record<number, PlayerStats>; // Gameweek -> Stats
   photoUrl?: string; // Approved player profile picture URL
   pendingPhotoUrl?: string; // Pending admin approval picture URL
+  previousCost?: number; // Previous price before rise/drop (e.g. 6.0)
+  priceChange?: number; // Price difference (e.g. +0.5)
 }
 
 export interface PendingPlayerPhoto {

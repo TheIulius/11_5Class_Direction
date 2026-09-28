@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
+import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { CLUBS } from '../../data/clubs';
 import { MatchGoal, Venue, Player } from '../../types/fpl';
 import confetti from 'canvas-confetti';
@@ -28,6 +29,7 @@ import {
   Building,
   MapPin,
   Flame,
+  TrendingUp,
 } from 'lucide-react';
 
 interface FloatingPointBadge {
@@ -39,7 +41,16 @@ interface FloatingPointBadge {
 }
 
 export const MatchDayAdmin: React.FC = () => {
-  const { fixtures, currentGW, players, updateFixture, updatePlayerStats } = useFPL();
+  const {
+    fixtures,
+    currentGW,
+    players,
+    updateFixture,
+    updatePlayerStats,
+    editPlayer,
+    isModerator,
+    isDevAuthenticated,
+  } = useFPL();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedFixtureId, setSelectedFixtureId] = useState<string | null>(null);
@@ -283,6 +294,28 @@ export const MatchDayAdmin: React.FC = () => {
     );
   };
 
+  const handleRaisePlayerPrice = (player: Player, delta: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!editPlayer) return;
+    const currentCost = player.cost;
+    const initialCost = player.previousCost ?? currentCost;
+    const newCost = Math.max(1.0, Math.round((currentCost + delta) * 10) / 10);
+    const priceChange = Math.round((newCost - initialCost) * 10) / 10;
+
+    editPlayer(player.id, {
+      cost: newCost,
+      previousCost: initialCost,
+      priceChange,
+    });
+
+    const diffStr = delta > 0 ? `+£${delta.toFixed(1)}m` : `-£${Math.abs(delta).toFixed(1)}m`;
+    spawnFloatingPoint(
+      `📈 £${currentCost.toFixed(1)}m → £${newCost.toFixed(1)}m (${diffStr})`,
+      delta > 0 ? 'bg-emerald-500 text-slate-950 font-black' : 'bg-amber-500 text-slate-950 font-black',
+      e
+    );
+  };
+
   // Decrement / Removal Actions (-1 handlers)
   const handleRemoveGoal = (player: Player, team: 'home' | 'away', e: React.MouseEvent) => {
     const hasGoal = goals.some((g) => g.playerId === player.id && !g.isOwnGoal);
@@ -495,22 +528,56 @@ export const MatchDayAdmin: React.FC = () => {
                 <span className="text-[9px] px-1 py-0.2 rounded font-black bg-white/10 text-emerald-400">
                   {p.position}
                 </span>
+                <PlayerPriceBadge player={p} className="text-[11px]" />
                 {isMvp && (
                   <span className="text-[9px] px-1 py-0.2 rounded font-black bg-amber-400 text-slate-950 flex items-center gap-0.5">
                     <Crown className="w-2.5 h-2.5" /> MVP
                   </span>
                 )}
               </div>
-              {/* Event indicators */}
-              <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 mt-0.5 flex-wrap">
-                {pGoalCount > 0 && <span className="text-emerald-400 font-bold">⚽ {pGoalCount}</span>}
-                {pOwnGoalCount > 0 && <span className="text-rose-400 font-bold">⚽ (OG) {pOwnGoalCount}</span>}
-                {pAssistCount > 0 && <span className="text-sky-400 font-bold">👟 {pAssistCount}</span>}
-                {pSaveCount > 0 && <span className="text-amber-400 font-bold">🧤 {pSaveCount}</span>}
-                {pPenSavedCount > 0 && <span className="text-emerald-400 font-bold">🛡️ {pPenSavedCount}</span>}
-                {pPenMissedCount > 0 && <span className="text-rose-400 font-bold">❌ {pPenMissedCount}</span>}
-                {isYellow && <span className="text-yellow-400">🟨</span>}
-                {isRed && <span className="text-rose-400">🟥</span>}
+              {/* Event indicators & Admin Price Control */}
+              <div className="flex items-center justify-between gap-2 mt-1 flex-wrap">
+                <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400 flex-wrap">
+                  {pGoalCount > 0 && <span className="text-emerald-400 font-bold">⚽ {pGoalCount}</span>}
+                  {pOwnGoalCount > 0 && <span className="text-rose-400 font-bold">⚽ (OG) {pOwnGoalCount}</span>}
+                  {pAssistCount > 0 && <span className="text-sky-400 font-bold">👟 {pAssistCount}</span>}
+                  {pSaveCount > 0 && <span className="text-amber-400 font-bold">🧤 {pSaveCount}</span>}
+                  {pPenSavedCount > 0 && <span className="text-emerald-400 font-bold">🛡️ {pPenSavedCount}</span>}
+                  {pPenMissedCount > 0 && <span className="text-rose-400 font-bold">❌ {pPenMissedCount}</span>}
+                  {isYellow && <span className="text-yellow-400">🟨</span>}
+                  {isRed && <span className="text-rose-400">🟥</span>}
+                </div>
+
+                {/* ONLY ADMINS: Price Raiser Controls */}
+                {(isModerator || isDevAuthenticated) && (
+                  <div className="flex items-center gap-1 bg-white/5 border border-white/10 px-1.5 py-0.5 rounded-lg text-[9px]">
+                    <span className="font-bold text-zinc-400 uppercase tracking-wider text-[8px]">Price:</span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleRaisePlayerPrice(p, -0.1, e)}
+                      className="px-1 py-0.5 rounded font-mono font-bold bg-white/5 hover:bg-rose-500/20 text-rose-300 hover:text-white transition-colors cursor-pointer"
+                      title="Decrease player price by £0.1m (-0.1)"
+                    >
+                      -0.1
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleRaisePlayerPrice(p, 0.1, e)}
+                      className="px-1.5 py-0.5 rounded font-mono font-black bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-slate-950 transition-colors cursor-pointer flex items-center gap-0.5"
+                      title="Raise player price by £0.1m (+0.1)"
+                    >
+                      +0.1 📈
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleRaisePlayerPrice(p, 0.5, e)}
+                      className="px-1.5 py-0.5 rounded font-mono font-black bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-slate-950 transition-colors cursor-pointer flex items-center gap-0.5"
+                      title="Raise player price by £0.5m (+0.5)"
+                    >
+                      +0.5 📈
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

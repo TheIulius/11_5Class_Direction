@@ -3,6 +3,7 @@ import { useFPL } from '../../context/FPLContext';
 import { Player, Position, Club, Fixture } from '../../types/fpl';
 import { CLUBS, getSortedSchoolClubs } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
+import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { ClassGridView } from '../transfers/ClassGridView';
 import { suggestPlayerPhotoApi, adminRemovePlayerPhotoApi } from '../../services/api';
 import confetti from 'canvas-confetti';
@@ -29,7 +30,7 @@ import {
   Trash2,
 } from 'lucide-react';
 
-type SortOption = 'points' | 'cost' | 'goals' | 'assists' | 'selectedByPercent' | 'minutes';
+type SortOption = 'points' | 'rising' | 'cost' | 'goals' | 'assists' | 'selectedByPercent' | 'minutes';
 
 export const PlayersView: React.FC = () => {
   const {
@@ -143,6 +144,10 @@ export const PlayersView: React.FC = () => {
         case 'points':
           valA = a.totalPoints;
           valB = b.totalPoints;
+          break;
+        case 'rising':
+          valA = a.priceChange ?? (a.previousCost ? Math.round((a.cost - a.previousCost) * 10) / 10 : 0);
+          valB = b.priceChange ?? (b.previousCost ? Math.round((b.cost - b.previousCost) * 10) / 10 : 0);
           break;
         case 'cost':
           valA = a.cost;
@@ -463,6 +468,7 @@ export const PlayersView: React.FC = () => {
 
                 {[
                   { id: 'points', label: 'Points', icon: Trophy },
+                  { id: 'rising', label: 'Rising 📈', icon: TrendingUp },
                   { id: 'cost', label: 'Price', icon: TrendingUp },
                   { id: 'goals', label: 'Goals ⚽', icon: Activity },
                   { id: 'assists', label: 'Assists 🅰️', icon: Activity },
@@ -600,9 +606,11 @@ export const PlayersView: React.FC = () => {
                       {/* Price */}
                       <div>
                         <span className="block text-[9px] uppercase font-bold text-slate-400">Price</span>
-                        <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">
-                          £{p.cost.toFixed(1)}m
-                        </span>
+                        <PlayerPriceBadge
+                          player={p}
+                          showDifference={sortBy === 'rising'}
+                          className="text-xs sm:text-sm font-black text-slate-800 dark:text-white"
+                        />
                       </div>
 
                       {/* Total Points */}
@@ -705,10 +713,8 @@ export const PlayersView: React.FC = () => {
                       {selectedPlayer.name}
                     </h3>
 
-                    <div className="flex items-center gap-2.5 text-xs font-mono mt-0.5">
-                      <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                        £{selectedPlayer.cost.toFixed(1)}m
-                      </span>
+                    <div className="flex items-center gap-2.5 text-xs font-mono mt-0.5 flex-wrap">
+                      <PlayerPriceBadge player={selectedPlayer} showDifference={true} className="text-sm font-black" />
                       <span>•</span>
                       <span className="font-bold text-amber-500">
                         {selectedPlayer.totalPoints} Pts

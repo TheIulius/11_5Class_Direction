@@ -3,6 +3,7 @@ import { Player, Position, Fixture, Club, Venue } from '../../types/fpl';
 import { CLUBS } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
+import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { useFPL } from '../../context/FPLContext';
 import { formatFixtureDate, sortFixturesByDate } from '../views/FixturesView';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -457,9 +458,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                           <span className="text-[10px] px-1.5 py-0.5 rounded font-black bg-white/10 text-emerald-400">
                             {selectedPlayer.position}
                           </span>
-                          <span className="text-[11px] font-mono font-black text-amber-400 bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 rounded">
-                            £{selectedPlayer.cost.toFixed(1)}m
-                          </span>
+                          <PlayerPriceBadge player={selectedPlayer} showDifference={true} className="text-[11px] font-mono font-black text-amber-400 bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 rounded" />
                         </div>
                         <span className="text-xs text-zinc-400">{selectedPlayer.name}</span>
                       </div>
@@ -718,9 +717,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       </div>
 
                       <div className="text-right">
-                        <span className="text-xs font-mono font-bold text-emerald-400 block">
-                          £{p.cost.toFixed(1)}m
-                        </span>
+                        <PlayerPriceBadge player={p} className="text-xs font-mono font-bold text-emerald-400 block" />
                         <span className="text-[10px] font-mono text-zinc-400">
                           {p.totalPoints} pts
                         </span>

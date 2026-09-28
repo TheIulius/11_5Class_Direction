@@ -3,6 +3,7 @@ import { Player, Position, Club, Squad } from '../../types/fpl';
 import { CLUBS } from '../../data/clubs';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from '../pitch/KitJersey';
+import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -190,10 +191,8 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                 <h3 className="text-base sm:text-xl font-black tracking-tight mt-0.5">
                   {detailPlayer.name}
                 </h3>
-                <div className="flex items-center gap-2.5 text-xs font-mono mt-0.5">
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    £{detailPlayer.cost.toFixed(1)}m
-                  </span>
+                <div className="flex items-center gap-2.5 text-xs font-mono mt-0.5 flex-wrap">
+                  <PlayerPriceBadge player={detailPlayer} showDifference={true} className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400" />
                   <span>•</span>
                   <span className="font-bold text-amber-500">
                     {detailPlayer.totalPoints} Pts
@@ -538,9 +537,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
 
                           {/* Price & Points */}
                           <div className="flex items-center justify-center gap-1 font-mono text-[8.5px] sm:text-[10px] leading-tight">
-                            <span className="font-black text-emerald-600 dark:text-emerald-400">
-                              £{p.cost.toFixed(1)}m
-                            </span>
+                            <PlayerPriceBadge player={p} className="font-black text-emerald-600 dark:text-emerald-400" />
                             <span className="text-amber-500 font-bold">
                               {p.totalPoints}p
                             </span>

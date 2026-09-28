@@ -4,6 +4,7 @@ import { KitJersey } from './KitJersey';
 import { canSwapPlayers } from '../../engine/formations';
 import { ArrowLeftRight, Check } from 'lucide-react';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
+import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 
 interface PlayerCardProps {
   playerId: string;
@@ -178,7 +179,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
       <div
         className="w-full text-center px-1 md:px-1.5 py-[1px] md:py-0.5 rounded-b text-[9.5px] sm:text-[10px] md:text-[11px] font-extrabold border-x border-b tracking-tight transition-colors bg-slate-900/95 text-slate-200 border-slate-800 flex items-center justify-center gap-1"
       >
-        <span className="font-mono">£{player.cost.toFixed(1)}m</span>
+        <PlayerPriceBadge player={player} className="text-[9px] sm:text-[9.5px]" />
         <span className="text-slate-500 font-normal text-[8px]">•</span>
         <span className="font-mono text-emerald-400 font-bold">{pts}pts</span>
       </div>

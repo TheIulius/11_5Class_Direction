@@ -3,6 +3,7 @@ import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from './KitJersey';
 import { CLUBS } from '../../data/clubs';
 import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, ChevronDown } from 'lucide-react';
+import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 
 interface PlayerActionSheetProps {
   playerId: string | null;
@@ -107,8 +108,8 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
               <h2 className="text-base md:text-lg font-black text-slate-900 dark:text-white leading-tight mt-0.5">
                 {player.name}
               </h2>
-              <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                <span>Cost: <strong className="text-slate-900 dark:text-white">£{player.cost.toFixed(1)}m</strong></span>
+              <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex-wrap">
+                <span className="flex items-center gap-1">Cost: <PlayerPriceBadge player={player} showDifference={true} /></span>
                 <span>•</span>
                 <span>Selected: <strong className="text-emerald-600 dark:text-emerald-400">{ownershipPercent}%</strong></span>
               </div>

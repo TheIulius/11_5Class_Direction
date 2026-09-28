@@ -21,6 +21,7 @@ import {
 import { validateSquadComposition } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { ClassGridView } from '../transfers/ClassGridView';
+import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 
 export type SortOption =
   | 'points_desc'
@@ -729,9 +730,7 @@ export const TransfersView: React.FC = () => {
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                  <span className="text-[11px] font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400">
-                                    £{p.cost.toFixed(1)}m
-                                  </span>
+                                  <PlayerPriceBadge player={p} className="text-[11px] font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400" />
                                   <span className="text-[10px] font-mono tabular-nums text-slate-400">
                                     {p.totalPoints} pts
                                   </span>
@@ -876,9 +875,7 @@ const SlotCard: React.FC<SlotCardProps> = ({
       </span>
 
       {/* Price Badge in Monospace Tabular Figures */}
-      <span className="text-[8px] sm:text-[10px] font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 -mt-0.5">
-        £{player.cost.toFixed(1)}m
-      </span>
+      <PlayerPriceBadge player={player} className="text-[8px] sm:text-[10px] font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 -mt-0.5 justify-center" />
     </div>
   );
 };
