@@ -412,7 +412,15 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
               {/* Player Header */}
               <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center space-x-3">
-                  <KitJersey clubId={sheetPlayer.clubId} position={sheetPlayer.position} className="w-12 h-12" />
+                  {sheetPlayer.photoUrl ? (
+                    <img
+                      src={sheetPlayer.photoUrl}
+                      alt={sheetPlayer.name}
+                      className="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
+                    />
+                  ) : (
+                    <KitJersey clubId={sheetPlayer.clubId} position={sheetPlayer.position} className="w-12 h-12 shrink-0" />
+                  )}
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">

@@ -529,3 +529,34 @@ export async function adminSetLineupVisibilityApi(mode: 'auto' | 'always_show' |
   return data;
 }
 
+export async function suggestPlayerPhotoApi(playerId: string, photoUrl: string, suggestedBy?: string) {
+  const res = await fetch(`${API_BASE}/api/player/photo/suggest`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ playerId, photoUrl, suggestedBy }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to submit player photo');
+  return data;
+}
+
+export async function adminFetchPlayerPhotosApi() {
+  const res = await fetch(`${API_BASE}/api/admin/player-photos`, {
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to fetch pending player photos');
+  return data;
+}
+
+export async function adminReviewPlayerPhotoApi(photoId: string, approve: boolean) {
+  const res = await fetch(`${API_BASE}/api/admin/player-photo/review`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ photoId, approve }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to review player photo');
+  return data;
+}
+

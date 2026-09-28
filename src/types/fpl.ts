@@ -39,6 +39,16 @@ export interface Player {
   selectedByPercent: number;
   isAvailable: boolean;
   gwStats: Record<number, PlayerStats>; // Gameweek -> Stats
+  photoUrl?: string; // Approved player profile picture URL
+  pendingPhotoUrl?: string; // Pending admin approval picture URL
+}
+
+export interface PendingPlayerPhoto {
+  id: string;
+  playerId: string;
+  photoUrl: string;
+  suggestedBy: string;
+  suggestedAt: string;
 }
 
 export interface SquadPlayer {

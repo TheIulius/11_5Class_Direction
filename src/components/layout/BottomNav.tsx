@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
-import { Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Wrench, Shield } from 'lucide-react';
+import { Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Wrench, Shield, Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface TabItem {
@@ -12,6 +12,7 @@ interface TabItem {
 const TABS: TabItem[] = [
   { id: 'team', label: 'Team', icon: Shirt },
   { id: 'transfers', label: 'Transfers', icon: ArrowLeftRight },
+  { id: 'players', label: 'Players', icon: Users },
   { id: 'standings', label: 'Standings', icon: Trophy },
   { id: 'fixtures', label: 'Fixtures', icon: Calendar },
   { id: 'dev', label: 'Dev', icon: Wrench },

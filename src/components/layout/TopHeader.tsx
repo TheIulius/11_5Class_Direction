@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
-import { Sparkles, Wrench, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Eye, Shield, BookOpen } from 'lucide-react';
+import { Sparkles, Wrench, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Eye, Shield, BookOpen, Users, UserCheck } from 'lucide-react';
 
 interface TabItem {
   id: TabType;
@@ -11,6 +11,7 @@ interface TabItem {
 const DESKTOP_TABS: TabItem[] = [
   { id: 'team', label: 'Team', icon: Shirt },
   { id: 'transfers', label: 'Transfers', icon: ArrowLeftRight },
+  { id: 'players', label: 'Players', icon: Users },
   { id: 'standings', label: 'Standings', icon: Trophy },
   { id: 'fixtures', label: 'Fixtures', icon: Calendar },
   { id: 'dev', label: 'Dev Mode', icon: Wrench },
@@ -109,6 +110,23 @@ export const TopHeader: React.FC = () => {
             <BookOpen className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
             <span className="hidden sm:inline font-bold">წესები</span>
           </button>
+
+          {/* Dedicated Managers Portal Button (Admins Only) */}
+          {isModerator && (
+            <button
+              onClick={() => setActiveTab('managers')}
+              className={`p-1.5 md:px-3 md:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'managers'
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 font-black shadow-xs'
+                  : 'bg-slate-100 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/[0.09]'
+              }`}
+              title="მენეჯერების მართვა / Registered Managers & Approvals"
+              aria-label="Managers"
+            >
+              <UserCheck className={`w-3.5 h-3.5 flex-shrink-0 ${activeTab === 'managers' ? 'text-slate-950' : 'text-amber-500'}`} />
+              <span className="font-bold">managers</span>
+            </button>
+          )}
 
           {/* Theme Toggle Button (Light / Dark) */}
           <button

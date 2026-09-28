@@ -179,6 +179,7 @@ app.get('/api/state', (req: Request, res: Response) => {
       entryFeeGEL: data.paymentSettings?.entryFeeGEL || 3,
       requireActivationCode: Boolean(data.paymentSettings?.requireActivationCode),
     },
+    pendingPhotos: data.pendingPhotos || [],
   });
 });
 
@@ -1675,6 +1676,11 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
       if (!local.players[pid]) {
         local.players[pid] = rp;
         changed = true;
+      } else {
+        if (rp.photoUrl && !local.players[pid].photoUrl) {
+          local.players[pid].photoUrl = rp.photoUrl;
+          changed = true;
+        }
       }
     }
   }
@@ -1684,6 +1690,20 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
     if (!local.paymentSettings) {
       local.paymentSettings = remote.paymentSettings;
       changed = true;
+    }
+  }
+
+  // 9. Merge Pending Player Photos
+  if (Array.isArray(remote.pendingPhotos)) {
+    if (!Array.isArray(local.pendingPhotos)) {
+      local.pendingPhotos = [];
+    }
+    const localPhotoIds = new Set((local.pendingPhotos as any[]).map((p) => p.id));
+    for (const rp of remote.pendingPhotos) {
+      if (!localPhotoIds.has(rp.id)) {
+        local.pendingPhotos.push(rp);
+        changed = true;
+      }
     }
   }
 
@@ -2047,6 +2067,100 @@ app.post('/api/admin/user/approve', (req: Request, res: Response) => {
       teamName: user.teamName,
       isApproved: user.isApproved,
     },
+  });
+});
+
+// --- Player Profile Picture Suggestion & Admin Approval ---
+
+// Any authenticated manager can suggest/upload a photo for a player
+app.post('/api/player/photo/suggest', (req: Request, res: Response) => {
+  const { playerId, photoUrl } = req.body;
+  if (!playerId || !photoUrl) {
+    return res.status(400).json({ error: 'playerId and photoUrl are required' });
+  }
+
+  const data = db.getData();
+  const player = data.players[playerId];
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  // Identify submitting user from auth token if available
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const user = token ? Object.values(data.users || {}).find((u) => u.token === token) : null;
+  const suggestedBy = user ? `@${user.username}` : (req.body.suggestedBy || 'manager');
+
+  if (!data.pendingPhotos) data.pendingPhotos = [];
+
+  const photoEntry = {
+    id: `photo_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    playerId,
+    photoUrl,
+    suggestedBy,
+    suggestedAt: new Date().toISOString(),
+  };
+
+  data.pendingPhotos.push(photoEntry);
+  player.pendingPhotoUrl = photoUrl;
+
+  db.save();
+  scheduleAutoSyncToGitHub(`User ${suggestedBy} suggested photo for player ${player.webName}`);
+
+  res.json({
+    success: true,
+    message: 'Photo submitted! Administrators will review and approve it shortly.',
+    pendingPhoto: photoEntry,
+  });
+});
+
+// Admin: List all pending player photos
+app.get('/api/admin/player-photos', (req: Request, res: Response) => {
+  const data = db.getData();
+  res.json({
+    success: true,
+    pendingPhotos: data.pendingPhotos || [],
+  });
+});
+
+// Admin: Approve or Reject a player photo
+app.post('/api/admin/player-photo/review', (req: Request, res: Response) => {
+  const { photoId, approve } = req.body;
+  if (!photoId) {
+    return res.status(400).json({ error: 'photoId is required' });
+  }
+
+  const data = db.getData();
+  if (!data.pendingPhotos) data.pendingPhotos = [];
+
+  const idx = data.pendingPhotos.findIndex((p: any) => p.id === photoId);
+  if (idx === -1) {
+    return res.status(404).json({ error: 'Pending photo not found' });
+  }
+
+  const item = data.pendingPhotos[idx];
+  const player = data.players[item.playerId];
+
+  if (approve) {
+    if (player) {
+      player.photoUrl = item.photoUrl;
+      delete player.pendingPhotoUrl;
+    }
+  } else {
+    if (player && player.pendingPhotoUrl === item.photoUrl) {
+      delete player.pendingPhotoUrl;
+    }
+  }
+
+  data.pendingPhotos.splice(idx, 1);
+  db.save();
+
+  scheduleAutoSyncToGitHub(`Admin ${approve ? 'approved' : 'rejected'} photo for player ${player?.webName || item.playerId}`, true);
+
+  res.json({
+    success: true,
+    message: approve ? `Photo approved for ${player?.webName || 'player'}!` : 'Photo rejected.',
+    photoUrl: approve ? item.photoUrl : null,
   });
 });
 

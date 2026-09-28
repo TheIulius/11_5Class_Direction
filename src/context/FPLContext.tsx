@@ -28,7 +28,7 @@ import * as api from '../services/api';
 
 export const INITIAL_BUDGET = 55.0;
 
-export type TabType = 'team' | 'transfers' | 'standings' | 'leagues' | 'fixtures' | 'dev';
+export type TabType = 'team' | 'transfers' | 'players' | 'standings' | 'leagues' | 'fixtures' | 'dev' | 'managers';
 
 export interface ManagerSummary {
   id: string;

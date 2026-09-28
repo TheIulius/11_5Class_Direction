@@ -5,6 +5,7 @@ import { CLUBS, getSortedSchoolClubs } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { SlideToConfirm } from './SlideToConfirm';
+import { IOSSwitch } from '../common/IOSSwitch';
 import { CommandPalette } from './CommandPalette';
 import { MatchDayAdmin } from './MatchDayAdmin';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -974,11 +975,15 @@ export const AdminPortal: React.FC = () => {
           <div className="space-y-4 animate-fade-in">
             {/* Squad Lock Status Hero Card */}
             <div className="p-5 rounded-2xl bg-zinc-900 border border-white/10 space-y-4 text-center">
-              <div className="w-12 h-12 mx-auto rounded-2xl flex items-center justify-center border transition-all">
+              <div className={`w-14 h-14 mx-auto rounded-2xl flex items-center justify-center border transition-all ${
+                isSquadLocked
+                  ? 'bg-rose-500/15 border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.2)]'
+                  : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
+              }`}>
                 {isSquadLocked ? (
-                  <Lock className="w-6 h-6 text-rose-400" />
+                  <Lock className="w-7 h-7 text-rose-400" />
                 ) : (
-                  <Unlock className="w-6 h-6 text-emerald-400" />
+                  <Unlock className="w-7 h-7 text-emerald-400" />
                 )}
               </div>
 
@@ -993,27 +998,36 @@ export const AdminPortal: React.FC = () => {
                 </p>
               </div>
 
-              <div className="max-w-md mx-auto pt-2">
-                <SlideToConfirm
-                  label={isSquadLocked ? 'Slide to Unlock Lineups' : 'Slide to Lock Lineups for Kickoff'}
-                  confirmLabel={isSquadLocked ? 'Lineups Unlocked' : 'Lineups Locked'}
-                  variant={isSquadLocked ? 'warning' : 'danger'}
-                  onConfirm={async () => {
-                    if (isSquadLocked) {
-                      await setDeadline({
-                        gameweek: currentGW,
-                        deadlineTime: new Date(Date.now() + 86400000 * 2).toISOString(),
-                      });
-                      showNotification('🔓 Lineups unlocked! Transfers are open.');
-                    } else {
-                      await setDeadline({
-                        gameweek: currentGW,
-                        deadlineTime: new Date(Date.now() - 1000).toISOString(),
-                      });
-                      showNotification('🔒 Lineups locked! Lineups are frozen for kickoff.');
-                    }
-                  }}
-                />
+              <div className="flex flex-col items-center justify-center pt-2 gap-2">
+                <div className="inline-flex items-center gap-4 bg-zinc-950/80 px-5 py-3 rounded-2xl border border-white/10 shadow-lg">
+                  <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
+                    {isSquadLocked ? 'Lineups Locked' : 'Lineups Open'}
+                  </span>
+                  <IOSSwitch
+                    size="lg"
+                    color={isSquadLocked ? 'rose' : 'emerald'}
+                    checked={isSquadLocked}
+                    ariaLabel="Toggle Lineup Lock"
+                    onChange={async (newLocked) => {
+                      if (!newLocked) {
+                        await setDeadline({
+                          gameweek: currentGW,
+                          deadlineTime: new Date(Date.now() + 86400000 * 2).toISOString(),
+                        });
+                        showNotification('🔓 Lineups unlocked! Transfers are open.');
+                      } else {
+                        await setDeadline({
+                          gameweek: currentGW,
+                          deadlineTime: new Date(Date.now() - 1000).toISOString(),
+                        });
+                        showNotification('🔒 Lineups locked! Lineups are frozen for kickoff.');
+                      }
+                    }}
+                  />
+                </div>
+                <span className="text-[11px] text-zinc-500 font-medium">
+                  {isSquadLocked ? 'Tap or slide switch to unlock and allow transfers' : 'Tap or slide switch to freeze all lineups for kickoff'}
+                </span>
               </div>
             </div>
 

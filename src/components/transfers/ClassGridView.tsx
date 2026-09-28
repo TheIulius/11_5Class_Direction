@@ -169,7 +169,15 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
           {/* Modal Top Header */}
           <div className="relative p-3.5 sm:p-5 bg-slate-100 dark:bg-zinc-950 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <KitJersey clubId={detailPlayer.clubId} position={detailPlayer.position} className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0" />
+              {detailPlayer.photoUrl ? (
+                <img
+                  src={detailPlayer.photoUrl}
+                  alt={detailPlayer.name}
+                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-zinc-900"
+                />
+              ) : (
+                <KitJersey clubId={detailPlayer.clubId} position={detailPlayer.position} className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0" />
+              )}
               <div>
                 <div className="flex items-center gap-2">
                   <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
