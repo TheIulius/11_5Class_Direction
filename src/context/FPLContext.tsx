@@ -131,6 +131,7 @@ interface FPLContextType {
   lineupVisibility: LineupVisibilityMode;
   isLineupsVisible: boolean;
   setLineupVisibility: (mode: LineupVisibilityMode) => Promise<void>;
+  isCurrentGWFinished: boolean;
 }
 
 const STORAGE_KEY_AUTH_TOKEN = 'fpl_auth_token_v1';
@@ -588,6 +589,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem(STORAGE_KEY_GW, currentGW.toString());
   }, [currentGW]);
 
+  // Check if current gameweek has ended
+  const isCurrentGWFinished = useMemo(() => {
+    const gwFixtures = fixtures.filter((f) => f.gameweek === currentGW);
+    return gwFixtures.length > 0 && gwFixtures.every((f) => Boolean(f.isFinished));
+  }, [fixtures, currentGW]);
+
   // Calculate points dynamically
   const calculationResult = useMemo(() => {
     return calculateGameweekSquadPoints(
@@ -597,9 +604,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       squad.activeChip,
       squad.transfersMadeThisGW,
       squad.freeTransfers,
-      fixtures
+      fixtures,
+      isCurrentGWFinished
     );
-  }, [squad, players, currentGW, fixtures]);
+  }, [squad, players, currentGW, fixtures, isCurrentGWFinished]);
 
   const teamValue = useMemo(() => {
     let cost = 0;
@@ -1762,6 +1770,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         lineupVisibility,
         isLineupsVisible,
         setLineupVisibility,
+        isCurrentGWFinished,
       }}
     >
       {children}

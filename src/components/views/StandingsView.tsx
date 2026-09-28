@@ -9,8 +9,19 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ManagerSquadModal } from '../leagues/ManagerSquadModal';
-import { getSortedSchoolClubs } from '../../data/clubs';
+
+type GradeOption = 'ALL' | '9' | '10' | '11' | '12';
+type SectionOption = 'ALL' | '1' | '2' | '3' | '4' | '5' | '6' | '7';
+
+const GRADES: { id: GradeOption; label: string }[] = [
+  { id: 'ALL', label: 'All' },
+  { id: '9', label: '9th' },
+  { id: '10', label: '10th' },
+  { id: '11', label: '11th' },
+  { id: '12', label: '12th' },
+];
 
 export const StandingsView: React.FC = () => {
   const { leagues, currentManager, authUser, currentGW, clubs } = useFPL();
@@ -19,13 +30,18 @@ export const StandingsView: React.FC = () => {
   const members = globalLeague?.members || [];
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [classFilter, setClassFilter] = useState('ALL');
+  const [selectedGrade, setSelectedGrade] = useState<GradeOption>('ALL');
+  const [selectedSection, setSelectedSection] = useState<SectionOption>('ALL');
   const [inspectedManagerId, setInspectedManagerId] = useState<string | null>(null);
 
-  const sortedClubs = useMemo(() => getSortedSchoolClubs(clubs), [clubs]);
   const currentUserId = authUser?.id || currentManager?.id || 'user_1';
 
-  // Filter members by search and class
+  const handleGradeChange = (grade: GradeOption) => {
+    setSelectedGrade(grade);
+    setSelectedSection('ALL');
+  };
+
+  // Filter members by search and Two-Tier Grade/Section pills
   const filteredMembers = useMemo(() => {
     return members.filter((member: any) => {
       // 1. Search Query
@@ -37,28 +53,53 @@ export const StandingsView: React.FC = () => {
         if (!matchesName) return false;
       }
 
-      // 2. Class Filter
-      if (classFilter !== 'ALL') {
-        const targetClass = classFilter.toLowerCase(); // e.g. '11/5' or 'sch_11_5'
-        const cleanTarget = targetClass.replace(/[^0-9]/g, ''); // e.g. '115'
+      // 2. Grade & Section Filter
+      if (selectedGrade !== 'ALL') {
+        const fields = [
+          member.club,
+          member.clubId,
+          member.class,
+          member.classId,
+          member.teamName,
+          member.managerName,
+        ]
+          .filter(Boolean)
+          .map((s: string) => s.toLowerCase());
 
-        const matchesTeamText =
-          member.teamName?.toLowerCase().includes(targetClass) ||
-          member.managerName?.toLowerCase().includes(targetClass);
+        const lineupClubs = Array.isArray(member.lineup)
+          ? member.lineup.map((p: any) => (p.clubId || '').toLowerCase())
+          : [];
 
-        const matchesLineupClub =
-          Array.isArray(member.lineup) &&
-          member.lineup.some((p: any) => {
-            const clubIdClean = (p.clubId || '').toLowerCase().replace(/[^0-9]/g, '');
-            return clubIdClean.includes(cleanTarget);
-          });
+        const allStrings = [...fields, ...lineupClubs];
 
-        if (!matchesTeamText && !matchesLineupClub) return false;
+        if (selectedSection === 'ALL') {
+          // If selectedGrade is "10" and selectedSection is "ALL", filter managers whose club/class starts with "SCH_10_" or "10/"
+          const pat1 = `sch_${selectedGrade}_`;
+          const pat2 = `${selectedGrade}/`;
+          const pat3 = `${selectedGrade}-`;
+          const matches = allStrings.some(
+            (str) =>
+              str.includes(pat1) ||
+              str.includes(pat2) ||
+              str.includes(pat3) ||
+              str.startsWith(`class ${selectedGrade}`)
+          );
+          if (!matches) return false;
+        } else {
+          // If selectedGrade is "10" and selectedSection is "3", filter managers matching "SCH_10_3" or "10/3"
+          const pat1 = `sch_${selectedGrade}_${selectedSection}`;
+          const pat2 = `${selectedGrade}/${selectedSection}`;
+          const pat3 = `${selectedGrade}-${selectedSection}`;
+          const matches = allStrings.some(
+            (str) => str.includes(pat1) || str.includes(pat2) || str.includes(pat3)
+          );
+          if (!matches) return false;
+        }
       }
 
       return true;
     });
-  }, [members, searchQuery, classFilter]);
+  }, [members, searchQuery, selectedGrade, selectedSection]);
 
   return (
     <div className="max-w-4xl mx-auto px-2 sm:px-6 pt-3 pb-28 select-none">
@@ -84,38 +125,95 @@ export const StandingsView: React.FC = () => {
           </span>
         </div>
 
-        {/* Search & Class Filter Bar */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 pt-1">
-          {/* Search Input */}
-          <div className="sm:col-span-7 relative flex items-center">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search manager or team..."
-              className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-emerald-500/50 transition-colors"
-            />
+        {/* Search Input */}
+        <div className="relative flex items-center pt-1">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search manager or team..."
+            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-emerald-500/50 transition-colors"
+          />
+        </div>
+
+        {/* Two-Tier Sliding Pill Strip */}
+        <div className="pt-1 space-y-1.5">
+          {/* Tier 1 (Grades): Horizontal row containing "All", "9th", "10th", "11th", "12th" */}
+          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/10 backdrop-blur-md">
+            {GRADES.map((grade) => {
+              const isActive = selectedGrade === grade.id;
+              return (
+                <button
+                  key={grade.id}
+                  type="button"
+                  onClick={() => handleGradeChange(grade.id)}
+                  className={`relative flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-colors cursor-pointer select-none text-center ${
+                    isActive
+                      ? 'text-white dark:text-slate-950 font-black'
+                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeGradePill"
+                      className="absolute inset-0 rounded-xl bg-slate-900 dark:bg-white shadow-xs"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                  <span className="relative z-10">{grade.label}</span>
+                </button>
+              );
+            })}
           </div>
 
-          {/* Classes Filter Dropdown (All Classes 28) */}
-          <div className="sm:col-span-5 relative">
-            <select
-              value={classFilter}
-              onChange={(e) => setClassFilter(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-xs font-semibold text-slate-800 dark:text-slate-200 outline-none focus:border-emerald-500/50 cursor-pointer transition-colors"
-            >
-              <option value="ALL">All Classes (28)</option>
-              {sortedClubs.map((club) => {
-                const classLabel = club.shortName || club.name;
-                return (
-                  <option key={club.id} value={classLabel}>
-                    Class {classLabel}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
+          {/* Tier 2 (Sections): Accordion container directly underneath Tier 1 */}
+          <AnimatePresence initial={false}>
+            {selectedGrade !== 'ALL' && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: 'easeInOut' }}
+                className="overflow-hidden"
+              >
+                <div className="pt-1 pb-0.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                  {/* "All [Grade]th" Button */}
+                  <button
+                    type="button"
+                    onClick={() => setSelectedSection('ALL')}
+                    className={`relative px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${
+                      selectedSection === 'ALL'
+                        ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
+                        : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10'
+                    }`}
+                  >
+                    All {selectedGrade}th
+                  </button>
+
+                  {/* 7 compact circular/rounded badges: "1", "2", "3", "4", "5", "6", "7" */}
+                  {(['1', '2', '3', '4', '5', '6', '7'] as SectionOption[]).map((sec) => {
+                    const isSecActive = selectedSection === sec;
+                    return (
+                      <button
+                        key={sec}
+                        type="button"
+                        onClick={() => setSelectedSection(sec)}
+                        className={`w-7 h-7 rounded-full text-xs font-bold shrink-0 flex items-center justify-center transition-all cursor-pointer ${
+                          isSecActive
+                            ? 'bg-emerald-500 text-slate-950 font-black shadow-xs ring-2 ring-emerald-500/40'
+                            : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200/80 dark:border-white/10'
+                        }`}
+                        title={`Class ${selectedGrade}/${sec}`}
+                      >
+                        {sec}
+                      </button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
@@ -229,7 +327,7 @@ export const StandingsView: React.FC = () => {
           })
         ) : (
           <div className="p-8 rounded-3xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400">
-            No managers found matching &ldquo;{searchQuery || classFilter}&rdquo;.
+            No managers found matching &ldquo;{searchQuery || (selectedGrade !== 'ALL' ? `Grade ${selectedGrade}${selectedSection !== 'ALL' ? `/${selectedSection}` : ''}` : 'filter')}&rdquo;.
           </div>
         )}
       </div>

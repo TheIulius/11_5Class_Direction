@@ -15,7 +15,7 @@ interface ManagerSquadModalProps {
 }
 
 export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId, onClose }) => {
-  const { players, currentGW, playerOwnership, isLineupsVisible, authUser } = useFPL();
+  const { players, currentGW, playerOwnership, isLineupsVisible, authUser, fixtures, isCurrentGWFinished } = useFPL();
   const [loading, setLoading] = useState(true);
   const [selectedGW, setSelectedGW] = useState<number>(currentGW);
   const [managerData, setManagerData] = useState<{
@@ -54,17 +54,21 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   // Recalculate if user selects a past Gameweek
   useEffect(() => {
     if (managerData && !isLineupHidden && selectedGW && managerData.squad?.players?.length > 0) {
+      const isPastGW = selectedGW < currentGW;
+      const isThisGWFinished = isPastGW || (selectedGW === currentGW ? isCurrentGWFinished : false);
       const pastCalc = calculateGameweekSquadPoints(
         managerData.squad.players,
         players,
         selectedGW,
         selectedGW === currentGW ? managerData.squad.activeChip : null,
         selectedGW === currentGW ? managerData.squad.transfersMadeThisGW : 0,
-        managerData.squad.freeTransfers
+        managerData.squad.freeTransfers,
+        fixtures,
+        isThisGWFinished
       );
       setCalcResult(pastCalc);
     }
-  }, [selectedGW, managerData, players, currentGW, isLineupHidden]);
+  }, [selectedGW, managerData, players, currentGW, isLineupHidden, fixtures, isCurrentGWFinished]);
 
   if (!managerId) return null;
 

@@ -245,7 +245,8 @@ export function calculateGameweekSquadPoints(
   activeChip: ChipType | null,
   transfersMadeThisGW: number,
   freeTransfers: number,
-  fixtures?: { homeClubId: string; awayClubId: string; venue?: string }[]
+  fixtures?: { homeClubId: string; awayClubId: string; venue?: string; isFinished?: boolean; gameweek?: number }[],
+  isGWFinished?: boolean
 ): GameweekCalculationResult {
   const compValidation = validateSquadComposition(squadPlayers, allPlayers);
 
@@ -314,59 +315,75 @@ export function calculateGameweekSquadPoints(
     .filter((p) => !p.isStarter)
     .sort((a, b) => a.benchOrder - b.benchOrder);
 
+  // Determine if the Gameweek has ended
+  // Auto-substitutions ONLY activate after the Gameweek is ended.
+  let gwEnded = false;
+  if (typeof isGWFinished === 'boolean') {
+    gwEnded = isGWFinished;
+  } else if (fixtures && fixtures.length > 0) {
+    const gwFixtures = fixtures.filter((f) => f.gameweek === currentGW);
+    gwEnded = gwFixtures.length > 0 && gwFixtures.every((f) => Boolean(f.isFinished));
+  }
+
   // Auto-substitutions
   const autoSubstitutions: { outPlayerId: string; inPlayerId: string }[] = [];
   const currentStartingPlayers = [...starters];
   const usedBenchPlayerIds = new Set<string>();
 
-  // 1. Goalkeeper auto-sub
-  const starterGK = currentStartingPlayers.find(
-    (sp) => allPlayers[sp.playerId]?.position === 'GKP'
-  );
-  if (starterGK && minutesMap[starterGK.playerId] === 0) {
-    const benchGK = bench.find(
-      (bp) => allPlayers[bp.playerId]?.position === 'GKP' && minutesMap[bp.playerId] > 0
+  // Only perform auto-substitutions once the Gameweek is ended (and Bench Boost is not active)
+  if (gwEnded && !isBenchBoost) {
+    // 1. Goalkeeper auto-sub (if starter played 0 minutes)
+    const starterGK = currentStartingPlayers.find(
+      (sp) => allPlayers[sp.playerId]?.position === 'GKP'
     );
-    if (benchGK) {
-      const idx = currentStartingPlayers.findIndex((p) => p.playerId === starterGK.playerId);
-      if (idx !== -1) {
-        currentStartingPlayers[idx] = benchGK;
-        usedBenchPlayerIds.add(benchGK.playerId);
-        autoSubstitutions.push({
-          outPlayerId: starterGK.playerId,
-          inPlayerId: benchGK.playerId,
-        });
+    if (starterGK && (minutesMap[starterGK.playerId] || 0) === 0) {
+      const benchGK = bench.find(
+        (bp) => allPlayers[bp.playerId]?.position === 'GKP' && (minutesMap[bp.playerId] || 0) > 0
+      );
+      if (benchGK) {
+        const idx = currentStartingPlayers.findIndex((p) => p.playerId === starterGK.playerId);
+        if (idx !== -1) {
+          currentStartingPlayers[idx] = benchGK;
+          usedBenchPlayerIds.add(benchGK.playerId);
+          autoSubstitutions.push({
+            outPlayerId: starterGK.playerId,
+            inPlayerId: benchGK.playerId,
+          });
+        }
       }
     }
-  }
 
-  // 2. Outfield auto-subs
-  for (let i = 0; i < currentStartingPlayers.length; i++) {
-    const sp = currentStartingPlayers[i];
-    const player = allPlayers[sp.playerId];
-    if (player?.position !== 'GKP' && minutesMap[sp.playerId] === 0) {
-      for (const bp of bench) {
-        const benchPlayer = allPlayers[bp.playerId];
-        if (
-          benchPlayer &&
-          benchPlayer.position !== 'GKP' &&
-          !usedBenchPlayerIds.has(bp.playerId) &&
-          minutesMap[bp.playerId] > 0
-        ) {
-          const candidateStarting = [...currentStartingPlayers];
-          candidateStarting[i] = bp;
-          const candidatePositions = candidateStarting.map(
-            (p) => allPlayers[p.playerId]?.position
-          );
+    // 2. Outfield auto-subs
+    // Any starting outfield player with 0 minutes in the GW is replaced by
+    // the highest priority bench player (benchOrder 1, 2, 3) who played (> 0 minutes)
+    // and keeps the starting formation valid (1-2-2, 2-1-2, 2-2-1, 1-3-1, 3-1-1).
+    for (let i = 0; i < currentStartingPlayers.length; i++) {
+      const sp = currentStartingPlayers[i];
+      const player = allPlayers[sp.playerId];
+      if (player?.position !== 'GKP' && (minutesMap[sp.playerId] || 0) === 0) {
+        for (const bp of bench) {
+          const benchPlayer = allPlayers[bp.playerId];
+          if (
+            benchPlayer &&
+            benchPlayer.position !== 'GKP' &&
+            !usedBenchPlayerIds.has(bp.playerId) &&
+            (minutesMap[bp.playerId] || 0) > 0
+          ) {
+            const candidateStarting = [...currentStartingPlayers];
+            candidateStarting[i] = bp;
+            const candidatePositions = candidateStarting.map(
+              (p) => allPlayers[p.playerId]?.position
+            );
 
-          if (isValidStartingXI(candidatePositions)) {
-            currentStartingPlayers[i] = bp;
-            usedBenchPlayerIds.add(bp.playerId);
-            autoSubstitutions.push({
-              outPlayerId: sp.playerId,
-              inPlayerId: bp.playerId,
-            });
-            break;
+            if (isValidStartingXI(candidatePositions)) {
+              currentStartingPlayers[i] = bp;
+              usedBenchPlayerIds.add(bp.playerId);
+              autoSubstitutions.push({
+                outPlayerId: sp.playerId,
+                inPlayerId: bp.playerId,
+              });
+              break;
+            }
           }
         }
       }
