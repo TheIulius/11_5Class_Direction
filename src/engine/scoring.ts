@@ -373,15 +373,10 @@ export function calculateGameweekSquadPoints(
     }
   }
 
-  // Captaincy logic
+  // Captaincy logic: strictly only the captain receives double points (or 3x with Triple Captain)
+  // Vice-Captain does not receive double points
   const captain = squadPlayers.find((p) => p.isCaptain);
-  const viceCaptain = squadPlayers.find((p) => p.isViceCaptain);
-
-  let effectiveCaptainId = captain ? captain.playerId : '';
-  // If Captain played 0 mins, fallback to Vice-Captain
-  if (captain && minutesMap[captain.playerId] === 0 && viceCaptain && minutesMap[viceCaptain.playerId] > 0) {
-    effectiveCaptainId = viceCaptain.playerId;
-  }
+  const effectiveCaptainId = captain ? captain.playerId : '';
 
   const captainMultiplier = isTripleCaptain ? 3 : 2;
 
