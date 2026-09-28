@@ -1024,6 +1024,7 @@ app.post('/api/admin/stat', (req: Request, res: Response) => {
     goals: 0,
     assists: 0,
     cleanSheet: false,
+    goalsConceded: 0,
     yellowCards: 0,
     redCards: 0,
     penaltiesSaved: 0,
@@ -1034,15 +1035,27 @@ app.post('/api/admin/stat', (req: Request, res: Response) => {
 
   const updatedStats = { ...currentStats, ...stats };
   player.gwStats[gw] = updatedStats;
-  player.gwPoints = calculatePlayerPoints(player.position, updatedStats);
 
-  // Recalculate total points
+  const normClub = player.clubId === 'SCH' ? 'SCH_11_5' : player.clubId;
+  const gwFixture = (data.fixtures || []).find(
+    (f: Fixture) => f.gameweek === gw && (f.homeClubId === normClub || f.awayClubId === normClub)
+  );
+  const isOnePrice = gwFixture?.venue === 'one_price';
+  player.gwPoints = calculatePlayerPoints(player.position, updatedStats, isOnePrice);
+
+  // Recalculate total points across all GWs
   let sum = 0;
-  Object.values(player.gwStats).forEach((s) => {
-    sum += calculatePlayerPoints(player.position, s);
+  Object.entries(player.gwStats).forEach(([gKey, s]: [string, any]) => {
+    const gNum = parseInt(gKey, 10);
+    const gFix = (data.fixtures || []).find(
+      (f: Fixture) => f.gameweek === gNum && (f.homeClubId === normClub || f.awayClubId === normClub)
+    );
+    const gOnePrice = gFix?.venue === 'one_price';
+    sum += calculatePlayerPoints(player.position, s, gOnePrice);
   });
   player.totalPoints = sum;
 
+  recalculateAllManagersLeaguePoints(data);
   db.save();
   res.json({ success: true, player });
 });
@@ -1178,7 +1191,8 @@ function recalculateAllManagersLeaguePoints(data: any) {
       currentGW,
       m.squad?.activeChip || null,
       m.squad?.transfersMadeThisGW || 0,
-      m.squad?.freeTransfers || 1
+      m.squad?.freeTransfers || 1,
+      data.fixtures
     );
 
     let cumulativeTotal = 0;
@@ -1189,7 +1203,8 @@ function recalculateAllManagersLeaguePoints(data: any) {
         gw,
         gw === currentGW ? m.squad?.activeChip || null : null,
         gw === currentGW ? m.squad?.transfersMadeThisGW || 0 : 0,
-        m.squad?.freeTransfers || 1
+        m.squad?.freeTransfers || 1,
+        data.fixtures
       );
       cumulativeTotal += gwCalc.totalPoints;
     }
@@ -1310,8 +1325,9 @@ app.post('/api/admin/gameweek', (req: Request, res: Response) => {
         const fix = (data.fixtures || []).find(
           (fx: any) => fx.gameweek === gNum && (fx.homeClubId === p.clubId || fx.awayClubId === p.clubId)
         );
-        const bd = calculatePlayerPoints(p.position, st, fix?.venue);
-        total += bd.total;
+        const isOnePrice = fix?.venue === 'one_price';
+        const pts = calculatePlayerPoints(p.position, st, isOnePrice);
+        total += pts;
       });
       p.totalPoints = total;
     });
@@ -2814,6 +2830,7 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
     player.totalPoints = sum;
   }
 
+  recalculateAllManagersLeaguePoints(data);
   db.save();
   res.json({ success: true, fixture, players: data.players });
 });

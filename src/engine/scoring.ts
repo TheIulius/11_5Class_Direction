@@ -70,12 +70,10 @@ export function calculatePlayerPoints(
     // FWD: 0 points for clean sheet
   }
 
-  // 4b. Goals conceded (KCL: -1 point for every 2 goals conceded for GKP and DEF)
+  // 4b. Goals conceded: goalkeepers and defenders points reduced by round_down(goals_scored_against_them / 2)
   if (position === 'GKP' || position === 'DEF') {
-    const conceded = stats.goalsConceded || 0;
-    if (conceded >= 2) {
-      points -= Math.floor(conceded / 2);
-    }
+    const conceded = Math.max(0, stats.goalsConceded || 0);
+    points -= Math.floor(conceded / 2);
   }
 
   // 5. Penalty saved (KCL: +3 for GK only)

@@ -238,12 +238,14 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                     <span className="font-sans font-bold text-rose-300">
                       {lang === 'geo' ? 'გაშვებული გოლები (DEF/GK)' : 'Goals Conceded (DEF/GK)'}
                     </span>
-                    <span className="font-black text-rose-400">-1 ქულა / 2 გოლზე</span>
+                    <span className="font-black text-rose-400">
+                      {lang === 'geo' ? '-⌊გოლები / 2⌋ ქულა' : '-⌊goals / 2⌋ pts'}
+                    </span>
                   </div>
-                  <p className="font-sans text-[10px] text-slate-400">
+                  <p className="font-sans text-[10px] text-slate-400 leading-relaxed">
                     {lang === 'geo'
-                      ? 'მეკარეებსა და მცველებს ყოველ 2 გაშვებულ გოლზე აკლდებათ -1 ქულა.'
-                      : '-1 point for every 2 goals conceded by the team.'}
+                      ? 'მეკარეებსა და მცველებს აკლდებათ round_down(გაშვებული გოლები / 2) ქულა (მაგ. 0-1 გოლზე: 0, 2-3 გოლზე: -1, 4-5 გოლზე: -2, 8 გოლზე: -4).'
+                      : 'Goalkeepers and defenders lose round_down(goals_conceded / 2) points (e.g. 0-1 goals: 0, 2-3 goals: -1, 4-5 goals: -2, 8 goals: -4).'}
                   </p>
                 </div>
 
