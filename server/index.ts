@@ -281,13 +281,7 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Password must be at least 4 characters' });
   }
 
-  // Pre-sync with GitHub to catch any remote registrations
-  try {
-    await syncDatabaseFromGitHub();
-  } catch (e) {
-    // Non-blocking fallback
-  }
-
+  // In-memory data is the live source of truth
   const data = db.getData();
   if (!data.users) data.users = {};
 
@@ -1499,6 +1493,11 @@ app.delete('/api/admin/activation-codes/:code', (req: Request, res: Response) =>
 // In-memory runtime GitHub token (can be set via environment variable or admin portal)
 let runtimeGithubToken = process.env.GITHUB_TOKEN || '';
 let autoSyncTimer: NodeJS.Timeout | null = null;
+let hasPendingLocalChanges = false;
+let lastLocalWriteTime = 0;
+let isCommittingToGitHub = false;
+let pendingCommitAfterCurrent = false;
+let pendingCommitReason = '';
 
 export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
   if (!remote || typeof remote !== 'object') return false;
@@ -1691,7 +1690,15 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
   return changed;
 }
 
-export async function syncDatabaseFromGitHub(explicitToken?: string): Promise<{ success: boolean; changed: boolean; error?: string }> {
+export async function syncDatabaseFromGitHub(explicitToken?: string, force: boolean = false): Promise<{ success: boolean; changed: boolean; error?: string }> {
+  // If not explicitly forced (e.g. boot-up or manual dev action), protect pending local writes
+  if (!force) {
+    if (hasPendingLocalChanges || isCommittingToGitHub || (Date.now() - lastLocalWriteTime < 15000)) {
+      console.log('[GitHub Sync] Skipped: local in-memory modifications are active/pending commit.');
+      return { success: true, changed: false };
+    }
+  }
+
   db.isSyncing = true;
   try {
     const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN;
@@ -1725,11 +1732,21 @@ export async function syncDatabaseFromGitHub(explicitToken?: string): Promise<{ 
       const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
       const remoteData = JSON.parse(remoteRaw);
   
-      // Overwrite local memory and disk directly with the fresh remote database
-      db.setData(remoteData);
-      console.log('[GitHub Sync] Remote database loaded into memory.');
-  
-      return { success: true, changed: true };
+      if (force) {
+        // Direct full database load (initial boot or explicit admin reset)
+        db.setData(remoteData);
+        console.log('[GitHub Sync] Remote database loaded into memory (forced).');
+        return { success: true, changed: true };
+      } else {
+        // Safe non-destructive merge that never reverts local squads or approvals
+        const local = db.getData();
+        const changed = mergeDatabases(local, remoteData);
+        if (changed) {
+          db.saveSilent();
+          console.log('[GitHub Sync] Remote database merged into memory without clobbering local changes.');
+        }
+        return { success: true, changed };
+      }
     } catch (err: any) {
       console.warn('[GitHub Sync] Error syncing from GitHub:', err?.message || err);
       return { success: false, changed: false, error: err?.message };
@@ -1739,7 +1756,7 @@ export async function syncDatabaseFromGitHub(explicitToken?: string): Promise<{ 
   }
 }
 
-export async function commitDbToGitHub(message: string, explicitToken?: string) {
+export async function commitDbToGitHub(message: string, explicitToken?: string): Promise<{ success: boolean; commitUrl?: string; error?: string }> {
   const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN;
   const owner = process.env.GITHUB_OWNER || 'TheIulius';
   const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
@@ -1750,6 +1767,14 @@ export async function commitDbToGitHub(message: string, explicitToken?: string) 
     return { success: false, error: 'No GitHub token configured' };
   }
 
+  // If already committing, queue another commit after current finishes to avoid SHA 409 conflict
+  if (isCommittingToGitHub) {
+    pendingCommitAfterCurrent = true;
+    pendingCommitReason = message;
+    return { success: true };
+  }
+
+  isCommittingToGitHub = true;
   try {
     // 1. Fetch current file SHA from GitHub so we can update it without a conflict
     const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
@@ -1794,24 +1819,39 @@ export async function commitDbToGitHub(message: string, explicitToken?: string) 
     }
 
     console.log(`Successfully committed database to GitHub: "${commitMsg}"`);
+    hasPendingLocalChanges = false;
     return { success: true, commitUrl: putJson.commit?.html_url };
   } catch (err: any) {
     console.warn('GitHub auto-sync error:', err);
     return { success: false, error: err?.message || 'Sync error' };
+  } finally {
+    isCommittingToGitHub = false;
+    if (pendingCommitAfterCurrent) {
+      pendingCommitAfterCurrent = false;
+      const nextReason = pendingCommitReason;
+      setTimeout(() => {
+        commitDbToGitHub(nextReason);
+      }, 300);
+    }
   }
 }
 
-export function scheduleAutoSyncToGitHub(reason: string) {
+export function scheduleAutoSyncToGitHub(reason: string, immediate: boolean = false) {
+  hasPendingLocalChanges = true;
+  lastLocalWriteTime = Date.now();
+
   const token = runtimeGithubToken || process.env.GITHUB_TOKEN;
   if (!token) return;
+
   if (autoSyncTimer) clearTimeout(autoSyncTimer);
+  const delay = immediate ? 50 : 1000; // 1s debounce for batch edits, 50ms for immediate
   autoSyncTimer = setTimeout(async () => {
     try {
       await commitDbToGitHub(`Admin update: ${reason}`);
     } catch (e) {
       console.warn('Background auto-sync failed:', e);
     }
-  }, 2500); // 2.5-second debounce for batch actions
+  }, delay);
 }
 
 // Automatically sync all database saves (user registrations, squads, transfers, match events) to GitHub
@@ -1946,13 +1986,8 @@ app.post('/api/admin/club/add', (req: Request, res: Response) => {
 
 
 
-// 11d. Developer Admin: List Registered Users
-app.get('/api/admin/users', async (req: Request, res: Response) => {
-  try {
-    await syncDatabaseFromGitHub();
-  } catch (e) {
-    // Non-blocking fallback
-  }
+// 11d. Developer Admin: List Registered Users (Instant in-memory lookup)
+app.get('/api/admin/users', (req: Request, res: Response) => {
   const data = db.getData();
   const usersList = Object.values(data.users || {}).map((u) => {
     const isAdmin = isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isAdmin);
@@ -1969,6 +2004,16 @@ app.get('/api/admin/users', async (req: Request, res: Response) => {
     };
   });
   res.json({ success: true, users: usersList });
+});
+
+// Developer Admin: Explicitly Pull / Reload Database from GitHub
+app.post('/api/admin/db/pull-github', async (req: Request, res: Response) => {
+  const token = req.body.token || runtimeGithubToken || process.env.GITHUB_TOKEN;
+  const result = await syncDatabaseFromGitHub(token, true);
+  if (!result.success) {
+    return res.status(500).json({ error: result.error || 'Failed to pull from GitHub' });
+  }
+  return res.json({ success: true, message: 'Database reloaded from GitHub data branch!' });
 });
 
 // 11e. Developer Admin: Approve / Unapprove User Account
@@ -1990,7 +2035,7 @@ app.post('/api/admin/user/approve', (req: Request, res: Response) => {
   user.isApproved = newStatus;
   db.save();
 
-  scheduleAutoSyncToGitHub(`Admin ${newStatus ? 'approved' : 'unapproved'} user @${user.username}`);
+  scheduleAutoSyncToGitHub(`Admin ${newStatus ? 'approved' : 'unapproved'} user @${user.username}`, true);
 
   res.json({
     success: true,
@@ -2547,11 +2592,11 @@ app.use((req: Request, res: Response) => {
   res.sendFile(path.join(clientDist, 'index.html'));
 });
 
-// WITH THIS:
+// Startup initialization: load latest database from GitHub data branch
 async function startServer() {
   console.log('[Startup] Syncing latest database from data branch before accepting traffic...');
   try {
-    const syncRes = await syncDatabaseFromGitHub();
+    const syncRes = await syncDatabaseFromGitHub(undefined, true);
     if (syncRes.success) {
       console.log(`[Startup] GitHub database sync successful (changed: ${syncRes.changed})`);
     }
@@ -2566,7 +2611,9 @@ async function startServer() {
 
 startServer();
 
-// Periodic background sync from GitHub every 30 seconds to keep multi-container Render instances aligned
+// Periodic background sync from GitHub every 5 minutes only if server is completely idle (no pending local writes)
 setInterval(() => {
-  syncDatabaseFromGitHub().catch(() => {});
-}, 30000);
+  if (!hasPendingLocalChanges && !isCommittingToGitHub && Date.now() - lastLocalWriteTime > 60000) {
+    syncDatabaseFromGitHub(undefined, false).catch(() => {});
+  }
+}, 300000);

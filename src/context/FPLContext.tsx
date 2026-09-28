@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   Player,
   Squad,
@@ -193,6 +193,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [availableManagers, setAvailableManagers] = useState<ManagerSummary[]>([]);
 
   const [isManagerModalOpen, setIsManagerModalOpen] = useState<boolean>(false);
+  const lastSquadEditTimeRef = useRef<number>(0);
 
   // Theme Management (Dark / Light Mode)
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -456,7 +457,9 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             managerName: data.activeManager.managerName,
             teamName: data.activeManager.teamName,
           });
-          if (data.activeManager.squad) {
+          // Do not overwrite squad if user actively made transfers or lineup edits in the last 6 seconds
+          const isRecentEdit = Date.now() - lastSquadEditTimeRef.current < 6000;
+          if (!isRecentEdit && data.activeManager.squad) {
             let activeSq = data.activeManager.squad;
             const allP = data.players || players;
 
@@ -808,8 +811,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setSquad(updatedSquad);
       localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
 
+      lastSquadEditTimeRef.current = Date.now();
+      const activeId = authUser?.id || currentManagerId;
       const res = await api.saveSquadApi(
-        currentManagerId,
+        activeId,
         targetPlayers,
         updatedSquad.teamName,
         calculatedBank,
@@ -934,6 +939,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newPlayers = normalizeSquadLineup(newPlayers, { ...players, [p.id]: p });
     }
 
+    lastSquadEditTimeRef.current = Date.now();
     const updatedSquad: Squad = {
       ...squad,
       players: newPlayers,
@@ -942,9 +948,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
-    api.saveSquadApi(currentManagerId, newPlayers, updatedSquad.teamName, newBank).catch((e) => {
-      console.warn('Auto-save squad buy player failed:', e);
-    });
+    const activeId = authUser?.id || currentManagerId;
+    if (activeId) {
+      api.saveSquadApi(activeId, newPlayers, updatedSquad.teamName, newBank).catch((e) => {
+        console.warn('Auto-save squad buy player failed:', e);
+      });
+    }
 
     return { success: true };
   };
@@ -991,6 +1000,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const newBank = Math.round((squad.bank + refund) * 10) / 10;
     const cleanRemaining = sanitizeCaptaincy(remaining);
+    lastSquadEditTimeRef.current = Date.now();
     const updatedSquad: Squad = {
       ...squad,
       players: cleanRemaining,
@@ -999,9 +1009,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
-    api.saveSquadApi(currentManagerId, cleanRemaining, updatedSquad.teamName, newBank).catch((e) => {
-      console.warn('Auto-save squad remove player failed:', e);
-    });
+    const activeId = authUser?.id || currentManagerId;
+    if (activeId) {
+      api.saveSquadApi(activeId, cleanRemaining, updatedSquad.teamName, newBank).catch((e) => {
+        console.warn('Auto-save squad remove player failed:', e);
+      });
+    }
 
     return { success: true };
   };
@@ -1101,6 +1114,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       });
     }
 
+    lastSquadEditTimeRef.current = Date.now();
     const cleanUpdatedPlayers = sanitizeCaptaincy(updatedPlayers);
     const updatedSquad: Squad = {
       ...squad,
@@ -1141,6 +1155,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
 
     // Direct assignment if target order slot is vacant
+    lastSquadEditTimeRef.current = Date.now();
     const updated = squad.players.map((p) =>
       p.playerId === playerId ? { ...p, benchOrder: clampedOrder } : p
     );
@@ -1161,6 +1176,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = squad.players.find((p) => p.playerId === playerId);
     if (!target || !target.isStarter) return;
 
+    lastSquadEditTimeRef.current = Date.now();
     const updated = sanitizeCaptaincy(
       squad.players.map((sp) => ({
         ...sp,
@@ -1172,9 +1188,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedSquad = { ...squad, players: updated };
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
-    api.saveSquadApi(currentManagerId, updated, updatedSquad.teamName, updatedSquad.bank).catch((err) => {
-      console.warn('Auto-save captain failed:', err);
-    });
+    const activeId = authUser?.id || currentManagerId;
+    if (activeId) {
+      api.saveSquadApi(activeId, updated, updatedSquad.teamName, updatedSquad.bank).catch((err) => {
+        console.warn('Auto-save captain failed:', err);
+      });
+    }
   };
 
   // Set Vice-Captain
@@ -1183,6 +1202,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const target = squad.players.find((p) => p.playerId === playerId);
     if (!target || !target.isStarter || target.isCaptain) return;
 
+    lastSquadEditTimeRef.current = Date.now();
     const updated = sanitizeCaptaincy(
       squad.players.map((sp) => ({
         ...sp,
@@ -1194,19 +1214,26 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedSquad = { ...squad, players: updated };
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
-    api.saveSquadApi(currentManagerId, updated, updatedSquad.teamName, updatedSquad.bank).catch((err) => {
-      console.warn('Auto-save vice captain failed:', err);
-    });
+    const activeId = authUser?.id || currentManagerId;
+    if (activeId) {
+      api.saveSquadApi(activeId, updated, updatedSquad.teamName, updatedSquad.bank).catch((err) => {
+        console.warn('Auto-save vice captain failed:', err);
+      });
+    }
   };
 
   // Activate Chip
   const activateChip = (chip: ChipType): boolean => {
     if (isSquadLocked || squad.usedChips[chip]) return false;
     const newActive = squad.activeChip === chip ? null : chip;
+    lastSquadEditTimeRef.current = Date.now();
     const updatedSquad = { ...squad, activeChip: newActive };
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
-    api.activateChipApi(currentManagerId, chip).catch(console.error);
+    const activeId = authUser?.id || currentManagerId;
+    if (activeId) {
+      api.activateChipApi(activeId, chip).catch(console.error);
+    }
     return true;
   };
 
@@ -1249,6 +1276,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
     }
 
+    lastSquadEditTimeRef.current = Date.now();
     const updatedPlayers = sanitizeCaptaincy(
       squad.players.map((sp) =>
         sp.playerId === outPlayerId ? { ...sp, playerId: inPlayerId } : sp
@@ -1265,10 +1293,13 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
 
-    api.transferPlayerApi(currentManagerId, outPlayerId, inPlayerId).catch((e) => {
-      console.warn('transferPlayerApi failed, syncing via saveSquadApi:', e);
-      api.saveSquadApi(currentManagerId, updatedPlayers, updatedSquad.teamName, updatedSquad.bank).catch(console.error);
-    });
+    const activeId = authUser?.id || currentManagerId;
+    if (activeId) {
+      api.transferPlayerApi(activeId, outPlayerId, inPlayerId).catch((e) => {
+        console.warn('transferPlayerApi failed, syncing via saveSquadApi:', e);
+        api.saveSquadApi(activeId, updatedPlayers, updatedSquad.teamName, updatedSquad.bank).catch(console.error);
+      });
+    }
     return { success: true };
   };
 
