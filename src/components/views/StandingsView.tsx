@@ -11,17 +11,11 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ManagerSquadModal } from '../leagues/ManagerSquadModal';
-
-type GradeOption = 'ALL' | '9' | '10' | '11' | '12';
-type SectionOption = 'ALL' | '1' | '2' | '3' | '4' | '5' | '6' | '7';
-
-const GRADES: { id: GradeOption; label: string }[] = [
-  { id: 'ALL', label: 'All' },
-  { id: '9', label: '9th' },
-  { id: '10', label: '10th' },
-  { id: '11', label: '11th' },
-  { id: '12', label: '12th' },
-];
+import {
+  ClassTwoTierPillStrip,
+  GradeOption,
+  SectionOption,
+} from '../common/ClassTwoTierPillStrip';
 
 export const StandingsView: React.FC = () => {
   const { leagues, currentManager, authUser, currentGW, clubs } = useFPL();
@@ -138,83 +132,13 @@ export const StandingsView: React.FC = () => {
         </div>
 
         {/* Two-Tier Sliding Pill Strip */}
-        <div className="pt-1 space-y-1.5">
-          {/* Tier 1 (Grades): Horizontal row containing "All", "9th", "10th", "11th", "12th" */}
-          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200/80 dark:border-white/10 backdrop-blur-md">
-            {GRADES.map((grade) => {
-              const isActive = selectedGrade === grade.id;
-              return (
-                <button
-                  key={grade.id}
-                  type="button"
-                  onClick={() => handleGradeChange(grade.id)}
-                  className={`relative flex-1 py-1.5 px-2 rounded-xl text-xs font-bold transition-colors cursor-pointer select-none text-center ${
-                    isActive
-                      ? 'text-white dark:text-slate-950 font-black'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-                  }`}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeGradePill"
-                      className="absolute inset-0 rounded-xl bg-slate-900 dark:bg-white shadow-xs"
-                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative z-10">{grade.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Tier 2 (Sections): Accordion container directly underneath Tier 1 */}
-          <AnimatePresence initial={false}>
-            {selectedGrade !== 'ALL' && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.22, ease: 'easeInOut' }}
-                className="overflow-hidden"
-              >
-                <div className="pt-1 pb-0.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
-                  {/* "All [Grade]th" Button */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedSection('ALL')}
-                    className={`relative px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${
-                      selectedSection === 'ALL'
-                        ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
-                        : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10'
-                    }`}
-                  >
-                    All {selectedGrade}th
-                  </button>
-
-                  {/* 7 compact circular/rounded badges: "1", "2", "3", "4", "5", "6", "7" */}
-                  {(['1', '2', '3', '4', '5', '6', '7'] as SectionOption[]).map((sec) => {
-                    const isSecActive = selectedSection === sec;
-                    return (
-                      <button
-                        key={sec}
-                        type="button"
-                        onClick={() => setSelectedSection(sec)}
-                        className={`w-7 h-7 rounded-full text-xs font-bold shrink-0 flex items-center justify-center transition-all cursor-pointer ${
-                          isSecActive
-                            ? 'bg-emerald-500 text-slate-950 font-black shadow-xs ring-2 ring-emerald-500/40'
-                            : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200/80 dark:border-white/10'
-                        }`}
-                        title={`Class ${selectedGrade}/${sec}`}
-                      >
-                        {sec}
-                      </button>
-                    );
-                  })}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <ClassTwoTierPillStrip
+          selectedGrade={selectedGrade}
+          selectedSection={selectedSection}
+          onGradeChange={handleGradeChange}
+          onSectionChange={setSelectedSection}
+          layoutIdPrefix="standingsView"
+        />
       </div>
 
       {/* Table Column Headers */}

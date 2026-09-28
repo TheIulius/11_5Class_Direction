@@ -5,6 +5,12 @@ import { CLUBS, getSortedSchoolClubs } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { ClassGridView } from '../transfers/ClassGridView';
+import {
+  ClassTwoTierPillStrip,
+  GradeOption,
+  SectionOption,
+  matchesGradeAndSection,
+} from '../common/ClassTwoTierPillStrip';
 import { suggestPlayerPhotoApi, adminRemovePlayerPhotoApi } from '../../services/api';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -51,7 +57,8 @@ export const PlayersView: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'classes'>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL');
-  const [clubFilter, setClubFilter] = useState<string>('ALL');
+  const [selectedGrade, setSelectedGrade] = useState<GradeOption>('ALL');
+  const [selectedSection, setSelectedSection] = useState<SectionOption>('ALL');
   const [sortBy, setSortBy] = useState<SortOption>('points');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
@@ -127,12 +134,9 @@ export const PlayersView: React.FC = () => {
       list = list.filter((p) => p.position === positionFilter);
     }
 
-    // Club filter
-    if (clubFilter !== 'ALL') {
-      list = list.filter((p) => {
-        const norm = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
-        return norm === clubFilter || p.clubId === clubFilter;
-      });
+    // Grade and Section filter
+    if (selectedGrade !== 'ALL') {
+      list = list.filter((p) => matchesGradeAndSection(p.clubId, selectedGrade, selectedSection));
     }
 
     // Sort
@@ -182,7 +186,7 @@ export const PlayersView: React.FC = () => {
     });
 
     return list;
-  }, [enrichedPlayers, searchQuery, positionFilter, clubFilter, sortBy, sortOrder, clubs]);
+  }, [enrichedPlayers, searchQuery, positionFilter, selectedGrade, selectedSection, sortBy, sortOrder, clubs]);
 
   const selectedPlayer = selectedPlayerId ? players[selectedPlayerId] : null;
   const enrichedSelectedPlayer = selectedPlayer
@@ -351,7 +355,7 @@ export const PlayersView: React.FC = () => {
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <span>📋 List View</span>
+            <span>📋 List</span>
           </button>
           <button
             onClick={() => setViewMode('classes')}
@@ -361,7 +365,7 @@ export const PlayersView: React.FC = () => {
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <span>🏫 Classes View</span>
+            <span>🏫 Classes</span>
           </button>
         </div>
       </div>
@@ -397,41 +401,34 @@ export const PlayersView: React.FC = () => {
         <div className="space-y-3.5">
           {/* Filters & Search Toolbar */}
           <div className="p-4 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-3 shadow-xs">
-            {/* Search Input & Club Select */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-              <div className="relative flex-1">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search player or class (e.g. 10/1)..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-emerald-500 transition-colors"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Class Dropdown */}
-              <select
-                value={clubFilter}
-                onChange={(e) => setClubFilter(e.target.value)}
-                className="px-3 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-300 focus:outline-hidden focus:border-emerald-500 cursor-pointer"
-              >
-                <option value="ALL">All Classes ({sortedClubs.length})</option>
-                {sortedClubs.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    Class {c.shortName || c.name}
-                  </option>
-                ))}
-              </select>
+            {/* Search Input */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search player or class (e.g. 10/1)..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-emerald-500 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
+
+            {/* Class Filter (Two-Tier Sliding Pill Strip) */}
+            <ClassTwoTierPillStrip
+              selectedGrade={selectedGrade}
+              selectedSection={selectedSection}
+              onGradeChange={setSelectedGrade}
+              onSectionChange={setSelectedSection}
+              layoutIdPrefix="playersView"
+            />
 
             {/* Position Filter Pills */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
@@ -520,7 +517,8 @@ export const PlayersView: React.FC = () => {
                   onClick={() => {
                     setSearchQuery('');
                     setPositionFilter('ALL');
-                    setClubFilter('ALL');
+                    setSelectedGrade('ALL');
+                    setSelectedSection('ALL');
                   }}
                   className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold"
                 >

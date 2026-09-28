@@ -22,6 +22,12 @@ import { validateSquadComposition } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { ClassGridView } from '../transfers/ClassGridView';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import {
+  ClassTwoTierPillStrip,
+  GradeOption,
+  SectionOption,
+  matchesGradeAndSection,
+} from '../common/ClassTwoTierPillStrip';
 
 export type SortOption =
   | 'points_desc'
@@ -55,7 +61,8 @@ export const TransfersView: React.FC = () => {
 
   // Filters & Search
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL');
-  const [clubFilter, setClubFilter] = useState<string>('ALL');
+  const [selectedGrade, setSelectedGrade] = useState<GradeOption>('ALL');
+  const [selectedSection, setSelectedSection] = useState<SectionOption>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('points_desc');
   const [affordableOnly, setAffordableOnly] = useState<boolean>(false);
@@ -130,9 +137,8 @@ export const TransfersView: React.FC = () => {
         if (squadPlayerIds.has(p.id) && (!outPlayer || p.id !== outPlayer.id)) return false;
         if (outPlayer && p.position !== outPlayer.position) return false;
         if (positionFilter !== 'ALL' && p.position !== positionFilter) return false;
-        if (clubFilter !== 'ALL') {
-          const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
-          if (normClub !== clubFilter) return false;
+        if (selectedGrade !== 'ALL') {
+          if (!matchesGradeAndSection(p.clubId, selectedGrade, selectedSection)) return false;
         }
         if (affordableOnly && p.cost > maxAvailableSpend) return false;
         if (searchQuery.trim()) {
@@ -172,7 +178,8 @@ export const TransfersView: React.FC = () => {
     squadPlayerIds,
     outPlayer,
     positionFilter,
-    clubFilter,
+    selectedGrade,
+    selectedSection,
     affordableOnly,
     searchQuery,
     sortBy,
@@ -556,7 +563,7 @@ export const TransfersView: React.FC = () => {
                   </span>
                 </div>
 
-                {/* View Mode Toggle: Grid vs List */}
+                {/* View Mode Toggle: Classes vs List */}
                 <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-xs">
                   <button
                     onClick={() => setViewMode('classes')}
@@ -567,8 +574,7 @@ export const TransfersView: React.FC = () => {
                     }`}
                     title="Class Grid View"
                   >
-                    <LayoutGrid className="w-3.5 h-3.5" />
-                    <span>Grid</span>
+                    <span>🏫 Classes</span>
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
@@ -579,8 +585,7 @@ export const TransfersView: React.FC = () => {
                     }`}
                     title="List View"
                   >
-                    <List className="w-3.5 h-3.5" />
-                    <span>List</span>
+                    <span>📋 List</span>
                   </button>
                 </div>
               </div>
@@ -653,33 +658,31 @@ export const TransfersView: React.FC = () => {
                   </button>
                 </div>
 
-                {/* Dropdowns in List mode */}
+                {/* Two-Tier Class Filter & Sort in List mode */}
                 {viewMode === 'list' && (
-                  <div className="grid grid-cols-2 gap-2 text-xs pt-1">
-                    <select
-                      value={clubFilter}
-                      onChange={(e) => setClubFilter(e.target.value)}
-                      className="w-full py-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 text-xs outline-none"
-                    >
-                      <option value="ALL">All Classes ({activeClubs.length})</option>
-                      {activeClubs.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.shortName} ({c.name})
-                        </option>
-                      ))}
-                    </select>
+                  <div className="space-y-2 pt-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase">Class Filter:</span>
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value as SortOption)}
+                        className="py-1 px-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 text-xs outline-none font-bold"
+                      >
+                        <option value="points_desc">Points: High to Low</option>
+                        <option value="cost_desc">Price: High to Low</option>
+                        <option value="cost_asc">Price: Low to High</option>
+                        <option value="form_desc">Form: High to Low</option>
+                        <option value="name_asc">Name: A to Z</option>
+                      </select>
+                    </div>
 
-                    <select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as SortOption)}
-                      className="w-full py-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200 text-xs outline-none"
-                    >
-                      <option value="points_desc">Points: High to Low</option>
-                      <option value="cost_desc">Price: High to Low</option>
-                      <option value="cost_asc">Price: Low to High</option>
-                      <option value="form_desc">Form: High to Low</option>
-                      <option value="name_asc">Name: A to Z</option>
-                    </select>
+                    <ClassTwoTierPillStrip
+                      selectedGrade={selectedGrade}
+                      selectedSection={selectedSection}
+                      onGradeChange={setSelectedGrade}
+                      onSectionChange={setSelectedSection}
+                      layoutIdPrefix="transfersView"
+                    />
                   </div>
                 )}
               </div>

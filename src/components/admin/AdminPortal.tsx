@@ -4,7 +4,6 @@ import { Position, Player, Fixture, ActivationCode } from '../../types/fpl';
 import { CLUBS, getSortedSchoolClubs } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
-import { SlideToConfirm } from './SlideToConfirm';
 import { IOSSwitch } from '../common/IOSSwitch';
 import { CommandPalette } from './CommandPalette';
 import { MatchDayAdmin } from './MatchDayAdmin';
@@ -985,61 +984,58 @@ export const AdminPortal: React.FC = () => {
         {/* ========================================================= */}
         {activeStep === 2 && (
           <div className="space-y-4 animate-fade-in">
-            {/* Squad Lock Status Hero Card */}
-            <div className="p-5 rounded-2xl bg-zinc-900 border border-white/10 space-y-4 text-center">
-              <div className={`w-14 h-14 mx-auto rounded-2xl flex items-center justify-center border transition-all ${
-                isSquadLocked
-                  ? 'bg-rose-500/15 border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.2)]'
-                  : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)]'
-              }`}>
-                {isSquadLocked ? (
-                  <Lock className="w-7 h-7 text-rose-400" />
-                ) : (
-                  <Unlock className="w-7 h-7 text-emerald-400" />
-                )}
-              </div>
-
-              <div>
-                <h3 className="font-black text-lg text-white">
-                  {isSquadLocked ? 'LINEUPS LOCKED FOR GW ' + currentGW : 'LINEUPS ARE OPEN FOR TRANSFERS'}
-                </h3>
-                <p className="text-xs text-zinc-400 mt-1 max-w-md mx-auto">
-                  {isSquadLocked
-                    ? 'All manager squads and chip selections are frozen. No transfers or substitutions are permitted.'
-                    : 'Managers can freely edit starting XI, make transfers, and activate chips until kickoff.'}
-                </p>
-              </div>
-
-              <div className="flex flex-col items-center justify-center pt-2 gap-2">
-                <div className="inline-flex items-center gap-4 bg-zinc-950/80 px-5 py-3 rounded-2xl border border-white/10 shadow-lg">
-                  <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
-                    {isSquadLocked ? 'Lineups Locked' : 'Lineups Open'}
-                  </span>
-                  <IOSSwitch
-                    size="lg"
-                    color={isSquadLocked ? 'rose' : 'emerald'}
-                    checked={isSquadLocked}
-                    ariaLabel="Toggle Lineup Lock"
-                    onChange={async (newLocked) => {
-                      if (!newLocked) {
-                        await setDeadline({
-                          gameweek: currentGW,
-                          deadlineTime: new Date(Date.now() + 86400000 * 2).toISOString(),
-                        });
-                        showNotification('🔓 Lineups unlocked! Transfers are open.');
-                      } else {
-                        await setDeadline({
-                          gameweek: currentGW,
-                          deadlineTime: new Date(Date.now() - 1000).toISOString(),
-                        });
-                        showNotification('🔒 Lineups locked! Lineups are frozen for kickoff.');
-                      }
-                    }}
-                  />
+            {/* Squad Lock Status Card (Left-Aligned) */}
+            <div className="p-5 rounded-2xl bg-zinc-900 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 transition-all ${
+                  isSquadLocked
+                    ? 'bg-rose-500/15 border-rose-500/30 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.15)]'
+                    : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]'
+                }`}>
+                  {isSquadLocked ? (
+                    <Lock className="w-6 h-6 text-rose-400" />
+                  ) : (
+                    <Unlock className="w-6 h-6 text-emerald-400" />
+                  )}
                 </div>
-                <span className="text-[11px] text-zinc-500 font-medium">
-                  {isSquadLocked ? 'Tap or slide switch to unlock and allow transfers' : 'Tap or slide switch to freeze all lineups for kickoff'}
+
+                <div>
+                  <h3 className="font-black text-base text-white">
+                    {isSquadLocked ? 'LINEUPS LOCKED FOR GW ' + currentGW : 'LINEUPS ARE OPEN FOR TRANSFERS'}
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-0.5 max-w-lg">
+                    {isSquadLocked
+                      ? 'All manager squads and chip selections are frozen. No transfers or substitutions are permitted.'
+                      : 'Managers can freely edit starting XI, make transfers, and activate chips until kickoff.'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 bg-zinc-950/80 px-4 py-2.5 rounded-2xl border border-white/10 shrink-0 self-start sm:self-auto shadow-sm">
+                <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
+                  {isSquadLocked ? 'Locked' : 'Open'}
                 </span>
+                <IOSSwitch
+                  size="md"
+                  color={isSquadLocked ? 'rose' : 'emerald'}
+                  checked={isSquadLocked}
+                  ariaLabel="Toggle Lineup Lock"
+                  onChange={async (newLocked) => {
+                    if (!newLocked) {
+                      await setDeadline({
+                        gameweek: currentGW,
+                        deadlineTime: new Date(Date.now() + 86400000 * 2).toISOString(),
+                      });
+                      showNotification('🔓 Lineups unlocked! Transfers are open.');
+                    } else {
+                      await setDeadline({
+                        gameweek: currentGW,
+                        deadlineTime: new Date(Date.now() - 1000).toISOString(),
+                      });
+                      showNotification('🔒 Lineups locked! Lineups are frozen for kickoff.');
+                    }
+                  }}
+                />
               </div>
             </div>
 
@@ -1568,41 +1564,77 @@ export const AdminPortal: React.FC = () => {
               </div>
             </div>
 
-            {/* Award Gameweek Points */}
-            <div className="p-5 rounded-2xl bg-zinc-900 border border-white/10 space-y-3">
-              <h4 className="font-black text-sm text-white">Award Gameweek Points</h4>
-              <p className="text-xs text-zinc-400">
-                Calculates captaincy multipliers, stadium bonuses, and records final standings for all managers.
-              </p>
-              <SlideToConfirm
-                label={`Slide to Finalize GW ${currentGW} Scores`}
-                confirmLabel="Gameweek Finalized!"
-                variant="emerald"
-                onConfirm={async () => {
-                  await finalizeGameweek();
-                  showNotification(`Gameweek ${currentGW} finalized and points awarded!`);
-                  confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
-                }}
-              />
-            </div>
+            {/* Consolidated Gameweek Finalization & Transition Box */}
+            <div className="p-5 rounded-2xl bg-zinc-900 border border-white/10 space-y-4">
+              <div className="flex items-center gap-2.5 pb-3 border-b border-white/10">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-black text-sm text-white">Gameweek {currentGW} Finalization & Progression</h4>
+                  <p className="text-[11px] text-zinc-400">
+                    Award matchday points to all managers and advance to Gameweek {currentGW + 1}
+                  </p>
+                </div>
+              </div>
 
-            {/* Advance Gameweek */}
-            <div className="p-5 rounded-2xl bg-zinc-900 border border-white/10 space-y-3">
-              <h4 className="font-black text-sm text-white">Advance to Next Gameweek</h4>
-              <p className="text-xs text-zinc-400">
-                Increments GW counter to {currentGW + 1}, refreshes free transfers, and opens the next transfer market.
-              </p>
-              <SlideToConfirm
-                label={`Slide to Advance to GW ${currentGW + 1}`}
-                confirmLabel={`Advanced to GW ${currentGW + 1}`}
-                variant="warning"
-                onConfirm={async () => {
-                  const nextGw = currentGW + 1;
-                  await advanceGameweek();
-                  showNotification(`Advanced to Gameweek ${nextGw}!`);
-                  confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-                }}
-              />
+              {/* Step 1: Award Gameweek Points */}
+              <div className="p-4 rounded-xl bg-zinc-950/70 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-xs text-white">1. Award Gameweek {currentGW} Points</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      Step 1
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 max-w-md">
+                    Calculates captaincy multipliers, stadium bonuses, auto-subs, and records final standings for all managers.
+                  </p>
+                </div>
+                <div className="shrink-0 self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await finalizeGameweek();
+                      showNotification(`Gameweek ${currentGW} finalized and points awarded!`);
+                      confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                    }}
+                    className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition-colors flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span>Award GW {currentGW} Points</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Step 2: Advance to Next Gameweek */}
+              <div className="p-4 rounded-xl bg-zinc-950/70 border border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="font-black text-xs text-white">2. Advance to Gameweek {currentGW + 1}</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400 border border-sky-500/20">
+                      Step 2
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 max-w-md">
+                    Increments GW counter to {currentGW + 1}, refreshes +1 free transfer for all managers, and opens market.
+                  </p>
+                </div>
+                <div className="shrink-0 self-start sm:self-auto">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const nextGw = currentGW + 1;
+                      await advanceGameweek();
+                      showNotification(`Advanced to Gameweek ${nextGw}!`);
+                      confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                    }}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs border border-white/15 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <span>Advance to GW {currentGW + 1} →</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Reset Current Gameweek Stats & Scores */}
@@ -1619,15 +1651,25 @@ export const AdminPortal: React.FC = () => {
               <p className="text-xs text-zinc-400">
                 Resets all match scores and player stats (goals, assists, saves, cards) for GW {currentGW} back to 0 and recalculates league points.
               </p>
-              <SlideToConfirm
-                label={`Slide to Reset GW ${currentGW} Stats & Scores`}
-                confirmLabel={`GW ${currentGW} Reset to 0!`}
-                variant="danger"
-                onConfirm={async () => {
-                  await resetCurrentGameweek(currentGW);
-                  showNotification(`Gameweek ${currentGW} stats and scores have been reset to 0!`);
-                }}
-              />
+              <div className="pt-1 flex items-center gap-3">
+                <IOSSwitch
+                  size="md"
+                  color="rose"
+                  checked={false}
+                  ariaLabel={`Reset GW ${currentGW} Stats`}
+                  onChange={async (checked) => {
+                    if (checked) {
+                      if (window.confirm(`Are you sure you want to reset GW ${currentGW} match scores and player stats back to 0?`)) {
+                        await resetCurrentGameweek(currentGW);
+                        showNotification(`Gameweek ${currentGW} stats and scores have been reset to 0!`);
+                      }
+                    }
+                  }}
+                />
+                <span className="text-xs text-zinc-300 font-bold">
+                  Toggle switch to reset GW {currentGW} stats &amp; scores
+                </span>
+              </div>
             </div>
 
             {/* Reset Entire Season Back to GW 1 */}
@@ -1636,15 +1678,25 @@ export const AdminPortal: React.FC = () => {
               <p className="text-xs text-zinc-400">
                 Resets counter back to GW 1 and clears all gameweek points/stats across the season while preserving all registered accounts and their picked squads.
               </p>
-              <SlideToConfirm
-                label="Slide to Reset Season to GW 1"
-                confirmLabel="Season Reset to GW 1!"
-                variant="danger"
-                onConfirm={async () => {
-                  await resetToDefaults();
-                  showNotification('Season reset to Gameweek 1! All user accounts and squads preserved.');
-                }}
-              />
+              <div className="pt-1 flex items-center gap-3">
+                <IOSSwitch
+                  size="md"
+                  color="rose"
+                  checked={false}
+                  ariaLabel="Reset Season to GW 1"
+                  onChange={async (checked) => {
+                    if (checked) {
+                      if (window.confirm('Are you sure you want to reset the season back to GW 1? All user accounts and squads will be preserved.')) {
+                        await resetToDefaults();
+                        showNotification('Season reset to Gameweek 1! All user accounts and squads preserved.');
+                      }
+                    }
+                  }}
+                />
+                <span className="text-xs text-zinc-300 font-bold">
+                  Toggle switch to reset season to GW 1
+                </span>
+              </div>
             </div>
           </div>
         )}
@@ -1850,15 +1902,25 @@ export const AdminPortal: React.FC = () => {
                   <p className="text-[11px] text-zinc-400">
                     Wipes match scores and reverts squads to baseline sample data.
                   </p>
-                  <SlideToConfirm
-                    label="Slide to Reset All Data"
-                    confirmLabel="Database Reset"
-                    variant="danger"
-                    onConfirm={() => {
-                      resetToDefaults();
-                      showNotification('Database reset to defaults.');
-                    }}
-                  />
+                  <div className="pt-1 flex items-center gap-3">
+                    <IOSSwitch
+                      size="md"
+                      color="rose"
+                      checked={false}
+                      ariaLabel="Reset All Database Data"
+                      onChange={(checked) => {
+                        if (checked) {
+                          if (window.confirm('Are you sure you want to reset all database data to defaults?')) {
+                            resetToDefaults();
+                            showNotification('Database reset to defaults.');
+                          }
+                        }
+                      }}
+                    />
+                    <span className="text-xs text-zinc-300 font-bold">
+                      Toggle switch to reset all database data
+                    </span>
+                  </div>
                 </div>
               </div>
             </motion.div>
