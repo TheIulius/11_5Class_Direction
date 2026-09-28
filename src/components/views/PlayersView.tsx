@@ -4,7 +4,7 @@ import { Player, Position, Club, Fixture } from '../../types/fpl';
 import { CLUBS, getSortedSchoolClubs } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { ClassGridView } from '../transfers/ClassGridView';
-import { suggestPlayerPhotoApi } from '../../services/api';
+import { suggestPlayerPhotoApi, adminRemovePlayerPhotoApi } from '../../services/api';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -26,6 +26,7 @@ import {
   TrendingUp,
   Percent,
   AlertCircle,
+  Trash2,
 } from 'lucide-react';
 
 type SortOption = 'points' | 'cost' | 'goals' | 'assists' | 'selectedByPercent' | 'minutes';
@@ -42,6 +43,8 @@ export const PlayersView: React.FC = () => {
     buyPlayer,
     transferPlayer,
     isSquadLocked,
+    isModerator,
+    refreshServerState,
   } = useFPL();
 
   const [viewMode, setViewMode] = useState<'list' | 'classes'>('list');
@@ -240,10 +243,20 @@ export const PlayersView: React.FC = () => {
 
       if (res.success) {
         confetti({ particleCount: 50, spread: 60, origin: { y: 0.6 } });
-        setPhotoFeedback({
-          type: 'success',
-          message: 'Photo submitted! Admins will review and approve it shortly.',
-        });
+        if (res.isAdminDirect) {
+          selectedPlayer.photoUrl = res.photoUrl || compressedDataUrl;
+          delete selectedPlayer.pendingPhotoUrl;
+          setPhotoFeedback({
+            type: 'success',
+            message: `Profile picture attached directly for ${selectedPlayer.name}!`,
+          });
+          refreshServerState();
+        } else {
+          setPhotoFeedback({
+            type: 'success',
+            message: 'Photo submitted! Admins will review and approve it shortly.',
+          });
+        }
       }
     } catch (err: any) {
       setPhotoFeedback({
@@ -253,6 +266,33 @@ export const PlayersView: React.FC = () => {
     } finally {
       setIsUploadingPhoto(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  // Handle Admin Direct Photo Removal
+  const [isRemovingPhoto, setIsRemovingPhoto] = useState(false);
+  const handleRemovePhoto = async () => {
+    if (!selectedPlayer || !isModerator) return;
+    if (!window.confirm(`Are you sure you want to remove ${selectedPlayer.name}'s profile picture?`)) return;
+
+    setIsRemovingPhoto(true);
+    setPhotoFeedback(null);
+    try {
+      const res = await adminRemovePlayerPhotoApi(selectedPlayer.id);
+      delete selectedPlayer.photoUrl;
+      delete selectedPlayer.pendingPhotoUrl;
+      setPhotoFeedback({
+        type: 'success',
+        message: res.message || 'Profile picture removed.',
+      });
+      refreshServerState();
+    } catch (err: any) {
+      setPhotoFeedback({
+        type: 'error',
+        message: err?.message || 'Failed to remove profile picture.',
+      });
+    } finally {
+      setIsRemovingPhoto(false);
     }
   };
 
@@ -641,11 +681,24 @@ export const PlayersView: React.FC = () => {
                       </span>
                       <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 flex items-center gap-0.5 ml-1"
+                        className="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 flex items-center gap-0.5 ml-1 cursor-pointer"
                       >
                         <Camera className="w-3 h-3" />
                         <span>{selectedPlayer.photoUrl ? 'Change Photo' : 'Upload Photo'}</span>
                       </button>
+
+                      {isModerator && selectedPlayer.photoUrl && (
+                        <button
+                          type="button"
+                          onClick={handleRemovePhoto}
+                          disabled={isRemovingPhoto}
+                          className="text-[10px] font-bold text-rose-500 hover:text-rose-400 flex items-center gap-0.5 ml-1.5 cursor-pointer transition-colors"
+                          title="Admin: Remove Profile Picture"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          <span>{isRemovingPhoto ? 'Removing...' : 'Remove Photo'}</span>
+                        </button>
+                      )}
                     </div>
 
                     <h3 className="text-lg sm:text-xl font-black tracking-tight mt-0.5">

@@ -560,3 +560,14 @@ export async function adminReviewPlayerPhotoApi(photoId: string, approve: boolea
   return data;
 }
 
+export async function adminRemovePlayerPhotoApi(playerId: string) {
+  const res = await fetch(`${API_BASE}/api/admin/player-photo/remove`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ playerId }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to remove player photo');
+  return data;
+}
+

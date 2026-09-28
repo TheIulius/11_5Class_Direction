@@ -16,6 +16,7 @@ import {
   LayoutGrid,
   Coins,
   Sparkles,
+  ChevronRight,
 } from 'lucide-react';
 import { validateSquadComposition } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
@@ -42,6 +43,7 @@ export const TransfersView: React.FC = () => {
     transferOutPlayerId,
     setTransferOutPlayerId,
     currentGW,
+    setActiveTab,
   } = fpl;
   const isSquadLocked = (fpl as any).isSquadLocked ?? false;
   const isDemoMode = (fpl as any).isDemoMode ?? false;
@@ -533,9 +535,21 @@ export const TransfersView: React.FC = () => {
               {/* Header Title & Mode Toggle */}
               <div className="flex items-center justify-between flex-wrap gap-2 pb-1 border-b border-slate-200/60 dark:border-white/[0.06]">
                 <div className="flex items-center gap-2">
-                  <h2 className="font-black text-sm sm:text-base text-slate-900 dark:text-white uppercase tracking-tight">
-                    {outPlayer ? `Replacing ${outPlayer.webName} (${outPlayer.position})` : 'Player Market'}
-                  </h2>
+                  {outPlayer ? (
+                    <h2 className="font-black text-sm sm:text-base text-slate-900 dark:text-white uppercase tracking-tight">
+                      Replacing {outPlayer.webName} ({outPlayer.position})
+                    </h2>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('players')}
+                      className="group flex items-center gap-1 text-sm sm:text-base font-black text-slate-900 dark:text-white uppercase tracking-tight hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors cursor-pointer"
+                      title="View full Players tab"
+                    >
+                      <span>Players</span>
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-500 group-hover:translate-x-0.5 transition-all" />
+                    </button>
+                  )}
                   <span className="text-xs text-slate-400 font-mono">
                     ({candidatePlayers.length} players)
                   </span>

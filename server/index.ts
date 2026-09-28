@@ -2089,7 +2089,25 @@ app.post('/api/player/photo/suggest', (req: Request, res: Response) => {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   const user = token ? Object.values(data.users || {}).find((u) => u.token === token) : null;
+  const isAdmin = user?.role === 'admin' || user?.isAdmin;
   const suggestedBy = user ? `@${user.username}` : (req.body.suggestedBy || 'manager');
+
+  // If submitting user is an administrator, attach photo DIRECTLY without additional approval!
+  if (isAdmin) {
+    player.photoUrl = photoUrl;
+    delete player.pendingPhotoUrl;
+    if (data.pendingPhotos) {
+      data.pendingPhotos = data.pendingPhotos.filter((p: any) => p.playerId !== playerId);
+    }
+    db.save();
+    scheduleAutoSyncToGitHub(`Admin ${suggestedBy} set photo for player ${player.webName}`, true);
+    return res.json({
+      success: true,
+      message: `Profile picture attached directly for ${player.webName}!`,
+      photoUrl,
+      isAdminDirect: true,
+    });
+  }
 
   if (!data.pendingPhotos) data.pendingPhotos = [];
 
@@ -2111,6 +2129,44 @@ app.post('/api/player/photo/suggest', (req: Request, res: Response) => {
     success: true,
     message: 'Photo submitted! Administrators will review and approve it shortly.',
     pendingPhoto: photoEntry,
+    isAdminDirect: false,
+  });
+});
+
+// Admin: Remove player photo
+app.post('/api/admin/player-photo/remove', (req: Request, res: Response) => {
+  const { playerId } = req.body;
+  if (!playerId) {
+    return res.status(400).json({ error: 'playerId is required' });
+  }
+
+  const data = db.getData();
+  const player = data.players[playerId];
+  if (!player) {
+    return res.status(404).json({ error: 'Player not found' });
+  }
+
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const user = token ? Object.values(data.users || {}).find((u) => u.token === token) : null;
+  const isAdmin = user?.role === 'admin' || user?.isAdmin;
+
+  if (!isAdmin) {
+    return res.status(403).json({ error: 'Admin authorization required to remove player photo' });
+  }
+
+  delete player.photoUrl;
+  delete player.pendingPhotoUrl;
+  if (data.pendingPhotos) {
+    data.pendingPhotos = data.pendingPhotos.filter((p: any) => p.playerId !== playerId);
+  }
+
+  db.save();
+  scheduleAutoSyncToGitHub(`Admin @${user?.username || 'admin'} removed photo for player ${player.webName}`, true);
+
+  res.json({
+    success: true,
+    message: `Profile picture removed for ${player.webName}`,
   });
 });
 
