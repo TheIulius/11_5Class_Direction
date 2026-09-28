@@ -555,7 +555,7 @@ export const AdminPortal: React.FC = () => {
   return (
     <div className="min-h-screen pb-24 text-zinc-100 font-sans select-none">
       {/* 1. DECOUPLED COMMAND CENTER NAVBAR */}
-      <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-b border-white/10 px-3 sm:px-6 py-2.5 flex items-center justify-between">
+      <header className="sticky top-0 z-40 bg-zinc-950/95 backdrop-blur-xl border-b border-white/10 px-3 sm:px-6 pt-[max(0.625rem,env(safe-area-inset-top))] pb-2.5 flex items-center justify-between">
         {/* Title & Ambient GitHub Sync Status Pill */}
         <div className="flex items-center gap-2 sm:gap-3 min-w-0">
           <button
