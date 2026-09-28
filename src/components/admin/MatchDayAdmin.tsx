@@ -259,12 +259,14 @@ export const MatchDayAdmin: React.FC = () => {
     if (type === 'yellow') {
       const isAlready = yellowCards.includes(playerId);
       if (!isAlready) spawnFloatingPoint('-1 Yellow', 'bg-yellow-500 text-slate-950 font-black', e);
+      else spawnFloatingPoint('Removed Yellow', 'bg-zinc-700 text-white font-bold', e);
       setYellowCards((prev) =>
         prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
       );
     } else {
       const isAlready = redCards.includes(playerId);
       if (!isAlready) spawnFloatingPoint('-3 Red', 'bg-rose-500 text-white font-black', e);
+      else spawnFloatingPoint('Removed Red', 'bg-zinc-700 text-white font-bold', e);
       setRedCards((prev) =>
         prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
       );
@@ -275,9 +277,102 @@ export const MatchDayAdmin: React.FC = () => {
     const isAlready = mvps.includes(playerId);
     const pts = getMvpPoints();
     if (!isAlready) spawnFloatingPoint(`+${pts} MVP`, 'bg-amber-400 text-slate-950 font-black', e);
+    else spawnFloatingPoint('Removed MVP', 'bg-zinc-700 text-white font-bold', e);
     setMvps((prev) =>
       prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
     );
+  };
+
+  // Decrement / Removal Actions (-1 handlers)
+  const handleRemoveGoal = (player: Player, team: 'home' | 'away', e: React.MouseEvent) => {
+    const hasGoal = goals.some((g) => g.playerId === player.id && !g.isOwnGoal);
+    if (!hasGoal) return;
+
+    setGoals((prev) => {
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i].playerId === player.id && !prev[i].isOwnGoal) {
+          return [...prev.slice(0, i), ...prev.slice(i + 1)];
+        }
+      }
+      return prev;
+    });
+
+    if (team === 'home') setHomeScore((s) => Math.max(0, s - 1));
+    else setAwayScore((s) => Math.max(0, s - 1));
+
+    const pts = getGoalPoints(player.position);
+    spawnFloatingPoint(`-1 Goal (-${pts})`, 'bg-rose-600 text-white font-black', e);
+  };
+
+  const handleRemoveOwnGoal = (player: Player, team: 'home' | 'away', e: React.MouseEvent) => {
+    const hasOg = goals.some((g) => g.playerId === player.id && g.isOwnGoal);
+    if (!hasOg) return;
+
+    setGoals((prev) => {
+      for (let i = prev.length - 1; i >= 0; i--) {
+        if (prev[i].playerId === player.id && prev[i].isOwnGoal) {
+          return [...prev.slice(0, i), ...prev.slice(i + 1)];
+        }
+      }
+      return prev;
+    });
+
+    if (team === 'home') setAwayScore((s) => Math.max(0, s - 1));
+    else setHomeScore((s) => Math.max(0, s - 1));
+
+    spawnFloatingPoint('-1 OG (+3)', 'bg-rose-600 text-white font-black', e);
+  };
+
+  const handleRemoveAssist = (player: Player, e: React.MouseEvent) => {
+    if ((playerAssists[player.id] || 0) <= 0) return;
+    const pts = getAssistPoints();
+    spawnFloatingPoint(`-1 Assist (-${pts})`, 'bg-sky-600 text-white font-black', e);
+    setPlayerAssists((prev) => ({
+      ...prev,
+      [player.id]: Math.max(0, (prev[player.id] || 0) - 1),
+    }));
+  };
+
+  const handleRemoveMissedPen = (player: Player, e: React.MouseEvent) => {
+    if ((penaltiesMissed[player.id] || 0) <= 0) return;
+    spawnFloatingPoint('-1 Pen Miss (+2)', 'bg-emerald-600 text-white font-black', e);
+    setPenaltiesMissed((prev) => ({
+      ...prev,
+      [player.id]: Math.max(0, (prev[player.id] || 0) - 1),
+    }));
+  };
+
+  const handleRemoveSavedPen = (player: Player, e: React.MouseEvent) => {
+    if ((penaltiesSaved[player.id] || 0) <= 0) return;
+    spawnFloatingPoint('-1 Pen Save (-3)', 'bg-amber-600 text-white font-black', e);
+    setPenaltiesSaved((prev) => ({
+      ...prev,
+      [player.id]: Math.max(0, (prev[player.id] || 0) - 1),
+    }));
+  };
+
+  const handleRemoveSave = (player: Player, e: React.MouseEvent) => {
+    if ((playerSaves[player.id] || 0) <= 0) return;
+    spawnFloatingPoint('-1 Save', 'bg-amber-600 text-white font-black', e);
+    setPlayerSaves((prev) => ({
+      ...prev,
+      [player.id]: Math.max(0, (prev[player.id] || 0) - 1),
+    }));
+  };
+
+  const handleRemoveGoalByIndex = (index: number) => {
+    const goal = goals[index];
+    if (!goal) return;
+
+    if (goal.isOwnGoal) {
+      if (goal.team === 'home') setAwayScore((s) => Math.max(0, s - 1));
+      else setHomeScore((s) => Math.max(0, s - 1));
+    } else {
+      if (goal.team === 'home') setHomeScore((s) => Math.max(0, s - 1));
+      else setAwayScore((s) => Math.max(0, s - 1));
+    }
+
+    setGoals((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Custom Minute Adjustment Helpers
@@ -515,92 +610,192 @@ export const MatchDayAdmin: React.FC = () => {
         </div>
 
         {/* Rapid Tactile Action Buttons */}
-        <div className="flex items-center gap-1 flex-wrap pt-0.5">
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => handleRapidGoal(p, team, e)}
-            className="px-2 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-black text-[10px] hover:bg-emerald-500 hover:text-slate-950 transition-colors"
-          >
-            + Goal ({getGoalPoints(p.position)}pt)
-          </motion.button>
+        <div className="flex items-center gap-1.5 flex-wrap pt-0.5">
+          {/* Goal (-1 / + Goal) */}
+          <div className="inline-flex items-center rounded-lg border border-emerald-500/30 overflow-hidden bg-emerald-500/10">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              disabled={pGoalCount === 0}
+              onClick={(e) => handleRemoveGoal(p, team, e)}
+              className={`px-1.5 py-1 font-black text-[10px] border-r border-emerald-500/30 transition-colors ${
+                pGoalCount > 0
+                  ? 'bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white cursor-pointer'
+                  : 'text-zinc-600 bg-white/5 cursor-not-allowed opacity-40'
+              }`}
+              title={pGoalCount > 0 ? `Remove 1 Goal (Currently: ${pGoalCount})` : 'No goals to remove'}
+            >
+              -1
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => handleRapidGoal(p, team, e)}
+              className="px-2 py-1 text-emerald-300 font-black text-[10px] hover:bg-emerald-500 hover:text-slate-950 transition-colors cursor-pointer"
+            >
+              + Goal ({getGoalPoints(p.position)}pt)
+            </motion.button>
+          </div>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => handleRapidAssist(p, e)}
-            className="px-2 py-1 rounded-lg bg-sky-500/15 border border-sky-500/30 text-sky-300 font-black text-[10px] hover:bg-sky-500 hover:text-slate-950 transition-colors"
-          >
-            + Assist ({getAssistPoints()}pt)
-          </motion.button>
+          {/* Assist (-1 / + Assist) */}
+          <div className="inline-flex items-center rounded-lg border border-sky-500/30 overflow-hidden bg-sky-500/10">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              disabled={pAssistCount === 0}
+              onClick={(e) => handleRemoveAssist(p, e)}
+              className={`px-1.5 py-1 font-black text-[10px] border-r border-sky-500/30 transition-colors ${
+                pAssistCount > 0
+                  ? 'bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white cursor-pointer'
+                  : 'text-zinc-600 bg-white/5 cursor-not-allowed opacity-40'
+              }`}
+              title={pAssistCount > 0 ? `Remove 1 Assist (Currently: ${pAssistCount})` : 'No assists to remove'}
+            >
+              -1
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => handleRapidAssist(p, e)}
+              className="px-2 py-1 text-sky-300 font-black text-[10px] hover:bg-sky-500 hover:text-slate-950 transition-colors cursor-pointer"
+            >
+              + Assist ({getAssistPoints()}pt)
+            </motion.button>
+          </div>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => handleRapidOwnGoal(p, team, e)}
-            className="px-2 py-1 rounded-lg bg-rose-500/15 border border-rose-500/30 text-rose-300 font-black text-[10px] hover:bg-rose-500 hover:text-white transition-colors"
-            title="Own Goal (-3 pts)"
-          >
-            + OG (-3)
-          </motion.button>
+          {/* Own Goal (-1 / + OG) */}
+          <div className="inline-flex items-center rounded-lg border border-rose-500/30 overflow-hidden bg-rose-500/10">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              disabled={pOwnGoalCount === 0}
+              onClick={(e) => handleRemoveOwnGoal(p, team, e)}
+              className={`px-1.5 py-1 font-black text-[10px] border-r border-rose-500/30 transition-colors ${
+                pOwnGoalCount > 0
+                  ? 'bg-rose-500/30 hover:bg-rose-500 text-rose-200 hover:text-white cursor-pointer'
+                  : 'text-zinc-600 bg-white/5 cursor-not-allowed opacity-40'
+              }`}
+              title={pOwnGoalCount > 0 ? `Remove 1 Own Goal (Currently: ${pOwnGoalCount})` : 'No own goals to remove'}
+            >
+              -1
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => handleRapidOwnGoal(p, team, e)}
+              className="px-2 py-1 text-rose-300 font-black text-[10px] hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
+              title="Own Goal (-3 pts)"
+            >
+              + OG (-3)
+            </motion.button>
+          </div>
 
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => handleRapidMissedPen(p, e)}
-            className="px-1.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 font-bold text-[10px] hover:bg-amber-500 hover:text-slate-950 transition-colors"
-            title="Missed Penalty (-2 pts)"
-          >
-            ❌ Miss Pen
-          </motion.button>
+          {/* Missed Penalty (-1 / + Miss Pen) */}
+          <div className="inline-flex items-center rounded-lg border border-amber-500/20 overflow-hidden bg-amber-500/10">
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              disabled={pPenMissedCount === 0}
+              onClick={(e) => handleRemoveMissedPen(p, e)}
+              className={`px-1.5 py-1 font-black text-[10px] border-r border-amber-500/20 transition-colors ${
+                pPenMissedCount > 0
+                  ? 'bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white cursor-pointer'
+                  : 'text-zinc-600 bg-white/5 cursor-not-allowed opacity-40'
+              }`}
+              title={pPenMissedCount > 0 ? `Remove 1 Missed Penalty (Currently: ${pPenMissedCount})` : 'No missed penalties to remove'}
+            >
+              -1
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.9 }}
+              onClick={(e) => handleRapidMissedPen(p, e)}
+              className="px-1.5 py-1 text-amber-300 font-bold text-[10px] hover:bg-amber-500 hover:text-slate-950 transition-colors cursor-pointer"
+              title="Missed Penalty (-2 pts)"
+            >
+              ❌ Miss Pen
+            </motion.button>
+          </div>
 
+          {/* Goalkeeper exclusive saves */}
           {p.position === 'GKP' && (
             <>
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => handleRapidSavedPen(p, e)}
-                className="px-2 py-1 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-black text-[10px] hover:bg-emerald-500 hover:text-slate-950 transition-colors"
-                title="Saved Penalty (+3 pts for GK only)"
-              >
-                🧤 Pen Save (+3)
-              </motion.button>
+              {/* Pen Save */}
+              <div className="inline-flex items-center rounded-lg border border-emerald-500/40 overflow-hidden bg-emerald-500/15">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  disabled={pPenSavedCount === 0}
+                  onClick={(e) => handleRemoveSavedPen(p, e)}
+                  className={`px-1.5 py-1 font-black text-[10px] border-r border-emerald-500/40 transition-colors ${
+                    pPenSavedCount > 0
+                      ? 'bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white cursor-pointer'
+                      : 'text-zinc-600 bg-white/5 cursor-not-allowed opacity-40'
+                  }`}
+                  title={pPenSavedCount > 0 ? `Remove 1 Pen Save (Currently: ${pPenSavedCount})` : 'No penalty saves to remove'}
+                >
+                  -1
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => handleRapidSavedPen(p, e)}
+                  className="px-2 py-1 text-emerald-300 font-black text-[10px] hover:bg-emerald-500 hover:text-slate-950 transition-colors cursor-pointer"
+                  title="Saved Penalty (+3 pts for GK only)"
+                >
+                  🧤 Pen Save (+3)
+                </motion.button>
+              </div>
 
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => handleRapidSave(p, e)}
-                className="px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 font-black text-[10px] hover:bg-amber-500 hover:text-slate-950 transition-colors"
-              >
-                + Save
-              </motion.button>
+              {/* Save */}
+              <div className="inline-flex items-center rounded-lg border border-amber-500/30 overflow-hidden bg-amber-500/10">
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  disabled={pSaveCount === 0}
+                  onClick={(e) => handleRemoveSave(p, e)}
+                  className={`px-1.5 py-1 font-black text-[10px] border-r border-amber-500/30 transition-colors ${
+                    pSaveCount > 0
+                      ? 'bg-rose-500/25 hover:bg-rose-500 text-rose-300 hover:text-white cursor-pointer'
+                      : 'text-zinc-600 bg-white/5 cursor-not-allowed opacity-40'
+                  }`}
+                  title={pSaveCount > 0 ? `Remove 1 Save (Currently: ${pSaveCount})` : 'No saves to remove'}
+                >
+                  -1
+                </motion.button>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => handleRapidSave(p, e)}
+                  className="px-2 py-1 text-amber-300 font-black text-[10px] hover:bg-amber-500 hover:text-slate-950 transition-colors cursor-pointer"
+                >
+                  + Save
+                </motion.button>
+              </div>
             </>
           )}
 
+          {/* Cards & MVP */}
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={(e) => handleToggleCard(p.id, 'yellow', e)}
-            className={`px-1.5 py-1 rounded-lg border text-[10px] font-bold transition-colors ${
-              isYellow ? 'bg-yellow-500 text-slate-950 border-yellow-400' : 'bg-white/5 border-white/10 text-zinc-400'
+            className={`px-1.5 py-1 rounded-lg border text-[10px] font-bold transition-colors cursor-pointer ${
+              isYellow ? 'bg-yellow-500 text-slate-950 border-yellow-400 font-black shadow-xs' : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
             }`}
-            title="Yellow Card (-1 pt)"
+            title={isYellow ? 'Click to remove Yellow Card' : 'Yellow Card (-1 pt)'}
           >
-            🟨
+            {isYellow ? '🟨 (-1) ✓' : '🟨'}
           </motion.button>
 
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={(e) => handleToggleCard(p.id, 'red', e)}
-            className={`px-1.5 py-1 rounded-lg border text-[10px] font-bold transition-colors ${
-              isRed ? 'bg-rose-500 text-white border-rose-400' : 'bg-white/5 border-white/10 text-zinc-400'
+            className={`px-1.5 py-1 rounded-lg border text-[10px] font-bold transition-colors cursor-pointer ${
+              isRed ? 'bg-rose-500 text-white border-rose-400 font-black shadow-xs' : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
             }`}
-            title="Red Card (-3 pts)"
+            title={isRed ? 'Click to remove Red Card' : 'Red Card (-3 pts)'}
           >
-            🟥
+            {isRed ? '🟥 (-3) ✓' : '🟥'}
           </motion.button>
 
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={(e) => handleToggleMvp(p.id, e)}
-            className={`px-2 py-1 rounded-lg border text-[10px] font-black transition-colors ${
-              isMvp ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-xs' : 'bg-white/5 border-white/10 text-zinc-400'
+            className={`px-2 py-1 rounded-lg border text-[10px] font-black transition-colors cursor-pointer ${
+              isMvp ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-xs' : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
             }`}
+            title={isMvp ? 'Click to remove MVP' : `MVP (+${getMvpPoints()} pts)`}
           >
-            ⭐ MVP (+{getMvpPoints()})
+            <Crown className="w-3 h-3 inline mr-1 text-amber-400" />
+            {isMvp ? `⭐ MVP (+${getMvpPoints()}) ✓` : `⭐ MVP (+${getMvpPoints()})`}
           </motion.button>
         </div>
       </div>
@@ -855,6 +1050,35 @@ export const MatchDayAdmin: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Logged Goals Feed with 1-click Delete */}
+          {goals.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-bold text-zinc-400">Goals ({goals.length}):</span>
+              {goals.map((g, idx) => {
+                const scorer = players[g.playerId];
+                return (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-zinc-200"
+                  >
+                    <span>
+                      ⚽ {scorer?.webName || 'Player'}{' '}
+                      {g.isOwnGoal ? <span className="text-rose-400 font-bold">(OG)</span> : ''}
+                      {g.minute ? <span className="text-zinc-500 font-mono text-[10px] ml-1">{g.minute}&apos;</span> : ''}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveGoalByIndex(idx)}
+                      className="text-zinc-500 hover:text-rose-400 font-bold ml-1 px-1 hover:bg-rose-500/20 rounded cursor-pointer transition-colors"
+                      title="Remove this goal (-1)"
+                    >
+                      ×
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* LIVE MATCH STOPWATCH & MINUTE CONTROL CENTER */}

@@ -337,27 +337,51 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   Tactile Stat Increments
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {/* Goal Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) =>
-                      handleStatIncrement('goals', 1, `+${selectedPlayer.position === 'FWD' ? 6 : selectedPlayer.position === 'MID' ? 6 : 7} Goal`, 'bg-emerald-500 text-slate-950', e)
-                    }
-                    className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-black text-xs flex items-center justify-between hover:bg-emerald-500/25 transition-colors"
-                  >
-                    <span>+ Goal</span>
-                    <span className="text-[10px] font-mono opacity-80 font-bold">+{selectedPlayer.position === 'FWD' ? 6 : 7}</span>
-                  </motion.button>
+                  {/* Goal Button Group */}
+                  <div className="flex items-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 overflow-hidden">
+                    <button
+                      disabled={!currentStats.goals}
+                      onClick={(e) =>
+                        handleStatIncrement('goals', -1, '-1 Goal', 'bg-rose-500 text-white', e)
+                      }
+                      className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-emerald-500/30 transition-colors"
+                      title="Remove 1 Goal (-1)"
+                    >
+                      -1
+                    </button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) =>
+                        handleStatIncrement('goals', 1, `+${selectedPlayer.position === 'FWD' ? 6 : selectedPlayer.position === 'MID' ? 6 : 7} Goal`, 'bg-emerald-500 text-slate-950', e)
+                      }
+                      className="flex-1 p-2.5 text-emerald-300 font-black text-xs flex items-center justify-between hover:bg-emerald-500/25 transition-colors"
+                    >
+                      <span>+ Goal</span>
+                      <span className="text-[10px] font-mono opacity-80 font-bold">+{selectedPlayer.position === 'FWD' ? 6 : 7}</span>
+                    </motion.button>
+                  </div>
 
-                  {/* Assist Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleStatIncrement('assists', 1, '+3 Assist', 'bg-sky-500 text-slate-950', e)}
-                    className="p-2.5 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-300 font-black text-xs flex items-center justify-between hover:bg-sky-500/25 transition-colors"
-                  >
-                    <span>+ Assist</span>
-                    <span className="text-[10px] font-mono opacity-80 font-bold">+3</span>
-                  </motion.button>
+                  {/* Assist Button Group */}
+                  <div className="flex items-center rounded-xl bg-sky-500/15 border border-sky-500/30 overflow-hidden">
+                    <button
+                      disabled={!currentStats.assists}
+                      onClick={(e) =>
+                        handleStatIncrement('assists', -1, '-1 Assist', 'bg-rose-500 text-white', e)
+                      }
+                      className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-sky-500/30 transition-colors"
+                      title="Remove 1 Assist (-1)"
+                    >
+                      -1
+                    </button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => handleStatIncrement('assists', 1, '+3 Assist', 'bg-sky-500 text-slate-950', e)}
+                      className="flex-1 p-2.5 text-sky-300 font-black text-xs flex items-center justify-between hover:bg-sky-500/25 transition-colors"
+                    >
+                      <span>+ Assist</span>
+                      <span className="text-[10px] font-mono opacity-80 font-bold">+3</span>
+                    </motion.button>
+                  </div>
 
                   {/* Clean Sheet Toggle */}
                   <motion.button
@@ -374,34 +398,70 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                   </motion.button>
 
                   {/* Save Button (GKs) */}
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleStatIncrement('saves', 1, '+1 Save', 'bg-amber-500 text-slate-950', e)}
-                    className="p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-300 font-black text-xs flex items-center justify-between hover:bg-amber-500/25 transition-colors"
-                  >
-                    <span>+ Save</span>
-                    <span className="text-[10px] font-mono opacity-80 font-bold">+1</span>
-                  </motion.button>
+                  <div className="flex items-center rounded-xl bg-amber-500/15 border border-amber-500/30 overflow-hidden">
+                    <button
+                      disabled={!currentStats.saves}
+                      onClick={(e) =>
+                        handleStatIncrement('saves', -1, '-1 Save', 'bg-rose-500 text-white', e)
+                      }
+                      className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-amber-500/30 transition-colors"
+                      title="Remove 1 Save (-1)"
+                    >
+                      -1
+                    </button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => handleStatIncrement('saves', 1, '+1 Save', 'bg-amber-500 text-slate-950', e)}
+                      className="flex-1 p-2.5 text-amber-300 font-black text-xs flex items-center justify-between hover:bg-amber-500/25 transition-colors"
+                    >
+                      <span>+ Save</span>
+                      <span className="text-[10px] font-mono opacity-80 font-bold">+1</span>
+                    </motion.button>
+                  </div>
 
                   {/* Yellow Card Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleStatIncrement('yellowCards', 1, '-1 Yellow', 'bg-yellow-500 text-slate-950', e)}
-                    className="p-2.5 rounded-xl bg-yellow-500/15 border border-yellow-500/30 text-yellow-300 font-black text-xs flex items-center justify-between hover:bg-yellow-500/25 transition-colors"
-                  >
-                    <span>+ 🟨 Yellow</span>
-                    <span className="text-[10px] font-mono opacity-80 font-bold">-1</span>
-                  </motion.button>
+                  <div className="flex items-center rounded-xl bg-yellow-500/15 border border-yellow-500/30 overflow-hidden">
+                    <button
+                      disabled={!currentStats.yellowCards}
+                      onClick={(e) =>
+                        handleStatIncrement('yellowCards', -1, 'Removed Yellow', 'bg-zinc-700 text-white', e)
+                      }
+                      className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-yellow-500/30 transition-colors"
+                      title="Remove 1 Yellow Card (-1)"
+                    >
+                      -1
+                    </button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => handleStatIncrement('yellowCards', 1, '-1 Yellow', 'bg-yellow-500 text-slate-950', e)}
+                      className="flex-1 p-2.5 text-yellow-300 font-black text-xs flex items-center justify-between hover:bg-yellow-500/25 transition-colors"
+                    >
+                      <span>+ 🟨 Yellow</span>
+                      <span className="text-[10px] font-mono opacity-80 font-bold">-1</span>
+                    </motion.button>
+                  </div>
 
                   {/* Red Card Button */}
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleStatIncrement('redCards', 1, '-3 Red Card', 'bg-rose-500 text-white', e)}
-                    className="p-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 font-black text-xs flex items-center justify-between hover:bg-rose-500/25 transition-colors"
-                  >
-                    <span>+ 🟥 Red Card</span>
-                    <span className="text-[10px] font-mono opacity-80 font-bold">-3</span>
-                  </motion.button>
+                  <div className="flex items-center rounded-xl bg-rose-500/15 border border-rose-500/30 overflow-hidden">
+                    <button
+                      disabled={!currentStats.redCards}
+                      onClick={(e) =>
+                        handleStatIncrement('redCards', -1, 'Removed Red', 'bg-zinc-700 text-white', e)
+                      }
+                      className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-rose-500/30 transition-colors"
+                      title="Remove 1 Red Card (-1)"
+                    >
+                      -1
+                    </button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={(e) => handleStatIncrement('redCards', 1, '-3 Red Card', 'bg-rose-500 text-white', e)}
+                      className="flex-1 p-2.5 text-rose-300 font-black text-xs flex items-center justify-between hover:bg-rose-500/25 transition-colors"
+                    >
+                      <span>+ 🟥 Red Card</span>
+                      <span className="text-[10px] font-mono opacity-80 font-bold">-3</span>
+                    </motion.button>
+                  </div>
                 </div>
               </div>
             </div>
