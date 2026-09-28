@@ -1217,9 +1217,15 @@ function recalculateAllManagersLeaguePoints(data: any) {
       const member = l.members.find((mem: any) => mem.id === m.id);
       if (member) {
         member.managerName = m.managerName;
-        member.teamName = m.teamName;
-        member.gwPoints = currentCalc.totalPoints;
-        member.totalPoints = cumulativeTotal;
+        // Safety guard: only update points if we have a valid non-zero calculation or if the member had 0
+        // Never wipe existing points to 0 if memory was temporarily missing player stats
+        if (cumulativeTotal > 0 || (member.totalPoints === 0 && currentCalc.totalPoints === 0)) {
+          member.gwPoints = currentCalc.totalPoints;
+          member.totalPoints = cumulativeTotal;
+        } else if (currentCalc.totalPoints > 0) {
+          member.gwPoints = currentCalc.totalPoints;
+          member.totalPoints = Math.max(member.totalPoints || 0, cumulativeTotal);
+        }
         member.activeChip = m.squad?.activeChip || null;
         member.lineup = lineupSummary;
       }
@@ -1658,12 +1664,17 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
     }
   }
 
-  // 6. Merge Fixtures if remote has completed matches
+  // 6. Merge Fixtures (scores, finished status, dates, goal scorers, venues)
   if (Array.isArray(remote.fixtures) && Array.isArray(local.fixtures)) {
     for (const rf of remote.fixtures) {
       const lf = local.fixtures.find((f) => f.id === rf.id);
       if (lf) {
-        if (rf.isFinished && !lf.isFinished) {
+        if (
+          (rf.isFinished && !lf.isFinished) ||
+          (rf.homeScore != null && lf.homeScore == null) ||
+          (rf.date && !lf.date) ||
+          (Array.isArray(rf.goalScorers) && rf.goalScorers.length > (lf.goalScorers?.length || 0))
+        ) {
           Object.assign(lf, rf);
           changed = true;
         }
@@ -1674,15 +1685,45 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
     }
   }
 
-  // 7. Merge custom added players
+  // 7. Merge players (stats, points, photos, costs)
   if (remote.players && typeof remote.players === 'object' && local.players) {
     for (const [pid, rp] of Object.entries(remote.players as Record<string, any>)) {
       if (!local.players[pid]) {
         local.players[pid] = rp;
         changed = true;
       } else {
-        if (rp.photoUrl && !local.players[pid].photoUrl) {
-          local.players[pid].photoUrl = rp.photoUrl;
+        const lp = local.players[pid];
+        // 1. Merge photo
+        if (rp.photoUrl && !lp.photoUrl) {
+          lp.photoUrl = rp.photoUrl;
+          changed = true;
+        }
+        // 2. Merge gameweek stats and points (CRITICAL: preserve match stats from remote)
+        if (rp.gwStats && Object.keys(rp.gwStats).length > 0) {
+          if (!lp.gwStats || Object.keys(lp.gwStats).length === 0) {
+            lp.gwStats = rp.gwStats;
+            lp.totalPoints = rp.totalPoints ?? lp.totalPoints;
+            lp.gwPoints = rp.gwPoints ?? lp.gwPoints;
+            changed = true;
+          } else {
+            for (const [gw, st] of Object.entries(rp.gwStats)) {
+              if (!lp.gwStats[gw] || ((st as any).minutes || 0) > (lp.gwStats[gw]?.minutes || 0)) {
+                lp.gwStats[gw] = st as any;
+                changed = true;
+              }
+            }
+            if ((rp.totalPoints || 0) > (lp.totalPoints || 0)) {
+              lp.totalPoints = rp.totalPoints;
+              lp.gwPoints = rp.gwPoints ?? lp.gwPoints;
+              changed = true;
+            }
+          }
+        }
+        // 3. Merge price changes if remote has updated cost
+        if (rp.cost !== undefined && rp.cost !== lp.cost && rp.priceChange !== undefined) {
+          lp.cost = rp.cost;
+          lp.previousCost = rp.previousCost;
+          lp.priceChange = rp.priceChange;
           changed = true;
         }
       }
