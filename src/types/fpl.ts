@@ -91,6 +91,7 @@ export interface Fixture {
   isFinished: boolean;
   isLive: boolean;
   kickoffTime: string;
+  date?: string;
   venue?: Venue;
   goalScorers?: MatchGoal[];
 }

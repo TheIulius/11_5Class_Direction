@@ -186,6 +186,18 @@ export const AdminPortal: React.FC = () => {
     }
   }, [isDevAuthenticated]);
 
+  // Global ⌘K keyboard listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   useEffect(() => {
     if (paymentSettings) {
       setBogLinkInput(paymentSettings.bogLink || '');
@@ -1469,7 +1481,7 @@ export const AdminPortal: React.FC = () => {
             >
               <div className="flex items-center gap-2.5">
                 <Search className="w-4 h-4 text-emerald-400" />
-                <span>Search any player across all classes to modify live stats...</span>
+                <span>Search players, modify live stats, or easily schedule matches (⌘K)...</span>
               </div>
               <kbd className="px-2 py-0.5 rounded bg-black/40 text-[10px] font-mono text-zinc-300 border border-white/10">
                 ⌘K / Ctrl+K
@@ -1865,6 +1877,9 @@ export const AdminPortal: React.FC = () => {
           return true;
         }}
         onEditPlayer={editPlayer}
+        fixtures={fixtures}
+        clubs={clubs}
+        onUpdateFixture={updateFixture}
       />
     </div>
   );

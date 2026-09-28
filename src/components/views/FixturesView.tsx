@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { CLUBS } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
@@ -19,6 +19,38 @@ import {
   Activity,
   ArrowRight,
 } from 'lucide-react';
+
+export const formatFixtureDate = (dateStr?: string): string => {
+  if (!dateStr) return 'Date TBD';
+  const parts = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (parts) {
+    const year = parseInt(parts[1], 10);
+    const month = parseInt(parts[2], 10) - 1;
+    const day = parseInt(parts[3], 10);
+    const d = new Date(year, month, day);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  const parsed = new Date(dateStr);
+  if (!isNaN(parsed.getTime())) {
+    return parsed.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  return dateStr;
+};
+
+export const sortFixturesByDate = (list: Fixture[]): Fixture[] => {
+  return [...list].sort((a, b) => {
+    const hasA = Boolean(a.date && !isNaN(Date.parse(a.date)));
+    const hasB = Boolean(b.date && !isNaN(Date.parse(b.date)));
+    if (hasA && !hasB) return -1;
+    if (!hasA && hasB) return 1;
+    if (hasA && hasB) {
+      const timeA = new Date(a.date!).getTime();
+      const timeB = new Date(b.date!).getTime();
+      if (timeA !== timeB) return timeA - timeB;
+    }
+    return a.id.localeCompare(b.id);
+  });
+};
 
 interface PlayerContribution {
   player: Player;
@@ -41,7 +73,10 @@ export const FixturesView: React.FC = () => {
   const [expandedFixtureId, setExpandedFixtureId] = useState<string | null>(null);
   const [activeTeamTab, setActiveTeamTab] = useState<Record<string, 'home' | 'away'>>({});
 
-  const gwFixtures = fixtures.filter((f) => f.gameweek === selectedGW);
+  const gwFixtures = useMemo(() => {
+    const filtered = fixtures.filter((f) => f.gameweek === selectedGW);
+    return sortFixturesByDate(filtered);
+  }, [fixtures, selectedGW]);
 
   const toggleFixture = (fixtureId: string) => {
     setExpandedFixtureId((prev) => (prev === fixtureId ? null : fixtureId));
@@ -260,7 +295,7 @@ export const FixturesView: React.FC = () => {
                             {fix.homeScore ?? 0} - {fix.awayScore ?? 0}
                           </div>
                           <span className="text-[8px] font-black text-slate-400 mt-0.5 uppercase tracking-wider">
-                            FT • Full Time
+                            FT • {fix.date ? formatFixtureDate(fix.date) : 'Full Time'}
                           </span>
                         </div>
                       ) : fix.isLive ? (
@@ -279,7 +314,7 @@ export const FixturesView: React.FC = () => {
                             vs
                           </div>
                           <span className="text-[9px] font-mono text-slate-400 mt-0.5">
-                            {fix.kickoffTime || 'Upcoming'}
+                            {fix.date ? formatFixtureDate(fix.date) : (fix.kickoffTime || 'Upcoming')}
                           </span>
                         </div>
                       )}
@@ -318,10 +353,23 @@ export const FixturesView: React.FC = () => {
 
                   {/* Match Sub-header: Venue and Quick Indicator */}
                   <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800/80 mt-2 text-[10px] text-slate-500 dark:text-slate-400">
-                    <span className="flex items-center gap-1 font-mono">
-                      <Clock className="w-3 h-3 text-slate-400" />
-                      {fix.kickoffTime || 'Kickoff TBD'}
-                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {fix.date ? (
+                        <span className="flex items-center gap-1 font-bold text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 shadow-2xs">
+                          <Calendar className="w-3 h-3 text-emerald-500" />
+                          {formatFixtureDate(fix.date)}
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-md border border-slate-200 dark:border-white/10">
+                          <Calendar className="w-3 h-3 text-slate-400" />
+                          Date TBD
+                        </span>
+                      )}
+                      <span className="flex items-center gap-1 font-mono text-slate-500 dark:text-slate-400">
+                        <Clock className="w-3 h-3 text-slate-400" />
+                        {fix.kickoffTime || 'Kickoff TBD'}
+                      </span>
+                    </div>
 
                     <span
                       className={`px-1.5 py-0.5 rounded-md font-bold text-[9px] ${

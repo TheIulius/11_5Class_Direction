@@ -127,11 +127,12 @@ export const SEED_FIXTURES: Fixture[] = [
     "gameweek": 1,
     "homeClubId": "SCH_11_5",
     "awayClubId": "SCH_10_7",
-    "homeScore": null,
-    "awayScore": null,
-    "isFinished": false,
+    "homeScore": 8,
+    "awayScore": 0,
+    "isFinished": true,
     "isLive": false,
-    "kickoffTime": "Matchday 1"
+    "kickoffTime": "Sep 28, 2026",
+    "date": "2026-09-28"
   },
   {
     "id": "fix_gw1_13",

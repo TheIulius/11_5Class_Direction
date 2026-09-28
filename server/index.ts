@@ -2085,12 +2085,22 @@ app.post('/api/player/photo/suggest', (req: Request, res: Response) => {
     return res.status(404).json({ error: 'Player not found' });
   }
 
-  // Identify submitting user from auth token if available
+  // Identify submitting user from auth token or x-auth-username header
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  const user = token ? Object.values(data.users || {}).find((u) => u.token === token) : null;
-  const isAdmin = user?.role === 'admin' || user?.isAdmin;
-  const suggestedBy = user ? `@${user.username}` : (req.body.suggestedBy || 'manager');
+  const usernameHeader = (req.headers['x-auth-username'] as string | undefined)?.trim();
+  const user = token
+    ? Object.values(data.users || {}).find((u) => u.token === token)
+    : usernameHeader
+    ? Object.values(data.users || {}).find((u) => u.username.toLowerCase() === usernameHeader.toLowerCase())
+    : null;
+
+  const isAdmin =
+    (user && (isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isAdmin))) ||
+    (usernameHeader && isUserAdmin(usernameHeader)) ||
+    req.headers['x-admin-password'] === ADMIN_PASSWORD;
+
+  const suggestedBy = user ? `@${user.username}` : usernameHeader ? `@${usernameHeader}` : (req.body.suggestedBy || 'manager');
 
   // If submitting user is an administrator, attach photo DIRECTLY without additional approval!
   if (isAdmin) {
@@ -2148,8 +2158,17 @@ app.post('/api/admin/player-photo/remove', (req: Request, res: Response) => {
 
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  const user = token ? Object.values(data.users || {}).find((u) => u.token === token) : null;
-  const isAdmin = user?.role === 'admin' || user?.isAdmin;
+  const usernameHeader = (req.headers['x-auth-username'] as string | undefined)?.trim();
+  const user = token
+    ? Object.values(data.users || {}).find((u) => u.token === token)
+    : usernameHeader
+    ? Object.values(data.users || {}).find((u) => u.username.toLowerCase() === usernameHeader.toLowerCase())
+    : null;
+
+  const isAdmin =
+    (user && (isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isAdmin))) ||
+    (usernameHeader && isUserAdmin(usernameHeader)) ||
+    req.headers['x-admin-password'] === ADMIN_PASSWORD;
 
   if (!isAdmin) {
     return res.status(403).json({ error: 'Admin authorization required to remove player photo' });
@@ -2162,7 +2181,7 @@ app.post('/api/admin/player-photo/remove', (req: Request, res: Response) => {
   }
 
   db.save();
-  scheduleAutoSyncToGitHub(`Admin @${user?.username || 'admin'} removed photo for player ${player.webName}`, true);
+  scheduleAutoSyncToGitHub(`Admin @${user?.username || usernameHeader || 'admin'} removed photo for player ${player.webName}`, true);
 
   res.json({
     success: true,

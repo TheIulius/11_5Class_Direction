@@ -12,6 +12,13 @@ export function getAuthHeaders(extra: Record<string, string> = {}): Record<strin
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
+    const authUserStr = typeof localStorage !== 'undefined' ? localStorage.getItem('fpl_auth_user_v1') : null;
+    if (authUserStr) {
+      const user = JSON.parse(authUserStr);
+      if (user?.username) {
+        headers['x-auth-username'] = user.username;
+      }
+    }
   } catch (e) {}
   return headers;
 }
