@@ -878,7 +878,7 @@ const SlotCard: React.FC<SlotCardProps> = ({
       </span>
 
       {/* Price Badge in Monospace Tabular Figures */}
-      <PlayerPriceBadge player={player} className="text-[8px] sm:text-[10px] font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 -mt-0.5 justify-center" />
+      <PlayerPriceBadge player={player} stacked={true} className="text-[8px] sm:text-[10px] font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400 -mt-0.5 justify-center" />
     </div>
   );
 };

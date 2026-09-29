@@ -177,11 +177,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
       {/* Value / Points Plate (Bottom half) - Price and Points side-by-side */}
       <div
-        className="w-full text-center px-0.5 sm:px-1 py-[1.5px] md:py-0.5 rounded-b text-[8.5px] sm:text-[9.5px] md:text-[10.5px] font-extrabold border-x border-b tracking-tight transition-colors bg-slate-900/95 text-slate-200 border-slate-800 flex items-center justify-center gap-1 whitespace-nowrap overflow-hidden"
+        className="w-full text-center px-1 sm:px-1.5 py-1 sm:py-1.5 rounded-b text-[8.5px] sm:text-[9.5px] font-extrabold border-x border-b border-t border-slate-800/80 tracking-tight transition-colors bg-slate-900/95 text-slate-200 min-h-[25px] sm:min-h-[27px] flex items-center justify-center gap-0.5 sm:gap-1 shadow-xs"
       >
-        <PlayerPriceBadge player={player} className="text-[8px] sm:text-[9px]" />
-        <span className="text-slate-600 font-normal text-[7px] select-none">•</span>
-        <span className="font-mono text-emerald-400 font-bold shrink-0">{pts}pts</span>
+        <PlayerPriceBadge player={player} stacked={true} className="text-[8.5px] sm:text-[9px]" />
+        <span className="text-slate-500 font-normal text-[7.5px] select-none shrink-0">•</span>
+        <span className="font-mono text-emerald-400 font-bold shrink-0 leading-none">{pts}pts</span>
       </div>
     </div>
   );
