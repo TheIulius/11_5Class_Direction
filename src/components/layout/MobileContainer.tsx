@@ -20,9 +20,10 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
     setIsRulesModalOpen,
     rulesModalTab,
     activeTab,
+    isModerator,
   } = useFPL();
 
-  const isDevMode = activeTab === 'dev';
+  const isDevMode = activeTab === 'dev' && isModerator;
 
   return (
     <div className="min-h-screen w-full flex flex-col bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 select-none transition-colors duration-200">

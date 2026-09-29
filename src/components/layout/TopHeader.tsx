@@ -135,6 +135,23 @@ export const TopHeader: React.FC = () => {
             </button>
           )}
 
+          {/* Dedicated Match Console Button (Referees Only) */}
+          {isReferee && !isModerator && (
+            <button
+              onClick={() => setActiveTab('dev')}
+              className={`p-1.5 md:px-3 md:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                activeTab === 'dev'
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 font-black shadow-xs ring-2 ring-amber-400/50'
+                  : 'bg-amber-500/15 dark:bg-amber-500/15 border-amber-500/30 text-amber-500 dark:text-amber-400 hover:bg-amber-500/25'
+              }`}
+              title="მატჩის კონსოლი (მსაჯი) / Matchday Referee Console"
+              aria-label="Match Console"
+            >
+              <Award className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="font-bold">Match Console</span>
+            </button>
+          )}
+
           {/* Theme Toggle Button (Light / Dark) */}
           <button
             onClick={toggleTheme}

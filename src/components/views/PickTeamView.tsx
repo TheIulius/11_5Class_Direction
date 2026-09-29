@@ -5,7 +5,7 @@ import { PlayerCard } from '../pitch/PlayerCard';
 import { PlayerActionSheet } from '../pitch/PlayerActionSheet';
 import { getFormationLayout } from '../../engine/formations';
 import { ChipType } from '../../types/fpl';
-import { Zap, CheckCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, Lock, ArrowLeft, ArrowRight, Clock } from 'lucide-react';
+import { Zap, CheckCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, Lock, ArrowLeft, ArrowRight, Clock, Award } from 'lucide-react';
 import { validateSquadComposition } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { TripleCaptainIcon, BenchBoostIcon, WildcardIcon } from '../icons/ChipIcons';
@@ -20,6 +20,7 @@ export const PickTeamView: React.FC = () => {
     saveSquad,
     setActiveTab,
     isSquadLocked,
+    isReferee,
     isDemoMode,
     currentGW,
     reorderBenchPlayer,
@@ -129,6 +130,28 @@ export const PickTeamView: React.FC = () => {
             </span>
           </div>
         </div>
+
+        {/* Trusted Referee Prompt Banner */}
+        {isReferee && (
+          <div className="p-3 md:p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs font-bold flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-2.5">
+              <Award className="w-5 h-5 flex-shrink-0 text-amber-400" />
+              <div>
+                <span className="font-black text-amber-300 mr-1.5 uppercase tracking-wide">
+                  მსაჯის პანელი (Referee):
+                </span>
+                <span>თქვენ გაქვთ მატჩების შედეგების და სტატისტიკის შეყვანის უფლება.</span>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab('dev')}
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition-all shrink-0 cursor-pointer shadow-xs active:scale-95 ml-2 flex items-center gap-1"
+            >
+              <span>Match Console</span>
+              <span>→</span>
+            </button>
+          </div>
+        )}
 
         {/* Lineup Locked Notification Banner */}
         {isSquadLocked && (

@@ -15,7 +15,7 @@ import { StudentProfileModal } from './components/auth/StudentProfileModal';
 import { UpdateNotesModal } from './components/common/UpdateNotesModal';
 
 const AppContent: React.FC = () => {
-  const { activeTab, authUser, isModerator, isReferee, openRulesModal } = useFPL();
+  const { activeTab, setActiveTab, authUser, isModerator, isReferee, openRulesModal } = useFPL();
 
   if (!authUser) {
     return <AuthLandingView />;
@@ -56,9 +56,18 @@ const AppContent: React.FC = () => {
                       </p>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-slate-950">
-                    Trusted Ref
-                  </span>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-slate-950">
+                      Trusted Ref
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('team')}
+                      className="px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-xs font-bold transition-all text-slate-700 dark:text-slate-200 cursor-pointer"
+                    >
+                      ← Team
+                    </button>
+                  </div>
                 </div>
                 <MatchDayAdmin />
               </div>
