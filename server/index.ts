@@ -341,12 +341,20 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
     role: isAdmin ? 'admin' : 'user',
     isAdmin,
     isApproved,
+    grade: req.body.grade || '',
+    parallel: req.body.parallel || '',
+    realName: (req.body.realName || '').trim(),
+    showRealNamePublicly: req.body.showRealNamePublicly !== undefined ? Boolean(req.body.showRealNamePublicly) : true,
   };
 
   const newManager: ManagerProfile = {
     id,
     managerName: managerName.trim(),
     teamName: teamName.trim(),
+    grade: newUser.grade,
+    parallel: newUser.parallel,
+    realName: newUser.realName,
+    showRealNamePublicly: newUser.showRealNamePublicly,
     squad: {
       teamName: teamName.trim(),
       managerName: managerName.trim(),
@@ -389,6 +397,10 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
       gwPoints: 0,
       rank: globalLeague.members.length + 1,
       previousRank: globalLeague.members.length + 1,
+      grade: newUser.grade,
+      parallel: newUser.parallel,
+      realName: newUser.realName,
+      showRealNamePublicly: newUser.showRealNamePublicly,
     });
   }
 
@@ -407,6 +419,10 @@ app.post('/api/auth/register', async (req: Request, res: Response) => {
       role: newUser.role,
       isAdmin: newUser.isAdmin,
       isApproved: newUser.isApproved,
+      grade: newUser.grade,
+      parallel: newUser.parallel,
+      realName: newUser.realName,
+      showRealNamePublicly: newUser.showRealNamePublicly,
     },
     squad: newManager.squad,
   });
@@ -530,6 +546,10 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
       role: isAdmin ? 'admin' : 'user',
       isAdmin,
       isApproved,
+      grade: user.grade,
+      parallel: user.parallel,
+      realName: user.realName,
+      showRealNamePublicly: user.showRealNamePublicly,
     },
     squad: manager.squad,
   });
@@ -600,6 +620,10 @@ app.get('/api/auth/me', async (req: Request, res: Response) => {
       role: isAdmin ? 'admin' : 'user',
       isAdmin,
       isApproved,
+      grade: user.grade,
+      parallel: user.parallel,
+      realName: user.realName,
+      showRealNamePublicly: user.showRealNamePublicly,
     },
     squad: manager.squad,
   });
@@ -622,6 +646,90 @@ app.post('/api/auth/logout', (req: Request, res: Response) => {
   }
 
   res.json({ success: true });
+});
+
+// Update Student Profile (Grade, Parallel, Real Name & Public Visibility)
+app.post('/api/user/profile', (req: Request, res: Response) => {
+  const { grade, parallel, firstName, lastName, realName, showRealNamePublicly } = req.body;
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : (req.body.token as string);
+  const authUsername = (req.headers['x-auth-username'] as string) || '';
+
+  const data = db.getData();
+  if (!data.users) data.users = {};
+
+  let user: UserAccount | undefined;
+  if (token) {
+    user = Object.values(data.users).find((u) => u.token === token);
+  }
+  if (!user && authUsername) {
+    user = Object.values(data.users).find((u) => u.username.toLowerCase() === authUsername.toLowerCase());
+  }
+  if (!user && req.body.userId) {
+    user = data.users[req.body.userId];
+  }
+
+  if (!user) {
+    return res.status(401).json({ error: 'User not authenticated' });
+  }
+
+  const finalRealName = (realName || `${firstName || ''} ${lastName || ''}`).trim();
+  const cleanGrade = (grade || '').trim();
+  const cleanParallel = (parallel || '').trim();
+  const cleanShowPublic = showRealNamePublicly === undefined ? true : Boolean(showRealNamePublicly);
+
+  if (!cleanGrade || !cleanParallel || !finalRealName) {
+    return res.status(400).json({ error: 'Grade, parallel, and full name are required' });
+  }
+
+  user.grade = cleanGrade;
+  user.parallel = cleanParallel;
+  user.realName = finalRealName;
+  user.showRealNamePublicly = cleanShowPublic;
+
+  // Also update in manager profile
+  if (data.managers && data.managers[user.id]) {
+    const m = data.managers[user.id];
+    m.grade = cleanGrade;
+    m.parallel = cleanParallel;
+    m.realName = finalRealName;
+    m.showRealNamePublicly = cleanShowPublic;
+  }
+
+  // Also update in all leagues
+  (data.leagues || []).forEach((l: any) => {
+    const member = l.members?.find((mem: any) => mem.id === user!.id);
+    if (member) {
+      member.grade = cleanGrade;
+      member.parallel = cleanParallel;
+      member.realName = finalRealName;
+      member.showRealNamePublicly = cleanShowPublic;
+    }
+  });
+
+  db.save();
+  scheduleAutoSyncToGitHub(`Updated school profile for @${user.username} (${cleanGrade}/${cleanParallel} ${finalRealName})`);
+
+  const isAdmin = isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isAdmin);
+  const isApproved = isAdmin || Boolean(user.isApproved);
+
+  return res.json({
+    success: true,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      managerName: user.managerName,
+      teamName: user.teamName,
+      role: isAdmin ? 'admin' : 'user',
+      isAdmin,
+      isApproved,
+      grade: user.grade,
+      parallel: user.parallel,
+      realName: user.realName,
+      showRealNamePublicly: user.showRealNamePublicly,
+    },
+  });
 });
 
 // Admin Developer Authentication (Server-Side verification)
@@ -1233,6 +1341,13 @@ function recalculateAllManagersLeaguePoints(data: any) {
       const member = l.members.find((mem: any) => mem.id === m.id);
       if (member) {
         member.managerName = m.managerName;
+        const u = data.users?.[m.id];
+        if (m.grade || u?.grade) member.grade = m.grade || u?.grade;
+        if (m.parallel || u?.parallel) member.parallel = m.parallel || u?.parallel;
+        if (m.realName || u?.realName) member.realName = m.realName || u?.realName;
+        if (m.showRealNamePublicly !== undefined || u?.showRealNamePublicly !== undefined) {
+          member.showRealNamePublicly = m.showRealNamePublicly ?? u?.showRealNamePublicly;
+        }
         // Safety guard: only update points if we have a valid non-zero calculation or if the member had 0
         // Never wipe existing points to 0 if memory was temporarily missing player stats
         if (cumulativeTotal > 0 || (member.totalPoints === 0 && currentCalc.totalPoints === 0)) {
@@ -1592,6 +1707,22 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
         }
         if (rUser.teamName && !lUser.teamName) {
           lUser.teamName = rUser.teamName;
+          changed = true;
+        }
+        if (rUser.grade && !lUser.grade) {
+          lUser.grade = rUser.grade;
+          changed = true;
+        }
+        if (rUser.parallel && !lUser.parallel) {
+          lUser.parallel = rUser.parallel;
+          changed = true;
+        }
+        if (rUser.realName && !lUser.realName) {
+          lUser.realName = rUser.realName;
+          changed = true;
+        }
+        if (rUser.showRealNamePublicly !== undefined && lUser.showRealNamePublicly === undefined) {
+          lUser.showRealNamePublicly = rUser.showRealNamePublicly;
           changed = true;
         }
       }
@@ -2083,6 +2214,10 @@ app.get('/api/admin/users', (req: Request, res: Response) => {
       role: isAdmin ? 'admin' : 'user',
       isAdmin,
       isApproved: isAdmin || Boolean(u.isApproved),
+      grade: u.grade,
+      parallel: u.parallel,
+      realName: u.realName,
+      showRealNamePublicly: u.showRealNamePublicly,
     };
   });
   res.json({ success: true, users: usersList });

@@ -1297,8 +1297,15 @@ export const AdminPortal: React.FC = () => {
                         >
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-extrabold text-xs text-white">{u.managerName}</span>
+                              <span className="font-extrabold text-xs text-white">
+                                {u.realName ? `${u.realName} (${u.managerName})` : u.managerName}
+                              </span>
                               <span className="text-[10px] font-mono text-amber-400 font-bold">@{u.username}</span>
+                              {u.grade && u.parallel && (
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">
+                                  {u.grade}/{u.parallel}
+                                </span>
+                              )}
                             </div>
                             <div className="flex items-center gap-2 text-[10px] text-zinc-400">
                               <span>Team: <strong className="text-slate-200">{u.teamName}</strong></span>
@@ -1373,8 +1380,15 @@ export const AdminPortal: React.FC = () => {
                     <div key={u.id} className="py-2.5 px-2 flex items-center justify-between gap-3 hover:bg-white/[0.02]">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-extrabold text-xs text-white truncate">{u.managerName}</span>
+                          <span className="font-extrabold text-xs text-white truncate">
+                            {u.realName ? `${u.realName} (${u.managerName})` : u.managerName}
+                          </span>
                           <span className="text-[10px] font-mono text-emerald-400 font-bold">@{u.username}</span>
+                          {u.grade && u.parallel && (
+                            <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 font-mono">
+                              {u.grade}/{u.parallel}
+                            </span>
+                          )}
 
                           {/* Role / Status Badge */}
                           {isUserAdm ? (

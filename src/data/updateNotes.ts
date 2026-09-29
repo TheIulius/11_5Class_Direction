@@ -38,6 +38,16 @@ export const UPDATE_NOTES: UpdateRelease[] = [
     tagEn: 'Latest Update',
     items: [
       {
+        id: 'manager_class_profile',
+        titleKa: '🏫 კლასისა (Grade & Parallel) და სახელის მითითება',
+        titleEn: '🏫 Grade, Section & Real Name Details',
+        descriptionKa: 'ყველა მენეჯერმა უნდა მიუთითოს საკუთარი კლასი, პარალელი, სახელი და გვარი. ასევე შეგიძლიათ აირჩიოთ, გამოჩნდეს თუ არა თქვენი რეალური სახელი საჯაროდ ლიდერბორდზე.',
+        descriptionEn: 'Managers must specify their grade, parallel, and full name. You can also choose if your real name is displayed publicly.',
+        badgeKa: 'პროფილი',
+        badgeEn: 'Profile',
+        icon: 'sliders',
+      },
+      {
         id: 'player_photos_request',
         titleKa: '📸 დაამატეთ ფოტოები მოთამაშეებს!',
         titleEn: '📸 Add Photos to Players!',

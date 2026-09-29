@@ -114,6 +114,7 @@ interface FPLContextType {
   openRulesModal: (tab?: 'rules' | 'updates') => void;
   loginUser: (login: string, pass: string) => Promise<void>;
   registerUser: (data: { username: string; email?: string; password: string; managerName: string; teamName: string; activationCode?: string }) => Promise<void>;
+  updateUserProfile: (data: { grade: string; parallel: string; realName: string; showRealNamePublicly: boolean }) => Promise<void>;
   logoutUser: () => void;
   checkAuthSession: () => Promise<boolean>;
   paymentSettings: PaymentSettings;
@@ -739,6 +740,21 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       };
       setSquad(initialSquad);
       localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(initialSquad));
+      await refreshServerState(res.user.id);
+    }
+  };
+
+  // Update Student Profile (Grade, Parallel, Real Name & Public Visibility)
+  const updateUserProfile = async (data: {
+    grade: string;
+    parallel: string;
+    realName: string;
+    showRealNamePublicly: boolean;
+  }) => {
+    const res = await api.updateUserProfileApi(data);
+    if (res.user) {
+      setAuthUser(res.user);
+      localStorage.setItem(STORAGE_KEY_AUTH_USER, JSON.stringify(res.user));
       await refreshServerState(res.user.id);
     }
   };
@@ -1770,6 +1786,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         openRulesModal,
         loginUser,
         registerUser,
+        updateUserProfile,
         logoutUser,
         checkAuthSession,
         paymentSettings,

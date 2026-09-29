@@ -10,6 +10,7 @@ import { ManagersView } from './components/views/ManagersView';
 import { AdminPortal } from './components/admin/AdminPortal';
 import { AuthLandingView } from './components/auth/AuthLandingView';
 import { PendingApprovalOverlay } from './components/auth/PendingApprovalOverlay';
+import { StudentProfileModal } from './components/auth/StudentProfileModal';
 import { UpdateNotesModal } from './components/common/UpdateNotesModal';
 
 const AppContent: React.FC = () => {
@@ -21,23 +22,24 @@ const AppContent: React.FC = () => {
 
   const isAccountApproved = authUser.isAdmin || Boolean(authUser.isApproved);
 
-  if (!isAccountApproved) {
-    return <PendingApprovalOverlay />;
-  }
-
   return (
     <div className="relative min-h-screen w-full">
-      <MobileContainer>
-        {activeTab === 'team' && <PickTeamView />}
-        {activeTab === 'transfers' && <TransfersView />}
-        {activeTab === 'players' && <PlayersView />}
-        {(activeTab === 'standings' || (activeTab as any) === 'leagues' || (activeTab as any) === 'points') && (
-          <StandingsView />
-        )}
-        {activeTab === 'fixtures' && <FixturesView />}
-        {activeTab === 'managers' && (isModerator ? <ManagersView /> : <PickTeamView />)}
-        {activeTab === 'dev' && (isModerator ? <AdminPortal /> : <PickTeamView />)}
-      </MobileContainer>
+      {!isAccountApproved ? (
+        <PendingApprovalOverlay />
+      ) : (
+        <MobileContainer>
+          {activeTab === 'team' && <PickTeamView />}
+          {activeTab === 'transfers' && <TransfersView />}
+          {activeTab === 'players' && <PlayersView />}
+          {(activeTab === 'standings' || (activeTab as any) === 'leagues' || (activeTab as any) === 'points') && (
+            <StandingsView />
+          )}
+          {activeTab === 'fixtures' && <FixturesView />}
+          {activeTab === 'managers' && (isModerator ? <ManagersView /> : <PickTeamView />)}
+          {activeTab === 'dev' && (isModerator ? <AdminPortal /> : <PickTeamView />)}
+        </MobileContainer>
+      )}
+      <StudentProfileModal />
       <UpdateNotesModal onOpenRulesHistory={() => openRulesModal('updates')} />
     </div>
   );

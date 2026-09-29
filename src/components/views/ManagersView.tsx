@@ -161,7 +161,9 @@ export const ManagersView: React.FC = () => {
       !q ||
       u.username.toLowerCase().includes(q) ||
       (u.managerName || '').toLowerCase().includes(q) ||
-      (u.teamName || '').toLowerCase().includes(q);
+      (u.teamName || '').toLowerCase().includes(q) ||
+      (u.realName || '').toLowerCase().includes(q) ||
+      (u.grade && u.parallel && `${u.grade}/${u.parallel}`.toLowerCase().includes(q));
 
     if (!matchesSearch) return false;
 
@@ -414,10 +416,17 @@ export const ManagersView: React.FC = () => {
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h4 className="text-sm font-black truncate">{u.managerName}</h4>
+                        <h4 className="text-sm font-black truncate">
+                          {u.realName ? `${u.realName} (${u.managerName})` : u.managerName}
+                        </h4>
                         <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">
                           @{u.username}
                         </span>
+                        {u.grade && u.parallel && (
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30 font-mono">
+                            {u.grade}/{u.parallel}
+                          </span>
+                        )}
                         {u.isAdmin && (
                           <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
                             Admin

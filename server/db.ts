@@ -22,6 +22,10 @@ export interface UserAccount {
   role?: 'admin' | 'user';
   isAdmin?: boolean;
   isApproved?: boolean;
+  grade?: string;
+  parallel?: string;
+  realName?: string;
+  showRealNamePublicly?: boolean;
 }
 
 export interface ManagerProfile {
@@ -30,6 +34,10 @@ export interface ManagerProfile {
   teamName: string;
   squad: Squad;
   joinedAt: string;
+  grade?: string;
+  parallel?: string;
+  realName?: string;
+  showRealNamePublicly?: boolean;
 }
 
 export interface PaymentSettings {

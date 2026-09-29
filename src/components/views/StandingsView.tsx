@@ -43,12 +43,19 @@ export const StandingsView: React.FC = () => {
         const q = searchQuery.toLowerCase().trim();
         const matchesName =
           member.managerName?.toLowerCase().includes(q) ||
-          member.teamName?.toLowerCase().includes(q);
+          member.teamName?.toLowerCase().includes(q) ||
+          (member.realName && member.realName.toLowerCase().includes(q));
         if (!matchesName) return false;
       }
 
       // 2. Grade & Section Filter
       if (selectedGrade !== 'ALL') {
+        if (member.grade) {
+          if (String(member.grade) !== String(selectedGrade)) return false;
+          if (selectedSection !== 'ALL' && String(member.parallel) !== String(selectedSection)) return false;
+          return true;
+        }
+
         const fields = [
           member.club,
           member.clubId,
@@ -215,6 +222,11 @@ export const StandingsView: React.FC = () => {
                           YOU
                         </span>
                       )}
+                      {member.grade && member.parallel && (
+                        <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                          {member.grade}/{member.parallel}
+                        </span>
+                      )}
                       {member.activeChip && (
                         <span className="px-1.5 py-0.2 rounded text-[8px] font-bold uppercase bg-amber-500/15 text-amber-400 border border-amber-500/25 flex items-center gap-0.5">
                           <Sparkles className="w-2 h-2" />
@@ -223,7 +235,9 @@ export const StandingsView: React.FC = () => {
                       )}
                     </div>
                     <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate block">
-                      {member.managerName}
+                      {member.showRealNamePublicly && member.realName
+                        ? member.realName
+                        : member.managerName}
                     </span>
                   </div>
                 </div>

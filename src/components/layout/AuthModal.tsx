@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useFPL } from '../../context/FPLContext';
-import { Lock, LogOut, Key, User, X, ExternalLink, Ticket, CreditCard } from 'lucide-react';
+import { Lock, LogOut, Key, User, X, ExternalLink, Ticket, CreditCard, GraduationCap } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { StudentProfileModal } from '../auth/StudentProfileModal';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface AuthModalProps {
 export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   const { authUser, loginUser, registerUser, logoutUser, paymentSettings } = useFPL();
   const [tab, setTab] = useState<'login' | 'register'>('login');
+  const [isEditingStudentProfile, setIsEditingStudentProfile] = useState(false);
 
   // Login inputs
   const [loginIdentifier, setLoginIdentifier] = useState('');
@@ -126,14 +128,26 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           <div className="space-y-4 py-2">
             <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2 text-center">
               <div className="w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center font-black text-lg">
-                {authUser.managerName.charAt(0).toUpperCase()}
+                {(authUser.realName || authUser.managerName || authUser.username).charAt(0).toUpperCase()}
               </div>
               <div>
                 <p className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">@{authUser.username}</p>
                 <h4 className="font-bold text-slate-900 dark:text-white text-base">{authUser.teamName}</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">{authUser.managerName}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {authUser.realName ? authUser.realName : authUser.managerName}
+                  {authUser.grade && authUser.parallel ? ` • კლასი ${authUser.grade}/${authUser.parallel}` : ''}
+                </p>
               </div>
             </div>
+
+            <button
+              type="button"
+              onClick={() => setIsEditingStudentProfile(true)}
+              className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <GraduationCap className="w-4 h-4 text-emerald-500" />
+              <span>კლასის & სახელის შეცვლა (Edit Profile)</span>
+            </button>
 
             <button
               onClick={() => {
@@ -145,6 +159,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <LogOut className="w-4 h-4" />
               <span>Sign Out</span>
             </button>
+
+            {isEditingStudentProfile && (
+              <StudentProfileModal
+                forceOpen={true}
+                onClose={() => setIsEditingStudentProfile(false)}
+              />
+            )}
           </div>
         ) : (
           /* LOGIN OR REGISTER FORM */

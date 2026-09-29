@@ -71,6 +71,23 @@ export async function authLogout(token: string) {
   });
 }
 
+export async function updateUserProfileApi(data: {
+  userId?: string;
+  grade: string;
+  parallel: string;
+  realName: string;
+  showRealNamePublicly: boolean;
+}) {
+  const res = await fetch(`${API_BASE}/api/user/profile`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || 'Failed to update profile');
+  return json;
+}
+
 export async function adminLoginApi(password?: string) {
   const token = typeof localStorage !== 'undefined' ? localStorage.getItem('fpl_auth_token_v1') : null;
   const res = await fetch(`${API_BASE}/api/admin/login`, {

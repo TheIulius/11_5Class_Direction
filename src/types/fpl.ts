@@ -108,6 +108,10 @@ export interface LeagueMember {
   gwPoints: number;
   rank: number;
   previousRank: number;
+  grade?: string;
+  parallel?: string;
+  realName?: string;
+  showRealNamePublicly?: boolean;
 }
 
 export interface League {
@@ -156,6 +160,10 @@ export interface AuthUser {
   role?: 'admin' | 'user';
   isAdmin?: boolean;
   isApproved?: boolean;
+  grade?: string;
+  parallel?: string;
+  realName?: string;
+  showRealNamePublicly?: boolean;
 }
 
 export type LineupVisibilityMode = 'auto' | 'always_show' | 'always_hide';
