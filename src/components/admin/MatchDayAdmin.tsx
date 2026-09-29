@@ -2,9 +2,10 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
-import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { CLUBS } from '../../data/clubs';
-import { MatchGoal, Venue, Player } from '../../types/fpl';
+import { MatchGoal, Venue, Player, Club, PlayerStats } from '../../types/fpl';
+import { calculatePlayerPoints } from '../../engine/scoring';
+import { adminSaveMatchEventsApi } from '../../services/api';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,22 +16,21 @@ import {
   AlertCircle,
   Check,
   ChevronLeft,
-  ChevronRight,
   Award,
   Zap,
   Clock,
   Shield,
   Trash2,
-  Users as UsersIcon,
-  Search,
   Play,
   Pause,
   RotateCcw,
   Building,
   MapPin,
-  Flame,
-  TrendingUp,
   MoreHorizontal,
+  X,
+  Sparkles,
+  LayoutList,
+  Columns,
 } from 'lucide-react';
 
 interface FloatingPointBadge {
@@ -49,8 +49,6 @@ export const MatchDayAdmin: React.FC = () => {
     updateFixture,
     updatePlayerStats,
     editPlayer,
-    isModerator,
-    isDevAuthenticated,
   } = useFPL();
 
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -61,14 +59,15 @@ export const MatchDayAdmin: React.FC = () => {
   const [awayScore, setAwayScore] = useState<number>(0);
   const [venue, setVenue] = useState<Venue>('delisi');
 
-  // Match Stopwatch Timer
-  const [defaultMinutes, setDefaultMinutes] = useState<number>(40);
+  // Match Stopwatch Timer (Default: 30 minutes)
+  const [defaultMinutes, setDefaultMinutes] = useState<number>(30);
   const [matchSeconds, setMatchSeconds] = useState<number>(0);
   const [isTimerRunning, setIsTimerRunning] = useState<boolean>(false);
 
   // Events State
   const [goals, setGoals] = useState<(MatchGoal & { team: 'home' | 'away' })[]>([]);
-  const [mvps, setMvps] = useState<string[]>([]);
+  // 3 MVPs: [1st (+3 pts), 2nd (+2 pts), 3rd (+1 pt)]
+  const [mvpRanking, setMvpRanking] = useState<(string | null)[]>([null, null, null]);
   const [playerMinutes, setPlayerMinutes] = useState<Record<string, number>>({});
   const [yellowCards, setYellowCards] = useState<string[]>([]);
   const [redCards, setRedCards] = useState<string[]>([]);
@@ -83,8 +82,12 @@ export const MatchDayAdmin: React.FC = () => {
   // Mobile active team tab ('home' | 'away' | 'both')
   const [activeTeamTab, setActiveTeamTab] = useState<'home' | 'away' | 'both'>('home');
 
-  // Expanded player drawer for secondary actions (OG, Red, Pens, Saves)
-  const [expandedPlayerId, setExpandedPlayerId] = useState<string | null>(null);
+  // View mode toggle on mobile/desktop ('table' | 'cards')
+  const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+
+  // Active popovers for MVP picker or More Drawer
+  const [activeMvpPickerPlayerId, setActiveMvpPickerPlayerId] = useState<string | null>(null);
+  const [activeMorePlayerId, setActiveMorePlayerId] = useState<string | null>(null);
 
   // Active match timer interval
   useEffect(() => {
@@ -124,15 +127,16 @@ export const MatchDayAdmin: React.FC = () => {
 
   const isOnePrice = venue === 'one_price';
 
-  const posOrder: Record<string, number> = { GKP: 1, DEF: 2, MID: 3, FWD: 4 };
-
+  // Get players for both teams
   const matchPlayers = useMemo(() => {
     if (!fixture) return { home: [], away: [] };
     const all = Object.values(players);
+
     const sortByPos = (a: Player, b: Player) => {
-      const orderA = posOrder[a.position] || 99;
-      const orderB = posOrder[b.position] || 99;
-      if (orderA !== orderB) return orderA - orderB;
+      const order = { GKP: 1, DEF: 2, MID: 3, FWD: 4 };
+      if (order[a.position] !== order[b.position]) {
+        return order[a.position] - order[b.position];
+      }
       return a.webName.localeCompare(b.webName);
     };
 
@@ -155,6 +159,10 @@ export const MatchDayAdmin: React.FC = () => {
         .sort(sortByPos),
     };
   }, [fixture, players]);
+
+  const allMatchPlayers = useMemo(() => {
+    return [...matchPlayers.home, ...matchPlayers.away];
+  }, [matchPlayers]);
 
   const spawnFloatingPoint = (text: string, color: string, e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -180,7 +188,8 @@ export const MatchDayAdmin: React.FC = () => {
         team: 'home',
       }))
     );
-    setMvps([]);
+    setDefaultMinutes(30);
+    setMvpRanking([null, null, null]);
     setPlayerMinutes({});
     setYellowCards([]);
     setRedCards([]);
@@ -191,7 +200,8 @@ export const MatchDayAdmin: React.FC = () => {
     setMatchSeconds(0);
     setIsTimerRunning(false);
     setActiveTeamTab('home');
-    setExpandedPlayerId(null);
+    setActiveMvpPickerPlayerId(null);
+    setActiveMorePlayerId(null);
     setStep(2);
   };
 
@@ -204,7 +214,88 @@ export const MatchDayAdmin: React.FC = () => {
   };
 
   const getAssistPoints = () => (isOnePrice ? 2 : 3);
-  const getMvpPoints = () => (isOnePrice ? 2 : 3);
+
+  // MVP Rank & Points Helpers
+  const getMvpRank = (playerId: string): 1 | 2 | 3 | null => {
+    if (mvpRanking[0] === playerId) return 1;
+    if (mvpRanking[1] === playerId) return 2;
+    if (mvpRanking[2] === playerId) return 3;
+    return null;
+  };
+
+  const getMvpPoints = (playerId: string): number => {
+    const rank = getMvpRank(playerId);
+    if (!rank) return 0;
+    const basePts = rank === 1 ? 3 : rank === 2 ? 2 : 1;
+    return isOnePrice ? Math.max(0, basePts - 1) : basePts;
+  };
+
+  const handleSetMvp = (playerId: string, targetRank: 1 | 2 | 3 | null, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setMvpRanking((prev) => {
+      const next: (string | null)[] = [...prev];
+      // Clear player from existing slot if any
+      for (let i = 0; i < 3; i++) {
+        if (next[i] === playerId) next[i] = null;
+      }
+      if (targetRank) {
+        const targetIndex = targetRank - 1;
+        next[targetIndex] = playerId;
+        const pts = isOnePrice ? Math.max(0, (targetRank === 1 ? 3 : targetRank === 2 ? 2 : 1) - 1) : (targetRank === 1 ? 3 : targetRank === 2 ? 2 : 1);
+        if (e) {
+          const medal = targetRank === 1 ? '🥇' : targetRank === 2 ? '🥈' : '🥉';
+          spawnFloatingPoint(`${medal} +${pts} MVP (${targetRank})`, 'bg-amber-400 text-slate-950 font-black', e);
+        }
+      } else if (e) {
+        spawnFloatingPoint('Removed MVP', 'bg-zinc-700 text-white font-bold', e);
+      }
+      return next;
+    });
+
+    if (!playerMinutes[playerId]) {
+      setPlayerMinutes((prev) => ({ ...prev, [playerId]: defaultMinutes }));
+    }
+  };
+
+  // Live Points Calculation for a player in this match
+  const computeLivePlayerPoints = (p: Player, team: 'home' | 'away') => {
+    const mins = playerMinutes[p.id] || 0;
+    if (mins === 0) return 0;
+
+    const isHome = team === 'home';
+    const goalsConceded = isHome ? awayScore : homeScore;
+    const cleanSheet = goalsConceded === 0;
+
+    const pGoals = goals.filter((g) => g.playerId === p.id && !g.isOwnGoal).length;
+    const pOwnGoals = goals.filter((g) => g.playerId === p.id && g.isOwnGoal).length;
+    const pAssists = playerAssists[p.id] || 0;
+    const pSaves = playerSaves[p.id] || 0;
+    const pPenSaved = penaltiesSaved[p.id] || 0;
+    const pPenMissed = penaltiesMissed[p.id] || 0;
+    const pYellows = yellowCards.includes(p.id) ? 1 : 0;
+    const pReds = redCards.includes(p.id) ? 1 : 0;
+    const mvpRank = getMvpRank(p.id);
+    const bonus = mvpRank === 1 ? 3 : mvpRank === 2 ? 2 : mvpRank === 3 ? 1 : 0;
+
+    const stats: PlayerStats = {
+      minutes: mins,
+      goals: pGoals,
+      assists: pAssists,
+      cleanSheet: cleanSheet && mins >= 20,
+      goalsConceded,
+      yellowCards: pYellows,
+      redCards: pReds,
+      penaltiesSaved: pPenSaved,
+      penaltiesMissed: pPenMissed,
+      ownGoals: pOwnGoals,
+      isMVP: bonus > 0,
+      bonus,
+      mvpRank: mvpRank ?? undefined,
+      saves: pSaves,
+    };
+
+    return calculatePlayerPoints(p.position, stats, isOnePrice);
+  };
 
   // Rapid Tactile Actions on Players
   const handleRapidGoal = (player: Player, team: 'home' | 'away', e: React.MouseEvent) => {
@@ -224,7 +315,6 @@ export const MatchDayAdmin: React.FC = () => {
     if (team === 'home') setHomeScore((s) => s + 1);
     else setAwayScore((s) => s + 1);
 
-    // Auto mark player minutes if not set
     if (!playerMinutes[player.id]) {
       setPlayerMinutes((prev) => ({ ...prev, [player.id]: defaultMinutes }));
     }
@@ -252,7 +342,6 @@ export const MatchDayAdmin: React.FC = () => {
       },
     ]);
 
-    // An own goal awards a goal to the opposing team
     if (team === 'home') setAwayScore((s) => s + 1);
     else setHomeScore((s) => s + 1);
 
@@ -306,16 +395,6 @@ export const MatchDayAdmin: React.FC = () => {
     }
   };
 
-  const handleToggleMvp = (playerId: string, e: React.MouseEvent) => {
-    const isAlready = mvps.includes(playerId);
-    const pts = getMvpPoints();
-    if (!isAlready) spawnFloatingPoint(`+${pts} MVP`, 'bg-amber-400 text-slate-950 font-black', e);
-    else spawnFloatingPoint('Removed MVP', 'bg-zinc-700 text-white font-bold', e);
-    setMvps((prev) =>
-      prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
-    );
-  };
-
   const handleRaisePlayerPrice = (player: Player, delta: number, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!editPlayer) return;
@@ -338,7 +417,7 @@ export const MatchDayAdmin: React.FC = () => {
     );
   };
 
-  // Decrement / Removal Actions (-1 handlers)
+  // Decrement Handlers (-1 handlers)
   const handleRemoveGoal = (player: Player, team: 'home' | 'away', e: React.MouseEvent) => {
     const hasGoal = goals.some((g) => g.playerId === player.id && !g.isOwnGoal);
     if (!hasGoal) return;
@@ -406,15 +485,6 @@ export const MatchDayAdmin: React.FC = () => {
     }));
   };
 
-  const handleRemoveSave = (player: Player, e: React.MouseEvent) => {
-    if ((playerSaves[player.id] || 0) <= 0) return;
-    spawnFloatingPoint('-1 Save', 'bg-amber-600 text-white font-black', e);
-    setPlayerSaves((prev) => ({
-      ...prev,
-      [player.id]: Math.max(0, (prev[player.id] || 0) - 1),
-    }));
-  };
-
   const handleRemoveGoalByIndex = (index: number) => {
     const goal = goals[index];
     if (!goal) return;
@@ -430,33 +500,40 @@ export const MatchDayAdmin: React.FC = () => {
     setGoals((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Custom Minute Adjustment Helpers
-  const handleSetPlayerMinutes = (playerId: string, mins: number) => {
+  // Minutes Adjustment Helpers (15-min Increments)
+  const handleSetPlayerMinutes = (playerId: string, mins: number, e?: React.MouseEvent) => {
     const clamped = Math.max(0, Math.min(120, mins));
+    if (e) {
+      const pts = clamped >= 20 ? '+2 pts' : clamped > 0 ? '+1 pt' : '0 pts';
+      spawnFloatingPoint(`${clamped}m (${pts})`, 'bg-zinc-200 text-slate-900 font-bold', e);
+    }
     setPlayerMinutes((prev) => ({ ...prev, [playerId]: clamped }));
   };
 
-  const handleStepPlayerMinutes = (playerId: string, delta: number, e?: React.MouseEvent) => {
+  const handleStepPlayerMinutes = (playerId: string, deltaSteps: number, e?: React.MouseEvent) => {
     const cur = playerMinutes[playerId] || 0;
-    const next = Math.max(0, Math.min(120, cur + delta));
+    const step = 15;
+    const next = Math.max(0, Math.min(120, cur + deltaSteps * step));
     if (e) {
-      spawnFloatingPoint(`${next}'`, 'bg-zinc-200 text-slate-900 font-bold', e);
+      const pts = next >= 20 ? '+2 pts' : next > 0 ? '+1 pt' : '0 pts';
+      spawnFloatingPoint(`${next}m (${pts})`, 'bg-zinc-200 text-slate-900 font-bold', e);
     }
     setPlayerMinutes((prev) => ({ ...prev, [playerId]: next }));
   };
 
   const setAllMinutes = (mins: number) => {
     const newMins: Record<string, number> = {};
-    [...matchPlayers.home, ...matchPlayers.away].forEach((p) => {
+    allMatchPlayers.forEach((p) => {
       newMins[p.id] = mins;
     });
     setPlayerMinutes(newMins);
   };
 
+  // Commit / Submit Match Results
   const handleSave = async () => {
     if (!fixture) return;
 
-    // 1. Update Fixture
+    // 1. Update Fixture Details
     await updateFixture(fixture.id, {
       homeScore,
       awayScore,
@@ -470,9 +547,38 @@ export const MatchDayAdmin: React.FC = () => {
       })),
     });
 
-    // 2. Update Player Stats
-    const allMatchPlayers = [...matchPlayers.home, ...matchPlayers.away];
+    const mvpPlayerIds = [mvpRanking[0], mvpRanking[1], mvpRanking[2]].filter(Boolean) as string[];
+    const mvpBonus: Record<string, number> = {};
+    if (mvpRanking[0]) mvpBonus[mvpRanking[0]] = 3;
+    if (mvpRanking[1]) mvpBonus[mvpRanking[1]] = 2;
+    if (mvpRanking[2]) mvpBonus[mvpRanking[2]] = 1;
 
+    // Try batch endpoint on backend
+    try {
+      await adminSaveMatchEventsApi({
+        fixtureId: fixture.id,
+        homeScore,
+        awayScore,
+        venue: venue === 'one_price' ? 'one_price' : 'parki',
+        goalScorers: goals.map((g) => ({
+          playerId: g.playerId,
+          minute: g.minute,
+          isOwnGoal: g.isOwnGoal,
+          assistPlayerId: g.assistPlayerId,
+        })),
+        mvpPlayerIds,
+        mvpBonus,
+        playerMinutes,
+        yellowCards,
+        redCards,
+        penaltiesSaved,
+        penaltiesMissed,
+      });
+    } catch (err: any) {
+      console.warn('Backend match-events error, fallback to context update:', err.message);
+    }
+
+    // 2. Update Player Stats in Context
     for (const p of allMatchPlayers) {
       const mins = playerMinutes[p.id] || 0;
       if (mins === 0) continue; // Skip players who didn't participate
@@ -482,14 +588,16 @@ export const MatchDayAdmin: React.FC = () => {
       const pAssists = playerAssists[p.id] || 0;
       const pSaves = playerSaves[p.id] || 0;
 
-      // Determine clean sheet & goals conceded
+      // Clean sheet calculation
       const isHome = matchPlayers.home.some((hp) => hp.id === p.id);
       const goalsConceded = isHome ? awayScore : homeScore;
       const cleanSheet = goalsConceded === 0;
 
       const pYellows = yellowCards.includes(p.id) ? 1 : 0;
       const pReds = redCards.includes(p.id) ? 1 : 0;
-      const pIsMvp = mvps.includes(p.id);
+      const mvpRank = getMvpRank(p.id);
+      const bonus = mvpRank === 1 ? 3 : mvpRank === 2 ? 2 : mvpRank === 3 ? 1 : 0;
+      const pIsMvp = bonus > 0;
       const pPenSaved = penaltiesSaved[p.id] || 0;
       const pPenMissed = penaltiesMissed[p.id] || 0;
 
@@ -505,6 +613,8 @@ export const MatchDayAdmin: React.FC = () => {
         penaltiesMissed: pPenMissed,
         ownGoals: pOwnGoals,
         isMVP: pIsMvp,
+        bonus,
+        mvpRank: mvpRank ?? undefined,
         saves: pSaves,
       });
     }
@@ -518,427 +628,6 @@ export const MatchDayAdmin: React.FC = () => {
 
     setStep(1);
     setSelectedFixtureId(null);
-  };
-
-  // Render player row with custom minute controls and tactical actions
-  const renderPlayerRow = (p: Player, team: 'home' | 'away') => {
-    const pGoalCount = goals.filter((g) => g.playerId === p.id && !g.isOwnGoal).length;
-    const pOwnGoalCount = goals.filter((g) => g.playerId === p.id && g.isOwnGoal).length;
-    const pAssistCount = playerAssists[p.id] || 0;
-    const pSaveCount = playerSaves[p.id] || 0;
-    const pPenSavedCount = penaltiesSaved[p.id] || 0;
-    const pPenMissedCount = penaltiesMissed[p.id] || 0;
-    const pMins = playerMinutes[p.id] || 0;
-    const isYellow = yellowCards.includes(p.id);
-    const isRed = redCards.includes(p.id);
-    const isMvp = mvps.includes(p.id);
-
-    const isExpanded =
-      expandedPlayerId === p.id ||
-      isRed ||
-      pOwnGoalCount > 0 ||
-      pPenMissedCount > 0 ||
-      pSaveCount > 0 ||
-      pPenSavedCount > 0;
-
-    return (
-      <div
-        key={p.id}
-        className={`p-2.5 rounded-xl border transition-all ${
-          pMins > 0
-            ? 'bg-zinc-900/80 border-white/10 hover:border-white/20 shadow-xs'
-            : 'bg-zinc-950/60 border-white/5 opacity-70 hover:opacity-100'
-        } space-y-2`}
-      >
-        {/* ROW 1: Player Identity, Inline Price, Badges, and Clean Minutes Stepper */}
-        <div className="flex items-center justify-between gap-2">
-          {/* Left: Avatar + Name + Pos + Price + Quick Admin +0.1 + Active Badges */}
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {p.photoUrl ? (
-              <img
-                src={p.photoUrl}
-                alt={p.webName}
-                className="w-7 h-7 rounded-full object-cover border border-white/20 shrink-0"
-              />
-            ) : (
-              <KitJersey clubId={p.clubId} position={p.position} className="w-7 h-7 shrink-0" />
-            )}
-
-            <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
-              <span className="font-extrabold text-sm text-white truncate max-w-[130px] sm:max-w-none">
-                {p.webName}
-              </span>
-
-              <span
-                className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider ${
-                  p.position === 'FWD'
-                    ? 'bg-rose-500/15 text-rose-300 border border-rose-500/25'
-                    : p.position === 'MID'
-                    ? 'bg-amber-500/15 text-amber-300 border border-amber-500/25'
-                    : p.position === 'DEF'
-                    ? 'bg-sky-500/15 text-sky-300 border border-sky-500/25'
-                    : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'
-                }`}
-              >
-                {p.position}
-              </span>
-
-              <PlayerPriceBadge player={p} className="text-xs" />
-
-              {/* Quick Admin Price Quick-Raiser Pills (Subtle & Inline) */}
-              {(isModerator || isDevAuthenticated) && (
-                <div className="inline-flex items-center gap-0.5 ml-0.5 bg-white/5 border border-white/10 rounded-md p-0.5">
-                  <button
-                    type="button"
-                    onClick={(e) => handleRaisePlayerPrice(p, -0.1, e)}
-                    className="px-1 py-0.2 rounded text-[9px] font-mono font-bold text-zinc-400 hover:text-rose-300 hover:bg-rose-500/20 transition-colors cursor-pointer"
-                    title="Decrease price £0.1m"
-                  >
-                    -0.1
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => handleRaisePlayerPrice(p, 0.1, e)}
-                    className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold text-emerald-400 hover:bg-emerald-500/20 transition-colors cursor-pointer flex items-center gap-0.5"
-                    title="Raise price £0.1m"
-                  >
-                    +0.1📈
-                  </button>
-                </div>
-              )}
-
-              {/* Active Match Event Indicators */}
-              {pGoalCount > 0 && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs">
-                  ⚽ {pGoalCount}
-                </span>
-              )}
-              {pAssistCount > 0 && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-sky-500/20 text-sky-300 border border-sky-500/40 shadow-xs">
-                  👟 {pAssistCount}
-                </span>
-              )}
-              {pOwnGoalCount > 0 && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-black bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                  (OG) {pOwnGoalCount}
-                </span>
-              )}
-              {isYellow && <span className="text-xs">🟨</span>}
-              {isRed && <span className="text-xs">🟥</span>}
-              {isMvp && (
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-black bg-amber-400 text-slate-950 shadow-xs">
-                  <Crown className="w-2.5 h-2.5" /> MVP
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Right: Minutes Stepper (Clean & Tactile) */}
-          <div className="flex items-center gap-1 shrink-0 bg-white/5 border border-white/10 rounded-lg p-0.5 text-xs">
-            <button
-              type="button"
-              onClick={(e) => handleStepPlayerMinutes(p.id, -1, e)}
-              className="w-5 h-5 rounded flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 text-xs font-bold transition-colors cursor-pointer"
-              title="-1 minute"
-            >
-              <Minus className="w-3 h-3" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSetPlayerMinutes(p.id, pMins === defaultMinutes ? 0 : defaultMinutes)}
-              className={`px-2 py-0.5 rounded text-xs font-mono font-black transition-all cursor-pointer ${
-                pMins > 0
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  : 'bg-zinc-800 text-zinc-500 hover:text-zinc-300'
-              }`}
-              title="Click to toggle Full Match / Did Not Play"
-            >
-              {pMins}m
-            </button>
-
-            <button
-              type="button"
-              onClick={(e) => handleStepPlayerMinutes(p.id, 1, e)}
-              className="w-5 h-5 rounded flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 text-xs font-bold transition-colors cursor-pointer"
-              title="+1 minute"
-            >
-              <Plus className="w-3 h-3" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => handleSetPlayerMinutes(p.id, pMins > 0 ? 0 : defaultMinutes)}
-              className={`px-1.5 py-0.5 rounded text-[10px] font-bold transition-colors cursor-pointer ${
-                pMins > 0
-                  ? 'text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10'
-                  : 'text-emerald-400/90 hover:text-emerald-300 hover:bg-emerald-500/10'
-              }`}
-              title={pMins > 0 ? 'Clear to 0m (Did not play)' : `Set to Full Match (${defaultMinutes}m)`}
-            >
-              {pMins > 0 ? '0m' : 'Full'}
-            </button>
-          </div>
-        </div>
-
-        {/* ROW 2: Primary Tactical Actions (Goal, Assist, Yellow, MVP, More) */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-1 border-t border-white/5 text-xs">
-          {/* Goal Action Button */}
-          {pGoalCount === 0 ? (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={(e) => handleRapidGoal(p, team, e)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 font-bold border border-emerald-500/25 transition-all cursor-pointer text-xs"
-            >
-              ⚽ +Goal
-            </motion.button>
-          ) : (
-            <div className="inline-flex items-center rounded-lg bg-emerald-500/20 border border-emerald-500 overflow-hidden shadow-xs">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => handleRemoveGoal(p, team, e)}
-                className="px-2 py-1 text-rose-300 hover:bg-rose-500 hover:text-white font-black text-xs border-r border-emerald-500/40 transition-colors cursor-pointer"
-                title="Remove 1 Goal"
-              >
-                -
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => handleRapidGoal(p, team, e)}
-                className="px-2 py-1 text-emerald-300 font-black text-xs hover:bg-emerald-500 hover:text-slate-950 transition-colors cursor-pointer"
-                title="Add another goal"
-              >
-                ⚽ {pGoalCount} Goal (+)
-              </motion.button>
-            </div>
-          )}
-
-          {/* Assist Action Button */}
-          {pAssistCount === 0 ? (
-            <motion.button
-              whileTap={{ scale: 0.95 }}
-              onClick={(e) => handleRapidAssist(p, e)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500 hover:text-slate-950 text-sky-300 font-bold border border-sky-500/25 transition-all cursor-pointer text-xs"
-            >
-              👟 +Assist
-            </motion.button>
-          ) : (
-            <div className="inline-flex items-center rounded-lg bg-sky-500/20 border border-sky-500 overflow-hidden shadow-xs">
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={(e) => handleRemoveAssist(p, e)}
-                className="px-2 py-1 text-rose-300 hover:bg-rose-500 hover:text-white font-black text-xs border-r border-sky-500/40 transition-colors cursor-pointer"
-                title="Remove 1 Assist"
-              >
-                -
-              </motion.button>
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => handleRapidAssist(p, e)}
-                className="px-2 py-1 text-sky-300 font-black text-xs hover:bg-sky-500 hover:text-slate-950 transition-colors cursor-pointer"
-                title="Add another assist"
-              >
-                👟 {pAssistCount} Assist (+)
-              </motion.button>
-            </div>
-          )}
-
-          {/* Yellow Card Button */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => handleToggleCard(p.id, 'yellow', e)}
-            className={`px-2 py-1 rounded-lg border text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 ${
-              isYellow
-                ? 'bg-yellow-500 text-slate-950 border-yellow-400 font-black shadow-xs'
-                : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-            }`}
-            title={isYellow ? 'Remove Yellow Card' : 'Yellow Card (-1 pt)'}
-          >
-            <span>🟨</span>
-            {isYellow && <span>(-1)</span>}
-          </motion.button>
-
-          {/* MVP Button */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={(e) => handleToggleMvp(p.id, e)}
-            className={`px-2.5 py-1 rounded-lg border text-xs font-black transition-colors cursor-pointer flex items-center gap-1 ${
-              isMvp
-                ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-xs'
-                : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white hover:bg-white/10'
-            }`}
-            title={isMvp ? 'Remove MVP' : 'Crown as Match MVP'}
-          >
-            <Crown className="w-3.5 h-3.5 text-amber-400" />
-            <span>MVP</span>
-          </motion.button>
-
-          {/* More / Secondary Actions Toggle Button */}
-          <button
-            type="button"
-            onClick={() => setExpandedPlayerId(expandedPlayerId === p.id ? null : p.id)}
-            className={`px-2 py-1 rounded-lg border text-xs font-bold transition-colors cursor-pointer flex items-center gap-1 ml-auto ${
-              isExpanded
-                ? 'bg-white/15 text-white border-white/20'
-                : 'bg-white/5 border-white/10 text-zinc-500 hover:text-zinc-300'
-            }`}
-            title="More actions: Red card, Own goal, Penalties, Saves"
-          >
-            <MoreHorizontal className="w-3.5 h-3.5" />
-            <span className="text-[10px]">More</span>
-          </button>
-        </div>
-
-        {/* ROW 3 (Expandable Tray): Red Card, Own Goal, Penalty, Saves */}
-        {isExpanded && (
-          <div className="flex items-center gap-1.5 flex-wrap pt-1.5 border-t border-dashed border-white/10 text-xs animate-fade-in">
-            {/* Red Card */}
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={(e) => handleToggleCard(p.id, 'red', e)}
-              className={`px-2 py-0.5 rounded-lg border text-[11px] font-bold transition-colors cursor-pointer flex items-center gap-1 ${
-                isRed
-                  ? 'bg-rose-500 text-white border-rose-400 font-black shadow-xs'
-                  : 'bg-white/5 border-white/10 text-zinc-400 hover:text-white'
-              }`}
-              title={isRed ? 'Remove Red Card' : 'Red Card (-3 pts)'}
-            >
-              <span>🟥 Red Card</span>
-            </motion.button>
-
-            {/* Own Goal */}
-            {pOwnGoalCount === 0 ? (
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => handleRapidOwnGoal(p, team, e)}
-                className="px-2 py-0.5 rounded-lg border border-rose-500/20 bg-rose-500/5 text-rose-300 hover:bg-rose-500 hover:text-white text-[11px] font-bold transition-colors cursor-pointer"
-                title="Own Goal (-3 pts)"
-              >
-                + Own Goal
-              </motion.button>
-            ) : (
-              <div className="inline-flex items-center rounded-lg border border-rose-500 bg-rose-500/20 overflow-hidden">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => handleRemoveOwnGoal(p, team, e)}
-                  className="px-1.5 py-0.5 text-rose-300 hover:bg-rose-500 hover:text-white font-black text-[11px] border-r border-rose-500/30 cursor-pointer"
-                >
-                  -
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => handleRapidOwnGoal(p, team, e)}
-                  className="px-2 py-0.5 text-rose-300 font-black text-[11px] cursor-pointer"
-                >
-                  ⚽ OG {pOwnGoalCount} (+)
-                </motion.button>
-              </div>
-            )}
-
-            {/* Missed Penalty */}
-            {pPenMissedCount === 0 ? (
-              <motion.button
-                whileTap={{ scale: 0.95 }}
-                onClick={(e) => handleRapidMissedPen(p, e)}
-                className="px-2 py-0.5 rounded-lg border border-amber-500/20 bg-amber-500/5 text-amber-300 hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-colors cursor-pointer"
-                title="Missed Penalty (-2 pts)"
-              >
-                ❌ Miss Pen
-              </motion.button>
-            ) : (
-              <div className="inline-flex items-center rounded-lg border border-amber-500 bg-amber-500/20 overflow-hidden">
-                <motion.button
-                  whileTap={{ scale: 0.9 }}
-                  onClick={(e) => handleRemoveMissedPen(p, e)}
-                  className="px-1.5 py-0.5 text-rose-300 hover:bg-rose-500 hover:text-white font-black text-[11px] border-r border-amber-500/30 cursor-pointer"
-                >
-                  -
-                </motion.button>
-                <motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={(e) => handleRapidMissedPen(p, e)}
-                  className="px-2 py-0.5 text-amber-300 font-black text-[11px] cursor-pointer"
-                >
-                  ❌ Miss {pPenMissedCount} (+)
-                </motion.button>
-              </div>
-            )}
-
-            {/* Goalkeeper exclusive saves */}
-            {p.position === 'GKP' && (
-              <>
-                {pPenSavedCount === 0 ? (
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleRapidSavedPen(p, e)}
-                    className="px-2 py-0.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500 hover:text-slate-950 text-[11px] font-bold transition-colors cursor-pointer"
-                    title="Penalty Save (+3 pts for GK only)"
-                  >
-                    🧤 Pen Save
-                  </motion.button>
-                ) : (
-                  <div className="inline-flex items-center rounded-lg border border-emerald-500 bg-emerald-500/20 overflow-hidden">
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => handleRemoveSavedPen(p, e)}
-                      className="px-1.5 py-0.5 text-rose-300 hover:bg-rose-500 hover:text-white font-black text-[11px] border-r border-emerald-500/30 cursor-pointer"
-                    >
-                      -
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => handleRapidSavedPen(p, e)}
-                      className="px-2 py-0.5 text-emerald-300 font-black text-[11px] cursor-pointer"
-                    >
-                      🧤 Pen {pPenSavedCount} (+)
-                    </motion.button>
-                  </div>
-                )}
-
-                {pSaveCount === 0 ? (
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={(e) => handleRapidSave(p, e)}
-                    className="px-2 py-0.5 rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-300 hover:bg-amber-500 hover:text-slate-950 text-[11px] font-bold transition-colors cursor-pointer"
-                  >
-                    + Save
-                  </motion.button>
-                ) : (
-                  <div className="inline-flex items-center rounded-lg border border-amber-500 bg-amber-500/20 overflow-hidden">
-                    <motion.button
-                      whileTap={{ scale: 0.9 }}
-                      onClick={(e) => handleRemoveSave(p, e)}
-                      className="px-1.5 py-0.5 text-rose-300 hover:bg-rose-500 hover:text-white font-black text-[11px] border-r border-amber-500/30 cursor-pointer"
-                    >
-                      -
-                    </motion.button>
-                    <motion.button
-                      whileTap={{ scale: 0.95 }}
-                      onClick={(e) => handleRapidSave(p, e)}
-                      className="px-2 py-0.5 text-amber-300 font-black text-[11px] cursor-pointer"
-                    >
-                      🧤 {pSaveCount} Saves (+)
-                    </motion.button>
-                  </div>
-                )}
-              </>
-            )}
-
-            {/* Quick Admin +0.5m Button */}
-            {(isModerator || isDevAuthenticated) && (
-              <button
-                type="button"
-                onClick={(e) => handleRaisePlayerPrice(p, 0.5, e)}
-                className="px-2 py-0.5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500 hover:text-slate-950 text-[11px] font-mono font-bold transition-colors cursor-pointer ml-auto"
-                title="Raise price by £0.5m (+0.5)"
-              >
-                +0.5m 📈
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    );
   };
 
   // -------------------------------------------------------------
@@ -1034,182 +723,712 @@ export const MatchDayAdmin: React.FC = () => {
   // STEP 2: MATCH EVENTS CONSOLE
   // -------------------------------------------------------------
   if (step === 2 && fixture && homeClub && awayClub) {
+    // Render an individual table row for a player
+    const renderPlayerTableRow = (p: Player, team: 'home' | 'away') => {
+      const pGoalCount = goals.filter((g) => g.playerId === p.id && !g.isOwnGoal).length;
+      const pOwnGoalCount = goals.filter((g) => g.playerId === p.id && g.isOwnGoal).length;
+      const pAssistCount = playerAssists[p.id] || 0;
+      const pSaveCount = playerSaves[p.id] || 0;
+      const pPenSavedCount = penaltiesSaved[p.id] || 0;
+      const pPenMissedCount = penaltiesMissed[p.id] || 0;
+      const pMins = playerMinutes[p.id] || 0;
+      const isYellow = yellowCards.includes(p.id);
+      const isRed = redCards.includes(p.id);
+
+      const mvpRank = getMvpRank(p.id);
+      const livePts = computeLivePlayerPoints(p, team);
+
+      const isMvpPickerOpen = activeMvpPickerPlayerId === p.id;
+      const isMoreDrawerOpen = activeMorePlayerId === p.id;
+
+      return (
+        <React.Fragment key={p.id}>
+          <tr
+            className={`border-b border-white/5 transition-colors ${
+              pMins > 0 ? 'bg-zinc-900/50 hover:bg-zinc-800/60' : 'bg-zinc-950/40 opacity-60 hover:opacity-100'
+            }`}
+          >
+            {/* 1. Player Info */}
+            <td className="py-2.5 px-3">
+              <div className="flex items-center gap-2">
+                {p.photoUrl ? (
+                  <img
+                    src={p.photoUrl}
+                    alt={p.webName}
+                    className="w-7 h-7 rounded-full object-cover border border-white/20 shrink-0"
+                  />
+                ) : (
+                  <KitJersey clubId={p.clubId} position={p.position} className="w-7 h-7 shrink-0" />
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-extrabold text-xs text-white truncate max-w-[120px] sm:max-w-none">
+                      {p.webName}
+                    </span>
+                    <span
+                      className={`text-[9px] px-1 py-0.2 rounded font-black uppercase tracking-wider ${
+                        p.position === 'FWD'
+                          ? 'bg-rose-500/15 text-rose-300 border border-rose-500/25'
+                          : p.position === 'MID'
+                          ? 'bg-amber-500/15 text-amber-300 border border-amber-500/25'
+                          : p.position === 'DEF'
+                          ? 'bg-sky-500/15 text-sky-300 border border-sky-500/25'
+                          : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'
+                      }`}
+                    >
+                      {p.position}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-mono">£{p.cost.toFixed(1)}m</span>
+                  </div>
+
+                  {/* Active Event Badges */}
+                  <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                    {pOwnGoalCount > 0 && (
+                      <span className="text-[9px] px-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+                        OG: {pOwnGoalCount}
+                      </span>
+                    )}
+                    {pPenMissedCount > 0 && (
+                      <span className="text-[9px] px-1 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold">
+                        ❌ Pen
+                      </span>
+                    )}
+                    {pPenSavedCount > 0 && (
+                      <span className="text-[9px] px-1 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                        🧤 Pen Save
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </td>
+
+            {/* 2. Minutes (15m increments) */}
+            <td className="py-2.5 px-2 text-center">
+              <div className="inline-flex items-center gap-0.5 bg-zinc-950 border border-white/10 rounded-lg p-0.5 font-mono text-[11px]">
+                <button
+                  type="button"
+                  onClick={(e) => handleStepPlayerMinutes(p.id, -1, e)}
+                  className="w-5 h-5 rounded flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title="-15 mins"
+                >
+                  <Minus className="w-2.5 h-2.5" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleSetPlayerMinutes(p.id, 0, e)}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-black transition-all cursor-pointer ${
+                    pMins === 0 ? 'bg-zinc-800 text-zinc-300 border border-white/10' : 'text-zinc-500 hover:text-white'
+                  }`}
+                  title="0 mins (Did not play)"
+                >
+                  0m
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleSetPlayerMinutes(p.id, 15, e)}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-black transition-all cursor-pointer ${
+                    pMins === 15 ? 'bg-amber-500/25 text-amber-300 border border-amber-500/40 shadow-xs' : 'text-zinc-500 hover:text-white'
+                  }`}
+                  title="15 mins (+1 pt)"
+                >
+                  15m
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleSetPlayerMinutes(p.id, 30, e)}
+                  className={`px-1.5 py-0.5 rounded text-[10px] font-black transition-all cursor-pointer ${
+                    pMins >= 20 ? 'bg-emerald-500/25 text-emerald-300 border border-emerald-500/40 shadow-xs' : 'text-zinc-500 hover:text-white'
+                  }`}
+                  title="30 mins full match (+2 pts)"
+                >
+                  30m
+                </button>
+
+                <button
+                  type="button"
+                  onClick={(e) => handleStepPlayerMinutes(p.id, 1, e)}
+                  className="w-5 h-5 rounded flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                  title="+15 mins"
+                >
+                  <Plus className="w-2.5 h-2.5" />
+                </button>
+              </div>
+            </td>
+
+            {/* 3. Goals */}
+            <td className="py-2.5 px-2 text-center">
+              {pGoalCount === 0 ? (
+                <button
+                  type="button"
+                  onClick={(e) => handleRapidGoal(p, team, e)}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 font-bold border border-emerald-500/20 transition-all text-xs cursor-pointer"
+                  title={`+1 Goal (+${getGoalPoints(p.position)} pts)`}
+                >
+                  ⚽ +
+                </button>
+              ) : (
+                <div className="inline-flex items-center rounded-lg bg-emerald-500/20 border border-emerald-500 overflow-hidden shadow-xs text-xs font-mono">
+                  <button
+                    type="button"
+                    onClick={(e) => handleRemoveGoal(p, team, e)}
+                    className="px-1.5 py-0.5 text-rose-300 hover:bg-rose-500 hover:text-white font-black border-r border-emerald-500/40 transition-colors cursor-pointer"
+                    title="Remove 1 Goal"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleRapidGoal(p, team, e)}
+                    className="px-2 py-0.5 text-emerald-300 font-black hover:bg-emerald-500 hover:text-slate-950 transition-colors cursor-pointer"
+                    title="Add Goal"
+                  >
+                    ⚽ {pGoalCount}
+                  </button>
+                </div>
+              )}
+            </td>
+
+            {/* 4. Assists */}
+            <td className="py-2.5 px-2 text-center">
+              {pAssistCount === 0 ? (
+                <button
+                  type="button"
+                  onClick={(e) => handleRapidAssist(p, e)}
+                  className="px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500 hover:text-slate-950 text-sky-300 font-bold border border-sky-500/20 transition-all text-xs cursor-pointer"
+                  title={`+1 Assist (+${getAssistPoints()} pts)`}
+                >
+                  👟 +
+                </button>
+              ) : (
+                <div className="inline-flex items-center rounded-lg bg-sky-500/20 border border-sky-500 overflow-hidden shadow-xs text-xs font-mono">
+                  <button
+                    type="button"
+                    onClick={(e) => handleRemoveAssist(p, e)}
+                    className="px-1.5 py-0.5 text-rose-300 hover:bg-rose-500 hover:text-white font-black border-r border-sky-500/40 transition-colors cursor-pointer"
+                    title="Remove 1 Assist"
+                  >
+                    -
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => handleRapidAssist(p, e)}
+                    className="px-2 py-0.5 text-sky-300 font-black hover:bg-sky-500 hover:text-slate-950 transition-colors cursor-pointer"
+                    title="Add Assist"
+                  >
+                    👟 {pAssistCount}
+                  </button>
+                </div>
+              )}
+            </td>
+
+            {/* 5. MVP (1st, 2nd, 3rd) */}
+            <td className="py-2.5 px-2 text-center relative">
+              {mvpRank === 1 ? (
+                <button
+                  type="button"
+                  onClick={() => setActiveMvpPickerPlayerId(isMvpPickerOpen ? null : p.id)}
+                  className="px-2 py-0.5 rounded-lg bg-amber-400 text-slate-950 border border-amber-300 font-black text-[11px] shadow-xs cursor-pointer inline-flex items-center gap-1"
+                >
+                  <span>🥇 1st</span>
+                  <span className="text-[9px] opacity-80">(+{isOnePrice ? 2 : 3})</span>
+                </button>
+              ) : mvpRank === 2 ? (
+                <button
+                  type="button"
+                  onClick={() => setActiveMvpPickerPlayerId(isMvpPickerOpen ? null : p.id)}
+                  className="px-2 py-0.5 rounded-lg bg-slate-200 text-slate-950 border border-slate-300 font-black text-[11px] shadow-xs cursor-pointer inline-flex items-center gap-1"
+                >
+                  <span>🥈 2nd</span>
+                  <span className="text-[9px] opacity-80">(+{isOnePrice ? 1 : 2})</span>
+                </button>
+              ) : mvpRank === 3 ? (
+                <button
+                  type="button"
+                  onClick={() => setActiveMvpPickerPlayerId(isMvpPickerOpen ? null : p.id)}
+                  className="px-2 py-0.5 rounded-lg bg-amber-700 text-white border border-amber-600 font-black text-[11px] shadow-xs cursor-pointer inline-flex items-center gap-1"
+                >
+                  <span>🥉 3rd</span>
+                  <span className="text-[9px] opacity-80">(+{isOnePrice ? 0 : 1})</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setActiveMvpPickerPlayerId(isMvpPickerOpen ? null : p.id)}
+                  className="px-2 py-1 rounded-lg bg-white/5 hover:bg-amber-400/20 text-zinc-400 hover:text-amber-300 border border-white/10 font-bold text-xs transition-colors cursor-pointer"
+                  title="Award MVP"
+                >
+                  ⭐ MVP
+                </button>
+              )}
+
+              {/* Floating MVP Selector Popover */}
+              {isMvpPickerOpen && (
+                <div className="absolute z-40 top-full mt-1 left-1/2 -translate-x-1/2 flex items-center gap-1 p-1 rounded-xl bg-zinc-950 border border-white/20 shadow-2xl text-[11px] font-mono">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      handleSetMvp(p.id, 1, e);
+                      setActiveMvpPickerPlayerId(null);
+                    }}
+                    className={`px-2 py-1 rounded-lg font-black transition-colors ${
+                      mvpRank === 1 ? 'bg-amber-400 text-slate-950' : 'text-amber-300 hover:bg-amber-500/20'
+                    }`}
+                  >
+                    🥇 1st (+{isOnePrice ? 2 : 3})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      handleSetMvp(p.id, 2, e);
+                      setActiveMvpPickerPlayerId(null);
+                    }}
+                    className={`px-2 py-1 rounded-lg font-black transition-colors ${
+                      mvpRank === 2 ? 'bg-slate-200 text-slate-950' : 'text-slate-300 hover:bg-white/10'
+                    }`}
+                  >
+                    🥈 2nd (+{isOnePrice ? 1 : 2})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      handleSetMvp(p.id, 3, e);
+                      setActiveMvpPickerPlayerId(null);
+                    }}
+                    className={`px-2 py-1 rounded-lg font-black transition-colors ${
+                      mvpRank === 3 ? 'bg-amber-700 text-white' : 'text-amber-500 hover:bg-amber-700/20'
+                    }`}
+                  >
+                    🥉 3rd (+{isOnePrice ? 0 : 1})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      handleSetMvp(p.id, null, e);
+                      setActiveMvpPickerPlayerId(null);
+                    }}
+                    className="p-1 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/20 transition-colors"
+                    title="Clear MVP"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </td>
+
+            {/* 6. Disciplinary Cards */}
+            <td className="py-2.5 px-2 text-center">
+              <div className="inline-flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={(e) => handleToggleCard(p.id, 'yellow', e)}
+                  className={`w-6 h-6 rounded flex items-center justify-center text-xs transition-colors cursor-pointer border ${
+                    isYellow
+                      ? 'bg-yellow-500 text-slate-950 border-yellow-400 font-black shadow-xs'
+                      : 'bg-white/5 border-white/10 text-zinc-600 hover:text-white hover:bg-white/10'
+                  }`}
+                  title={isYellow ? 'Remove Yellow Card' : 'Yellow Card (-1 pt)'}
+                >
+                  🟨
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => handleToggleCard(p.id, 'red', e)}
+                  className={`w-6 h-6 rounded flex items-center justify-center text-xs transition-colors cursor-pointer border ${
+                    isRed
+                      ? 'bg-rose-500 text-white border-rose-400 font-black shadow-xs'
+                      : 'bg-white/5 border-white/10 text-zinc-600 hover:text-white hover:bg-white/10'
+                  }`}
+                  title={isRed ? 'Remove Red Card' : 'Red Card (-3 pts)'}
+                >
+                  🟥
+                </button>
+              </div>
+            </td>
+
+            {/* 7. More (Drawer Popover) */}
+            <td className="py-2.5 px-2 text-center relative">
+              <button
+                type="button"
+                onClick={() => setActiveMorePlayerId(isMoreDrawerOpen ? null : p.id)}
+                className={`p-1.5 rounded-lg border text-xs font-bold transition-colors cursor-pointer ${
+                  isMoreDrawerOpen || pOwnGoalCount > 0 || pPenMissedCount > 0 || pPenSavedCount > 0
+                    ? 'bg-white/15 text-white border-white/20'
+                    : 'bg-white/5 border-white/10 text-zinc-500 hover:text-zinc-300'
+                }`}
+                title="Secondary events: OG, Pen Miss/Save, Price"
+              >
+                <MoreHorizontal className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Popover for secondary events */}
+              {isMoreDrawerOpen && (
+                <div className="absolute z-40 top-full mt-1 right-0 w-64 p-3 rounded-2xl bg-zinc-950 border border-white/20 shadow-2xl text-left text-xs space-y-2.5">
+                  <div className="flex items-center justify-between pb-1 border-b border-white/10 text-zinc-400">
+                    <span className="font-bold text-white text-[11px]">{p.webName}</span>
+                    <button
+                      type="button"
+                      onClick={() => setActiveMorePlayerId(null)}
+                      className="text-zinc-500 hover:text-white"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Own Goal Counter */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-zinc-300">Own Goal (-3 pts)</span>
+                    <div className="inline-flex items-center rounded-lg bg-zinc-900 border border-white/10 overflow-hidden font-mono text-[10px]">
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveOwnGoal(p, team, e)}
+                        className="px-1.5 py-0.5 text-zinc-400 hover:bg-rose-500 hover:text-white"
+                      >
+                        -
+                      </button>
+                      <span className="px-1.5 font-bold text-white">{pOwnGoalCount}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleRapidOwnGoal(p, team, e)}
+                        className="px-1.5 py-0.5 text-rose-300 hover:bg-rose-500 hover:text-white font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Missed Penalty Counter */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-zinc-300">Missed Penalty (-2 pts)</span>
+                    <div className="inline-flex items-center rounded-lg bg-zinc-900 border border-white/10 overflow-hidden font-mono text-[10px]">
+                      <button
+                        type="button"
+                        onClick={(e) => handleRemoveMissedPen(p, e)}
+                        className="px-1.5 py-0.5 text-zinc-400 hover:bg-rose-500 hover:text-white"
+                      >
+                        -
+                      </button>
+                      <span className="px-1.5 font-bold text-white">{pPenMissedCount}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => handleRapidMissedPen(p, e)}
+                        className="px-1.5 py-0.5 text-amber-300 hover:bg-amber-500 hover:text-slate-950 font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Goalkeeper Pen Save */}
+                  {p.position === 'GKP' && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] text-emerald-300">Penalty Saved (+3 pts)</span>
+                      <div className="inline-flex items-center rounded-lg bg-zinc-900 border border-white/10 overflow-hidden font-mono text-[10px]">
+                        <button
+                          type="button"
+                          onClick={(e) => handleRemoveSavedPen(p, e)}
+                          className="px-1.5 py-0.5 text-zinc-400 hover:bg-zinc-800"
+                        >
+                          -
+                        </button>
+                        <span className="px-1.5 font-bold text-emerald-300">{pPenSavedCount}</span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleRapidSavedPen(p, e)}
+                          className="px-1.5 py-0.5 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 font-bold"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Price Adjustment */}
+                  <div className="pt-1.5 border-t border-white/10 space-y-1">
+                    <span className="text-[10px] text-zinc-400 font-bold block">Adjust Price (£{p.cost.toFixed(1)}m):</span>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={(e) => handleRaisePlayerPrice(p, -0.1, e)}
+                        className="flex-1 py-1 rounded bg-zinc-900 border border-white/10 text-[10px] font-mono font-bold text-zinc-400 hover:text-rose-300 hover:bg-rose-500/20"
+                      >
+                        -0.1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleRaisePlayerPrice(p, 0.1, e)}
+                        className="flex-1 py-1 rounded bg-zinc-900 border border-white/10 text-[10px] font-mono font-bold text-emerald-400 hover:bg-emerald-500/20"
+                      >
+                        +0.1📈
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => handleRaisePlayerPrice(p, 0.5, e)}
+                        className="flex-1 py-1 rounded bg-zinc-900 border border-white/10 text-[10px] font-mono font-bold text-emerald-400 hover:bg-emerald-500/20"
+                      >
+                        +0.5📈
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </td>
+
+            {/* 8. Live Fantasy PTS Preview */}
+            <td className="py-2.5 px-3 text-right">
+              <span
+                className={`inline-block px-2 py-0.5 rounded-lg text-xs font-mono font-black ${
+                  livePts > 2
+                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                    : livePts > 0
+                    ? 'bg-sky-500/20 text-sky-300 border border-sky-500/30'
+                    : livePts < 0
+                    ? 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                    : 'bg-zinc-800 text-zinc-500'
+                }`}
+              >
+                {livePts > 0 ? `+${livePts}` : livePts}
+              </span>
+            </td>
+          </tr>
+        </React.Fragment>
+      );
+    };
+
+    // Render team roster table
+    const renderTeamTable = (teamPlayers: Player[], team: 'home' | 'away', club: Club) => {
+      return (
+        <div className="bg-zinc-900/90 rounded-2xl border border-white/10 overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between p-3 sm:p-3.5 border-b border-white/10 bg-zinc-950/40">
+            <div className="flex items-center gap-2 min-w-0">
+              <ClassShieldBadge clubId={club.id} size="sm" />
+              <h3 className="font-black text-sm text-white truncate">
+                {club.name} ({team === 'home' ? 'Home' : 'Away'})
+              </h3>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-mono font-bold text-zinc-400">
+                {teamPlayers.length} Players
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  const newMins = { ...playerMinutes };
+                  teamPlayers.forEach((p) => {
+                    newMins[p.id] = defaultMinutes;
+                  });
+                  setPlayerMinutes(newMins);
+                }}
+                className="px-2 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold hover:bg-emerald-500 hover:text-slate-950 transition-all text-[10px] cursor-pointer"
+              >
+                All {defaultMinutes}m
+              </button>
+            </div>
+          </div>
+
+          {/* Table Container */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr className="border-b border-white/10 bg-zinc-950/60 text-[10px] uppercase tracking-wider text-zinc-400 font-black">
+                  <th className="py-2.5 px-3 min-w-[130px]">Player</th>
+                  <th className="py-2.5 px-2 text-center min-w-[125px]">Minutes (30m)</th>
+                  <th className="py-2.5 px-2 text-center min-w-[70px]">Goals</th>
+                  <th className="py-2.5 px-2 text-center min-w-[70px]">Assists</th>
+                  <th className="py-2.5 px-2 text-center min-w-[85px]">MVP (1/2/3)</th>
+                  <th className="py-2.5 px-2 text-center min-w-[65px]">Cards</th>
+                  <th className="py-2.5 px-2 text-center min-w-[45px]">More</th>
+                  <th className="py-2.5 px-3 text-right min-w-[45px]">Pts</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5 font-mono">
+                {teamPlayers.map((p) => renderPlayerTableRow(p, team))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      );
+    };
+
     return (
       <div className="space-y-4 animate-fade-in relative">
         {/* Floating Feedback Badges */}
         {floatingPoints.map((fp) => (
           <motion.div
             key={fp.id}
-            initial={{ opacity: 1, y: 0, scale: 0.8 }}
-            animate={{ opacity: 0, y: -45, scale: 1.25 }}
-            transition={{ duration: 0.85, ease: 'easeOut' }}
-            className={`fixed z-50 pointer-events-none px-2.5 py-1 rounded-full text-xs font-black shadow-2xl ${fp.color}`}
-            style={{ left: fp.x - 40, top: fp.y - 20 }}
+            initial={{ opacity: 1, scale: 0.8, y: 0 }}
+            animate={{ opacity: 0, scale: 1.2, y: -45 }}
+            transition={{ duration: 0.8 }}
+            className={`fixed pointer-events-none z-50 px-2 py-0.5 rounded-full text-xs font-black shadow-lg ${fp.color}`}
+            style={{ left: fp.x - 30, top: fp.y - 20 }}
           >
             {fp.text}
           </motion.div>
         ))}
 
-        {/* Top Action Bar */}
-        <div className="flex items-center justify-between gap-2 flex-wrap pb-2 border-b border-white/10">
+        {/* TOP BAR: Nav + Stadium Toggle + Save CTA */}
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <button
             onClick={() => setStep(1)}
             className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 transition-colors"
           >
-            <ChevronLeft className="w-4 h-4" /> Switch Match
+            <ChevronLeft className="w-4 h-4" /> Change Fixture
           </button>
 
           <div className="flex items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-zinc-900 border border-white/10 rounded-xl p-0.5 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => setViewMode('table')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'table' ? 'bg-white/15 text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Table Layout"
+              >
+                <LayoutList className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Table</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('cards')}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+                  viewMode === 'cards' ? 'bg-white/15 text-white' : 'text-zinc-400 hover:text-white'
+                }`}
+                title="Cards Layout"
+              >
+                <Columns className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Cards</span>
+              </button>
+            </div>
+
             <button
               onClick={() => setStep(3)}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500 text-slate-950 font-black text-xs rounded-xl hover:bg-emerald-400 transition-colors shadow-md"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-500 text-slate-950 font-black text-xs rounded-xl hover:bg-emerald-400 transition-colors shadow-md cursor-pointer"
             >
               <span>Review & Save</span>
-              <ChevronRight className="w-4 h-4" />
+              <Check className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* STADIUM SELECTOR & RULES BANNER */}
-        <div className="p-3 sm:p-4 rounded-2xl bg-zinc-900 border border-white/10 space-y-2.5">
-          <div className="flex items-center justify-between flex-wrap gap-2">
-            <span className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-emerald-400" />
-              <span>Select Match Stadium:</span>
-            </span>
-
-            {/* Stadium Switcher Buttons */}
-            <div className="flex items-center gap-2 p-1 bg-zinc-950 rounded-xl border border-white/10">
+        {/* STADIUM VENUE SELECTOR */}
+        <div className="flex items-center justify-between p-3 rounded-2xl bg-zinc-900 border border-white/10 flex-wrap gap-2 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-zinc-400">Match Venue:</span>
+            <div className="inline-flex rounded-xl bg-zinc-950 p-1 border border-white/10">
               <button
                 onClick={() => setVenue('delisi')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                className={`flex items-center gap-1 px-3 py-1 rounded-lg font-black transition-all ${
                   !isOnePrice
                     ? 'bg-emerald-500 text-slate-950 shadow-sm'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <MapPin className="w-3.5 h-3.5" />
-                <span>🏟️ Delisi Stadium</span>
+                <span>Delisi Stadium (Parki)</span>
               </button>
-
               <button
                 onClick={() => setVenue('one_price')}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-black transition-all ${
+                className={`flex items-center gap-1 px-3 py-1 rounded-lg font-black transition-all ${
                   isOnePrice
                     ? 'bg-amber-400 text-slate-950 shadow-sm'
                     : 'text-zinc-400 hover:text-white'
                 }`}
               >
                 <Building className="w-3.5 h-3.5" />
-                <span>🏢 One Price Stadium</span>
+                <span>One Price Stadium (-1pt)</span>
               </button>
             </div>
           </div>
 
-          {/* Active Stadium Rule Notification */}
-          <div
-            className={`p-2.5 rounded-xl border text-[11px] leading-relaxed flex items-center gap-2 ${
-              isOnePrice
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-200'
-                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-200'
-            }`}
-          >
+          <div className="text-[11px] font-mono text-zinc-400">
             {isOnePrice ? (
-              <>
-                <Building className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>
-                  <strong>One Price Stadium Rule Active:</strong> High-scoring arena. Goals, Assists, and MVP points
-                  are each <strong>reduced by 1 point</strong> (GK Goal: 6, DEF Goal: 5, MID Goal: 4, FWD Goal: 3, Assist: 2, MVP: 2).
-                </span>
-              </>
+              <span className="text-amber-300 font-bold">Goals, Assists & MVP: -1 pt reduction</span>
             ) : (
-              <>
-                <Shield className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>
-                  <strong>Delisi (Parki) Stadium Active:</strong> Standard tournament rules apply (GK Goal: 7, DEF Goal: 6,
-                  MID Goal: 5, FWD Goal: 4, Assist: 3, MVP: 3).
-                </span>
-              </>
+              <span className="text-emerald-400 font-bold">Standard Points Active</span>
             )}
           </div>
         </div>
 
-        {/* TACTICAL SCOREBOARD */}
-        <div className="bg-zinc-900 p-4 sm:p-5 rounded-2xl border border-white/10 text-center relative overflow-hidden">
+        {/* LIVE SCOREBOARD */}
+        <div className="p-4 sm:p-5 rounded-3xl bg-zinc-900 border border-white/10 text-center space-y-3 shadow-lg">
           <div className="flex items-center justify-center gap-4 sm:gap-10">
-            {/* Home Score */}
-            <div className="flex flex-col items-center gap-2 w-1/3">
-              <div className="flex items-center gap-2">
-                <ClassShieldBadge clubId={homeClub.id} size="sm" />
-                <span className="font-black text-sm sm:text-base text-white truncate">{homeClub.shortName}</span>
+            {/* Home Team Score Block */}
+            <div className="flex items-center gap-3 flex-1 justify-end">
+              <div className="text-right">
+                <span className="font-black text-sm sm:text-base text-white block">{homeClub.name}</span>
+                <span className="text-[10px] text-zinc-400 font-mono">Home</span>
               </div>
-              <div className="flex items-center gap-2 sm:gap-3">
+              <ClassShieldBadge clubId={homeClub.id} size="md" />
+              <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-2xl border border-white/10">
                 <button
                   onClick={() => setHomeScore((s) => Math.max(0, s - 1))}
-                  className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  className="w-7 h-7 rounded-xl bg-white/5 text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center font-bold text-xs"
                 >
-                  <Minus className="w-4 h-4" />
+                  <Minus className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-4xl sm:text-5xl font-mono font-black text-white w-14 text-center">
-                  {homeScore}
-                </span>
+                <span className="w-9 text-2xl font-black font-mono text-emerald-400">{homeScore}</span>
                 <button
                   onClick={() => setHomeScore((s) => s + 1)}
-                  className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                  className="w-7 h-7 rounded-xl bg-white/5 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-center font-bold text-xs"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
 
-            <div className="text-zinc-600 font-black text-2xl font-mono">—</div>
+            <span className="text-xl font-black text-zinc-600 font-mono">—</span>
 
-            {/* Away Score */}
-            <div className="flex flex-col items-center gap-2 w-1/3">
-              <div className="flex items-center gap-2">
-                <ClassShieldBadge clubId={awayClub.id} size="sm" />
-                <span className="font-black text-sm sm:text-base text-white truncate">{awayClub.shortName}</span>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
+            {/* Away Team Score Block */}
+            <div className="flex items-center gap-3 flex-1 justify-start">
+              <div className="flex items-center gap-1 bg-zinc-950 p-1 rounded-2xl border border-white/10">
                 <button
                   onClick={() => setAwayScore((s) => Math.max(0, s - 1))}
-                  className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
+                  className="w-7 h-7 rounded-xl bg-white/5 text-zinc-400 hover:text-rose-400 hover:bg-rose-500/10 flex items-center justify-center font-bold text-xs"
                 >
-                  <Minus className="w-4 h-4" />
+                  <Minus className="w-3.5 h-3.5" />
                 </button>
-                <span className="text-4xl sm:text-5xl font-mono font-black text-white w-14 text-center">
-                  {awayScore}
-                </span>
+                <span className="w-9 text-2xl font-black font-mono text-emerald-400">{awayScore}</span>
                 <button
                   onClick={() => setAwayScore((s) => s + 1)}
-                  className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                  className="w-7 h-7 rounded-xl bg-white/5 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10 flex items-center justify-center font-bold text-xs"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                 </button>
+              </div>
+              <ClassShieldBadge clubId={awayClub.id} size="md" />
+              <div className="text-left">
+                <span className="font-black text-sm sm:text-base text-white block">{awayClub.name}</span>
+                <span className="text-[10px] text-zinc-400 font-mono">Away</span>
               </div>
             </div>
           </div>
 
-          {/* Logged Goals Feed with 1-click Delete */}
+          {/* Goal Scorers Ribbon */}
           {goals.length > 0 && (
-            <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-center gap-1.5 flex-wrap">
+            <div className="flex items-center justify-center gap-1.5 flex-wrap pt-2 border-t border-white/5 text-xs">
               <span className="text-[11px] font-bold text-zinc-400">Goals ({goals.length}):</span>
               {goals.map((g, idx) => {
                 const scorer = players[g.playerId];
+                const assist = g.assistPlayerId ? players[g.assistPlayerId] : null;
                 return (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-zinc-200"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[11px] text-white font-mono"
                   >
-                    <span>
-                      ⚽ {scorer?.webName || 'Player'}{' '}
-                      {g.isOwnGoal ? <span className="text-rose-400 font-bold">(OG)</span> : ''}
-                      {g.minute ? <span className="text-zinc-500 font-mono text-[10px] ml-1">{g.minute}&apos;</span> : ''}
-                    </span>
+                    ⚽ <strong>{scorer?.webName || 'Goal'}</strong>
+                    {g.minute ? <span className="text-zinc-400">({g.minute}&apos;)</span> : ''}
+                    {g.isOwnGoal ? <span className="text-rose-400 font-bold">(OG)</span> : ''}
+                    {assist ? <span className="text-sky-300 text-[10px]">asst: {assist.webName}</span> : ''}
                     <button
                       onClick={() => handleRemoveGoalByIndex(idx)}
                       className="text-zinc-500 hover:text-rose-400 font-bold ml-1 px-1 hover:bg-rose-500/20 rounded cursor-pointer transition-colors"
-                      title="Remove this goal (-1)"
+                      title="Delete goal entry"
                     >
                       ×
                     </button>
@@ -1220,7 +1439,150 @@ export const MatchDayAdmin: React.FC = () => {
           )}
         </div>
 
-        {/* LIVE MATCH STOPWATCH & MINUTE CONTROL CENTER */}
+        {/* 3 MVPs PODIUM BANNER */}
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-900 border border-white/10 space-y-2.5">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Crown className="w-4 h-4 text-amber-400" />
+              <h4 className="text-xs font-black uppercase tracking-wider text-white">
+                Match MVPs (Podium)
+              </h4>
+            </div>
+            <span className="text-[11px] text-zinc-400 font-mono">
+              🥇 1st: +{isOnePrice ? '2' : '3'} pts • 🥈 2nd: +{isOnePrice ? '1' : '2'} pts • 🥉 3rd: +{isOnePrice ? '0' : '1'} pt
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            {/* 1st MVP */}
+            <div className="p-2.5 rounded-xl border border-amber-400/40 bg-amber-500/10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg">🥇</span>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-400 block">
+                    1st MVP (+{isOnePrice ? '2' : '3'} pts)
+                  </span>
+                  {mvpRanking[0] ? (
+                    <span className="font-extrabold text-xs text-white truncate block">
+                      {players[mvpRanking[0]]?.webName || players[mvpRanking[0]]?.name}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-zinc-500 italic block">None selected</span>
+                  )}
+                </div>
+              </div>
+              {mvpRanking[0] ? (
+                <button
+                  type="button"
+                  onClick={() => handleSetMvp(mvpRanking[0]!, null)}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                  title="Clear 1st MVP"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <select
+                  onChange={(e) => e.target.value && handleSetMvp(e.target.value, 1)}
+                  value=""
+                  className="bg-zinc-950 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-zinc-300 outline-none cursor-pointer"
+                >
+                  <option value="">Select...</option>
+                  {allMatchPlayers.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.webName} ({p.position})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            {/* 2nd MVP */}
+            <div className="p-2.5 rounded-xl border border-slate-300/40 bg-slate-400/10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg">🥈</span>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-slate-300 block">
+                    2nd MVP (+{isOnePrice ? '1' : '2'} pts)
+                  </span>
+                  {mvpRanking[1] ? (
+                    <span className="font-extrabold text-xs text-white truncate block">
+                      {players[mvpRanking[1]]?.webName || players[mvpRanking[1]]?.name}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-zinc-500 italic block">None selected</span>
+                  )}
+                </div>
+              </div>
+              {mvpRanking[1] ? (
+                <button
+                  type="button"
+                  onClick={() => handleSetMvp(mvpRanking[1]!, null)}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                  title="Clear 2nd MVP"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <select
+                  onChange={(e) => e.target.value && handleSetMvp(e.target.value, 2)}
+                  value=""
+                  className="bg-zinc-950 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-zinc-300 outline-none cursor-pointer"
+                >
+                  <option value="">Select...</option>
+                  {allMatchPlayers.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.webName} ({p.position})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            {/* 3rd MVP */}
+            <div className="p-2.5 rounded-xl border border-amber-700/40 bg-amber-700/10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg">🥉</span>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-black uppercase tracking-wider text-amber-500 block">
+                    3rd MVP (+{isOnePrice ? '0' : '1'} pt)
+                  </span>
+                  {mvpRanking[2] ? (
+                    <span className="font-extrabold text-xs text-white truncate block">
+                      {players[mvpRanking[2]]?.webName || players[mvpRanking[2]]?.name}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-zinc-500 italic block">None selected</span>
+                  )}
+                </div>
+              </div>
+              {mvpRanking[2] ? (
+                <button
+                  type="button"
+                  onClick={() => handleSetMvp(mvpRanking[2]!, null)}
+                  className="p-1 rounded-lg text-zinc-400 hover:text-rose-400 hover:bg-rose-500/20 transition-colors cursor-pointer"
+                  title="Clear 3rd MVP"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <select
+                  onChange={(e) => e.target.value && handleSetMvp(e.target.value, 3)}
+                  value=""
+                  className="bg-zinc-950 border border-white/10 rounded-lg px-2 py-1 text-[11px] text-zinc-300 outline-none cursor-pointer"
+                >
+                  <option value="">Select...</option>
+                  {allMatchPlayers.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.webName} ({p.position})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* STOPWATCH & BULK MINUTES TOOLBAR */}
         <div className="p-3.5 sm:p-4 rounded-2xl bg-zinc-900 border border-white/10 space-y-3">
           <div className="flex items-center justify-between flex-wrap gap-3">
             {/* Live Stopwatch Clock */}
@@ -1236,8 +1598,9 @@ export const MatchDayAdmin: React.FC = () => {
               {/* Stopwatch Action Buttons */}
               <div className="flex items-center gap-1.5">
                 <button
+                  type="button"
                   onClick={() => setIsTimerRunning(!isTimerRunning)}
-                  className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-black transition-all ${
+                  className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
                     isTimerRunning
                       ? 'bg-amber-400 text-slate-950'
                       : 'bg-emerald-500 text-slate-950 hover:bg-emerald-400'
@@ -1248,11 +1611,12 @@ export const MatchDayAdmin: React.FC = () => {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => {
                     setIsTimerRunning(false);
                     setMatchSeconds(0);
                   }}
-                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors"
+                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
                   title="Reset Timer to 00:00"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
@@ -1260,31 +1624,34 @@ export const MatchDayAdmin: React.FC = () => {
               </div>
             </div>
 
-            {/* Bulk Minute Tools */}
+            {/* Bulk Minute Tools (30 min match length, 15m increments) */}
             <div className="flex items-center gap-2 flex-wrap">
               <div className="flex items-center gap-1.5 text-xs text-zinc-400">
                 <span>Match Length:</span>
                 <input
                   type="number"
-                  min="20"
+                  min="15"
                   max="120"
+                  step="15"
                   value={defaultMinutes}
-                  onChange={(e) => setDefaultMinutes(parseInt(e.target.value) || 40)}
-                  className="w-12 bg-zinc-950 border border-white/10 rounded-lg px-1.5 py-1 text-center font-mono font-bold text-white text-xs outline-none"
+                  onChange={(e) => setDefaultMinutes(parseInt(e.target.value) || 30)}
+                  className="w-14 bg-zinc-950 border border-white/10 rounded-lg px-2 py-1 text-center font-mono font-bold text-white text-xs outline-none"
                 />
                 <span>m</span>
               </div>
 
               <button
+                type="button"
                 onClick={() => setAllMinutes(defaultMinutes)}
-                className="px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs hover:bg-emerald-500 hover:text-slate-950 transition-all"
+                className="px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 font-bold text-xs hover:bg-emerald-500 hover:text-slate-950 transition-all cursor-pointer"
               >
                 All Full Match ({defaultMinutes}m)
               </button>
 
               <button
+                type="button"
                 onClick={() => setAllMinutes(0)}
-                className="px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-rose-400 font-bold text-xs transition-colors"
+                className="px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-zinc-400 hover:text-rose-400 font-bold text-xs transition-colors cursor-pointer"
               >
                 Clear All (0m)
               </button>
@@ -1333,48 +1700,16 @@ export const MatchDayAdmin: React.FC = () => {
           </button>
         </div>
 
-        {/* SIDE-BY-SIDE ROSTER CARDS WITH TACTICAL ACTIONS */}
+        {/* ROSTERS: TABLE LAYOUT FOR EACH TEAM */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {/* HOME TEAM ROSTER */}
-          <div
-            className={`space-y-2 bg-zinc-900/90 p-2.5 sm:p-4 rounded-2xl border border-white/10 ${
-              activeTeamTab === 'away' ? 'hidden lg:block' : 'block'
-            }`}
-          >
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <div className="flex items-center gap-2 min-w-0">
-                <ClassShieldBadge clubId={homeClub.id} size="sm" />
-                <h3 className="font-black text-sm text-white truncate">{homeClub.name} (Home)</h3>
-              </div>
-              <span className="text-[10px] font-mono font-bold text-zinc-400 shrink-0">
-                {matchPlayers.home.length} Players
-              </span>
-            </div>
-
-            <div className="space-y-2 lg:max-h-[620px] lg:overflow-y-auto pr-0.5">
-              {matchPlayers.home.map((p) => renderPlayerRow(p, 'home'))}
-            </div>
+          {/* HOME TEAM */}
+          <div className={activeTeamTab === 'away' ? 'hidden lg:block' : 'block'}>
+            {renderTeamTable(matchPlayers.home, 'home', homeClub)}
           </div>
 
-          {/* AWAY TEAM ROSTER */}
-          <div
-            className={`space-y-2 bg-zinc-900/90 p-2.5 sm:p-4 rounded-2xl border border-white/10 ${
-              activeTeamTab === 'home' ? 'hidden lg:block' : 'block'
-            }`}
-          >
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <div className="flex items-center gap-2 min-w-0">
-                <ClassShieldBadge clubId={awayClub.id} size="sm" />
-                <h3 className="font-black text-sm text-white truncate">{awayClub.name} (Away)</h3>
-              </div>
-              <span className="text-[10px] font-mono font-bold text-zinc-400 shrink-0">
-                {matchPlayers.away.length} Players
-              </span>
-            </div>
-
-            <div className="space-y-2 lg:max-h-[620px] lg:overflow-y-auto pr-0.5">
-              {matchPlayers.away.map((p) => renderPlayerRow(p, 'away'))}
-            </div>
+          {/* AWAY TEAM */}
+          <div className={activeTeamTab === 'home' ? 'hidden lg:block' : 'block'}>
+            {renderTeamTable(matchPlayers.away, 'away', awayClub)}
           </div>
         </div>
       </div>
@@ -1393,7 +1728,7 @@ export const MatchDayAdmin: React.FC = () => {
         <div className="flex items-center justify-between">
           <button
             onClick={() => setStep(2)}
-            className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 transition-colors"
+            className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" /> Back to Console
           </button>
@@ -1424,7 +1759,7 @@ export const MatchDayAdmin: React.FC = () => {
               <span className="font-extrabold text-sm text-white block mt-1">{homeClub.shortName}</span>
               <span className="text-3xl font-black font-mono text-emerald-400">{homeScore}</span>
               {homeCleanSheet && (
-                <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">Clean Sheet (+4 DEF/GK)</span>
+                <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">Clean Sheet (+4 GK/DEF, +1 MID)</span>
               )}
               {awayScore >= 2 && (
                 <span className="text-[10px] text-rose-400 font-bold block mt-0.5">
@@ -1440,7 +1775,7 @@ export const MatchDayAdmin: React.FC = () => {
               <span className="font-extrabold text-sm text-white block mt-1">{awayClub.shortName}</span>
               <span className="text-3xl font-black font-mono text-emerald-400">{awayScore}</span>
               {awayCleanSheet && (
-                <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">Clean Sheet (+4 DEF/GK)</span>
+                <span className="text-[10px] text-emerald-400 font-bold block mt-0.5">Clean Sheet (+4 GK/DEF, +1 MID)</span>
               )}
               {homeScore >= 2 && (
                 <span className="text-[10px] text-rose-400 font-bold block mt-0.5">
@@ -1460,7 +1795,16 @@ export const MatchDayAdmin: React.FC = () => {
             </div>
 
             <div>
-              <strong>MVPs:</strong> {mvps.map((id) => players[id]?.webName).join(', ') || 'None selected'}
+              <strong>3 Match MVPs:</strong>{' '}
+              {mvpRanking.some(Boolean) ? (
+                <span className="space-x-2">
+                  {mvpRanking[0] && <span>🥇 1st: {players[mvpRanking[0]]?.webName} (+{isOnePrice ? 2 : 3} pts)</span>}
+                  {mvpRanking[1] && <span>🥈 2nd: {players[mvpRanking[1]]?.webName} (+{isOnePrice ? 1 : 2} pts)</span>}
+                  {mvpRanking[2] && <span>🥉 3rd: {players[mvpRanking[2]]?.webName} (+{isOnePrice ? 0 : 1} pt)</span>}
+                </span>
+              ) : (
+                'None selected'
+              )}
             </div>
 
             <div>
@@ -1468,7 +1812,7 @@ export const MatchDayAdmin: React.FC = () => {
             </div>
 
             <div className="pt-1 text-[11px] text-zinc-400">
-              * Points for conceded goals (-1 per 2 conceded for DEF/GK), own goals (-3), missed penalties (-2), and clean sheets (+4) will be calculated and updated immediately.
+              * Points for conceded goals (-1 per 2 conceded for DEF/GK), clean sheets (+4 GK/DEF, +1 MID), 3 MVPs (+3/+2/+1), and minutes (1-19m: +1, 20+m: +2) will be updated immediately.
             </div>
           </div>
 

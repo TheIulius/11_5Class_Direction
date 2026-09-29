@@ -460,6 +460,7 @@ export async function adminSaveMatchEventsApi(payload: {
   awayScore: number;
   goalScorers: { playerId: string; minute?: number; isOwnGoal?: boolean; assistPlayerId?: string }[];
   mvpPlayerIds: string[];
+  mvpBonus?: Record<string, number>;
   playerMinutes: Record<string, number>;
   yellowCards: string[];
   redCards: string[];

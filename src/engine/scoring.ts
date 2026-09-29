@@ -91,11 +91,22 @@ export function calculatePlayerPoints(
   // 8. Own goals (KCL: -3)
   points -= (stats.ownGoals || 0) * 3;
 
-  // 9. MVP (KCL: +3, One Price Stadium: +2)
-  // Support both new isMVP (boolean) and legacy bonus (number) fields
-  const isMVP = stats.isMVP || (stats.bonus != null && stats.bonus > 0);
-  if (isMVP) {
-    points += isOnePriceStadium ? 2 : 3;
+  // 9. Match MVPs: 1st MVP (+3 pts), 2nd MVP (+2 pts), 3rd MVP (+1 pt)
+  // (One Price Stadium reduces MVP points by 1)
+  let mvpPts = 0;
+  if (stats.bonus != null && stats.bonus > 0) {
+    mvpPts = stats.bonus;
+  } else if (stats.mvpRank != null) {
+    mvpPts = stats.mvpRank === 1 ? 3 : stats.mvpRank === 2 ? 2 : stats.mvpRank === 3 ? 1 : 0;
+  } else if (stats.isMVP) {
+    mvpPts = 3; // Fallback for legacy single MVP
+  }
+
+  if (mvpPts > 0) {
+    if (isOnePriceStadium) {
+      mvpPts = Math.max(0, mvpPts - 1);
+    }
+    points += mvpPts;
   }
 
   return points;

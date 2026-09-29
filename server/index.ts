@@ -1031,6 +1031,7 @@ app.post('/api/admin/stat', (req: Request, res: Response) => {
     penaltiesMissed: 0,
     ownGoals: 0,
     isMVP: false,
+    bonus: 0,
   };
 
   const updatedStats = { ...currentStats, ...stats };
@@ -2796,6 +2797,23 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
     const hasCleanSheet = isHomeTeam ? homeCleanSheet : awayCleanSheet;
     const goalsConceded = isHomeTeam ? (awayScore || 0) : (homeScore || 0);
 
+    let bonus = 0;
+    let isMVP = false;
+    let mvpRank: 1 | 2 | 3 | undefined = undefined;
+
+    if (req.body.mvpBonus && typeof req.body.mvpBonus[player.id] === 'number') {
+      bonus = req.body.mvpBonus[player.id];
+      isMVP = bonus > 0;
+      if (bonus === 3) mvpRank = 1;
+      else if (bonus === 2) mvpRank = 2;
+      else if (bonus === 1) mvpRank = 3;
+    } else if (Array.isArray(mvpPlayerIds)) {
+      const idx = mvpPlayerIds.indexOf(player.id);
+      if (idx === 0) { bonus = 3; isMVP = true; mvpRank = 1; }
+      else if (idx === 1) { bonus = 2; isMVP = true; mvpRank = 2; }
+      else if (idx === 2) { bonus = 1; isMVP = true; mvpRank = 3; }
+    }
+
     const stats: PlayerStats = {
       minutes: mins,
       goals: goalCount[player.id] || 0,
@@ -2807,7 +2825,9 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
       penaltiesSaved: penaltiesSaved?.[player.id] || 0,
       penaltiesMissed: penaltiesMissed?.[player.id] || 0,
       ownGoals: ownGoalCount[player.id] || 0,
-      isMVP: (mvpPlayerIds || []).includes(player.id),
+      isMVP: isMVP,
+      bonus: bonus,
+      mvpRank: mvpRank,
     };
 
     player.gwStats[gw] = stats;

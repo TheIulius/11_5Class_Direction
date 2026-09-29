@@ -64,6 +64,7 @@ interface PlayerContribution {
   penaltiesMissed: number;
   ownGoals: number;
   isMVP: boolean;
+  bonus: number;
   gamePoints: number;
 }
 
@@ -116,7 +117,8 @@ export const FixturesView: React.FC = () => {
       };
 
       const gamePoints = calculatePlayerPoints(p.position, stats, isOnePrice);
-      const isMVP = Boolean(stats.isMVP || (stats.bonus != null && stats.bonus > 0));
+      const bonus = stats.bonus || (stats.mvpRank === 1 ? 3 : stats.mvpRank === 2 ? 2 : stats.mvpRank === 3 ? 1 : (stats.isMVP ? 3 : 0));
+      const isMVP = Boolean(stats.isMVP || bonus > 0);
 
       return {
         player: p,
@@ -130,6 +132,7 @@ export const FixturesView: React.FC = () => {
         penaltiesMissed: stats.penaltiesMissed || 0,
         ownGoals: stats.ownGoals || 0,
         isMVP,
+        bonus,
         gamePoints,
       };
     });
@@ -557,10 +560,17 @@ export const FixturesView: React.FC = () => {
                                             </span>
                                             {c.isMVP && (
                                               <span
-                                                className="text-[9px] px-1 rounded bg-amber-500/20 text-amber-500 border border-amber-500/30 font-black flex items-center gap-0.5"
-                                                title="Match MVP"
+                                                className={`text-[9px] px-1.5 py-0.5 rounded border font-black flex items-center gap-0.5 ${
+                                                  c.bonus === 3
+                                                    ? 'bg-amber-500/20 text-amber-500 border-amber-500/30'
+                                                    : c.bonus === 2
+                                                    ? 'bg-slate-300/20 text-slate-300 border-slate-400/30'
+                                                    : 'bg-amber-700/20 text-amber-500 border-amber-700/30'
+                                                }`}
+                                                title={`Match MVP (+${c.bonus || 3} pts)`}
                                               >
-                                                <Crown className="w-2.5 h-2.5" /> MVP
+                                                <Crown className="w-2.5 h-2.5" />
+                                                {c.bonus === 3 ? '1st MVP (+3)' : c.bonus === 2 ? '2nd MVP (+2)' : c.bonus === 1 ? '3rd MVP (+1)' : 'MVP'}
                                               </span>
                                             )}
                                           </div>
@@ -688,10 +698,17 @@ export const FixturesView: React.FC = () => {
                                             </span>
                                             {c.isMVP && (
                                               <span
-                                                className="text-[9px] px-1 rounded bg-amber-500/20 text-amber-500 border border-amber-500/30 font-black flex items-center gap-0.5"
-                                                title="Match MVP"
+                                                className={`text-[9px] px-1.5 py-0.5 rounded border font-black flex items-center gap-0.5 ${
+                                                  c.bonus === 3
+                                                    ? 'bg-amber-500/20 text-amber-500 border-amber-500/30'
+                                                    : c.bonus === 2
+                                                    ? 'bg-slate-300/20 text-slate-300 border-slate-400/30'
+                                                    : 'bg-amber-700/20 text-amber-500 border-amber-700/30'
+                                                }`}
+                                                title={`Match MVP (+${c.bonus || 3} pts)`}
                                               >
-                                                <Crown className="w-2.5 h-2.5" /> MVP
+                                                <Crown className="w-2.5 h-2.5" />
+                                                {c.bonus === 3 ? '1st MVP (+3)' : c.bonus === 2 ? '2nd MVP (+2)' : c.bonus === 1 ? '3rd MVP (+1)' : 'MVP'}
                                               </span>
                                             )}
                                           </div>

@@ -20,10 +20,11 @@ export interface PlayerStats {
   penaltiesMissed: number;
   ownGoals: number;
   isMVP: boolean;
-  // Legacy fields kept for backward compat with existing DB data
+  // Legacy and extended fields
   goalsConceded?: number;
   saves?: number;
   bonus?: number;
+  mvpRank?: 1 | 2 | 3;
 }
 
 export interface Player {

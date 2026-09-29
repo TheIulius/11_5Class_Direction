@@ -214,10 +214,38 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                     </tr>
                     <tr className="hover:bg-slate-800/30">
                       <td className="p-2.5 font-sans font-medium text-slate-200">
-                        {lang === 'geo' ? 'MVP (მატჩის საუკეთესო)' : 'Match MVP'}
+                        {lang === 'geo' ? '🥇 1-ლი MVP (საუკეთესო)' : '🥇 1st MVP'}
                       </td>
                       <td className="p-2.5 text-center font-bold text-amber-400">+3</td>
                       <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+2</td>
+                    </tr>
+                    <tr className="hover:bg-slate-800/30">
+                      <td className="p-2.5 font-sans font-medium text-slate-200">
+                        {lang === 'geo' ? '🥈 მე-2 MVP' : '🥈 2nd MVP'}
+                      </td>
+                      <td className="p-2.5 text-center font-bold text-slate-300">+2</td>
+                      <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+1</td>
+                    </tr>
+                    <tr className="hover:bg-slate-800/30">
+                      <td className="p-2.5 font-sans font-medium text-slate-200">
+                        {lang === 'geo' ? '🥉 მე-3 MVP' : '🥉 3rd MVP'}
+                      </td>
+                      <td className="p-2.5 text-center font-bold text-amber-600">+1</td>
+                      <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">0</td>
+                    </tr>
+                    <tr className="hover:bg-slate-800/30 bg-emerald-500/5">
+                      <td className="p-2.5 font-sans font-medium text-emerald-300">
+                        {lang === 'geo' ? 'მშრალი მატჩი (Clean Sheet - GK/DEF)' : 'Clean Sheet (GK/DEF)'}
+                      </td>
+                      <td className="p-2.5 text-center font-bold text-emerald-400">+4</td>
+                      <td className="p-2.5 text-center font-bold text-emerald-400">+4</td>
+                    </tr>
+                    <tr className="hover:bg-slate-800/30 bg-emerald-500/5">
+                      <td className="p-2.5 font-sans font-medium text-emerald-300">
+                        {lang === 'geo' ? 'მშრალი მატჩი (Clean Sheet - MID)' : 'Clean Sheet (MID)'}
+                      </td>
+                      <td className="p-2.5 text-center font-bold text-emerald-400">+1</td>
+                      <td className="p-2.5 text-center font-bold text-emerald-400">+1</td>
                     </tr>
                   </tbody>
                 </table>
@@ -289,7 +317,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Clean Sheet */}
-                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1">
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-emerald-500/20 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-sans font-bold text-emerald-300">
                       {lang === 'geo' ? 'მშრალი მატჩი (Clean Sheet)' : 'Clean Sheet'}
@@ -298,8 +326,8 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                   </div>
                   <p className="font-sans text-[10px] text-slate-400">
                     {lang === 'geo'
-                      ? 'მოითხოვს მოედანზე მინიმუმ 20 წუთის გატარებას.'
-                      : 'Player must play 20+ minutes with 0 goals conceded.'}
+                      ? 'მეკარეებსა და მცველებს +4 ქულა, ნახევარმცველებს +1 ქულა. მოითხოვს მინიმუმ 20 წუთის გატარებას 0 გაშვებული გოლით.'
+                      : 'Goalkeepers & Defenders earn +4 pts, Midfielders +1 pt. Requires 20+ mins played with 0 goals conceded.'}
                   </p>
                 </div>
 
@@ -307,14 +335,29 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
                 <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1">
                   <div className="flex items-center justify-between">
                     <span className="font-sans font-bold text-slate-200">
-                      {lang === 'geo' ? 'ნათამაშები წუთები' : 'Minutes Played'}
+                      {lang === 'geo' ? 'ნათამაშები წუთები (30 წთ მატჩი)' : 'Minutes Played (30m match)'}
                     </span>
-                    <span className="font-black text-emerald-400">+1 (1-19&apos;), +2 (20+&apos;)</span>
+                    <span className="font-black text-emerald-400">+1 (1-19&apos;), +2 (20-30&apos;)</span>
                   </div>
                   <p className="font-sans text-[10px] text-slate-400">
                     {lang === 'geo'
-                      ? '1+ წუთი მოედანზე: +1 ქულა; 20+ წუთი მოედანზე: +2 ქულა.'
-                      : '+1 pt for 1-19 minutes; +2 pts for 20+ minutes.'}
+                      ? 'მატჩის ხანგრძლივობაა 30 წთ (შეყვანა 15 წთ ბიჯით). 1-19 წთ: +1 ქულა; 20+ წთ: +2 ქულა.'
+                      : 'Match length is 30m (15m increments). 1-19 mins: +1 pt; 20+ mins: +2 pts.'}
+                  </p>
+                </div>
+
+                {/* 3 MVPs Awarded per match */}
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-amber-500/20 space-y-1 sm:col-span-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-sans font-bold text-amber-300">
+                      {lang === 'geo' ? 'მატჩის 3 MVP (საუკეთესო მოთამაშეები)' : '3 Match MVPs'}
+                    </span>
+                    <span className="font-black text-amber-400">🥇 +3, 🥈 +2, 🥉 +1</span>
+                  </div>
+                  <p className="font-sans text-[10px] text-slate-400">
+                    {lang === 'geo'
+                      ? 'თითოეულ მატჩში ჯილდოვდება 3 MVP: 1-ლი ადგილი: +3 ქულა, მე-2 ადგილი: +2 ქულა, მე-3 ადგილი: +1 ქულა (One Price-ზე: +2, +1, 0).'
+                      : '3 MVPs are awarded per match: 1st MVP: +3 pts, 2nd MVP: +2 pts, 3rd MVP: +1 pt (at One Price: +2, +1, 0).'}
                   </p>
                 </div>
 
