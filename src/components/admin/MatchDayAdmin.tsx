@@ -538,6 +538,8 @@ export const MatchDayAdmin: React.FC = () => {
       homeScore,
       awayScore,
       isFinished: true,
+      completedAt: fixture.completedAt || new Date().toISOString(),
+      date: fixture.date || new Date().toISOString().split('T')[0],
       venue,
       goalScorers: goals.map((g) => ({
         playerId: g.playerId,
@@ -1348,7 +1350,7 @@ export const MatchDayAdmin: React.FC = () => {
 
           <div className="text-[11px] font-mono text-zinc-400">
             {isOnePrice ? (
-              <span className="text-amber-300 font-bold">Goals (-1pt), Assists (-2pts), MVP (-1pt) reduction</span>
+              <span className="text-amber-300 font-bold">Goals & Assists (-2pts), MVP (-1pt) reduction</span>
             ) : (
               <span className="text-emerald-400 font-bold">Standard Points Active</span>
             )}
@@ -1743,7 +1745,7 @@ export const MatchDayAdmin: React.FC = () => {
             {isOnePrice ? (
               <>
                 <Building className="w-3.5 h-3.5 text-amber-400" />
-                <span>🏢 One Price Stadium (-1 pt Goals/MVP, -2 pts Assists)</span>
+                <span>🏢 One Price Stadium (-2 pts Goals/Assists, -1 pt MVP)</span>
               </>
             ) : (
               <>

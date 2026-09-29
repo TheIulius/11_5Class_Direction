@@ -271,28 +271,28 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                               {lang === 'geo' ? 'მეკარის გოლი' : 'Goalkeeper Goal'}
                             </td>
                             <td className="p-2.5 text-center font-bold text-emerald-400">+7</td>
-                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+6</td>
+                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+5</td>
                           </tr>
                           <tr className="hover:bg-slate-800/30">
                             <td className="p-2.5 font-sans font-medium text-slate-200">
                               {lang === 'geo' ? 'მცველის გოლი' : 'Defender Goal'}
                             </td>
                             <td className="p-2.5 text-center font-bold text-emerald-400">+6</td>
-                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+5</td>
+                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+4</td>
                           </tr>
                           <tr className="hover:bg-slate-800/30">
                             <td className="p-2.5 font-sans font-medium text-slate-200">
                               {lang === 'geo' ? 'ნახევარმცველის გოლი' : 'Midfielder Goal'}
                             </td>
                             <td className="p-2.5 text-center font-bold text-emerald-400">+5</td>
-                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+4</td>
+                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+3</td>
                           </tr>
                           <tr className="hover:bg-slate-800/30">
                             <td className="p-2.5 font-sans font-medium text-slate-200">
                               {lang === 'geo' ? 'თავდამსხმელის გოლი' : 'Forward Goal'}
                             </td>
                             <td className="p-2.5 text-center font-bold text-emerald-400">+4</td>
-                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+3</td>
+                            <td className="p-2.5 text-center font-bold text-amber-300 bg-amber-500/5">+2</td>
                           </tr>
                           <tr className="hover:bg-slate-800/30">
                             <td className="p-2.5 font-sans font-medium text-slate-200">
@@ -478,11 +478,11 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                     <p className="text-[11px] leading-relaxed text-amber-100/90">
                       {lang === 'geo' ? (
                         <>
-                          One Price Stadium-ზე ჩატარებულ მატჩებში გოლებზე და MVP-ზე სტანდარტული ქულების რაოდენობა <strong>1 ქულით მცირდება</strong>, ხოლო საგოლე გადაცემებზე (ასისტებზე) — <strong>2 ქულით მცირდება</strong> (ასისტში იწერება +1 ქულა +3-ის ნაცვლად). ეს ცვლილება მოქმედებს იმის გამო, რომ One Price Stadium-ზე გატანილი გოლების საშუალო რაოდენობა მნიშვნელოვნად აღემატება Delisi (Parki) Stadium-ის მაჩვენებელს. <em>ყველა სხვა ქულების წესი უცვლელი რჩება.</em>
+                          One Price Stadium-ზე ჩატარებულ მატჩებში გოლებსა და საგოლე გადაცემებზე (ასისტებზე) სტანდარტული ქულების რაოდენობა <strong>2 ქულით მცირდება (-2 ქულა)</strong>, ხოლო MVP-ზე — <strong>1 ქულით მცირდება (-1 ქულა)</strong>. ეს ცვლილება მოქმედებს იმის გამო, რომ One Price Stadium-ზე გატანილი გოლების საშუალო რაოდენობა მნიშვნელოვნად აღემატება Delisi (Parki) Stadium-ის მაჩვენებელს. <em>ყველა სხვა ქულების წესი უცვლელი რჩება.</em>
                         </>
                       ) : (
                         <>
-                          In matches played at <strong>One Price Stadium</strong>, standard points awarded for Goals and MVP are each <strong>reduced by 1 point</strong>, and Assists are <strong>reduced by 2 points</strong> (+1 pt awarded instead of +3). This adjustment accounts for the significantly higher average goal-scoring rate compared to Delisi (Parki) Stadium. All other rules remain unmodified.
+                          In matches played at <strong>One Price Stadium</strong>, standard points awarded for Goals and Assists are each <strong>reduced by 2 points (-2 pts)</strong>, and MVP points are <strong>reduced by 1 point (-1 pt)</strong>. This adjustment accounts for the significantly higher average goal-scoring rate compared to Delisi (Parki) Stadium. All other rules remain unmodified.
                         </>
                       )}
                     </p>

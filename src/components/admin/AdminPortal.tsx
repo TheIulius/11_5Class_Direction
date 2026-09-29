@@ -828,7 +828,7 @@ export const AdminPortal: React.FC = () => {
                         className="w-full bg-zinc-900 border border-white/10 rounded-xl p-2 text-white outline-none"
                       >
                         <option value="delisi">🏟️ Delisi Stadium (Parki - Standard Rules)</option>
-                        <option value="one_price">🏢 One Price Stadium (-1 pt Goals/MVP, -2 pts Assists)</option>
+                        <option value="one_price">🏢 One Price Stadium (-2 pts Goals/Assists, -1 pt MVP)</option>
                       </select>
                     </div>
                   </div>

@@ -39,6 +39,30 @@ export const formatFixtureDate = (dateStr?: string): string => {
 
 export const sortFixturesByDate = (list: Fixture[]): Fixture[] => {
   return [...list].sort((a, b) => {
+    // 1. Finished matches first
+    const aFinished = Boolean(a.isFinished);
+    const bFinished = Boolean(b.isFinished);
+    if (aFinished && !bFinished) return -1;
+    if (!aFinished && bFinished) return 1;
+
+    // 2. If both are finished, sort by date / completedAt (dates when they were filled in)
+    if (aFinished && bFinished) {
+      const getFinishedTime = (f: Fixture): number => {
+        if (f.completedAt && !isNaN(Date.parse(f.completedAt))) {
+          return new Date(f.completedAt).getTime();
+        }
+        if (f.date && !isNaN(Date.parse(f.date))) {
+          return new Date(f.date).getTime();
+        }
+        return 0;
+      };
+      const timeA = getFinishedTime(a);
+      const timeB = getFinishedTime(b);
+      if (timeA !== timeB) return timeA - timeB;
+      return a.id.localeCompare(b.id, undefined, { numeric: true });
+    }
+
+    // 3. If both are unfinished, defined dates first, chronologically
     const hasA = Boolean(a.date && !isNaN(Date.parse(a.date)));
     const hasB = Boolean(b.date && !isNaN(Date.parse(b.date)));
     if (hasA && !hasB) return -1;
@@ -48,7 +72,7 @@ export const sortFixturesByDate = (list: Fixture[]): Fixture[] => {
       const timeB = new Date(b.date!).getTime();
       if (timeA !== timeB) return timeA - timeB;
     }
-    return a.id.localeCompare(b.id);
+    return a.id.localeCompare(b.id, undefined, { numeric: true });
   });
 };
 

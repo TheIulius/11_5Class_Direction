@@ -40,7 +40,7 @@ export function calculatePlayerPoints(
     points += 1;
   }
 
-  // 2. Goals scored (position-dependent, One Price Stadium reduces by 1)
+  // 2. Goals scored (position-dependent, One Price Stadium: -2 pts reduction)
   if (goals > 0) {
     let goalPts: number;
     if (position === 'GKP') {
@@ -52,7 +52,7 @@ export function calculatePlayerPoints(
     } else {
       goalPts = 4; // FWD
     }
-    if (isOnePriceStadium) goalPts -= 1;
+    if (isOnePriceStadium) goalPts -= 2;
     points += goals * goalPts;
   }
 
