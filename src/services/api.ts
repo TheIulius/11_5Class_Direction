@@ -347,6 +347,22 @@ export async function adminApproveUserApi(target: { userId?: string; username?: 
   return data;
 }
 
+export async function adminSetUserRoleApi(target: {
+  userId?: string;
+  username?: string;
+  role: 'admin' | 'ref' | 'user';
+  isReferee?: boolean;
+}) {
+  const res = await fetch(`${API_BASE}/api/admin/user/set-role`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(target),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to update user role');
+  return data;
+}
+
 export async function adminCreateUserApi(payload: {
   username: string;
   password: string;

@@ -3,6 +3,7 @@ import { useFPL } from '../../context/FPLContext';
 import {
   adminFetchUsersApi,
   adminApproveUserApi,
+  adminSetUserRoleApi,
   adminDeleteUserApi,
   adminResetPasswordApi,
   adminFetchPlayerPhotosApi,
@@ -26,6 +27,7 @@ import {
   Shield,
   AlertCircle,
   RefreshCw,
+  Award,
 } from 'lucide-react';
 
 export const ManagersView: React.FC = () => {
@@ -34,7 +36,7 @@ export const ManagersView: React.FC = () => {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterMode, setFilterMode] = useState<'all' | 'pending' | 'approved'>('all');
+  const [filterMode, setFilterMode] = useState<'all' | 'pending' | 'approved' | 'refs'>('all');
 
   // Inspection & actions state
   const [selectedManagerIdForSquad, setSelectedManagerIdForSquad] = useState<string | null>(null);
@@ -100,6 +102,35 @@ export const ManagersView: React.FC = () => {
         prev.map((u) => (u.id === userId ? { ...u, isApproved: currentApproved } : u))
       );
       showNotification(err?.message || 'Failed to update approval status.');
+    }
+  };
+
+  // Handle Toggle Referee Role
+  const handleToggleRef = async (userId: string, username: string, currentIsRef: boolean) => {
+    const targetRef = !currentIsRef;
+    // Optimistic UI update
+    setUsersList((prev) =>
+      prev.map((u) => (u.id === userId ? { ...u, isReferee: targetRef, role: targetRef ? 'ref' : 'user' } : u))
+    );
+
+    try {
+      const res = await adminSetUserRoleApi({
+        userId,
+        username,
+        role: targetRef ? 'ref' : 'user',
+        isReferee: targetRef,
+      });
+      if (res.success) {
+        if (targetRef) {
+          confetti({ particleCount: 50, spread: 70, origin: { y: 0.6 } });
+        }
+        showNotification(res.message || `@${username} is now ${targetRef ? 'a trusted Referee (მსაჯი)' : 'a regular user'}.`);
+      }
+    } catch (err: any) {
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, isReferee: currentIsRef, role: currentIsRef ? 'ref' : 'user' } : u))
+      );
+      showNotification(err?.message || 'Failed to update referee role.');
     }
   };
 
@@ -173,12 +204,16 @@ export const ManagersView: React.FC = () => {
     if (filterMode === 'approved') {
       return u.isAdmin || u.isApproved;
     }
+    if (filterMode === 'refs') {
+      return u.role === 'ref' || u.isReferee;
+    }
     return true;
   });
 
   const totalCount = usersList.length;
   const approvedCount = usersList.filter((u) => u.isAdmin || u.isApproved).length;
   const pendingCount = usersList.filter((u) => !u.isAdmin && !u.isApproved).length;
+  const refsCount = usersList.filter((u) => u.role === 'ref' || u.isReferee).length;
 
   return (
     <div className="space-y-4 pb-20 animate-fade-in text-slate-900 dark:text-white">
@@ -389,6 +424,17 @@ export const ManagersView: React.FC = () => {
             >
               Approved ({approvedCount})
             </button>
+            <button
+              onClick={() => setFilterMode('refs')}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filterMode === 'refs'
+                  ? 'bg-amber-500 text-slate-950 shadow-xs font-black'
+                  : 'text-amber-500 hover:text-amber-400'
+              }`}
+            >
+              <Award className="w-3 h-3" />
+              <span>Refs ({refsCount})</span>
+            </button>
           </div>
         </div>
 
@@ -402,6 +448,7 @@ export const ManagersView: React.FC = () => {
           ) : (
             filteredUsers.map((u) => {
               const isApproved = u.isAdmin || Boolean(u.isApproved);
+              const isRef = Boolean(u.role === 'ref' || u.isReferee);
 
               return (
                 <div
@@ -430,6 +477,12 @@ export const ManagersView: React.FC = () => {
                         {u.isAdmin && (
                           <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
                             Admin
+                          </span>
+                        )}
+                        {isRef && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1 font-mono">
+                            <Award className="w-2.5 h-2.5" />
+                            Ref
                           </span>
                         )}
                       </div>
@@ -478,6 +531,25 @@ export const ManagersView: React.FC = () => {
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
+                    )}
+
+                    {/* Referee Role Toggle (Admin only can toggle, can't toggle superadmin) */}
+                    {!u.isAdmin && (
+                      <div className="flex items-center gap-1.5 pl-2 border-l border-slate-300 dark:border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleRef(u.id, u.username, isRef)}
+                          className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all flex items-center gap-1 cursor-pointer select-none ${
+                            isRef
+                              ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400/50 hover:bg-amber-400'
+                              : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-zinc-700 hover:text-white'
+                          }`}
+                          title={isRef ? 'Revoke Referee role' : 'Make trusted Referee'}
+                        >
+                          <Award className="w-3 h-3" />
+                          <span>{isRef ? '🏁 Ref' : '+ Ref'}</span>
+                        </button>
+                      </div>
                     )}
 
                     {/* iOS Approval Switch */}

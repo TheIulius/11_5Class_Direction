@@ -157,8 +157,9 @@ export interface AuthUser {
   email?: string;
   managerName: string;
   teamName: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'ref' | 'user';
   isAdmin?: boolean;
+  isReferee?: boolean;
   isApproved?: boolean;
   grade?: string;
   parallel?: string;

@@ -8,13 +8,14 @@ import { StandingsView } from './components/views/StandingsView';
 import { FixturesView } from './components/views/FixturesView';
 import { ManagersView } from './components/views/ManagersView';
 import { AdminPortal } from './components/admin/AdminPortal';
+import { MatchDayAdmin } from './components/admin/MatchDayAdmin';
 import { AuthLandingView } from './components/auth/AuthLandingView';
 import { PendingApprovalOverlay } from './components/auth/PendingApprovalOverlay';
 import { StudentProfileModal } from './components/auth/StudentProfileModal';
 import { UpdateNotesModal } from './components/common/UpdateNotesModal';
 
 const AppContent: React.FC = () => {
-  const { activeTab, authUser, isModerator, openRulesModal } = useFPL();
+  const { activeTab, authUser, isModerator, isReferee, openRulesModal } = useFPL();
 
   if (!authUser) {
     return <AuthLandingView />;
@@ -36,7 +37,35 @@ const AppContent: React.FC = () => {
           )}
           {activeTab === 'fixtures' && <FixturesView />}
           {activeTab === 'managers' && (isModerator ? <ManagersView /> : <PickTeamView />)}
-          {activeTab === 'dev' && (isModerator ? <AdminPortal /> : <PickTeamView />)}
+          {activeTab === 'dev' && (
+            isModerator ? (
+              <AdminPortal />
+            ) : isReferee ? (
+              <div className="space-y-4">
+                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black">
+                      🏁
+                    </div>
+                    <div>
+                      <h3 className="text-xs font-black text-slate-950 dark:text-white uppercase tracking-wider">
+                        Referee Match Console
+                      </h3>
+                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        შეიყვანეთ და განაახლეთ მატჩის შედეგები და მოთამაშეთა სტატისტიკა
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-slate-950">
+                    Trusted Ref
+                  </span>
+                </div>
+                <MatchDayAdmin />
+              </div>
+            ) : (
+              <PickTeamView />
+            )
+          )}
         </MobileContainer>
       )}
       <StudentProfileModal />

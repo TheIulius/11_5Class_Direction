@@ -49,6 +49,7 @@ interface FPLContextType {
   setActiveTab: (tab: TabType) => void;
   isDevAuthenticated: boolean;
   isModerator: boolean;
+  isReferee: boolean;
   devLogin: (pass?: string) => Promise<boolean>;
   devLogout: () => void;
   selectedPlayerForSwap: string | null;
@@ -342,6 +343,13 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const clean = authUser.username.trim().toLowerCase();
     return clean === 'theiulius' || clean === 'chaga' || authUser.role === 'admin' || authUser.isAdmin === true;
   }, [authUser]);
+
+  // Trusted Referee privilege system
+  const isReferee = useMemo(() => {
+    if (!authUser) return false;
+    if (isModerator) return true; // Full administrators also possess referee rights
+    return authUser.role === 'ref' || authUser.isReferee === true;
+  }, [authUser, isModerator]);
 
   const isDevAuthenticated = isModerator;
   const [selectedPlayerForSwap, setSelectedPlayerForSwap] = useState<string | null>(null);
@@ -1739,6 +1747,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveTab,
         isDevAuthenticated,
         isModerator,
+        isReferee,
         devLogin,
         devLogout,
         selectedPlayerForSwap,

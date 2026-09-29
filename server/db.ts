@@ -19,8 +19,9 @@ export interface UserAccount {
   teamName: string;
   token?: string;
   createdAt: string;
-  role?: 'admin' | 'user';
+  role?: 'admin' | 'ref' | 'user';
   isAdmin?: boolean;
+  isReferee?: boolean;
   isApproved?: boolean;
   grade?: string;
   parallel?: string;
@@ -34,6 +35,9 @@ export interface ManagerProfile {
   teamName: string;
   squad: Squad;
   joinedAt: string;
+  role?: 'admin' | 'ref' | 'user';
+  isAdmin?: boolean;
+  isReferee?: boolean;
   grade?: string;
   parallel?: string;
   realName?: string;

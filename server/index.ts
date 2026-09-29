@@ -543,8 +543,9 @@ app.post('/api/auth/login', async (req: Request, res: Response) => {
       email: user.email,
       managerName: user.managerName,
       teamName: user.teamName,
-      role: isAdmin ? 'admin' : 'user',
+      role: isAdmin ? 'admin' : (user.role === 'ref' || user.isReferee ? 'ref' : 'user'),
       isAdmin,
+      isReferee: Boolean(user.role === 'ref' || user.isReferee),
       isApproved,
       grade: user.grade,
       parallel: user.parallel,
@@ -617,8 +618,9 @@ app.get('/api/auth/me', async (req: Request, res: Response) => {
       email: user.email,
       managerName: user.managerName,
       teamName: user.teamName,
-      role: isAdmin ? 'admin' : 'user',
+      role: isAdmin ? 'admin' : (user.role === 'ref' || user.isReferee ? 'ref' : 'user'),
       isAdmin,
+      isReferee: Boolean(user.role === 'ref' || user.isReferee),
       isApproved,
       grade: user.grade,
       parallel: user.parallel,
@@ -1725,6 +1727,11 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
           lUser.showRealNamePublicly = rUser.showRealNamePublicly;
           changed = true;
         }
+        if (rUser.role === 'ref' || rUser.isReferee) {
+          lUser.role = 'ref';
+          lUser.isReferee = true;
+          changed = true;
+        }
       }
     }
   }
@@ -2204,6 +2211,7 @@ app.get('/api/admin/users', (req: Request, res: Response) => {
   const data = db.getData();
   const usersList = Object.values(data.users || {}).map((u) => {
     const isAdmin = isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isAdmin);
+    const isReferee = Boolean(u.role === 'ref' || u.isReferee);
     return {
       id: u.id,
       username: u.username,
@@ -2211,8 +2219,9 @@ app.get('/api/admin/users', (req: Request, res: Response) => {
       managerName: u.managerName,
       teamName: u.teamName,
       createdAt: u.createdAt,
-      role: isAdmin ? 'admin' : 'user',
+      role: u.role || (isAdmin ? 'admin' : isReferee ? 'ref' : 'user'),
       isAdmin,
+      isReferee,
       isApproved: isAdmin || Boolean(u.isApproved),
       grade: u.grade,
       parallel: u.parallel,
@@ -2262,6 +2271,56 @@ app.post('/api/admin/user/approve', (req: Request, res: Response) => {
       username: user.username,
       managerName: user.managerName,
       teamName: user.teamName,
+      isApproved: user.isApproved,
+    },
+  });
+});
+
+// 11f. Developer Admin: Set User Role (Admin / Ref / Regular User)
+app.post('/api/admin/user/set-role', (req: Request, res: Response) => {
+  const { userId, username, role, isReferee } = req.body;
+  const data = db.getData();
+  if (!data.users) data.users = {};
+
+  const clean = (username || '').trim().toLowerCase();
+  const user = Object.values(data.users).find(
+    (u) => (userId && u.id === userId) || (clean && u.username.toLowerCase() === clean)
+  );
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  // Prevent demoting primary administrators
+  if ((user.username === 'theiulius' || user.username === 'chaga') && role && role !== 'admin') {
+    return res.status(400).json({ error: 'Cannot change role of primary tournament administrators.' });
+  }
+
+  const targetRole: 'admin' | 'ref' | 'user' = role || (isReferee ? 'ref' : 'user');
+  user.role = targetRole;
+  user.isAdmin = targetRole === 'admin';
+  user.isReferee = targetRole === 'ref' || Boolean(isReferee);
+
+  if (data.managers && data.managers[user.id]) {
+    data.managers[user.id].role = targetRole;
+    data.managers[user.id].isAdmin = user.isAdmin;
+    data.managers[user.id].isReferee = user.isReferee;
+  }
+
+  db.save();
+  scheduleAutoSyncToGitHub(`Admin set role of @${user.username} to ${targetRole}`, true);
+
+  res.json({
+    success: true,
+    message: `@${user.username} (${user.managerName}) is now ${targetRole === 'ref' ? 'a trusted Referee (მსაჯი)' : targetRole === 'admin' ? 'an Admin' : 'a Regular Manager'}.`,
+    user: {
+      id: user.id,
+      username: user.username,
+      managerName: user.managerName,
+      teamName: user.teamName,
+      role: user.role,
+      isAdmin: user.isAdmin,
+      isReferee: user.isReferee,
       isApproved: user.isApproved,
     },
   });

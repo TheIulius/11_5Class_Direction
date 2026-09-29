@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
-import { Sparkles, Wrench, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Eye, Shield, BookOpen, Users, UserCheck } from 'lucide-react';
+import { Sparkles, Wrench, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Eye, Shield, BookOpen, Users, UserCheck, Award } from 'lucide-react';
 
 interface TabItem {
   id: TabType;
@@ -28,6 +28,7 @@ export const TopHeader: React.FC = () => {
     activeTab,
     isDevAuthenticated,
     isModerator,
+    isReferee,
     authUser,
     setIsAuthModalOpen,
     setIsRulesModalOpen,
@@ -148,8 +149,8 @@ export const TopHeader: React.FC = () => {
             )}
           </button>
 
-          {/* Developer / Moderator Portal shortcut button (mobile only, ADMINS ONLY) */}
-          {isModerator && (
+          {/* Developer / Moderator / Referee Portal shortcut button (mobile only, ADMINS OR REFS) */}
+          {(isModerator || isReferee) && (
             <button
               onClick={() => setActiveTab('dev')}
               className={`md:hidden p-1.5 rounded-full transition-all border ${
@@ -157,10 +158,14 @@ export const TopHeader: React.FC = () => {
                   ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 border-transparent font-bold'
                   : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/[0.09]'
               }`}
-              title="Moderator Console"
-              aria-label="Moderator Console"
+              title={isModerator ? 'Moderator Console' : 'Match Console'}
+              aria-label={isModerator ? 'Moderator Console' : 'Match Console'}
             >
-              <Shield className="w-4 h-4 text-amber-400" />
+              {isModerator ? (
+                <Shield className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Award className="w-4 h-4 text-amber-400" />
+              )}
             </button>
           )}
         </div>
@@ -169,11 +174,11 @@ export const TopHeader: React.FC = () => {
       {/* Desktop Navigation Tabs Bar */}
       <nav className="hidden md:flex items-center justify-center bg-slate-50 dark:bg-[#070b12] border-t border-slate-200 dark:border-slate-800/80 select-none">
         <div className="w-full max-w-6xl mx-auto flex items-center justify-center gap-1.5 px-6 py-1.5">
-          {DESKTOP_TABS.filter((tab) => tab.id !== 'dev' || isModerator).map((tab) => {
-            const Icon = tab.id === 'dev' && isModerator ? Shield : tab.icon;
-            const isActive = activeTab === tab.id;
+          {DESKTOP_TABS.filter((tab) => tab.id !== 'dev' || isModerator || isReferee).map((tab) => {
             const isDev = tab.id === 'dev';
-            const displayLabel = isDev && isModerator ? 'Mod Console' : tab.label;
+            const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;
+            const isActive = activeTab === tab.id;
+            const displayLabel = isDev ? (isModerator ? 'Mod Console' : 'Match Console') : tab.label;
 
             return (
               <button
@@ -185,9 +190,9 @@ export const TopHeader: React.FC = () => {
                     : 'bg-transparent text-slate-500 dark:text-slate-400 border-transparent hover:bg-slate-200/60 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-slate-200'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? (isDev && isModerator ? 'text-amber-400' : 'text-emerald-400') : 'text-slate-400'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? (isDev ? 'text-amber-400' : 'text-emerald-400') : 'text-slate-400'}`} />
                 <span>{displayLabel}</span>
-                {isDev && isDevAuthenticated && (
+                {isDev && (isDevAuthenticated || isReferee) && (
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80" />
                 )}
               </button>
