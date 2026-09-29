@@ -85,7 +85,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div
       onClick={handleClick}
-      className={`relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 select-none group max-w-[76px] sm:max-w-[85px] md:max-w-[96px] ${
+      className={`relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 select-none group min-w-[72px] max-w-[82px] sm:max-w-[88px] md:max-w-[96px] ${
         isSwapSource
           ? 'scale-110 z-30 ring-2 ring-yellow-400 rounded-lg shadow-xl'
           : isSwapTargetEligible
@@ -177,11 +177,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
       {/* Value / Points Plate (Bottom half) - Price and Points side-by-side */}
       <div
-        className="w-full text-center px-1 md:px-1.5 py-[1px] md:py-0.5 rounded-b text-[9.5px] sm:text-[10px] md:text-[11px] font-extrabold border-x border-b tracking-tight transition-colors bg-slate-900/95 text-slate-200 border-slate-800 flex items-center justify-center gap-1"
+        className="w-full text-center px-0.5 sm:px-1 py-[1.5px] md:py-0.5 rounded-b text-[8.5px] sm:text-[9.5px] md:text-[10.5px] font-extrabold border-x border-b tracking-tight transition-colors bg-slate-900/95 text-slate-200 border-slate-800 flex items-center justify-center gap-1 whitespace-nowrap overflow-hidden"
       >
-        <PlayerPriceBadge player={player} className="text-[9px] sm:text-[9.5px]" />
-        <span className="text-slate-500 font-normal text-[8px]">•</span>
-        <span className="font-mono text-emerald-400 font-bold">{pts}pts</span>
+        <PlayerPriceBadge player={player} className="text-[8px] sm:text-[9px]" />
+        <span className="text-slate-600 font-normal text-[7px] select-none">•</span>
+        <span className="font-mono text-emerald-400 font-bold shrink-0">{pts}pts</span>
       </div>
     </div>
   );
