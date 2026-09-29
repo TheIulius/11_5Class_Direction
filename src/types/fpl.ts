@@ -98,6 +98,15 @@ export interface Fixture {
   completedAt?: string;
   venue?: Venue;
   goalScorers?: MatchGoal[];
+  mvpPlayerIds?: string[];
+  mvpBonus?: Record<string, number>;
+  playerMinutes?: Record<string, number>;
+  yellowCards?: string[];
+  redCards?: string[];
+  penaltiesSaved?: Record<string, number>;
+  penaltiesMissed?: Record<string, number>;
+  playerAssists?: Record<string, number>;
+  playerSaves?: Record<string, number>;
 }
 
 export interface LeagueMember {

@@ -2936,6 +2936,8 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
     redCards,
     penaltiesSaved,
     penaltiesMissed,
+    playerAssists,
+    playerSaves,
     venue,
   } = req.body;
 
@@ -2952,6 +2954,15 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
   fixture.isLive = false;
   fixture.venue = venue || 'parki';
   fixture.goalScorers = goalScorers || [];
+  fixture.mvpPlayerIds = mvpPlayerIds || [];
+  fixture.mvpBonus = req.body.mvpBonus || {};
+  fixture.playerMinutes = playerMinutes || {};
+  fixture.yellowCards = yellowCards || [];
+  fixture.redCards = redCards || [];
+  fixture.penaltiesSaved = penaltiesSaved || {};
+  fixture.penaltiesMissed = penaltiesMissed || {};
+  fixture.playerAssists = playerAssists || {};
+  fixture.playerSaves = playerSaves || {};
 
   // Determine which players are on each team
   const homePlayers = Object.values(data.players).filter(
@@ -2962,9 +2973,9 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
   );
   const allMatchPlayers = [...homePlayers, ...awayPlayers];
 
-  // Tally goals, assists, own goals per player from goalScorers array
+  // Tally goals, assists, own goals per player from goalScorers array and playerAssists
   const goalCount: Record<string, number> = {};
-  const assistCount: Record<string, number> = {};
+  const assistCount: Record<string, number> = { ...(playerAssists || {}) };
   const ownGoalCount: Record<string, number> = {};
 
   (goalScorers || []).forEach((g: any) => {
@@ -2973,7 +2984,7 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
     } else {
       goalCount[g.playerId] = (goalCount[g.playerId] || 0) + 1;
     }
-    if (g.assistPlayerId) {
+    if (g.assistPlayerId && (!playerAssists || playerAssists[g.assistPlayerId] === undefined)) {
       assistCount[g.assistPlayerId] = (assistCount[g.assistPlayerId] || 0) + 1;
     }
   });
@@ -3022,6 +3033,7 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
       isMVP: isMVP,
       bonus: bonus,
       mvpRank: mvpRank,
+      saves: playerSaves?.[player.id] || 0,
     };
 
     player.gwStats[gw] = stats;

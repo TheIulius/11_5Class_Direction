@@ -499,6 +499,8 @@ export async function adminSaveMatchEventsApi(payload: {
   redCards: string[];
   penaltiesSaved: Record<string, number>;
   penaltiesMissed: Record<string, number>;
+  playerAssists?: Record<string, number>;
+  playerSaves?: Record<string, number>;
   venue: 'parki' | 'one_price';
 }) {
   const res = await fetch(`${API_BASE}/api/admin/match-events`, {

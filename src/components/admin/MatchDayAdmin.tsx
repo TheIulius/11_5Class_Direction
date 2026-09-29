@@ -178,27 +178,144 @@ export const MatchDayAdmin: React.FC = () => {
 
   const handleSelectFixture = (fId: string) => {
     const f = fixtures.find((x) => x.id === fId);
+    if (!f) return;
     setSelectedFixtureId(fId);
-    setHomeScore(f?.homeScore || 0);
-    setAwayScore(f?.awayScore || 0);
-    setVenue(f?.venue === 'one_price' ? 'one_price' : 'delisi');
-    setGoals(
-      (f?.goalScorers || []).map((g) => ({
-        ...g,
-        team: 'home',
-      }))
-    );
-    setDefaultMinutes(30);
-    setMvpRanking([null, null, null]);
-    setPlayerMinutes({});
-    setYellowCards([]);
-    setRedCards([]);
-    setPenaltiesSaved({});
-    setPenaltiesMissed({});
-    setPlayerAssists({});
-    setPlayerSaves({});
-    setMatchSeconds(0);
-    setIsTimerRunning(false);
+    setHomeScore(f.homeScore || 0);
+    setAwayScore(f.awayScore || 0);
+    setVenue(f.venue === 'one_price' ? 'one_price' : (f.venue || 'delisi'));
+
+    const homeClubId = f.homeClubId;
+    const awayClubId = f.awayClubId;
+
+    const getPlayerTeam = (playerId: string): 'home' | 'away' => {
+      const pl = players[playerId];
+      if (!pl) return 'home';
+      const cId = pl.clubId === 'SCH' ? 'SCH_11_5' : pl.clubId;
+      const awayId = awayClubId === 'SCH' ? 'SCH_11_5' : awayClubId;
+      return cId === awayId ? 'away' : 'home';
+    };
+
+    const loadedGoals: (MatchGoal & { team: 'home' | 'away' })[] = (f.goalScorers || []).map((g) => ({
+      ...g,
+      team: getPlayerTeam(g.playerId),
+    }));
+    setGoals(loadedGoals);
+
+    const all = Object.values(players);
+    const fixturePlayers = all.filter((p) => {
+      const cId = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+      return (
+        cId === homeClubId ||
+        cId === awayClubId ||
+        (homeClubId === 'SCH_11_5' && cId === 'SCH') ||
+        (awayClubId === 'SCH_11_5' && cId === 'SCH') ||
+        (homeClubId === 'SCH' && cId === 'SCH_11_5') ||
+        (awayClubId === 'SCH' && cId === 'SCH_11_5')
+      );
+    });
+
+    const initialMinutes: Record<string, number> = { ...(f.playerMinutes || {}) };
+    for (const p of fixturePlayers) {
+      const statMins = p.gwStats?.[f.gameweek]?.minutes ?? p.gwStats?.[currentGW]?.minutes;
+      if (initialMinutes[p.id] === undefined && typeof statMins === 'number' && statMins > 0) {
+        initialMinutes[p.id] = statMins;
+      }
+    }
+    for (const g of loadedGoals) {
+      if (!initialMinutes[g.playerId]) initialMinutes[g.playerId] = 30;
+      if (g.assistPlayerId && !initialMinutes[g.assistPlayerId]) initialMinutes[g.assistPlayerId] = 30;
+    }
+    setPlayerMinutes(initialMinutes);
+
+    const initialAssists: Record<string, number> = { ...(f.playerAssists || {}) };
+    for (const g of loadedGoals) {
+      if (g.assistPlayerId) {
+        const goalAssists = loadedGoals.filter((x) => x.assistPlayerId === g.assistPlayerId).length;
+        initialAssists[g.assistPlayerId] = Math.max(initialAssists[g.assistPlayerId] || 0, goalAssists);
+      }
+    }
+    for (const p of fixturePlayers) {
+      const statAssists = p.gwStats?.[f.gameweek]?.assists ?? p.gwStats?.[currentGW]?.assists;
+      if (typeof statAssists === 'number' && statAssists > 0) {
+        initialAssists[p.id] = Math.max(initialAssists[p.id] || 0, statAssists);
+      }
+    }
+    setPlayerAssists(initialAssists);
+
+    const initialYellows: string[] = Array.isArray(f.yellowCards) ? [...f.yellowCards] : [];
+    const initialReds: string[] = Array.isArray(f.redCards) ? [...f.redCards] : [];
+    for (const p of fixturePlayers) {
+      const statYellow = p.gwStats?.[f.gameweek]?.yellowCards ?? p.gwStats?.[currentGW]?.yellowCards;
+      const statRed = p.gwStats?.[f.gameweek]?.redCards ?? p.gwStats?.[currentGW]?.redCards;
+      if (statYellow && statYellow > 0 && !initialYellows.includes(p.id)) {
+        initialYellows.push(p.id);
+      }
+      if (statRed && statRed > 0 && !initialReds.includes(p.id)) {
+        initialReds.push(p.id);
+      }
+    }
+    setYellowCards(initialYellows);
+    setRedCards(initialReds);
+
+    const initialPenSaved: Record<string, number> = { ...(f.penaltiesSaved || {}) };
+    const initialPenMissed: Record<string, number> = { ...(f.penaltiesMissed || {}) };
+    for (const p of fixturePlayers) {
+      const statSaved = p.gwStats?.[f.gameweek]?.penaltiesSaved ?? p.gwStats?.[currentGW]?.penaltiesSaved;
+      const statMissed = p.gwStats?.[f.gameweek]?.penaltiesMissed ?? p.gwStats?.[currentGW]?.penaltiesMissed;
+      if (typeof statSaved === 'number' && statSaved > 0 && initialPenSaved[p.id] === undefined) {
+        initialPenSaved[p.id] = statSaved;
+      }
+      if (typeof statMissed === 'number' && statMissed > 0 && initialPenMissed[p.id] === undefined) {
+        initialPenMissed[p.id] = statMissed;
+      }
+    }
+    setPenaltiesSaved(initialPenSaved);
+    setPenaltiesMissed(initialPenMissed);
+
+    const initialSaves: Record<string, number> = { ...(f.playerSaves || {}) };
+    for (const p of fixturePlayers) {
+      const statSaves = p.gwStats?.[f.gameweek]?.saves ?? p.gwStats?.[currentGW]?.saves;
+      if (typeof statSaves === 'number' && statSaves > 0 && initialSaves[p.id] === undefined) {
+        initialSaves[p.id] = statSaves;
+      }
+    }
+    setPlayerSaves(initialSaves);
+
+    const initialMvp: (string | null)[] = [null, null, null];
+    if (Array.isArray(f.mvpPlayerIds)) {
+      if (f.mvpPlayerIds[0]) initialMvp[0] = f.mvpPlayerIds[0];
+      if (f.mvpPlayerIds[1]) initialMvp[1] = f.mvpPlayerIds[1];
+      if (f.mvpPlayerIds[2]) initialMvp[2] = f.mvpPlayerIds[2];
+    }
+    for (const p of fixturePlayers) {
+      const stat = p.gwStats?.[f.gameweek] || p.gwStats?.[currentGW];
+      if (!stat) continue;
+      if (stat.mvpRank === 1 || stat.bonus === 3) {
+        initialMvp[0] = p.id;
+      } else if (stat.mvpRank === 2 || stat.bonus === 2) {
+        initialMvp[1] = p.id;
+      } else if (stat.mvpRank === 3 || stat.bonus === 1) {
+        initialMvp[2] = p.id;
+      } else if (stat.isMVP && !initialMvp.includes(p.id)) {
+        const emptyIdx = initialMvp.indexOf(null);
+        if (emptyIdx !== -1) initialMvp[emptyIdx] = p.id;
+      }
+    }
+    setMvpRanking(initialMvp);
+
+    const minutesValues = Object.values(initialMinutes);
+    const maxPlayedMinutes = minutesValues.length > 0 ? Math.max(...minutesValues) : 30;
+    const resolvedDefaultMins = maxPlayedMinutes > 0 ? maxPlayedMinutes : 30;
+    setDefaultMinutes(resolvedDefaultMins);
+
+    if (f.isFinished) {
+      setMatchSeconds(resolvedDefaultMins * 60);
+      setIsTimerRunning(false);
+    } else {
+      setMatchSeconds(0);
+      setIsTimerRunning(false);
+    }
+
     setActiveTeamTab('home');
     setActiveMvpPickerPlayerId(null);
     setActiveMorePlayerId(null);
@@ -533,6 +650,12 @@ export const MatchDayAdmin: React.FC = () => {
   const handleSave = async () => {
     if (!fixture) return;
 
+    const mvpPlayerIds = [mvpRanking[0], mvpRanking[1], mvpRanking[2]].filter(Boolean) as string[];
+    const mvpBonus: Record<string, number> = {};
+    if (mvpRanking[0]) mvpBonus[mvpRanking[0]] = 3;
+    if (mvpRanking[1]) mvpBonus[mvpRanking[1]] = 2;
+    if (mvpRanking[2]) mvpBonus[mvpRanking[2]] = 1;
+
     // 1. Update Fixture Details
     await updateFixture(fixture.id, {
       homeScore,
@@ -547,13 +670,16 @@ export const MatchDayAdmin: React.FC = () => {
         minute: g.minute,
         isOwnGoal: g.isOwnGoal,
       })),
+      mvpPlayerIds,
+      mvpBonus,
+      playerMinutes,
+      yellowCards,
+      redCards,
+      penaltiesSaved,
+      penaltiesMissed,
+      playerAssists,
+      playerSaves,
     });
-
-    const mvpPlayerIds = [mvpRanking[0], mvpRanking[1], mvpRanking[2]].filter(Boolean) as string[];
-    const mvpBonus: Record<string, number> = {};
-    if (mvpRanking[0]) mvpBonus[mvpRanking[0]] = 3;
-    if (mvpRanking[1]) mvpBonus[mvpRanking[1]] = 2;
-    if (mvpRanking[2]) mvpBonus[mvpRanking[2]] = 1;
 
     // Try batch endpoint on backend
     try {
@@ -575,6 +701,8 @@ export const MatchDayAdmin: React.FC = () => {
         redCards,
         penaltiesSaved,
         penaltiesMissed,
+        playerAssists,
+        playerSaves,
       });
     } catch (err: any) {
       console.warn('Backend match-events error, fallback to context update:', err.message);
