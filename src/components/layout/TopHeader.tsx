@@ -17,6 +17,8 @@ const DESKTOP_TABS: TabItem[] = [
   { id: 'dev', label: 'Dev Mode', icon: Wrench },
 ];
 
+import { hasManagerSeenLatestUpdate } from '../../data/updateNotes';
+
 export const TopHeader: React.FC = () => {
   const {
     currentGW,
@@ -29,6 +31,7 @@ export const TopHeader: React.FC = () => {
     authUser,
     setIsAuthModalOpen,
     setIsRulesModalOpen,
+    openRulesModal,
     leagues,
     currentManager,
     theme,
@@ -102,13 +105,16 @@ export const TopHeader: React.FC = () => {
         <div className="flex items-center gap-1.5 md:gap-2">
           {/* Rules & Scoring System Modal Button */}
           <button
-            onClick={() => setIsRulesModalOpen(true)}
-            className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/[0.09] cursor-pointer"
+            onClick={() => openRulesModal('rules')}
+            className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/[0.09] cursor-pointer relative"
             title="ტურნირის წესები და ქულები / Official Rules & Scoring"
             aria-label="Tournament Rules"
           >
             <BookOpen className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
             <span className="font-bold text-[11px] sm:text-xs">წესები</span>
+            {authUser?.id && !hasManagerSeenLatestUpdate(authUser.id) && (
+              <span className="w-2 h-2 rounded-full bg-amber-400 ring-2 ring-slate-900 animate-pulse shrink-0" title="ახალი განახლება!" />
+            )}
           </button>
 
           {/* Dedicated Managers Portal Button (Admins Only) */}

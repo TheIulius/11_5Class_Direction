@@ -10,9 +10,10 @@ import { ManagersView } from './components/views/ManagersView';
 import { AdminPortal } from './components/admin/AdminPortal';
 import { AuthLandingView } from './components/auth/AuthLandingView';
 import { PendingApprovalOverlay } from './components/auth/PendingApprovalOverlay';
+import { UpdateNotesModal } from './components/common/UpdateNotesModal';
 
 const AppContent: React.FC = () => {
-  const { activeTab, authUser, isModerator } = useFPL();
+  const { activeTab, authUser, isModerator, openRulesModal } = useFPL();
 
   if (!authUser) {
     return <AuthLandingView />;
@@ -37,6 +38,7 @@ const AppContent: React.FC = () => {
         {activeTab === 'managers' && (isModerator ? <ManagersView /> : <PickTeamView />)}
         {activeTab === 'dev' && (isModerator ? <AdminPortal /> : <PickTeamView />)}
       </MobileContainer>
+      <UpdateNotesModal onOpenRulesHistory={() => openRulesModal('updates')} />
     </div>
   );
 };

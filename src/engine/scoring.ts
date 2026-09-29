@@ -19,7 +19,7 @@ import { Player, PlayerStats, Position, SquadPlayer, ChipType } from '../types/f
  *    red card        → -3
  *    own goal        → -3
  *
- *  One Price Stadium: goals, assists, MVP each reduced by 1 point.
+ *  One Price Stadium: goals and MVP reduced by 1 point, assists reduced by 2 points (+1 pt).
  */
 export function calculatePlayerPoints(
   position: Position,
@@ -56,8 +56,8 @@ export function calculatePlayerPoints(
     points += goals * goalPts;
   }
 
-  // 3. Assists (KCL: +3 all positions, One Price Stadium: +2)
-  const assistPts = isOnePriceStadium ? 2 : 3;
+  // 3. Assists (KCL: +3 all positions, One Price Stadium: -2 pts reduction = +1 pt)
+  const assistPts = isOnePriceStadium ? 1 : 3;
   points += assists * assistPts;
 
   // 4. Clean sheets (KCL: must play 20+ minutes)

@@ -18,6 +18,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
     setIsAuthModalOpen,
     isRulesModalOpen,
     setIsRulesModalOpen,
+    rulesModalTab,
     activeTab,
   } = useFPL();
 
@@ -66,6 +67,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
       <RulesModal
         isOpen={isRulesModalOpen}
         onClose={() => setIsRulesModalOpen(false)}
+        initialTab={rulesModalTab}
       />
     </div>
   );
