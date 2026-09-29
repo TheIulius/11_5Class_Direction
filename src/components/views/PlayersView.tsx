@@ -370,6 +370,16 @@ export const PlayersView: React.FC = () => {
         </div>
       </div>
 
+      {/* Photo encouragement banner */}
+      <div className="p-3 bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent rounded-2xl border border-sky-500/30 text-xs flex items-center justify-between gap-2 text-sky-800 dark:text-sky-200 shadow-xs">
+        <div className="flex items-center gap-2 min-w-0">
+          <Camera className="w-4 h-4 text-sky-500 shrink-0" />
+          <span className="font-bold tracking-tight">
+            💡 tip: you can add photos to players now! Tap any player to upload or request.
+          </span>
+        </div>
+      </div>
+
       {/* ========================================================================= */}
       {/* CLASSES / CALENDAR VIEW                                                   */}
       {/* ========================================================================= */}
@@ -721,6 +731,11 @@ export const PlayersView: React.FC = () => {
                       <span className="text-slate-400">
                         {enrichedSelectedPlayer.ownershipPercent}% Owned
                       </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 mt-1.5 text-[10.5px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2.5 py-1 rounded-xl border border-sky-500/20 w-fit">
+                      <Camera className="w-3.5 h-3.5 shrink-0" />
+                      <span>tip: you can add photos to players now!</span>
                     </div>
                   </div>
                 </div>

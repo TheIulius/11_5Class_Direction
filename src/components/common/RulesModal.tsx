@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Trophy,
   SlidersHorizontal,
+  ChevronDown,
 } from 'lucide-react';
 import { UPDATE_NOTES, UpdateItem } from '../../data/updateNotes';
 
@@ -32,6 +33,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 }) => {
   const [lang, setLang] = useState<'geo' | 'eng'>('geo');
   const [activeTab, setActiveTab] = useState<'rules' | 'updates'>(initialTab);
+  const [expandedItemId, setExpandedItemId] = useState<string | null>('player_photos_request');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -540,29 +542,68 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         </p>
 
                         <div className="space-y-2">
-                          {release.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="p-2.5 sm:p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex items-start gap-2.5"
-                            >
-                              <div className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 shrink-0 mt-0.5">
-                                {renderItemIcon(item.icon)}
+                          {release.items.map((item) => {
+                            const isExpanded = expandedItemId === item.id;
+                            const isStandout = item.highlight;
+
+                            return (
+                              <div
+                                key={item.id}
+                                className={`rounded-xl border transition-all overflow-hidden ${
+                                  isStandout
+                                    ? 'bg-gradient-to-r from-sky-950/30 via-slate-900 to-indigo-950/20 border-sky-400/40 shadow-xs'
+                                    : isExpanded
+                                    ? 'bg-slate-900/90 border-emerald-500/30'
+                                    : 'bg-slate-950/70 border-slate-800/80 hover:border-slate-700'
+                                }`}
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => setExpandedItemId(prev => prev === item.id ? null : item.id)}
+                                  className="w-full p-2.5 sm:p-3 flex items-center justify-between gap-2 text-left cursor-pointer transition-colors"
+                                >
+                                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                                    <div className={`p-1.5 rounded-lg border shrink-0 ${
+                                      isStandout ? 'bg-sky-500/20 border-sky-400/40 text-sky-400' : 'bg-slate-900 border-slate-800'
+                                    }`}>
+                                      {renderItemIcon(item.icon)}
+                                    </div>
+                                    <span className={`font-bold text-xs truncate ${isStandout ? 'text-sky-200' : 'text-slate-200'}`}>
+                                      {lang === 'geo' ? item.titleKa : item.titleEn}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex items-center gap-1.5 shrink-0">
+                                    <span className={`text-[9px] font-mono px-1.5 py-0.2 rounded ${
+                                      isStandout ? 'bg-sky-500/20 text-sky-300 border border-sky-400/30' : 'bg-slate-800 text-slate-400'
+                                    }`}>
+                                      {lang === 'geo' ? item.badgeKa : item.badgeEn}
+                                    </span>
+                                    <ChevronDown
+                                      className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${
+                                        isExpanded ? 'rotate-180 text-emerald-400' : ''
+                                      }`}
+                                    />
+                                  </div>
+                                </button>
+
+                                <AnimatePresence initial={false}>
+                                  {isExpanded && (
+                                    <motion.div
+                                      initial={{ height: 0, opacity: 0 }}
+                                      animate={{ height: 'auto', opacity: 1 }}
+                                      exit={{ height: 0, opacity: 0 }}
+                                      transition={{ duration: 0.18, ease: 'easeInOut' }}
+                                    >
+                                      <div className="px-3 pb-3 pt-0 text-[11px] text-slate-300 leading-relaxed border-t border-slate-800/40 font-sans">
+                                        {lang === 'geo' ? item.descriptionKa : item.descriptionEn}
+                                      </div>
+                                    </motion.div>
+                                  )}
+                                </AnimatePresence>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-1 mb-0.5 flex-wrap">
-                                  <span className="font-bold text-xs text-slate-200">
-                                    {lang === 'geo' ? item.titleKa : item.titleEn}
-                                  </span>
-                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
-                                    {lang === 'geo' ? item.badgeKa : item.badgeEn}
-                                  </span>
-                                </div>
-                                <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-                                  {lang === 'geo' ? item.descriptionKa : item.descriptionEn}
-                                </p>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                     ))}

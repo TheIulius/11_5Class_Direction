@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from './KitJersey';
 import { CLUBS } from '../../data/clubs';
-import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, ChevronDown } from 'lucide-react';
+import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, ChevronDown, Camera, Check } from 'lucide-react';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import { suggestPlayerPhotoApi } from '../../services/api';
 
 interface PlayerActionSheetProps {
   playerId: string | null;
@@ -24,6 +25,7 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
     isSquadLocked,
     reorderBenchPlayer,
     playerOwnership,
+    authUser,
   } = useFPL();
 
   const [showOwnershipList, setShowOwnershipList] = useState(false);
@@ -46,6 +48,49 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
 
   const ownership = playerId && playerOwnership ? playerOwnership[playerId] : null;
   const ownershipPercent = ownership?.percent ?? (player?.selectedByPercent ?? 0);
+
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const [photoStatus, setPhotoStatus] = useState<string | null>(null);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !player) return;
+    try {
+      setPhotoStatus('იტვირთება...');
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 400;
+          if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+          const res = await suggestPlayerPhotoApi(player.id, dataUrl, authUser?.username);
+          if (res?.photoUrl) player.photoUrl = res.photoUrl;
+          setPhotoStatus('მოთხოვნა გაიგზავნა! ადმინი მალე განიხილავს.');
+          setTimeout(() => setPhotoStatus(null), 4000);
+        };
+        img.src = ev.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    } catch (err: any) {
+      setPhotoStatus(err?.message || 'ატვირთვა ვერ მოხერხდა');
+      setTimeout(() => setPhotoStatus(null), 4000);
+    }
+  };
 
   const handleStartSwap = () => {
     if (isSquadLocked) return;
@@ -122,6 +167,36 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
           >
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Photo Tip & Upload Banner */}
+        <div className="my-2.5 p-2.5 rounded-2xl bg-sky-500/10 border border-sky-500/25 flex items-center justify-between gap-2 shadow-xs">
+          <div className="flex items-center gap-2 min-w-0">
+            <Camera className="w-4 h-4 text-sky-500 shrink-0" />
+            <div className="text-[11px] leading-tight">
+              <span className="font-bold text-sky-600 dark:text-sky-300 block">
+                tip: you can add photos to players now!
+              </span>
+              <span className="text-[10px] text-slate-500 dark:text-slate-400">
+                {photoStatus || (player.photoUrl ? 'გსურთ ფოტოს შეცვლა?' : 'მოითხოვეთ მოთამაშის რეალური ფოტო')}
+              </span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => photoInputRef.current?.click()}
+            className="px-2.5 py-1 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-[10px] transition-colors shrink-0 shadow-xs cursor-pointer flex items-center gap-1"
+          >
+            <Camera className="w-3 h-3" />
+            <span>{player.photoUrl ? 'შეცვლა' : 'ატვირთვა'}</span>
+          </button>
+          <input
+            type="file"
+            ref={photoInputRef}
+            onChange={handlePhotoUpload}
+            accept="image/*"
+            className="hidden"
+          />
         </div>
 
         {/* Match Gameweek Performance Card */}

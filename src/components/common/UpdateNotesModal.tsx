@@ -11,6 +11,7 @@ import {
   Clock,
   Shield,
   SlidersHorizontal,
+  ChevronDown,
   ChevronRight,
   BookOpen,
   CheckCircle2,
@@ -35,9 +36,12 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
   onClose: controlledOnClose,
   onOpenRulesHistory,
 }) => {
-  const { authUser, setIsRulesModalOpen } = useFPL();
+  const { authUser, setIsRulesModalOpen, setActiveTab } = useFPL();
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  // Accordion state: Set of opened item IDs. By default, the standout photo feature is open!
+  const [expandedId, setExpandedId] = useState<string | null>('player_photos_request');
 
   useEffect(() => {
     setMounted(true);
@@ -50,7 +54,6 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
 
     const isSeen = hasManagerSeenLatestUpdate(authUser.id);
     if (!isSeen) {
-      // Small delay for smooth entry after page load
       const timer = setTimeout(() => {
         setInternalIsOpen(true);
       }, 700);
@@ -78,6 +81,10 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
     } else {
       setIsRulesModalOpen(true);
     }
+  };
+
+  const toggleExpand = (id: string) => {
+    setExpandedId((prev) => (prev === id ? null : id));
   };
 
   useEffect(() => {
@@ -165,42 +172,111 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
               </button>
             </div>
 
-            {/* Sub-header intro */}
-            <div className="px-4 py-2.5 bg-slate-950/50 border-b border-slate-800/60 text-[11px] text-slate-300 leading-snug shrink-0">
-              გამარჯობა, <strong className="text-emerald-400">{authUser?.username ? `@${authUser.username}` : 'მენეჯერო'}</strong>! თქვენი ბოლო შესვლის შემდეგ ვებსაიტზე შევიდა მნიშვნელოვანი სიახლეები:
+            {/* Sub-header instruction */}
+            <div className="px-4 py-2 bg-slate-950/60 border-b border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+              <span>დააჭირეთ ნებისმიერ სიახლეს დეტალების სანახავად:</span>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold">5 სიახლე</span>
             </div>
 
-            {/* Scrollable Items List */}
-            <div className="p-3.5 sm:p-5 flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-3">
-              {LATEST_UPDATE.items.map((item) => (
-                <div
-                  key={item.id}
-                  className={`p-3 sm:p-3.5 rounded-2xl border transition-all ${
-                    item.highlight
-                      ? 'bg-gradient-to-br from-slate-900 via-slate-900/90 to-emerald-950/20 border-emerald-500/30 shadow-xs'
-                      : 'bg-slate-950/50 border-slate-800/70'
-                  }`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <div className="p-2 rounded-xl bg-slate-800/80 border border-slate-700/60 shrink-0 mt-0.5">
-                      {renderIcon(item.icon)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1 flex-wrap">
-                        <h4 className="text-xs sm:text-[13px] font-bold text-white tracking-tight">
+            {/* Click-to-Expand Accordion Items List */}
+            <div className="p-3 sm:p-4 flex-1 min-h-0 overflow-y-auto overscroll-contain space-y-2">
+              {LATEST_UPDATE.items.map((item) => {
+                const isExpanded = expandedId === item.id;
+                const isStandout = item.highlight;
+
+                return (
+                  <div
+                    key={item.id}
+                    className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                      isStandout
+                        ? 'bg-gradient-to-r from-sky-950/30 via-slate-900 to-indigo-950/20 border-sky-400/50 shadow-md shadow-sky-500/5'
+                        : isExpanded
+                        ? 'bg-slate-900/90 border-emerald-500/30'
+                        : 'bg-slate-950/60 border-slate-800/70 hover:border-slate-700 hover:bg-slate-900/50'
+                    }`}
+                  >
+                    {/* Clickable Header Bar */}
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand(item.id)}
+                      className="w-full p-3 sm:p-3.5 flex items-center justify-between gap-2.5 text-left cursor-pointer transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                        <div
+                          className={`p-1.5 rounded-xl border shrink-0 ${
+                            isStandout
+                              ? 'bg-sky-500/20 border-sky-400/40 text-sky-400'
+                              : 'bg-slate-800/80 border-slate-700/60'
+                          }`}
+                        >
+                          {renderIcon(item.icon)}
+                        </div>
+
+                        <span
+                          className={`text-xs sm:text-[13px] font-bold tracking-tight truncate ${
+                            isStandout ? 'text-sky-200 font-black' : 'text-slate-200'
+                          }`}
+                        >
                           {item.titleKa}
-                        </h4>
-                        <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700/60">
-                          {item.badgeKa}
                         </span>
                       </div>
-                      <p className="text-[11.5px] text-slate-300 leading-relaxed font-sans">
-                        {item.descriptionKa}
-                      </p>
-                    </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span
+                          className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded-md ${
+                            isStandout
+                              ? 'bg-sky-500/20 text-sky-300 border border-sky-400/30 font-black'
+                              : 'bg-slate-800 text-slate-400 border border-slate-700/60'
+                          }`}
+                        >
+                          {item.badgeKa}
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                            isExpanded ? 'rotate-180 text-emerald-400' : ''
+                          }`}
+                        />
+                      </div>
+                    </button>
+
+                    {/* Expandable Body */}
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.18, ease: 'easeInOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="px-3.5 pb-3.5 pt-0.5 text-[11.5px] text-slate-300 leading-relaxed border-t border-slate-800/40 font-sans">
+                            {item.descriptionKa}
+
+                            {isStandout && (
+                              <div className="mt-2.5 pt-2 border-t border-sky-500/20 flex items-center justify-between gap-2">
+                                <span className="text-[10px] text-sky-300/90 font-medium">
+                                  💡 დააჭირეთ მოთამაშეს მის ბარათზე და ატვირთეთ ფოტო!
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDismiss();
+                                    setActiveTab('players');
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-[10px] transition-colors shrink-0 shadow-xs"
+                                >
+                                  Players ტაბი →
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Footer Actions */}

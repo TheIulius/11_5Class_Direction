@@ -12,6 +12,7 @@ import {
   X,
   Clock,
   Activity,
+  Camera,
 } from 'lucide-react';
 
 export interface ClassGridViewProps {
@@ -201,6 +202,10 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                   <span className="text-slate-400">
                     Form: {detailPlayer.form}
                   </span>
+                </div>
+                <div className="flex items-center gap-1.5 mt-1 text-[10px] font-semibold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded-lg border border-sky-500/20 w-fit">
+                  <Camera className="w-3 h-3 shrink-0" />
+                  <span>tip: you can add photos to players now!</span>
                 </div>
               </div>
             </div>

@@ -85,6 +85,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div
       onClick={handleClick}
+      title="tip: you can add photos to players now!"
       className={`relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 select-none group min-w-[72px] max-w-[82px] sm:max-w-[88px] md:max-w-[96px] ${
         isSwapSource
           ? 'scale-110 z-30 ring-2 ring-yellow-400 rounded-lg shadow-xl'
