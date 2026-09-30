@@ -44,7 +44,10 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
   const club = CLUBS[player.clubId];
   const stats = player.gwStats[currentGW];
   const breakdown = calculationResult.playerPointsBreakdown[playerId];
-  const currentPts = breakdown ? breakdown.finalPoints : (stats ? player.gwPoints : 0);
+  const isScoringActive = (squadPlayer?.isStarter ?? false) || breakdown?.isAutoSubIn || calculationResult.isBenchBoost;
+  const currentPts = breakdown
+    ? (isScoringActive ? breakdown.finalPoints : breakdown.rawPoints)
+    : (stats ? player.gwPoints : 0);
 
   const ownership = playerId && playerOwnership ? playerOwnership[playerId] : null;
   const ownershipPercent = ownership?.percent ?? (player?.selectedByPercent ?? 0);

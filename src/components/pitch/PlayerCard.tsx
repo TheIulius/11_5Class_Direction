@@ -46,10 +46,13 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
   // Breakdown for points
   const breakdown = calculationResult.playerPointsBreakdown[playerId];
-  const pts = breakdown ? breakdown.finalPoints : (player.gwStats[currentGW] ? player.gwPoints : 0);
   const isAutoSubIn = breakdown?.isAutoSubIn;
   const isAutoSubOut = breakdown?.isAutoSubOut;
   const isTripleCap = isCaptain && calculationResult.isTripleCaptain;
+  const isScoringActive = isStarter || isAutoSubIn || calculationResult.isBenchBoost;
+  const pts = breakdown
+    ? (isScoringActive ? breakdown.finalPoints : breakdown.rawPoints)
+    : (player.gwStats[currentGW] ? player.gwPoints : 0);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();

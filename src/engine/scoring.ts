@@ -296,7 +296,11 @@ export function calculateGameweekSquadPoints(
     if (!fixtures || fixtures.length === 0) return false;
     const normClub = player.clubId === 'SCH' ? 'SCH_11_5' : player.clubId;
     const fix = fixtures.find(
-      (f) => f.homeClubId === normClub || f.awayClubId === normClub
+      (f) =>
+        (f.gameweek == null || Number(f.gameweek) === Number(currentGW)) &&
+        (f.homeClubId === normClub ||
+          f.awayClubId === normClub ||
+          (normClub === 'SCH_11_5' && (f.homeClubId === 'SCH' || f.awayClubId === 'SCH')))
     );
     return fix?.venue === 'one_price';
   };
@@ -330,7 +334,7 @@ export function calculateGameweekSquadPoints(
   if (typeof isGWFinished === 'boolean') {
     gwEnded = isGWFinished;
   } else if (fixtures && fixtures.length > 0) {
-    const gwFixtures = fixtures.filter((f) => f.gameweek === currentGW);
+    const gwFixtures = fixtures.filter((f) => Number(f.gameweek) === Number(currentGW));
     gwEnded = gwFixtures.length > 0 && gwFixtures.every((f) => Boolean(f.isFinished));
   }
 

@@ -256,7 +256,8 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
     data.currentGW,
     manager.squad.activeChip,
     manager.squad.transfersMadeThisGW,
-    manager.squad.freeTransfers
+    manager.squad.freeTransfers,
+    data.fixtures
   );
 
   res.json({
@@ -1325,6 +1326,7 @@ function recalculateAllManagersLeaguePoints(data: any) {
         const p = data.players?.[sp.playerId];
         if (!p) return null;
         const bd = currentCalc.playerPointsBreakdown?.[sp.playerId];
+        const isScoringActive = sp.isStarter || bd?.isAutoSubIn || currentCalc.isBenchBoost;
         return {
           playerId: sp.playerId,
           webName: p.webName,
@@ -1334,7 +1336,7 @@ function recalculateAllManagersLeaguePoints(data: any) {
           isCaptain: Boolean(sp.isCaptain),
           isViceCaptain: Boolean(sp.isViceCaptain),
           benchOrder: sp.benchOrder || 0,
-          points: bd ? bd.finalPoints : 0,
+          points: bd ? (isScoringActive ? bd.finalPoints : bd.rawPoints) : (p.gwStats?.[currentGW] ? p.gwPoints : 0),
         };
       })
       .filter(Boolean);

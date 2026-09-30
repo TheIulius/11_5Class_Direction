@@ -370,7 +370,8 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                   const p = players[sp.playerId];
                   if (!p) return null;
                   const bd = calcResult.playerPointsBreakdown[sp.playerId];
-                  const pts = bd ? bd.finalPoints : 0;
+                  const isScoringActive = bd?.isAutoSubIn || calcResult.isBenchBoost;
+                  const pts = bd ? (isScoringActive ? bd.finalPoints : bd.rawPoints) : (p.gwStats[currentGW] ? p.gwPoints : 0);
                   return (
                     <div key={sp.playerId} className="flex flex-col items-center text-center">
                       <span className="text-[9px] text-slate-400 font-bold mb-0.5">
@@ -462,7 +463,11 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-600 dark:text-slate-300">GW {currentGW} Score</span>
                   <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">
-                    {sheetBreakdown ? sheetBreakdown.finalPoints : (sheetStats ? sheetPlayer.gwPoints : 0)} PTS
+                    {sheetBreakdown
+                      ? ((sheetSquadPlayer?.isStarter || sheetBreakdown.isAutoSubIn || calcResult?.isBenchBoost)
+                          ? sheetBreakdown.finalPoints
+                          : sheetBreakdown.rawPoints)
+                      : (sheetStats ? sheetPlayer.gwPoints : 0)} PTS
                   </span>
                 </div>
 

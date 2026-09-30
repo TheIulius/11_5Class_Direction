@@ -324,13 +324,13 @@ export const MatchDayAdmin: React.FC = () => {
 
   // Point values calculation based on venue
   const getGoalPoints = (pos: string) => {
-    if (pos === 'GKP') return isOnePrice ? 6 : 7;
-    if (pos === 'DEF') return isOnePrice ? 5 : 6;
-    if (pos === 'MID') return isOnePrice ? 4 : 5;
-    return isOnePrice ? 3 : 4; // FWD
+    if (pos === 'GKP') return isOnePrice ? 5 : 7;
+    if (pos === 'DEF') return isOnePrice ? 4 : 6;
+    if (pos === 'MID') return isOnePrice ? 3 : 5;
+    return isOnePrice ? 2 : 4; // FWD
   };
 
-  const getAssistPoints = () => (isOnePrice ? 2 : 3);
+  const getAssistPoints = () => (isOnePrice ? 1 : 3);
 
   // MVP Rank & Points Helpers
   const getMvpRank = (playerId: string): 1 | 2 | 3 | null => {
