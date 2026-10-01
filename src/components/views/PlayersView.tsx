@@ -213,34 +213,43 @@ export const PlayersView: React.FC = () => {
         reader.onload = (event) => {
           const img = new Image();
           img.onload = () => {
-            const canvas = document.createElement('canvas');
-            const maxSize = 280;
-            let width = img.width;
-            let height = img.height;
+            try {
+              const canvas = document.createElement('canvas');
+              const maxSize = 280;
+              let width = img.width;
+              let height = img.height;
 
-            if (width > height) {
-              if (width > maxSize) {
-                height = Math.round((height * maxSize) / width);
-                width = maxSize;
+              if (width > height) {
+                if (width > maxSize) {
+                  height = Math.round((height * maxSize) / width);
+                  width = maxSize;
+                }
+              } else {
+                if (height > maxSize) {
+                  width = Math.round((width * maxSize) / height);
+                  height = maxSize;
+                }
               }
-            } else {
-              if (height > maxSize) {
-                width = Math.round((width * maxSize) / height);
-                height = maxSize;
+
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return reject(new Error('Canvas-ის შეცდომა'));
+              ctx.drawImage(img, 0, 0, width, height);
+
+              let result = canvas.toDataURL('image/jpeg', 0.80);
+              if (result.length > 70000) {
+                result = canvas.toDataURL('image/jpeg', 0.60);
               }
+              resolve(result);
+            } catch (canvasErr: any) {
+              reject(new Error(canvasErr?.message || 'სურათის დამუშავება ვერ მოხერხდა'));
             }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return reject(new Error('Canvas error'));
-            ctx.drawImage(img, 0, 0, width, height);
-            resolve(canvas.toDataURL('image/jpeg', 0.85));
           };
-          img.onerror = reject;
+          img.onerror = () => reject(new Error('სურათის გახსნა ვერ მოხერხდა (Invalid image file)'));
           img.src = event.target?.result as string;
         };
-        reader.onerror = reject;
+        reader.onerror = () => reject(new Error('ფაილის წაკითხვა ვერ მოხერხდა'));
         reader.readAsDataURL(file);
       });
 
@@ -257,20 +266,22 @@ export const PlayersView: React.FC = () => {
           delete selectedPlayer.pendingPhotoUrl;
           setPhotoFeedback({
             type: 'success',
-            message: `Profile picture attached directly for ${selectedPlayer.name}!`,
+            message: `ფოტო დაყენდა ${selectedPlayer.name}-სთვის! (Attached directly)`,
           });
           refreshServerState();
         } else {
+          selectedPlayer.pendingPhotoUrl = res.pendingPhoto?.photoUrl || compressedDataUrl;
           setPhotoFeedback({
             type: 'success',
-            message: 'Photo submitted! Admins will review and approve it shortly.',
+            message: 'ფოტო წარმატებით გაიგზავნა! ადმინი მალე განიხილავს და დაამტკიცებს.',
           });
+          refreshServerState();
         }
       }
     } catch (err: any) {
       setPhotoFeedback({
         type: 'error',
-        message: err?.message || 'Failed to submit photo.',
+        message: err?.message || 'ფოტოს ატვირთვა ვერ მოხერხდა. გთხოვთ სცადოთ თავიდან.',
       });
     } finally {
       setIsUploadingPhoto(false);
@@ -663,13 +674,24 @@ export const PlayersView: React.FC = () => {
                 <div className="flex items-center gap-3.5">
                   {/* Avatar / Photo with Upload Button */}
                   <div className="relative group shrink-0">
-                    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border-2 border-emerald-500/50 shadow-md flex items-center justify-center">
+                    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border-2 border-emerald-500/50 shadow-md flex items-center justify-center relative">
                       {selectedPlayer.photoUrl ? (
                         <img
                           src={selectedPlayer.photoUrl}
                           alt={selectedPlayer.name}
                           className="w-full h-full object-cover"
                         />
+                      ) : selectedPlayer.pendingPhotoUrl ? (
+                        <div className="relative w-full h-full">
+                          <img
+                            src={selectedPlayer.pendingPhotoUrl}
+                            alt={selectedPlayer.name}
+                            className="w-full h-full object-cover opacity-80"
+                          />
+                          <span className="absolute bottom-0 inset-x-0 bg-amber-500/90 text-slate-950 text-[8px] font-black text-center py-0.5">
+                            ⏳ PENDING
+                          </span>
+                        </div>
                       ) : (
                         <KitJersey clubId={selectedPlayer.clubId} position={selectedPlayer.position} className="w-12 h-12" />
                       )}
@@ -695,12 +717,17 @@ export const PlayersView: React.FC = () => {
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                         Class {clubs[selectedPlayer.clubId]?.shortName || selectedPlayer.clubId.replace('SCH_', '').replace('_', '/')}
                       </span>
+                      {selectedPlayer.pendingPhotoUrl && !selectedPlayer.photoUrl && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                          ⏳ მოლოდინშია
+                        </span>
+                      )}
                       <button
                         onClick={() => fileInputRef.current?.click()}
                         className="text-[10px] font-bold text-emerald-500 hover:text-emerald-400 flex items-center gap-0.5 ml-1 cursor-pointer"
                       >
                         <Camera className="w-3 h-3" />
-                        <span>{selectedPlayer.photoUrl ? 'Change Photo' : 'Upload Photo'}</span>
+                        <span>{selectedPlayer.photoUrl ? 'Change Photo' : selectedPlayer.pendingPhotoUrl ? 'Update Photo' : 'Upload Photo'}</span>
                       </button>
 
                       {isModerator && selectedPlayer.photoUrl && (

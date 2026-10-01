@@ -16,11 +16,39 @@ export function getAuthHeaders(extra: Record<string, string> = {}): Record<strin
     if (authUserStr) {
       const user = JSON.parse(authUserStr);
       if (user?.username) {
-        headers['x-auth-username'] = user.username;
+        headers['x-auth-username'] = encodeURIComponent(user.username);
       }
     }
   } catch (e) {}
   return headers;
+}
+
+export async function safeJson<T = any>(res: Response, fallbackError = 'მოთხოვნა ვერ შესრულდა'): Promise<T> {
+  let text = '';
+  try {
+    text = await res.text();
+  } catch (e: any) {
+    throw new Error(`ქსელის შეცდომა (${res.status}): ${e?.message || fallbackError}`);
+  }
+
+  let data: any = null;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    if (!res.ok) {
+      if (res.status === 413) {
+        throw new Error('ფოტოს ზომა ძალიან დიდია. გთხოვთ აირჩიოთ უფრო მცირე ზომის ფოტო.');
+      }
+      throw new Error(`${fallbackError} (${res.status})`);
+    }
+    throw new Error('სერვერიდან მიღებულია არასწორი მონაცემები.');
+  }
+
+  if (!res.ok) {
+    throw new Error(data?.error || data?.message || `${fallbackError} (${res.status})`);
+  }
+
+  return data as T;
 }
 
 export async function authRegister(data: {
@@ -578,18 +606,14 @@ export async function suggestPlayerPhotoApi(playerId: string, photoUrl: string, 
     headers: getAuthHeaders(),
     body: JSON.stringify({ playerId, photoUrl, suggestedBy }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to submit player photo');
-  return data;
+  return safeJson(res, 'ფოტოს გაგზავნა ვერ მოხერხდა (Failed to submit player photo)');
 }
 
 export async function adminFetchPlayerPhotosApi() {
   const res = await fetch(`${API_BASE}/api/admin/player-photos`, {
     headers: getAuthHeaders(),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to fetch pending player photos');
-  return data;
+  return safeJson(res, 'ფოტოების სიის მიღება ვერ მოხერხდა (Failed to fetch pending player photos)');
 }
 
 export async function adminReviewPlayerPhotoApi(photoId: string, approve: boolean) {
@@ -598,9 +622,7 @@ export async function adminReviewPlayerPhotoApi(photoId: string, approve: boolea
     headers: getAuthHeaders(),
     body: JSON.stringify({ photoId, approve }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to review player photo');
-  return data;
+  return safeJson(res, 'ფოტოს განხილვა ვერ მოხერხდა (Failed to review player photo)');
 }
 
 export async function adminRemovePlayerPhotoApi(playerId: string) {
@@ -609,8 +631,6 @@ export async function adminRemovePlayerPhotoApi(playerId: string) {
     headers: getAuthHeaders(),
     body: JSON.stringify({ playerId }),
   });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to remove player photo');
-  return data;
+  return safeJson(res, 'ფოტოს წაშლა ვერ მოხერხდა (Failed to remove player photo)');
 }
 

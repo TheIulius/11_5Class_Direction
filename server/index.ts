@@ -15,7 +15,8 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '25mb' }));
+app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // Moderator / Admin privilege designations
 export const ADMIN_USERNAMES = ['theiulius', 'chaga'];
@@ -2346,7 +2347,12 @@ app.post('/api/player/photo/suggest', (req: Request, res: Response) => {
   // Identify submitting user from auth token or x-auth-username header
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  const usernameHeader = (req.headers['x-auth-username'] as string | undefined)?.trim();
+  const rawHeader = (req.headers['x-auth-username'] as string | undefined)?.trim();
+  let usernameHeader = rawHeader;
+  try {
+    if (rawHeader) usernameHeader = decodeURIComponent(rawHeader);
+  } catch (e) {}
+
   const user = token
     ? Object.values(data.users || {}).find((u) => u.token === token)
     : usernameHeader
@@ -2364,7 +2370,7 @@ app.post('/api/player/photo/suggest', (req: Request, res: Response) => {
   if (isAdmin) {
     player.photoUrl = photoUrl;
     delete player.pendingPhotoUrl;
-    if (data.pendingPhotos) {
+    if (Array.isArray(data.pendingPhotos)) {
       data.pendingPhotos = data.pendingPhotos.filter((p: any) => p.playerId !== playerId);
     }
     db.save();
@@ -2377,7 +2383,7 @@ app.post('/api/player/photo/suggest', (req: Request, res: Response) => {
     });
   }
 
-  if (!data.pendingPhotos) data.pendingPhotos = [];
+  if (!Array.isArray(data.pendingPhotos)) data.pendingPhotos = [];
 
   const photoEntry = {
     id: `photo_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -2416,7 +2422,12 @@ app.post('/api/admin/player-photo/remove', (req: Request, res: Response) => {
 
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  const usernameHeader = (req.headers['x-auth-username'] as string | undefined)?.trim();
+  const rawAdminHeader = (req.headers['x-auth-username'] as string | undefined)?.trim();
+  let usernameHeader = rawAdminHeader;
+  try {
+    if (rawAdminHeader) usernameHeader = decodeURIComponent(rawAdminHeader);
+  } catch (e) {}
+
   const user = token
     ? Object.values(data.users || {}).find((u) => u.token === token)
     : usernameHeader
@@ -3061,6 +3072,15 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
   recalculateAllManagersLeaguePoints(data);
   db.save();
   res.json({ success: true, fixture, players: data.players });
+});
+
+// Global JSON error handler (prevents default Express HTML error pages for payload too large, bad JSON, etc.)
+app.use((err: any, req: Request, res: Response, next: any) => {
+  console.error('[API Error]', err?.message || err);
+  if (err?.status === 413 || err?.type === 'entity.too.large') {
+    return res.status(413).json({ error: 'ფოტოს ზომა ძალიან დიდია (Photo size exceeds maximum allowed limit).' });
+  }
+  return res.status(err?.status || 500).json({ error: err?.message || 'Server error' });
 });
 
 // Static assets in production

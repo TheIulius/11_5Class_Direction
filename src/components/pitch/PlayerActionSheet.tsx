@@ -26,6 +26,7 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
     reorderBenchPlayer,
     playerOwnership,
     authUser,
+    refreshServerState,
   } = useFPL();
 
   const [showOwnershipList, setShowOwnershipList] = useState(false);
@@ -58,40 +59,72 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !player) return;
+
+    if (!file.type.startsWith('image/')) {
+      setPhotoStatus('გთხოვთ აირჩიოთ სურათის ფაილი');
+      setTimeout(() => setPhotoStatus(null), 4000);
+      return;
+    }
+
     try {
       setPhotoStatus('იტვირთება...');
       const reader = new FileReader();
       reader.onload = async (ev) => {
         const img = new Image();
         img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          let width = img.width;
-          let height = img.height;
-          const maxDim = 400;
-          if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-          } else if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          try {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            const maxDim = 280;
+            if (width > height && width > maxDim) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else if (height > maxDim) {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.80);
+            if (dataUrl.length > 70000) {
+              dataUrl = canvas.toDataURL('image/jpeg', 0.60);
+            }
 
-          const res = await suggestPlayerPhotoApi(player.id, dataUrl, authUser?.username);
-          if (res?.photoUrl) player.photoUrl = res.photoUrl;
-          setPhotoStatus('მოთხოვნა გაიგზავნა! ადმინი მალე განიხილავს.');
+            const res = await suggestPlayerPhotoApi(player.id, dataUrl, authUser?.username);
+            if (res?.isAdminDirect) {
+              player.photoUrl = res.photoUrl || dataUrl;
+              delete player.pendingPhotoUrl;
+              setPhotoStatus('ფოტო წარმატებით დაემატა!');
+            } else {
+              player.pendingPhotoUrl = res?.pendingPhoto?.photoUrl || dataUrl;
+              setPhotoStatus('მოთხოვნა გაიგზავნა! ადმინი მალე განიხილავს.');
+            }
+            refreshServerState?.();
+            setTimeout(() => setPhotoStatus(null), 4000);
+          } catch (err: any) {
+            setPhotoStatus(err?.message || 'ატვირთვა ვერ მოხერხდა');
+            setTimeout(() => setPhotoStatus(null), 4000);
+          }
+        };
+        img.onerror = () => {
+          setPhotoStatus('სურათის გახსნა ვერ მოხერხდა');
           setTimeout(() => setPhotoStatus(null), 4000);
         };
         img.src = ev.target?.result as string;
+      };
+      reader.onerror = () => {
+        setPhotoStatus('ფაილის წაკითხვა ვერ მოხერხდა');
+        setTimeout(() => setPhotoStatus(null), 4000);
       };
       reader.readAsDataURL(file);
     } catch (err: any) {
       setPhotoStatus(err?.message || 'ატვირთვა ვერ მოხერხდა');
       setTimeout(() => setPhotoStatus(null), 4000);
+    } finally {
+      if (photoInputRef.current) photoInputRef.current.value = '';
     }
   };
 
@@ -141,6 +174,17 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
                 alt={player.name}
                 className="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
               />
+            ) : player.pendingPhotoUrl ? (
+              <div className="relative w-12 h-12 shrink-0">
+                <img
+                  src={player.pendingPhotoUrl}
+                  alt={player.name}
+                  className="w-12 h-12 rounded-2xl object-cover border-2 border-amber-500/40 shadow-xs opacity-80 bg-slate-100 dark:bg-slate-800"
+                />
+                <span className="absolute -top-1 -right-1 text-[8px] bg-amber-500 text-black font-black px-1 rounded-full shadow-xs">
+                  ⏳
+                </span>
+              </div>
             ) : (
               <KitJersey clubId={player.clubId} position={player.position} className="w-12 h-12 shrink-0" />
             )}

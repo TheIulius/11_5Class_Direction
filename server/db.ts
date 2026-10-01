@@ -151,6 +151,7 @@ function getDefaultData(): DatabaseSchema {
       requireActivationCode: false,
     },
     activationCodes: [],
+    pendingPhotos: [],
   };
 }
 
@@ -209,6 +210,11 @@ class Database {
 
     if (!Array.isArray(this.data.activationCodes)) {
       this.data.activationCodes = [];
+      modified = true;
+    }
+
+    if (!Array.isArray(this.data.pendingPhotos)) {
+      this.data.pendingPhotos = [];
       modified = true;
     }
 

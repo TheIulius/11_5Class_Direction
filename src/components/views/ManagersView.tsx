@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 
 export const ManagersView: React.FC = () => {
-  const { authUser, players } = useFPL();
+  const { authUser, players, refreshServerState } = useFPL();
 
   const [usersList, setUsersList] = useState<any[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
@@ -144,6 +144,7 @@ export const ManagersView: React.FC = () => {
         }
         showNotification(res.message || (approve ? 'Photo approved!' : 'Photo rejected.'));
         setPendingPhotos((prev) => prev.filter((p) => p.id !== photoId));
+        refreshServerState();
       }
     } catch (err: any) {
       showNotification(err?.message || 'Failed to review photo.');
