@@ -564,11 +564,19 @@ export const PlayersView: React.FC = () => {
                         #{idx + 1}
                       </span>
 
-                      {/* Photo / Avatar with Jersey */}
-                      <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
-                        <KitJersey clubId={p.clubId} position={p.position} photoUrl={p.photoUrl} className="w-8 h-8" />
+                      {/* Photo / Avatar */}
+                      <div className="relative w-11 h-11 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 shadow-xs">
+                        {p.photoUrl ? (
+                          <img
+                            src={p.photoUrl}
+                            alt={p.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <KitJersey clubId={p.clubId} position={p.position} className="w-8 h-8" />
+                        )}
                         {isOwnedByMe && (
-                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-slate-950 text-[8px] font-black flex items-center justify-center shadow-xs z-20">
+                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-slate-950 text-[8px] font-black flex items-center justify-center z-20">
                             ✓
                           </span>
                         )}

@@ -147,13 +147,13 @@ export const KitJersey: React.FC<KitJerseyProps> = ({
       <line x1="42" y1="28" x2="42" y2="52" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
     </svg>
 
-    {/* Circular Player Photo on upper left corner of the jersey */}
+    {/* Circular Player Photo on upper left corner of the jersey (~20% coverage) */}
     {photoUrl && !hasImgError && (
       <img
         src={photoUrl}
         alt=""
         onError={() => setHasImgError(true)}
-        className="absolute -top-[10%] -left-[14%] w-[70%] h-[70%] rounded-full object-cover border-[1.5px] border-white dark:border-slate-900 shadow-md ring-1 ring-black/20 z-10 pointer-events-none"
+        className="absolute -top-[6%] -left-[8%] w-[52%] h-[52%] rounded-full object-cover border-[1.5px] border-white dark:border-slate-900 shadow-md ring-1 ring-black/20 z-10 pointer-events-none"
       />
     )}
   </div>
