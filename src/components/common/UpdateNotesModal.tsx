@@ -41,7 +41,7 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
   const [mounted, setMounted] = useState(false);
 
   // Accordion state: Set of opened item IDs. By default, the standout photo feature is open!
-  const [expandedId, setExpandedId] = useState<string | null>('player_photos_request');
+  const [expandedId, setExpandedId] = useState<string | null>('player_photos_fixed');
 
   useEffect(() => {
     setMounted(true);
@@ -175,7 +175,7 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
             {/* Sub-header instruction */}
             <div className="px-4 py-2 bg-slate-950/60 border-b border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
               <span>დააჭირეთ ნებისმიერ სიახლეს დეტალების სანახავად:</span>
-              <span className="text-[10px] font-mono text-emerald-400 font-bold">5 სიახლე</span>
+              <span className="text-[10px] font-mono text-emerald-400 font-bold">{LATEST_UPDATE.items.length} სიახლე</span>
             </div>
 
             {/* Click-to-Expand Accordion Items List */}

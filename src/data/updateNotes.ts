@@ -26,6 +26,31 @@ export interface UpdateRelease {
 
 export const UPDATE_NOTES: UpdateRelease[] = [
   {
+    id: 'update_2026_10_01_photos_fixed',
+    version: 'v1.2.5',
+    date: '1 ოქტომბერი, 2026',
+    timestamp: 1790873000000,
+    titleKa: 'ფოტოების დამატება მუშაობს! 📸',
+    titleEn: 'Player Photo Uploads are Live! 📸',
+    summaryKa: 'ტექნიკური შეფერხება გასწორდა — ახლა უკვე ყველას შეუძლია მოთამაშეებს ფოტოები დაამატოს!',
+    summaryEn: 'Bug fixed — now EVERYONE can add photos to players!',
+    tagKa: 'უახლესი განახლება',
+    tagEn: 'Latest Update',
+    items: [
+      {
+        id: 'player_photos_fixed',
+        titleKa: '📸 ახლა უკვე ყველას შეუძლია ფოტოების დამატება!',
+        titleEn: '📸 EVERYONE can now add photos to players!',
+        descriptionKa: '2-დღიანი ტექნიკური ხარვეზი გასწორებულია! ნებისმიერ მენეჯერს შეუძლია მოთამაშის ბარათზე დაჭერით მარტივად ატვირთოს ფოტო. ადმინისტრაცია განიხილავს და დაამტკიცებს.',
+        descriptionEn: 'The 2-day upload bug is fixed! Every manager can now click on any player card and easily upload a photo. Admins will review and approve.',
+        badgeKa: 'გასწორდა ✅',
+        badgeEn: 'Fixed ✅',
+        icon: 'camera',
+        highlight: true,
+      },
+    ],
+  },
+  {
     id: 'update_2026_09_29_v2',
     version: 'v1.2.0',
     date: '29 სექტემბერი, 2026',
@@ -34,8 +59,8 @@ export const UPDATE_NOTES: UpdateRelease[] = [
     titleEn: 'New Rules, Player Photos, 3 MVPs & Prices',
     summaryKa: 'მთავარი სიახლეები: მოთამაშის ფოტოების დამატება, One Price Stadium-ის ქულები, 3 MVP და ფასების ზრდა.',
     summaryEn: 'Key updates: Add photos to players, One Price Stadium scoring, 3 MVPs per match, and player price rise.',
-    tagKa: 'უახლესი განახლება',
-    tagEn: 'Latest Update',
+    tagKa: 'წინა განახლება',
+    tagEn: 'Previous Update',
     items: [
       {
         id: 'manager_class_profile',

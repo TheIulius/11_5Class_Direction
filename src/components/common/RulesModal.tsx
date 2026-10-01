@@ -33,7 +33,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({
 }) => {
   const [lang, setLang] = useState<'geo' | 'eng'>('geo');
   const [activeTab, setActiveTab] = useState<'rules' | 'updates'>(initialTab);
-  const [expandedItemId, setExpandedItemId] = useState<string | null>('player_photos_request');
+  const [expandedItemId, setExpandedItemId] = useState<string | null>('player_photos_fixed');
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
