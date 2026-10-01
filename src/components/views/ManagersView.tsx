@@ -36,7 +36,7 @@ export const ManagersView: React.FC = () => {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [isLoadingUsers, setIsLoadingUsers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterMode, setFilterMode] = useState<'all' | 'pending' | 'approved' | 'refs'>('all');
+  const [filterMode, setFilterMode] = useState<'all' | 'pending' | 'approved' | 'refs' | 'admins'>('all');
 
   // Inspection & actions state
   const [selectedManagerIdForSquad, setSelectedManagerIdForSquad] = useState<string | null>(null);
@@ -102,6 +102,57 @@ export const ManagersView: React.FC = () => {
         prev.map((u) => (u.id === userId ? { ...u, isApproved: currentApproved } : u))
       );
       showNotification(err?.message || 'Failed to update approval status.');
+    }
+  };
+
+  // Handle Toggle Admin Privileges
+  const handleToggleAdmin = async (userId: string, username: string, currentIsAdmin: boolean) => {
+    const isPrimary = username.toLowerCase() === 'theiulius' || username.toLowerCase() === 'chaga';
+    if (isPrimary) {
+      showNotification('Cannot modify permissions of primary tournament creator.');
+      return;
+    }
+
+    const targetAdmin = !currentIsAdmin;
+    const targetRole: 'admin' | 'user' = targetAdmin ? 'admin' : 'user';
+
+    if (targetAdmin) {
+      const ok = window.confirm(
+        `დარწმუნებული ხართ, რომ გსურთ @${username}-ს მიანიჭოთ ADMIN პრივილეგიები?\n\nმომხმარებელს ექნება სრული წვდომა ადმინ პანელზე, მატჩებზე და მენეჯერებზე.`
+      );
+      if (!ok) return;
+    } else {
+      const ok = window.confirm(`გსურთ ჩამოართვათ ADMIN უფლებები @${username}-ს?`);
+      if (!ok) return;
+    }
+
+    // Optimistic UI update
+    setUsersList((prev) =>
+      prev.map((u) =>
+        u.id === userId
+          ? { ...u, isAdmin: targetAdmin, role: targetRole, isApproved: targetAdmin ? true : u.isApproved }
+          : u
+      )
+    );
+
+    try {
+      const res = await adminSetUserRoleApi({
+        userId,
+        username,
+        role: targetRole,
+      });
+      if (res.success) {
+        if (targetAdmin) {
+          confetti({ particleCount: 60, spread: 75, origin: { y: 0.6 } });
+        }
+        showNotification(res.message || `@${username} is now ${targetAdmin ? 'an Administrator (ადმინი)' : 'a regular user'}.`);
+        refreshServerState();
+      }
+    } catch (err: any) {
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, isAdmin: currentIsAdmin, role: currentIsAdmin ? 'admin' : 'user' } : u))
+      );
+      showNotification(err?.message || 'Failed to update admin privileges.');
     }
   };
 
@@ -199,6 +250,9 @@ export const ManagersView: React.FC = () => {
 
     if (!matchesSearch) return false;
 
+    if (filterMode === 'admins') {
+      return u.isAdmin || u.role === 'admin' || u.username === 'theiulius' || u.username === 'chaga';
+    }
     if (filterMode === 'pending') {
       return !u.isAdmin && !u.isApproved;
     }
@@ -215,6 +269,7 @@ export const ManagersView: React.FC = () => {
   const approvedCount = usersList.filter((u) => u.isAdmin || u.isApproved).length;
   const pendingCount = usersList.filter((u) => !u.isAdmin && !u.isApproved).length;
   const refsCount = usersList.filter((u) => u.role === 'ref' || u.isReferee).length;
+  const adminsCount = usersList.filter((u) => u.isAdmin || u.role === 'admin' || u.username === 'theiulius' || u.username === 'chaga').length;
 
   return (
     <div className="space-y-4 pb-20 animate-fade-in text-slate-900 dark:text-white">
@@ -436,6 +491,17 @@ export const ManagersView: React.FC = () => {
               <Award className="w-3 h-3" />
               <span>Refs ({refsCount})</span>
             </button>
+            <button
+              onClick={() => setFilterMode('admins')}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                filterMode === 'admins'
+                  ? 'bg-purple-600 text-white shadow-xs font-black'
+                  : 'text-purple-400 hover:text-purple-300'
+              }`}
+            >
+              <Shield className="w-3 h-3" />
+              <span>Admins ({adminsCount})</span>
+            </button>
           </div>
         </div>
 
@@ -448,7 +514,9 @@ export const ManagersView: React.FC = () => {
             </div>
           ) : (
             filteredUsers.map((u) => {
-              const isApproved = u.isAdmin || Boolean(u.isApproved);
+              const isPrimaryAdmin = u.username.toLowerCase() === 'theiulius' || u.username.toLowerCase() === 'chaga';
+              const isUserAdmin = Boolean(u.isAdmin || u.role === 'admin' || isPrimaryAdmin);
+              const isApproved = isUserAdmin || Boolean(u.isApproved);
               const isRef = Boolean(u.role === 'ref' || u.isReferee);
 
               return (
@@ -475,12 +543,13 @@ export const ManagersView: React.FC = () => {
                             {u.grade}/{u.parallel}
                           </span>
                         )}
-                        {u.isAdmin && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        {isUserAdmin && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1 font-mono">
+                            <Shield className="w-2.5 h-2.5" />
                             Admin
                           </span>
                         )}
-                        {isRef && (
+                        {isRef && !isUserAdmin && (
                           <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1 font-mono">
                             <Award className="w-2.5 h-2.5" />
                             Ref
@@ -503,7 +572,7 @@ export const ManagersView: React.FC = () => {
                   </div>
 
                   {/* Right: Actions & iOS Approval Switch */}
-                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-white/5">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200 dark:border-white/5 flex-wrap">
                     {/* View Squad Button */}
                     <button
                       onClick={() => setSelectedManagerIdForSquad(u.id)}
@@ -524,7 +593,7 @@ export const ManagersView: React.FC = () => {
                     </button>
 
                     {/* Delete Account */}
-                    {!u.isAdmin && (
+                    {!isPrimaryAdmin && u.username.toLowerCase() !== authUser?.username?.toLowerCase() && (
                       <button
                         onClick={() => handleDeleteUser(u.id, u.username)}
                         className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 transition-all cursor-pointer"
@@ -534,16 +603,32 @@ export const ManagersView: React.FC = () => {
                       </button>
                     )}
 
-                    {/* Referee Role Toggle (Admin only can toggle, can't toggle superadmin) */}
-                    {!u.isAdmin && (
+                    {/* Role Toggles (Admin & Ref) - cannot toggle primary creator admins */}
+                    {!isPrimaryAdmin && (
                       <div className="flex items-center gap-1.5 pl-2 border-l border-slate-300 dark:border-white/10">
+                        {/* Admin Role Toggle */}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleAdmin(u.id, u.username, isUserAdmin)}
+                          className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all flex items-center gap-1 cursor-pointer select-none ${
+                            isUserAdmin
+                              ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-400/50 hover:bg-purple-500'
+                              : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-purple-500/20 hover:text-purple-300'
+                          }`}
+                          title={isUserAdmin ? 'Revoke Admin privileges' : 'Grant Admin privileges'}
+                        >
+                          <Shield className="w-3 h-3" />
+                          <span>{isUserAdmin ? '🛡️ Admin' : '+ Admin'}</span>
+                        </button>
+
+                        {/* Referee Role Toggle */}
                         <button
                           type="button"
                           onClick={() => handleToggleRef(u.id, u.username, isRef)}
                           className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all flex items-center gap-1 cursor-pointer select-none ${
                             isRef
                               ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400/50 hover:bg-amber-400'
-                              : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-zinc-700 hover:text-white'
+                              : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-amber-500/20 hover:text-amber-300'
                           }`}
                           title={isRef ? 'Revoke Referee role' : 'Make trusted Referee'}
                         >
@@ -562,7 +647,7 @@ export const ManagersView: React.FC = () => {
                         size="md"
                         color="emerald"
                         checked={isApproved}
-                        disabled={u.isAdmin}
+                        disabled={isUserAdmin}
                         ariaLabel={`Approval switch for ${u.username}`}
                         onChange={() => handleToggleApproval(u.id, u.username, isApproved)}
                       />

@@ -24,7 +24,16 @@ export const INITIAL_BUDGET = 55.0;
 
 export function isUserAdmin(username?: string): boolean {
   if (!username) return false;
-  return ADMIN_USERNAMES.includes(username.trim().toLowerCase());
+  const clean = username.trim().toLowerCase();
+  if (ADMIN_USERNAMES.includes(clean)) return true;
+  try {
+    const data = db.getData();
+    if (data?.users) {
+      const u = Object.values(data.users).find((acc) => acc.username.toLowerCase() === clean);
+      if (u && (u.role === 'admin' || Boolean(u.isAdmin))) return true;
+    }
+  } catch (e) {}
+  return false;
 }
 
 // 1. Health check
@@ -2303,11 +2312,17 @@ app.post('/api/admin/user/set-role', (req: Request, res: Response) => {
   user.role = targetRole;
   user.isAdmin = targetRole === 'admin';
   user.isReferee = targetRole === 'ref' || Boolean(isReferee);
+  if (targetRole === 'admin') {
+    user.isApproved = true;
+  }
 
   if (data.managers && data.managers[user.id]) {
     data.managers[user.id].role = targetRole;
     data.managers[user.id].isAdmin = user.isAdmin;
     data.managers[user.id].isReferee = user.isReferee;
+    if (targetRole === 'admin') {
+      data.managers[user.id].isApproved = true;
+    }
   }
 
   db.save();
