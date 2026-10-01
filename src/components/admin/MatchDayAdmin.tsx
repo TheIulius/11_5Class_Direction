@@ -76,6 +76,10 @@ export const MatchDayAdmin: React.FC = () => {
   const [playerAssists, setPlayerAssists] = useState<Record<string, number>>({});
   const [playerSaves, setPlayerSaves] = useState<Record<string, number>>({});
 
+  // Per-GKP goals conceded override (playerId → goals conceded by that keeper)
+  // By default, the first GKP to receive minutes gets ALL goals conceded; admin can redistribute.
+  const [gkpGoalsConceded, setGkpGoalsConceded] = useState<Record<string, number>>({});
+
   // Floating point feedback
   const [floatingPoints, setFloatingPoints] = useState<FloatingPointBadge[]>([]);
 
@@ -163,6 +167,45 @@ export const MatchDayAdmin: React.FC = () => {
   const allMatchPlayers = useMemo(() => {
     return [...matchPlayers.home, ...matchPlayers.away];
   }, [matchPlayers]);
+
+  // Compute the effective goals conceded for a player.
+  // For GKPs: use gkpGoalsConceded override if set; otherwise auto-assign all goals
+  // to the first GKP (by position order) who has minutes on that team.
+  // For non-GKPs: use the full team goals conceded as before.
+  const getEffectiveGoalsConceded = (playerId: string, team: 'home' | 'away'): number => {
+    const p = players[playerId];
+    if (!p) return 0;
+    const teamGoalsConceded = team === 'home' ? awayScore : homeScore;
+
+    if (p.position !== 'GKP' && p.position !== 'DEF') return teamGoalsConceded;
+    if (p.position === 'DEF') return teamGoalsConceded;
+
+    // GKP: check for manual override
+    if (gkpGoalsConceded[playerId] !== undefined) {
+      return gkpGoalsConceded[playerId];
+    }
+
+    // Auto-assign: first GKP with minutes on this team gets all goals
+    const teamPlayers = team === 'home' ? matchPlayers.home : matchPlayers.away;
+    const teamGKPs = teamPlayers.filter((tp) => tp.position === 'GKP' && (playerMinutes[tp.id] || 0) > 0);
+    if (teamGKPs.length <= 1) {
+      // Only one GKP played (or none), they get all the goals
+      return teamGoalsConceded;
+    }
+
+    // Multiple GKPs played — if none have overrides, first gets all
+    const anyHasOverride = teamGKPs.some((gk) => gkpGoalsConceded[gk.id] !== undefined);
+    if (!anyHasOverride) {
+      // First GKP (by sort order) gets all goals
+      return teamGKPs[0].id === playerId ? teamGoalsConceded : 0;
+    }
+
+    // Some have overrides but this one doesn't — give remainder
+    const assignedTotal = teamGKPs
+      .filter((gk) => gk.id !== playerId && gkpGoalsConceded[gk.id] !== undefined)
+      .reduce((sum, gk) => sum + (gkpGoalsConceded[gk.id] || 0), 0);
+    return Math.max(0, teamGoalsConceded - assignedTotal);
+  };
 
   const spawnFloatingPoint = (text: string, color: string, e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -281,6 +324,18 @@ export const MatchDayAdmin: React.FC = () => {
     }
     setPlayerSaves(initialSaves);
 
+    // Initialize GKP goals conceded overrides from saved stats
+    const initialGkpConceded: Record<string, number> = {};
+    for (const p of fixturePlayers) {
+      if (p.position === 'GKP') {
+        const stat = p.gwStats?.[f.gameweek] ?? p.gwStats?.[currentGW];
+        if (stat && typeof stat.goalsConceded === 'number' && (stat.minutes || 0) > 0) {
+          initialGkpConceded[p.id] = stat.goalsConceded;
+        }
+      }
+    }
+    setGkpGoalsConceded(initialGkpConceded);
+
     const initialMvp: (string | null)[] = [null, null, null];
     if (Array.isArray(f.mvpPlayerIds)) {
       if (f.mvpPlayerIds[0]) initialMvp[0] = f.mvpPlayerIds[0];
@@ -381,8 +436,9 @@ export const MatchDayAdmin: React.FC = () => {
     if (mins === 0) return 0;
 
     const isHome = team === 'home';
-    const goalsConceded = isHome ? awayScore : homeScore;
-    const cleanSheet = goalsConceded === 0;
+    const teamGoalsConceded = isHome ? awayScore : homeScore;
+    const goalsConceded = p.position === 'GKP' ? getEffectiveGoalsConceded(p.id, team) : teamGoalsConceded;
+    const cleanSheet = teamGoalsConceded === 0;
 
     const pGoals = goals.filter((g) => g.playerId === p.id && !g.isOwnGoal).length;
     const pOwnGoals = goals.filter((g) => g.playerId === p.id && g.isOwnGoal).length;
@@ -721,8 +777,10 @@ export const MatchDayAdmin: React.FC = () => {
 
       // Clean sheet calculation
       const isHome = matchPlayers.home.some((hp) => hp.id === p.id);
-      const goalsConceded = isHome ? awayScore : homeScore;
-      const cleanSheet = goalsConceded === 0;
+      const team: 'home' | 'away' = isHome ? 'home' : 'away';
+      const teamGoalsConceded = isHome ? awayScore : homeScore;
+      const goalsConceded = p.position === 'GKP' ? getEffectiveGoalsConceded(p.id, team) : teamGoalsConceded;
+      const cleanSheet = teamGoalsConceded === 0;
 
       const pYellows = yellowCards.includes(p.id) ? 1 : 0;
       const pReds = redCards.includes(p.id) ? 1 : 0;
