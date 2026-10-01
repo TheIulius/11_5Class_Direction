@@ -4,6 +4,7 @@ import { CLUBS } from '../../data/clubs';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from '../pitch/KitJersey';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -184,10 +185,8 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                 <KitJersey clubId={detailPlayer.clubId} position={detailPlayer.position} className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0" />
               )}
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                    {detailPlayer.position}
-                  </span>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <PlayerPositionBadge playerId={detailPlayer.id} position={detailPlayer.position} />
                   <span className="text-xs font-black text-slate-500 dark:text-slate-400">
                     Class {playerClub?.shortName || normClubId.replace('SCH_', '').replace('_', '/')}
                   </span>
@@ -223,6 +222,9 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
 
           {/* Modal Body */}
           <div className="p-3.5 sm:p-5 space-y-3.5 max-h-[65vh] overflow-y-auto">
+            {/* Position Override Notice (if effectively FWD) */}
+            <PlayerPositionOverrideNotice playerId={detailPlayer.id} position={detailPlayer.position} />
+
             {/* Quick Season Totals */}
             <div className="grid grid-cols-5 gap-1.5 text-center">
               <div className="p-1.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/60 dark:border-white/5">

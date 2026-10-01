@@ -6,6 +6,7 @@ import { Squad } from '../../types/fpl';
 import { GameweekCalculationResult, calculateGameweekSquadPoints, getEffectiveScoringPosition } from '../../engine/scoring';
 import { getFormationLayout } from '../../engine/formations';
 import { KitJersey } from '../pitch/KitJersey';
+import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { CLUBS } from '../../data/clubs';
 import { ArrowLeft, Award, Activity, Sparkles, X, AlertCircle, Loader2, ChevronLeft, ChevronRight, Lock, Users, ChevronDown } from 'lucide-react';
 
@@ -430,10 +431,8 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                     <KitJersey clubId={sheetPlayer.clubId} position={sheetPlayer.position} className="w-12 h-12 shrink-0" />
                   )}
                   <div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
-                        {sheetPlayer.position}
-                      </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <PlayerPositionBadge playerId={sheetPlayer.id} position={sheetPlayer.position} />
                       <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         {CLUBS[sheetPlayer.clubId]?.name || sheetPlayer.clubId}
                       </span>
@@ -460,6 +459,9 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                   <X className="w-5 h-5" />
                 </button>
               </div>
+
+              {/* Position Override Notice (if effectively FWD) */}
+              <PlayerPositionOverrideNotice playerId={sheetPlayer.id} position={sheetPlayer.position} className="my-2.5" />
 
               {/* Performance Stats */}
               <div className="my-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">

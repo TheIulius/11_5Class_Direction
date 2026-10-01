@@ -4,6 +4,7 @@ import { CLUBS } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { useFPL } from '../../context/FPLContext';
 import { getEffectiveScoringPosition } from '../../engine/scoring';
 import { formatFixtureDate, sortFixturesByDate } from '../views/FixturesView';
@@ -453,12 +454,10 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                     <div className="flex items-center gap-3">
                       <KitJersey clubId={selectedPlayer.clubId} position={selectedPlayer.position} photoUrl={selectedPlayer.photoUrl} className="w-10 h-10" />
                       <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <ClassShieldBadge clubId={selectedPlayer.clubId} size="xs" />
                           <h3 className="font-black text-base text-white">{selectedPlayer.webName}</h3>
-                          <span className="text-[10px] px-1.5 py-0.5 rounded font-black bg-white/10 text-emerald-400">
-                            {selectedPlayer.position}
-                          </span>
+                          <PlayerPositionBadge playerId={selectedPlayer.id} position={selectedPlayer.position} />
                           <PlayerPriceBadge player={selectedPlayer} showDifference={true} className="text-[11px] font-mono font-black text-amber-400 bg-amber-500/10 border border-amber-500/25 px-1.5 py-0.5 rounded" />
                         </div>
                         <span className="text-xs text-zinc-400">{selectedPlayer.name}</span>
@@ -471,6 +470,9 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       ← Back to Search
                     </button>
                   </div>
+
+                  {/* Position Override Notice (if effectively FWD) */}
+                  <PlayerPositionOverrideNotice playerId={selectedPlayer.id} position={selectedPlayer.position} className="mt-2.5" />
 
                   {/* Player Price Editor Row */}
                   {Boolean(actualEditPlayer) && (

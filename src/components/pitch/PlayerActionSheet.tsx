@@ -4,6 +4,7 @@ import { KitJersey } from './KitJersey';
 import { CLUBS } from '../../data/clubs';
 import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, ChevronDown, Camera, Check } from 'lucide-react';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { suggestPlayerPhotoApi } from '../../services/api';
 
 interface PlayerActionSheetProps {
@@ -195,10 +196,8 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
               <KitJersey clubId={player.clubId} position={player.position} className="w-12 h-12 shrink-0" />
             )}
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
-                  {player.position}
-                </span>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <PlayerPositionBadge playerId={player.id} position={player.position} />
                 <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   {club?.name || player.clubId}
                 </span>
@@ -221,6 +220,9 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Position Override Notice (if effectively FWD) */}
+        <PlayerPositionOverrideNotice playerId={player.id} position={player.position} className="my-2.5" />
 
         {/* Photo Tip & Upload Banner */}
         <div className="my-2.5 p-2.5 rounded-2xl bg-sky-500/10 border border-sky-500/25 flex items-center justify-between gap-2 shadow-xs">

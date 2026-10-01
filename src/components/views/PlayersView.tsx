@@ -4,6 +4,7 @@ import { Player, Position, Club, Fixture } from '../../types/fpl';
 import { CLUBS, getSortedSchoolClubs } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { ClassGridView } from '../transfers/ClassGridView';
 import {
   ClassTwoTierPillStrip,
@@ -723,9 +724,7 @@ export const PlayersView: React.FC = () => {
 
                   <div>
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase border ${getPositionBadgeColor(selectedPlayer.position)}`}>
-                        {selectedPlayer.position}
-                      </span>
+                      <PlayerPositionBadge playerId={selectedPlayer.id} position={selectedPlayer.position} />
                       <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
                         Class {clubs[selectedPlayer.clubId]?.shortName || selectedPlayer.clubId.replace('SCH_', '').replace('_', '/')}
                       </span>
@@ -806,6 +805,9 @@ export const PlayersView: React.FC = () => {
 
               {/* Modal Scrollable Content */}
               <div className="p-4 sm:p-5 space-y-4 overflow-y-auto max-h-[calc(90vh-140px)]">
+                {/* Position Override Notice (if effectively FWD) */}
+                <PlayerPositionOverrideNotice playerId={selectedPlayer.id} position={selectedPlayer.position} />
+
                 {/* Stats Dashboard Grid */}
                 <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 text-center">
                   <div className="p-2 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5">
