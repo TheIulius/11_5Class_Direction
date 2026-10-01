@@ -13914,6 +13914,54 @@
           "showRealNamePublicly": true,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1790502580519",
+          "managerName": "gio",
+          "teamName": "123",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 67,
+          "previousRank": 67,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790519882502",
+          "managerName": "Kucha",
+          "teamName": "9/4",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 70,
+          "previousRank": 70,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790618163501",
+          "managerName": "test",
+          "teamName": "test",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 79,
+          "previousRank": 79,
+          "activeChip": null,
+          "lineup": []
+        },
+        {
+          "id": "user_1790876833817",
+          "managerName": "Aleksandre",
+          "teamName": "Bvb",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 81,
+          "previousRank": 81,
+          "grade": "9",
+          "parallel": "4",
+          "realName": "Aleksandre Keldishvili",
+          "showRealNamePublicly": true,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -15239,7 +15287,7 @@
       "joinedAt": "2026-09-26T20:44:31.753Z",
       "grade": "11",
       "parallel": "1",
-      "realName": "giorgi modebadze",
+      "realName": "Giorgi Modebadze",
       "showRealNamePublicly": false
     },
     "user_1790455808605": {
@@ -19919,6 +19967,92 @@
         }
       },
       "joinedAt": "2026-10-01T10:35:56.655Z"
+    },
+    "user_1790502580519": {
+      "id": "user_1790502580519",
+      "managerName": "gio",
+      "teamName": "123",
+      "squad": {
+        "teamName": "123",
+        "managerName": "gio",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T09:49:40.520Z"
+    },
+    "user_1790519882502": {
+      "id": "user_1790519882502",
+      "managerName": "Kucha",
+      "teamName": "9/4",
+      "squad": {
+        "teamName": "9/4",
+        "managerName": "Kucha",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-27T14:38:02.503Z"
+    },
+    "user_1790618163501": {
+      "id": "user_1790618163501",
+      "managerName": "test",
+      "teamName": "test",
+      "role": "ref",
+      "isReferee": true,
+      "squad": {
+        "teamName": "test",
+        "managerName": "test",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-09-28T17:56:03.502Z"
+    },
+    "user_1790876833817": {
+      "id": "user_1790876833817",
+      "managerName": "Aleksandre",
+      "teamName": "Bvb",
+      "grade": "9",
+      "parallel": "4",
+      "realName": "Aleksandre Keldishvili",
+      "showRealNamePublicly": true,
+      "squad": {
+        "teamName": "Bvb",
+        "managerName": "Aleksandre",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        }
+      },
+      "joinedAt": "2026-10-01T17:47:13.818Z"
     }
   },
   "users": {
@@ -20190,7 +20324,7 @@
       "isApproved": true,
       "grade": "11",
       "parallel": "1",
-      "realName": "giorgi modebadze",
+      "realName": "Giorgi Modebadze",
       "showRealNamePublicly": false
     },
     "user_1790455808605": {
@@ -21370,6 +21504,65 @@
       "grade": "10",
       "parallel": "3",
       "realName": "Nikoloz Zurabiani",
+      "showRealNamePublicly": true
+    },
+    "user_1790502580519": {
+      "id": "user_1790502580519",
+      "username": "gio",
+      "email": "vezie14@gmail.com",
+      "passwordHash": "6c4c6324a1cdab93b034ddf003ac6520f2b907fcc1879aa422db3f217b60e7abd15169c86a25e622b9476ead3aee8203ccade0bf485a98d1e7a76378c394d35a",
+      "salt": "d2bbdfc0e1d3c2f9c9a34eed3816b2c5",
+      "managerName": "gio",
+      "teamName": "123",
+      "createdAt": "2026-09-27T09:49:40.520Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790519882502": {
+      "id": "user_1790519882502",
+      "username": "kucha",
+      "email": "davitkuwashvili@gmail.com",
+      "passwordHash": "0d9857ecb6f119a09fe3310bfd1dd42c3bcc03dbf35a7a87893f74bf19c6f72eab2350d9780e4c9ec70dafd1ff257b4cfe5b1928be2801ed58a0e3cdce5cce90",
+      "salt": "7e6bb23370c1e14dec24744d52e3e7fc",
+      "managerName": "Kucha",
+      "teamName": "9/4",
+      "token": "756bd8703416b11a5fc2b2a8d7352ebad7a15fe81f59a3b192b41161198dee87",
+      "createdAt": "2026-09-27T14:38:02.503Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false
+    },
+    "user_1790618163501": {
+      "id": "user_1790618163501",
+      "username": "test",
+      "email": "test@fantasy.pl",
+      "passwordHash": "f5805214c2224595806ce0a53f27bd91892f59b74ad7c09a3d8247a7e0bbe3849c9fc038d613de6c417becb65b07fe838fdf350f2731c353a48c8a4ba8906fb0",
+      "salt": "7116f8c501caf74e56858b6251e8a16b",
+      "managerName": "test",
+      "teamName": "test",
+      "createdAt": "2026-09-28T17:56:03.502Z",
+      "role": "ref",
+      "isAdmin": false,
+      "isReferee": true,
+      "isApproved": true
+    },
+    "user_1790876833817": {
+      "id": "user_1790876833817",
+      "username": "keldd",
+      "email": "keldd@fantasy.pl",
+      "passwordHash": "14cdfe76e07d9abaf63be64a59059a6ecce9af5cf68f86629d15afc6d19cb7fdbf2617cfa66225a691f5e721aa7090763d4b3b3810b3d5dbf209247797803b52",
+      "salt": "6cb7f7e68c562f34bc44e9d32b76e9de",
+      "managerName": "Aleksandre",
+      "teamName": "Bvb",
+      "token": "8ff97b19bda1198e851d10a3e78e47c25aba3f72a89bac8b1d8f8226f9e6c288",
+      "createdAt": "2026-10-01T17:47:13.818Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false,
+      "grade": "9",
+      "parallel": "4",
+      "realName": "Aleksandre Keldishvili",
       "showRealNamePublicly": true
     }
   },
