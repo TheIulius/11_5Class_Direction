@@ -146,7 +146,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
         {/* Bench Order indicator if on bench (Sub 1, Sub 2, Sub 3) */}
         {!isStarter && (
-          <div className={`absolute -bottom-1 -left-1 font-black text-[8px] md:text-[9px] rounded px-1.5 py-0.5 border shadow-sm ${
+          <div className={`absolute -bottom-1 -right-1 font-black text-[8px] md:text-[9px] rounded px-1.5 py-0.5 border shadow-sm z-20 ${
             benchOrder === 1
               ? 'bg-black/95 text-emerald-400 border-emerald-500/50'
               : benchOrder === 2
