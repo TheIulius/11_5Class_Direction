@@ -172,11 +172,14 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
           <div className="relative p-3.5 sm:p-5 bg-slate-100 dark:bg-zinc-950 border-b border-slate-200 dark:border-white/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               {detailPlayer.photoUrl ? (
-                <img
-                  src={detailPlayer.photoUrl}
-                  alt={detailPlayer.name}
-                  className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-zinc-900"
-                />
+                <div className="flex flex-col items-center gap-1.5 shrink-0">
+                  <img
+                    src={detailPlayer.photoUrl}
+                    alt={detailPlayer.name}
+                    className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-zinc-900"
+                  />
+                  <KitJersey clubId={detailPlayer.clubId} position={detailPlayer.position} className="w-8 h-8 sm:w-9 sm:h-9 drop-shadow-xs" />
+                </div>
               ) : (
                 <KitJersey clubId={detailPlayer.clubId} position={detailPlayer.position} className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0" />
               )}
@@ -526,6 +529,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                             <KitJersey
                               clubId={p.clubId}
                               position={p.position}
+                              photoUrl={p.photoUrl}
                               className="w-7 h-7 sm:w-10 sm:h-10 transition-transform group-hover:scale-105"
                             />
                             {isOwned && (
@@ -709,6 +713,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                                 <KitJersey
                                   clubId={p.clubId}
                                   position={p.position}
+                                  photoUrl={p.photoUrl}
                                   className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow-xs"
                                 />
                                 {isOwned && (

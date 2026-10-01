@@ -6,9 +6,21 @@ interface KitJerseyProps {
   clubId: string;
   position: Position;
   className?: string;
+  photoUrl?: string | null;
 }
 
-export const KitJersey: React.FC<KitJerseyProps> = ({ clubId, position, className = 'w-10 h-10' }) => {
+export const KitJersey: React.FC<KitJerseyProps> = ({
+  clubId,
+  position,
+  className = 'w-10 h-10',
+  photoUrl,
+}) => {
+  const [hasImgError, setHasImgError] = React.useState(false);
+
+  React.useEffect(() => {
+    setHasImgError(false);
+  }, [photoUrl]);
+
   const isClass11_5 = clubId === 'SCH_11_5' || clubId === 'SCH';
   const club = CLUBS[clubId] || {
     primaryColor: '#37003c',
@@ -23,12 +35,13 @@ export const KitJersey: React.FC<KitJerseyProps> = ({ clubId, position, classNam
   const strokeColor = isClass11_5 ? '#451a03' : '#111111';
 
   return (
-    <svg
-      viewBox="0 0 64 64"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={`${className} filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] transition-transform duration-200 group-hover:scale-105`}
-    >
+    <div className={`relative inline-flex items-center justify-center shrink-0 ${className}`}>
+      <svg
+        viewBox="0 0 64 64"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="w-full h-full filter drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] transition-transform duration-200 group-hover:scale-105"
+      >
       <defs>
         {isClass11_5 && (
           <linearGradient id="goldCrownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
@@ -133,5 +146,16 @@ export const KitJersey: React.FC<KitJerseyProps> = ({ clubId, position, classNam
       <line x1="22" y1="28" x2="22" y2="52" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
       <line x1="42" y1="28" x2="42" y2="52" stroke="rgba(0,0,0,0.15)" strokeWidth="1" />
     </svg>
+
+    {/* Circular Player Photo on upper left corner of the jersey */}
+    {photoUrl && !hasImgError && (
+      <img
+        src={photoUrl}
+        alt=""
+        onError={() => setHasImgError(true)}
+        className="absolute -top-[10%] -left-[14%] w-[70%] h-[70%] rounded-full object-cover border-[1.5px] border-white dark:border-slate-900 shadow-md ring-1 ring-black/20 z-10 pointer-events-none"
+      />
+    )}
+  </div>
   );
 };

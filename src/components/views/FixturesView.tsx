@@ -554,20 +554,13 @@ export const FixturesView: React.FC = () => {
                                     >
                                       {/* Left: Player Avatar + Name + Badges */}
                                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                                        <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-slate-200 dark:bg-slate-800">
-                                          {c.player.photoUrl ? (
-                                            <img
-                                              src={c.player.photoUrl}
-                                              alt={c.player.name}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <KitJersey
-                                              clubId={c.player.clubId}
-                                              position={c.player.position}
-                                              className="w-6 h-6"
-                                            />
-                                          )}
+                                        <div className="relative w-8 h-8 shrink-0 flex items-center justify-center">
+                                          <KitJersey
+                                            clubId={c.player.clubId}
+                                            position={c.player.position}
+                                            photoUrl={c.player.photoUrl}
+                                            className="w-6 h-6"
+                                          />
                                         </div>
 
                                         <div className="min-w-0">
@@ -692,20 +685,13 @@ export const FixturesView: React.FC = () => {
                                     >
                                       {/* Left: Player Avatar + Name + Badges */}
                                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                                        <div className="w-8 h-8 rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-slate-200 dark:bg-slate-800">
-                                          {c.player.photoUrl ? (
-                                            <img
-                                              src={c.player.photoUrl}
-                                              alt={c.player.name}
-                                              className="w-full h-full object-cover"
-                                            />
-                                          ) : (
-                                            <KitJersey
-                                              clubId={c.player.clubId}
-                                              position={c.player.position}
-                                              className="w-6 h-6"
-                                            />
-                                          )}
+                                        <div className="relative w-8 h-8 shrink-0 flex items-center justify-center">
+                                          <KitJersey
+                                            clubId={c.player.clubId}
+                                            position={c.player.position}
+                                            photoUrl={c.player.photoUrl}
+                                            className="w-6 h-6"
+                                          />
                                         </div>
 
                                         <div className="min-w-0">

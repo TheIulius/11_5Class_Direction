@@ -169,21 +169,27 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
         <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center space-x-3">
             {player.photoUrl ? (
-              <img
-                src={player.photoUrl}
-                alt={player.name}
-                className="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
-              />
-            ) : player.pendingPhotoUrl ? (
-              <div className="relative w-12 h-12 shrink-0">
+              <div className="flex flex-col items-center gap-1 shrink-0">
                 <img
-                  src={player.pendingPhotoUrl}
+                  src={player.photoUrl}
                   alt={player.name}
-                  className="w-12 h-12 rounded-2xl object-cover border-2 border-amber-500/40 shadow-xs opacity-80 bg-slate-100 dark:bg-slate-800"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
                 />
-                <span className="absolute -top-1 -right-1 text-[8px] bg-amber-500 text-black font-black px-1 rounded-full shadow-xs">
-                  ⏳
-                </span>
+                <KitJersey clubId={player.clubId} position={player.position} className="w-8 h-8 drop-shadow-xs" />
+              </div>
+            ) : player.pendingPhotoUrl ? (
+              <div className="flex flex-col items-center gap-1 shrink-0">
+                <div className="relative w-12 h-12 shrink-0">
+                  <img
+                    src={player.pendingPhotoUrl}
+                    alt={player.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-amber-500/40 shadow-xs opacity-80 bg-slate-100 dark:bg-slate-800"
+                  />
+                  <span className="absolute -top-1 -right-1 text-[8px] bg-amber-500 text-black font-black px-1 rounded-full shadow-xs">
+                    ⏳
+                  </span>
+                </div>
+                <KitJersey clubId={player.clubId} position={player.position} className="w-8 h-8 drop-shadow-xs" />
               </div>
             ) : (
               <KitJersey clubId={player.clubId} position={player.position} className="w-12 h-12 shrink-0" />

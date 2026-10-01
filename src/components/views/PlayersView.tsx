@@ -564,19 +564,11 @@ export const PlayersView: React.FC = () => {
                         #{idx + 1}
                       </span>
 
-                      {/* Photo / Avatar */}
-                      <div className="relative w-11 h-11 rounded-2xl overflow-hidden shrink-0 flex items-center justify-center bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 shadow-xs">
-                        {p.photoUrl ? (
-                          <img
-                            src={p.photoUrl}
-                            alt={p.name}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <KitJersey clubId={p.clubId} position={p.position} className="w-8 h-8" />
-                        )}
+                      {/* Photo / Avatar with Jersey */}
+                      <div className="relative w-10 h-10 shrink-0 flex items-center justify-center">
+                        <KitJersey clubId={p.clubId} position={p.position} photoUrl={p.photoUrl} className="w-8 h-8" />
                         {isOwnedByMe && (
-                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-slate-950 text-[8px] font-black flex items-center justify-center">
+                          <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-slate-950 text-[8px] font-black flex items-center justify-center shadow-xs z-20">
                             ✓
                           </span>
                         )}
@@ -672,41 +664,53 @@ export const PlayersView: React.FC = () => {
               {/* Modal Header */}
               <div className="relative p-4 sm:p-5 bg-slate-100 dark:bg-zinc-950 border-b border-slate-200 dark:border-white/10 flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3.5">
-                  {/* Avatar / Photo with Upload Button */}
-                  <div className="relative group shrink-0">
-                    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-3xl overflow-hidden bg-white dark:bg-zinc-900 border-2 border-emerald-500/50 shadow-md flex items-center justify-center relative">
-                      {selectedPlayer.photoUrl ? (
-                        <img
-                          src={selectedPlayer.photoUrl}
-                          alt={selectedPlayer.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : selectedPlayer.pendingPhotoUrl ? (
-                        <div className="relative w-full h-full">
+                  {/* Left Column: Player Photo with Team Jersey Below It */}
+                  <div className="flex flex-col items-center gap-2 shrink-0">
+                    <div className="relative group shrink-0">
+                      <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full overflow-hidden bg-white dark:bg-zinc-900 border-2 border-emerald-500/50 shadow-md flex items-center justify-center relative">
+                        {selectedPlayer.photoUrl ? (
                           <img
-                            src={selectedPlayer.pendingPhotoUrl}
+                            src={selectedPlayer.photoUrl}
                             alt={selectedPlayer.name}
-                            className="w-full h-full object-cover opacity-80"
+                            className="w-full h-full object-cover"
                           />
-                          <span className="absolute bottom-0 inset-x-0 bg-amber-500/90 text-slate-950 text-[8px] font-black text-center py-0.5">
-                            ⏳ PENDING
-                          </span>
-                        </div>
-                      ) : (
-                        <KitJersey clubId={selectedPlayer.clubId} position={selectedPlayer.position} className="w-12 h-12" />
-                      )}
+                        ) : selectedPlayer.pendingPhotoUrl ? (
+                          <div className="relative w-full h-full">
+                            <img
+                              src={selectedPlayer.pendingPhotoUrl}
+                              alt={selectedPlayer.name}
+                              className="w-full h-full object-cover opacity-80"
+                            />
+                            <span className="absolute bottom-0 inset-x-0 bg-amber-500/90 text-slate-950 text-[8px] font-black text-center py-0.5">
+                              ⏳ PENDING
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-slate-200 dark:bg-zinc-800 text-slate-400">
+                            <Camera className="w-6 h-6 text-slate-400 dark:text-slate-500" />
+                            <span className="text-[8px] font-bold mt-0.5 text-slate-500">No Photo</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Camera Upload Overlay */}
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute inset-0 bg-black/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer"
+                        title="Upload profile picture"
+                      >
+                        <Camera className="w-5 h-5" />
+                        <span className="text-[9px] font-bold mt-0.5">Upload</span>
+                      </button>
                     </div>
 
-                    {/* Camera Upload Overlay */}
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/60 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white cursor-pointer"
-                      title="Upload profile picture"
-                    >
-                      <Camera className="w-5 h-5" />
-                      <span className="text-[9px] font-bold mt-0.5">Upload</span>
-                    </button>
+                    {/* Team Jersey below the photo - little smaller than photo, not overlapping */}
+                    <KitJersey
+                      clubId={selectedPlayer.clubId}
+                      position={selectedPlayer.position}
+                      className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-md"
+                    />
                   </div>
 
                   <div>

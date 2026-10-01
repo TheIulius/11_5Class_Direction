@@ -450,7 +450,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                 <div className="space-y-4 py-2">
                   <div className="flex items-center justify-between pb-3 border-b border-white/10">
                     <div className="flex items-center gap-3">
-                      <KitJersey clubId={selectedPlayer.clubId} position={selectedPlayer.position} className="w-10 h-10" />
+                      <KitJersey clubId={selectedPlayer.clubId} position={selectedPlayer.position} photoUrl={selectedPlayer.photoUrl} className="w-10 h-10" />
                       <div>
                         <div className="flex items-center gap-2">
                           <ClassShieldBadge clubId={selectedPlayer.clubId} size="xs" />
@@ -699,7 +699,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       className="p-2.5 rounded-xl hover:bg-white/[0.06] cursor-pointer flex items-center justify-between transition-colors group"
                     >
                       <div className="flex items-center gap-3">
-                        <KitJersey clubId={p.clubId} position={p.position} className="w-8 h-8 flex-shrink-0" />
+                        <KitJersey clubId={p.clubId} position={p.position} photoUrl={p.photoUrl} className="w-8 h-8 flex-shrink-0" />
                         <div>
                           <div className="flex items-center gap-1.5">
                             <span className="font-extrabold text-sm text-white group-hover:text-emerald-400 transition-colors">

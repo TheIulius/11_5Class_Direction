@@ -719,7 +719,7 @@ export const TransfersView: React.FC = () => {
                             }`}
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
-                              <KitJersey clubId={p.clubId} position={p.position} className="w-8 h-8 flex-shrink-0" />
+                              <KitJersey clubId={p.clubId} position={p.position} photoUrl={p.photoUrl} className="w-8 h-8 flex-shrink-0" />
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5">
                                   <span className="text-xs font-bold truncate text-slate-900 dark:text-white">
@@ -870,7 +870,7 @@ const SlotCard: React.FC<SlotCardProps> = ({
       )}
 
       {/* Player Jersey Kit */}
-      <KitJersey clubId={player.clubId} position={player.position} className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
+      <KitJersey clubId={player.clubId} position={player.position} photoUrl={player.photoUrl} className="w-6 h-6 sm:w-8 sm:h-8 flex-shrink-0" />
 
       {/* Player Name */}
       <span className="text-[9px] sm:text-[11px] font-extrabold truncate w-full text-center text-slate-900 dark:text-white leading-tight">

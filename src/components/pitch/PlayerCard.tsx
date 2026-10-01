@@ -116,12 +116,17 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
       {/* Jersey Container with Captain & Vice Captain Badges */}
       <div className="relative flex items-center justify-center my-0.5">
-        <KitJersey clubId={player.clubId} position={player.position} className="w-10 h-10 sm:w-11 sm:h-11 md:w-13 md:h-13" />
+        <KitJersey
+          clubId={player.clubId}
+          position={player.position}
+          photoUrl={player.photoUrl}
+          className="w-10 h-10 sm:w-11 sm:h-11 md:w-13 md:h-13"
+        />
 
         {/* Captaincy Badges */}
         {isCaptain && (
           <div
-            className={`absolute -top-1 -right-2 text-white font-black text-[9px] md:text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center border shadow-md ${
+            className={`absolute -top-1 -right-2 text-white font-black text-[9px] md:text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center border shadow-md z-20 ${
               isTripleCap ? 'bg-gradient-to-r from-[#ffe600] to-[#ff9900] text-black border-white' : 'bg-[#111] text-white border-white'
             }`}
             title={isTripleCap ? 'Triple Captain' : 'Captain (2x)'}
@@ -132,7 +137,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
         {isViceCaptain && !isCaptain && (
           <div
-            className="absolute -top-1 -right-2 bg-gray-300 text-black font-black text-[9px] md:text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center border border-black shadow-md"
+            className="absolute -top-1 -right-2 bg-gray-300 text-black font-black text-[9px] md:text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center border border-black shadow-md z-20"
             title="Vice Captain"
           >
             V

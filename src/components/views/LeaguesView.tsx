@@ -274,7 +274,7 @@ export const LeaguesView: React.FC = () => {
                                   : 'bg-slate-50 dark:bg-white/[0.03] border-slate-200/60 dark:border-white/[0.06]'
                               }`}
                             >
-                              <KitJersey clubId={p.clubId} position={p.position} className="w-5 h-5 flex-shrink-0" />
+                              <KitJersey clubId={p.clubId} position={p.position} photoUrl={p.photoUrl} className="w-5 h-5 flex-shrink-0" />
                               <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-0.5">
                                   <span className="text-[10px] font-extrabold text-slate-800 dark:text-white truncate">

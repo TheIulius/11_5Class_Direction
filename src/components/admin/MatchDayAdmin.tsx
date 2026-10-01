@@ -881,15 +881,7 @@ export const MatchDayAdmin: React.FC = () => {
             {/* 1. Player Info */}
             <td className="py-2.5 px-3">
               <div className="flex items-center gap-2">
-                {p.photoUrl ? (
-                  <img
-                    src={p.photoUrl}
-                    alt={p.webName}
-                    className="w-7 h-7 rounded-full object-cover border border-white/20 shrink-0"
-                  />
-                ) : (
-                  <KitJersey clubId={p.clubId} position={p.position} className="w-7 h-7 shrink-0" />
-                )}
+                <KitJersey clubId={p.clubId} position={p.position} photoUrl={p.photoUrl} className="w-7 h-7 shrink-0" />
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <span className="font-extrabold text-xs text-white truncate max-w-[120px] sm:max-w-none">

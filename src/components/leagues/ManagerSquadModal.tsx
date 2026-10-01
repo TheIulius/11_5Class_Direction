@@ -418,11 +418,14 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
               <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center space-x-3">
                   {sheetPlayer.photoUrl ? (
-                    <img
-                      src={sheetPlayer.photoUrl}
-                      alt={sheetPlayer.name}
-                      className="w-12 h-12 rounded-2xl object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
-                    />
+                    <div className="flex flex-col items-center gap-1 shrink-0">
+                      <img
+                        src={sheetPlayer.photoUrl}
+                        alt={sheetPlayer.name}
+                        className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500/40 shadow-xs shrink-0 bg-slate-100 dark:bg-slate-800"
+                      />
+                      <KitJersey clubId={sheetPlayer.clubId} position={sheetPlayer.position} className="w-8 h-8 drop-shadow-xs" />
+                    </div>
                   ) : (
                     <KitJersey clubId={sheetPlayer.clubId} position={sheetPlayer.position} className="w-12 h-12 shrink-0" />
                   )}
@@ -577,12 +580,12 @@ const OpponentPlayerCard: React.FC<{
     >
       {/* Jersey + Badge */}
       <div className="relative">
-        <KitJersey clubId={player.clubId} position={player.position} className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-md" />
+        <KitJersey clubId={player.clubId} position={player.position} photoUrl={player.photoUrl} className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-md" />
 
         {/* Captain badge */}
         {isCaptain && (
           <span
-            className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center font-black text-[9px] text-white shadow-md border ${
+            className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center font-black text-[9px] text-white shadow-md border z-20 ${
               isTripleCaptain ? 'bg-rose-500 border-white ring-1 ring-amber-400' : 'bg-slate-900 border-amber-400'
             }`}
           >
