@@ -639,7 +639,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
               }}
               className={`px-2.5 py-1 sm:px-3 sm:py-1 rounded-lg text-xs font-black uppercase transition-all ${
                 activeGrade === g
-                  ? 'bg-emerald-500 text-slate-950 shadow-xs'
+                  ? 'bg-sky-500 text-white font-black shadow-xs dark:bg-emerald-500 dark:text-slate-950'
                   : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -662,14 +662,14 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
             <div
               key={club.id}
               onClick={() => setActiveClassId(club.id)}
-              className="group p-2 sm:p-2.5 rounded-2xl bg-slate-50/70 dark:bg-white/[0.02] hover:bg-slate-100 dark:hover:bg-white/[0.05] border border-slate-200/70 dark:border-white/10 hover:border-emerald-500/50 transition-all cursor-pointer"
+              className="group p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-white/[0.02] hover:bg-sky-50/50 dark:hover:bg-white/[0.05] border border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/50 shadow-xs hover:shadow-md hover:shadow-sky-500/10 transition-all cursor-pointer"
             >
               {/* Class Title Header (e.g. 10/1) */}
               <div className="flex items-baseline justify-between mb-1">
-                <h3 className="text-sm sm:text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors leading-none">
+                <h3 className="text-sm sm:text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-emerald-400 transition-colors leading-none">
                   {club.shortName}
                 </h3>
-                <span className="text-[8.5px] sm:text-[10px] font-mono font-bold text-slate-400 group-hover:text-emerald-400">
+                <span className="text-[8.5px] sm:text-[10px] font-mono font-bold text-slate-400 group-hover:text-sky-500 dark:group-hover:text-emerald-400">
                   {ownedInClass > 0 ? `${ownedInClass}/2` : `${classPlayers.length}p`}
                 </span>
               </div>

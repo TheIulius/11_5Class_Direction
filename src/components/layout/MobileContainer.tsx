@@ -26,7 +26,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
   const isDevMode = activeTab === 'dev' && isModerator;
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-slate-50 text-slate-900 dark:bg-[#090d16] dark:text-slate-100 select-none transition-colors duration-200">
+    <div className="min-h-screen w-full flex flex-col bg-gradient-to-b from-sky-50/40 via-slate-50 to-sky-50/20 dark:from-[#090d16] dark:via-[#090d16] dark:to-[#090d16] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
       {/* Top Header - decoupled in Dev Mode */}
       {!isDevMode && <TopHeader />}
 

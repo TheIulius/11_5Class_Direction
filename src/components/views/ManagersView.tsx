@@ -275,7 +275,7 @@ export const ManagersView: React.FC = () => {
     <div className="space-y-4 pb-20 animate-fade-in text-slate-900 dark:text-white">
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed top-20 right-4 z-50 bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-4 py-2.5 rounded-2xl shadow-xl border border-white/20 text-xs font-black animate-fade-in">
+        <div className="fixed top-20 right-4 z-50 bg-sky-600 dark:bg-white text-white dark:text-slate-950 px-4 py-2.5 rounded-2xl shadow-xl border border-sky-400/40 dark:border-white/20 text-xs font-black animate-fade-in">
           {notification}
         </div>
       )}

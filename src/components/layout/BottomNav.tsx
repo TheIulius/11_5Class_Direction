@@ -25,7 +25,7 @@ export const BottomNav: React.FC = () => {
 
   return (
     <nav className="md:hidden fixed bottom-1.5 left-2.5 right-2.5 z-40 max-w-[430px] mx-auto select-none">
-      <div className="flex items-center justify-around py-1 px-1 rounded-2xl bg-slate-950/90 dark:bg-[#0a0f1a]/95 backdrop-blur-2xl border border-white/[0.10] shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+      <div className="flex items-center justify-around py-1 px-1 rounded-2xl bg-white/95 dark:bg-[#0a0f1a]/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/[0.10] shadow-[0_8px_32px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
         {visibleTabs.map((tab) => {
           const isDev = tab.id === 'dev';
           const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;
@@ -42,7 +42,7 @@ export const BottomNav: React.FC = () => {
               {isActive && (
                 <motion.div
                   layoutId="activeDockPill"
-                  className="absolute inset-0 rounded-xl bg-white/[0.08] dark:bg-white/[0.07] border border-white/15 shadow-xs -z-10"
+                  className="absolute inset-0 rounded-xl bg-sky-50 border border-sky-200/80 dark:bg-white/[0.07] dark:border-white/15 shadow-xs -z-10"
                   transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                 />
               )}
@@ -50,17 +50,17 @@ export const BottomNav: React.FC = () => {
               <div className="relative">
                 <Icon
                   className={`w-5 h-5 transition-transform duration-200 ${
-                    isActive ? (isDev ? 'scale-110 text-amber-400' : 'scale-110 text-emerald-400') : 'text-slate-400 group-hover:text-slate-200'
+                    isActive ? (isDev ? 'scale-110 text-amber-500 dark:text-amber-400' : 'scale-110 text-sky-600 dark:text-emerald-400') : 'text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'
                   }`}
                 />
                 {isDev && (isDevAuthenticated || isReferee) && (
-                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-slate-950" />
+                  <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-amber-400 ring-2 ring-white dark:ring-slate-950" />
                 )}
               </div>
 
               <span
                 className={`text-[10px] mt-0.5 tracking-tight truncate max-w-[55px] transition-colors ${
-                  isActive ? (isDev ? 'font-black text-amber-400' : 'font-black text-emerald-400') : 'font-medium text-slate-400'
+                  isActive ? (isDev ? 'font-black text-amber-600 dark:text-amber-400' : 'font-black text-sky-600 dark:text-emerald-400') : 'font-medium text-slate-500 dark:text-slate-400'
                 }`}
               >
                 {displayLabel}

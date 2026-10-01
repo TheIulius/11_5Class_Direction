@@ -89,7 +89,7 @@ export const ClassTwoTierPillStrip: React.FC<ClassTwoTierPillStripProps> = ({
               {isActive && (
                 <motion.div
                   layoutId={activePillId}
-                  className="absolute inset-0 rounded-xl bg-slate-900 dark:bg-white shadow-xs"
+                  className="absolute inset-0 rounded-xl bg-sky-500 dark:bg-white shadow-xs"
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
@@ -116,7 +116,7 @@ export const ClassTwoTierPillStrip: React.FC<ClassTwoTierPillStripProps> = ({
                 onClick={() => onSectionChange('ALL')}
                 className={`relative px-3 py-1 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer ${
                   selectedSection === 'ALL'
-                    ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
+                    ? 'bg-sky-500 text-white dark:bg-emerald-500 dark:text-slate-950 font-black shadow-xs'
                     : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10'
                 }`}
               >
@@ -133,7 +133,7 @@ export const ClassTwoTierPillStrip: React.FC<ClassTwoTierPillStripProps> = ({
                     onClick={() => onSectionChange(sec)}
                     className={`w-7 h-7 rounded-full text-xs font-bold shrink-0 flex items-center justify-center transition-all cursor-pointer ${
                       isSecActive
-                        ? 'bg-emerald-500 text-slate-950 font-black shadow-xs ring-2 ring-emerald-500/40'
+                        ? 'bg-sky-500 text-white dark:bg-emerald-500 dark:text-slate-950 font-black shadow-xs ring-2 ring-sky-500/40 dark:ring-emerald-500/40'
                         : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200/80 dark:border-white/10'
                     }`}
                     title={`Class ${selectedGrade}/${sec}`}

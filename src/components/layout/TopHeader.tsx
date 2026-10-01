@@ -189,7 +189,7 @@ export const TopHeader: React.FC = () => {
       </div>
 
       {/* Desktop Navigation Tabs Bar */}
-      <nav className="hidden md:flex items-center justify-center bg-slate-50 dark:bg-[#070b12] border-t border-slate-200 dark:border-slate-800/80 select-none">
+      <nav className="hidden md:flex items-center justify-center bg-white/80 dark:bg-[#070b12] border-t border-sky-100 dark:border-slate-800/80 select-none">
         <div className="w-full max-w-6xl mx-auto flex items-center justify-center gap-1.5 px-6 py-1.5">
           {DESKTOP_TABS.filter((tab) => tab.id !== 'dev' || isModerator || isReferee).map((tab) => {
             const isDev = tab.id === 'dev';
@@ -203,11 +203,11 @@ export const TopHeader: React.FC = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
                   isActive
-                    ? 'bg-slate-900 dark:bg-white/[0.09] text-white border-slate-900 dark:border-white/[0.14] font-bold shadow-xs'
-                    : 'bg-transparent text-slate-500 dark:text-slate-400 border-transparent hover:bg-slate-200/60 dark:hover:bg-white/[0.04] hover:text-slate-900 dark:hover:text-slate-200'
+                    ? 'bg-sky-500 text-white border-sky-400 font-bold shadow-md shadow-sky-500/25 dark:bg-white/[0.09] dark:text-white dark:border-white/[0.14]'
+                    : 'bg-transparent text-slate-600 dark:text-slate-400 border-transparent hover:bg-sky-50/70 hover:text-sky-700 dark:hover:bg-white/[0.04] dark:hover:text-slate-200'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? (isDev ? 'text-amber-400' : 'text-emerald-400') : 'text-slate-400'}`} />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? (isDev ? 'text-amber-300' : 'text-white') : 'text-slate-400'}`} />
                 <span>{displayLabel}</span>
                 {isDev && (isDevAuthenticated || isReferee) && (
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80" />
@@ -220,8 +220,8 @@ export const TopHeader: React.FC = () => {
 
       {/* Gameweek Quick Metric Bar - hidden on Transfers tab to eliminate clutter and duplicate Bank */}
       {activeTab !== 'transfers' && (
-        <div className="w-full bg-slate-100/70 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-800/60 py-1.5 md:py-2 text-center text-xs">
-          <div className="max-w-6xl mx-auto grid grid-cols-4 divide-x divide-slate-200 dark:divide-slate-800 px-1 md:px-6">
+        <div className="w-full bg-gradient-to-r from-sky-50/70 via-white to-sky-50/70 dark:from-slate-900/60 dark:via-[#0c121e] dark:to-slate-900/60 border-t border-sky-100 dark:border-slate-800/60 py-1.5 md:py-2 text-center text-xs">
+          <div className="max-w-6xl mx-auto grid grid-cols-4 divide-x divide-sky-100 dark:divide-slate-800 px-1 md:px-6">
             <div>
               <span className="block text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">GW</span>
               <span className="text-xs md:text-sm font-black font-mono tabular-nums text-emerald-600 dark:text-emerald-400">

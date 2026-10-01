@@ -303,14 +303,14 @@ export const TransfersView: React.FC = () => {
           )}
 
           <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.09]">
-            <span className={comp.isValid ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+            <span className={comp.isValid ? 'text-emerald-600 dark:text-emerald-400 font-bold' : 'text-amber-600 dark:text-amber-400 font-bold'}>
               {validSquadCount}/9
             </span>
-            <span className="text-[10px] text-slate-400 font-medium">Slots</span>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Slots</span>
           </div>
 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.09]">
-            <Coins className="w-3.5 h-3.5 text-emerald-400" />
+            <Coins className="w-3.5 h-3.5 text-sky-500 dark:text-emerald-400" />
             <span className="text-xs font-mono tabular-nums font-bold text-slate-800 dark:text-slate-200">
               £{squad.bank.toFixed(1)}m
             </span>
@@ -320,9 +320,9 @@ export const TransfersView: React.FC = () => {
 
       {/* Lock Banner if Gameweek is Locked */}
       {isSquadLocked && (
-        <div className="mx-3 sm:mx-6 mt-2 p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center justify-between">
+        <div className="mx-3 sm:mx-6 mt-2 p-2.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-900 dark:text-amber-300 text-xs font-bold flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Lock className="w-4 h-4 flex-shrink-0 text-amber-400" />
+            <Lock className="w-4 h-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
             <span>
               {isDemoMode
                 ? 'Demo Mode: Transfer market is in preview mode. Sign in or register to make transfers.'
@@ -359,26 +359,26 @@ export const TransfersView: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-40 p-3.5 rounded-2xl bg-slate-900/95 dark:bg-[#0c121e]/95 backdrop-blur-2xl border border-emerald-500/40 shadow-2xl text-white"
+            className="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-40 p-3.5 rounded-2xl bg-white/95 dark:bg-[#0c121e]/95 backdrop-blur-2xl border border-sky-400/50 dark:border-emerald-500/40 shadow-2xl text-slate-900 dark:text-white"
           >
             <div className="flex items-center justify-between gap-3 text-xs">
               <div className="min-w-0">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">1-for-1 Transfer</span>
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold block">1-for-1 Transfer</span>
                 <div className="flex items-center gap-1.5 font-bold truncate">
-                  <span className="text-rose-400 truncate">{outPlayer.webName}</span>
-                  <ArrowLeftRight className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
-                  <span className="text-emerald-400 truncate">{inPlayer.webName}</span>
+                  <span className="text-rose-500 dark:text-rose-400 truncate">{outPlayer.webName}</span>
+                  <ArrowLeftRight className="w-3.5 h-3.5 text-sky-500 dark:text-emerald-400 flex-shrink-0" />
+                  <span className="text-emerald-600 dark:text-emerald-400 truncate">{inPlayer.webName}</span>
                 </div>
-                <div className="text-[11px] font-mono tabular-nums text-slate-300 mt-0.5 flex items-center gap-1 flex-wrap">
+                <div className="text-[11px] font-mono tabular-nums text-slate-600 dark:text-slate-300 mt-0.5 flex items-center gap-1 flex-wrap">
                   <span>Bank: £{potentialBank.toFixed(1)}m</span>
                   {potentialBank < 0 ? (
-                    <span className="text-rose-400 font-bold">(Over Budget)</span>
+                    <span className="text-rose-500 dark:text-rose-400 font-bold">(Over Budget)</span>
                   ) : squad.activeChip === 'wildcard' ? (
-                    <span className="text-indigo-400 font-bold">• Wildcard (Free)</span>
+                    <span className="text-indigo-600 dark:text-indigo-400 font-bold">• Wildcard (Free)</span>
                   ) : squad.transfersMadeThisGW >= squad.freeTransfers ? (
-                    <span className="text-amber-400 font-bold">• -4 pts hit</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">• -4 pts hit</span>
                   ) : (
-                    <span className="text-emerald-400 font-bold">• Free Transfer</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">• Free Transfer</span>
                   )}
                 </div>
               </div>
@@ -389,7 +389,7 @@ export const TransfersView: React.FC = () => {
                     setOutPlayerId(null);
                     setInPlayerId(null);
                   }}
-                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/20 text-slate-300"
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300"
                 >
                   Cancel
                 </button>
@@ -398,7 +398,7 @@ export const TransfersView: React.FC = () => {
                   disabled={potentialBank < 0 || isSquadLocked}
                   className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
                     potentialBank < 0 || isSquadLocked
-                      ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
                       : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-md'
                   }`}
                 >
@@ -430,7 +430,7 @@ export const TransfersView: React.FC = () => {
                 </h2>
                 <button
                   onClick={() => setMobileShowPitch((prev) => !prev)}
-                  className="lg:hidden px-2 py-0.5 rounded-lg bg-slate-200/80 dark:bg-white/10 text-[10px] font-bold text-slate-700 dark:text-slate-300"
+                  className="lg:hidden px-2 py-0.5 rounded-lg bg-sky-50 dark:bg-white/10 border border-sky-200/80 dark:border-transparent text-[10px] font-bold text-sky-700 dark:text-slate-300"
                 >
                   {mobileShowPitch ? 'Hide Pitch ▲' : 'Show Pitch ▼'}
                 </button>
@@ -450,7 +450,7 @@ export const TransfersView: React.FC = () => {
             </div>
 
             {/* Tactical Pitch with 9 squad slots (Collapsible on mobile, always visible on lg+) */}
-            <div className={`${mobileShowPitch ? 'block' : 'hidden lg:block'} relative rounded-3xl bg-gradient-to-b from-emerald-950/30 via-slate-900/60 to-emerald-950/40 dark:from-emerald-950/40 dark:via-[#09111c] dark:to-emerald-950/30 border border-white/[0.08] shadow-lg p-2.5 sm:p-5 overflow-hidden`}>
+            <div className={`${mobileShowPitch ? 'block' : 'hidden lg:block'} relative rounded-3xl bg-gradient-to-b from-emerald-600 via-emerald-700 to-emerald-800 dark:from-emerald-950/40 dark:via-[#09111c] dark:to-emerald-950/30 border border-emerald-500/40 dark:border-white/[0.08] shadow-lg shadow-emerald-950/15 p-2.5 sm:p-5 overflow-hidden`}>
               {/* Subtle Turf Pitch Markings & Komarovi Champions League Watermark */}
               <div className="absolute inset-0 pointer-events-none opacity-20">
                 <div className="absolute top-0 left-1/4 right-1/4 h-10 border-b border-x border-white/40 rounded-b-xl" />
@@ -569,8 +569,8 @@ export const TransfersView: React.FC = () => {
                     onClick={() => setViewMode('classes')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors font-bold ${
                       viewMode === 'classes'
-                        ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-sky-500 text-white font-black shadow-xs dark:bg-emerald-500 dark:text-slate-950'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                     title="Class Grid View"
                   >
@@ -580,8 +580,8 @@ export const TransfersView: React.FC = () => {
                     onClick={() => setViewMode('list')}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-colors font-bold ${
                       viewMode === 'list'
-                        ? 'bg-emerald-500 text-slate-950 font-black shadow-xs'
-                        : 'text-slate-400 hover:text-slate-200'
+                        ? 'bg-sky-500 text-white font-black shadow-xs dark:bg-emerald-500 dark:text-slate-950'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                     title="List View"
                   >
@@ -599,12 +599,12 @@ export const TransfersView: React.FC = () => {
                     placeholder="Search player or class (e.g. 10/1, Zarno)..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 focus:border-emerald-500 outline-none text-slate-900 dark:text-white placeholder-slate-400 transition-colors"
+                    className="w-full pl-9 pr-8 py-2 rounded-xl text-xs bg-white dark:bg-white/5 border border-slate-200/90 dark:border-white/10 focus:border-sky-500 dark:focus:border-emerald-500 focus:ring-2 focus:ring-sky-400/20 outline-none text-slate-900 dark:text-white placeholder-slate-400 transition-colors shadow-2xs"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -649,11 +649,11 @@ export const TransfersView: React.FC = () => {
                     onClick={() => setAffordableOnly((prev) => !prev)}
                     className={`ml-auto flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold border transition-colors flex-shrink-0 ${
                       affordableOnly
-                        ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-600 dark:text-emerald-400'
-                        : 'bg-transparent border-slate-200 dark:border-white/10 text-slate-500 hover:text-slate-300'
+                        ? 'bg-sky-500/15 border-sky-500/40 text-sky-700 dark:text-sky-300'
+                        : 'bg-white dark:bg-transparent border-slate-200/90 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
-                    <Coins className="w-3 h-3" />
+                    <Coins className="w-3 h-3 text-sky-500 dark:text-emerald-400" />
                     <span>Affordable</span>
                   </button>
                 </div>
@@ -834,12 +834,12 @@ const SlotCard: React.FC<SlotCardProps> = ({
     return (
       <button
         onClick={onSelectEmpty}
-        className="w-[64px] sm:w-[88px] h-[64px] sm:h-[92px] rounded-xl sm:rounded-2xl border border-dashed border-white/25 hover:border-emerald-400/80 bg-white/5 dark:bg-slate-900/40 hover:bg-emerald-500/10 flex flex-col items-center justify-center gap-0.5 sm:gap-1 transition-all group active:scale-95 shadow-xs"
+        className="w-[64px] sm:w-[88px] h-[64px] sm:h-[92px] rounded-xl sm:rounded-2xl border border-dashed border-white/40 hover:border-emerald-300 bg-white/10 dark:bg-slate-900/40 hover:bg-white/20 dark:hover:bg-emerald-500/10 flex flex-col items-center justify-center gap-0.5 sm:gap-1 transition-all group active:scale-95 shadow-xs backdrop-blur-2xs"
       >
-        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-          <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400" />
+        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/20 dark:bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <Plus className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white dark:text-emerald-400" />
         </div>
-        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-slate-300 group-hover:text-emerald-400">
+        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-white/90 dark:text-slate-300 group-hover:text-emerald-200 dark:group-hover:text-emerald-400">
           {label}
         </span>
       </button>
@@ -852,7 +852,7 @@ const SlotCard: React.FC<SlotCardProps> = ({
       className={`relative w-[66px] sm:w-[92px] h-[68px] sm:h-[96px] rounded-xl sm:rounded-2xl cursor-pointer p-1 sm:p-1.5 flex flex-col items-center justify-between transition-all group active:scale-95 ${
         isOutPlayer
           ? 'bg-rose-500/20 border-2 border-rose-500 shadow-[0_0_12px_rgba(244,63,94,0.35)]'
-          : 'bg-white/80 dark:bg-slate-900/85 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-white/10 shadow-sm'
+          : 'bg-white/95 dark:bg-slate-900/85 hover:bg-white dark:hover:bg-slate-800 border border-white/70 dark:border-white/10 shadow-sm'
       }`}
     >
       {/* Quick Sell / Refund Button */}

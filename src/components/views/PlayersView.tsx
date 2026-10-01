@@ -466,8 +466,8 @@ export const PlayersView: React.FC = () => {
                     onClick={() => setPositionFilter(pos)}
                     className={`px-3 py-1 rounded-xl text-xs font-black transition-all shrink-0 border ${
                       isActive
-                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 border-slate-900 dark:border-white shadow-xs'
-                        : 'bg-slate-100 dark:bg-zinc-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-slate-300'
+                        ? 'bg-sky-500 text-white border-sky-500 shadow-xs dark:bg-white dark:text-slate-950 dark:border-white'
+                        : 'bg-slate-100 dark:bg-zinc-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-sky-300 dark:hover:border-white/20 hover:text-slate-900'
                     }`}
                   >
                     {pos} ({count})
@@ -507,8 +507,8 @@ export const PlayersView: React.FC = () => {
                       }}
                       className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 border ${
                         isActive
-                          ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/40 shadow-xs'
-                          : 'bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300'
+                          ? 'bg-sky-500/15 text-sky-700 dark:text-emerald-400 border-sky-500/40 dark:border-emerald-500/40 shadow-xs'
+                          : 'bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-slate-700'
                       }`}
                     >
                       <span>{s.label}</span>

@@ -171,36 +171,36 @@ export const PickTeamView: React.FC = () => {
         )}
 
         {/* Monospace Quick Metrics Bar */}
-        <div className="flex items-center justify-between flex-wrap gap-2 px-3 py-2 rounded-xl bg-slate-900/80 dark:bg-zinc-950/80 border border-white/10 backdrop-blur-xs">
+        <div className="flex items-center justify-between flex-wrap gap-2 px-3 py-2 rounded-xl bg-white/95 dark:bg-zinc-950/80 border border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-xs">
           <div className="flex items-center flex-wrap gap-2.5 sm:gap-4 text-xs font-mono">
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase font-bold text-slate-400">VAL</span>
-              <span className="font-bold text-slate-100">£{teamValue.toFixed(1)}m</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">VAL</span>
+              <span className="font-bold text-slate-800 dark:text-slate-100">£{teamValue.toFixed(1)}m</span>
             </div>
-            <div className="h-3 w-[1px] bg-white/15" />
+            <div className="h-3 w-[1px] bg-slate-200 dark:bg-white/15" />
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase font-bold text-slate-400">BANK</span>
-              <span className="font-bold text-emerald-400">£{squad.bank.toFixed(1)}m</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">BANK</span>
+              <span className="font-bold text-emerald-600 dark:text-emerald-400">£{squad.bank.toFixed(1)}m</span>
             </div>
-            <div className="h-3 w-[1px] bg-white/15" />
+            <div className="h-3 w-[1px] bg-slate-200 dark:bg-white/15" />
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase font-bold text-slate-400">FREE FT</span>
-              <span className="font-bold text-cyan-400">{freeTransfersRemaining}</span>
+              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">FREE FT</span>
+              <span className="font-bold text-sky-600 dark:text-cyan-400">{freeTransfersRemaining}</span>
             </div>
             {deadline && (
               <>
-                <div className="h-3 w-[1px] bg-white/15" />
+                <div className="h-3 w-[1px] bg-slate-200 dark:bg-white/15" />
                 <div
                   className="flex items-center gap-1.5"
                   title={`Deadline: ${new Date(deadline.deadlineTime).toLocaleString()}`}
                 >
-                  <span className="text-[10px] uppercase font-bold text-slate-400">DEADLINE</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">DEADLINE</span>
                   <span
                     className={`font-bold flex items-center gap-1 ${
-                      isSquadLocked ? 'text-rose-400' : 'text-amber-400'
+                      isSquadLocked ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'
                     }`}
                   >
-                    <Clock className="w-3 h-3 text-amber-400/80" />
+                    <Clock className="w-3 h-3 text-amber-500/90" />
                     <span>{isSquadLocked ? 'Locked' : timeLeft}</span>
                   </span>
                 </div>
@@ -213,18 +213,18 @@ export const PickTeamView: React.FC = () => {
             onClick={() => setShowCompDetails((prev) => !prev)}
             className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors flex items-center gap-1.5 ${
               comp.isValid
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-400'
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
             }`}
           >
             {comp.isValid ? (
               <>
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
                 <span>Lineup Ready</span>
               </>
             ) : (
               <>
-                <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+                <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
                 <span>Squad Incomplete ({validCount}/9)</span>
               </>
             )}
@@ -234,22 +234,22 @@ export const PickTeamView: React.FC = () => {
 
         {/* Collapsible Squad Composition Matrix */}
         {showCompDetails && (
-          <div className="p-3 rounded-xl bg-slate-900/60 dark:bg-zinc-950/60 border border-white/10 animate-fade-in space-y-2">
+          <div className="p-3 rounded-xl bg-white/95 dark:bg-zinc-950/60 border border-slate-200/90 dark:border-white/10 shadow-xs animate-fade-in space-y-2">
             <div className="grid grid-cols-4 gap-1.5 text-center">
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.gkCount === 1 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-400">GK</span>
+              <div className={`p-1.5 rounded-lg border text-xs ${comp.gkCount === 1 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">GK</span>
                 <span className="font-mono font-black text-xs">{comp.gkCount}/1</span>
               </div>
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.defCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-400">DEF</span>
+              <div className={`p-1.5 rounded-lg border text-xs ${comp.defCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">DEF</span>
                 <span className="font-mono font-black text-xs">{comp.defCount}/3</span>
               </div>
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.midCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-400">MID</span>
+              <div className={`p-1.5 rounded-lg border text-xs ${comp.midCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">MID</span>
                 <span className="font-mono font-black text-xs">{comp.midCount}/3</span>
               </div>
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.fwdCount === 2 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-400">FWD</span>
+              <div className={`p-1.5 rounded-lg border text-xs ${comp.fwdCount === 2 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">FWD</span>
                 <span className="font-mono font-black text-xs">{comp.fwdCount}/2</span>
               </div>
             </div>
@@ -277,20 +277,20 @@ export const PickTeamView: React.FC = () => {
       </section>
 
       {/* Fine Dashed Divider between Sections */}
-      <div className="w-full border-b border-dashed border-white/15 my-4" />
+      <div className="w-full border-b border-dashed border-slate-200 dark:border-white/15 my-4" />
 
       {/* ======================================================== */}
       {/* SECTION 2: BOTTOM RIBBON (Unified Substitutes & Chips Dock) */}
       {/* ======================================================== */}
       <section className="flex flex-col space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 rounded-2xl bg-slate-900/90 dark:bg-zinc-950/90 border border-white/10 backdrop-blur-md shadow-xl">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 rounded-2xl bg-white/95 dark:bg-zinc-950/90 border border-slate-200/90 dark:border-white/10 backdrop-blur-md shadow-lg shadow-sky-950/5">
           {/* Left Column: Substitutes (Strictly 3 Reserves) */}
-          <div className="md:col-span-7 flex flex-col justify-between md:border-r border-dashed border-white/15 md:pr-4">
+          <div className="md:col-span-7 flex flex-col justify-between md:border-r border-dashed border-slate-200 dark:border-white/15 md:pr-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                 Substitutes ({layout.bench.length}/3)
               </span>
-              <span className="text-[9px] font-mono text-slate-400">
+              <span className="text-[9px] font-mono text-slate-500 dark:text-slate-400">
                 Priority: Sub 1 enters 1st
               </span>
             </div>
@@ -305,10 +305,10 @@ export const PickTeamView: React.FC = () => {
                       <div className="w-full flex items-center justify-between mb-1 px-1">
                         <span className={`text-[9px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded-md ${
                           order === 1
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                            ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40'
                             : order === 2
-                            ? 'bg-sky-500/20 text-sky-400 border border-sky-500/40'
-                            : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                            ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/40'
+                            : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/40'
                         }`}>
                           {order === 1 ? '1st Sub ★' : order === 2 ? '2nd Sub' : '3rd Sub'}
                         </span>
@@ -322,7 +322,7 @@ export const PickTeamView: React.FC = () => {
                                   reorderBenchPlayer(sp.playerId, order - 1);
                                 }}
                                 title={`Promote to Sub ${order - 1}`}
-                                className="p-1 rounded bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-90"
+                                className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90"
                               >
                                 <ArrowLeft className="w-3 h-3" />
                               </button>
@@ -334,7 +334,7 @@ export const PickTeamView: React.FC = () => {
                                   reorderBenchPlayer(sp.playerId, order + 1);
                                 }}
                                 title={`Demote to Sub ${order + 1}`}
-                                className="p-1 rounded bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-all active:scale-90"
+                                className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90"
                               >
                                 <ArrowRight className="w-3 h-3" />
                               </button>
@@ -360,10 +360,10 @@ export const PickTeamView: React.FC = () => {
                   <div
                     key={`empty-bench-${order}`}
                     onClick={() => setActiveTab('transfers')}
-                    className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-white/20 bg-black/20 text-slate-400 hover:border-emerald-400/50 hover:bg-emerald-500/10 cursor-pointer transition-all min-h-[90px]"
+                    className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-black/20 text-slate-500 dark:text-slate-400 hover:border-sky-400 hover:bg-sky-50/50 cursor-pointer transition-all min-h-[90px]"
                   >
-                    <span className="text-[10px] font-bold text-slate-400">Sub {order}</span>
-                    <span className="text-[8px] text-emerald-400 mt-1 font-mono uppercase tracking-wider">+ Empty</span>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Sub {order}</span>
+                    <span className="text-[8px] text-sky-600 dark:text-emerald-400 mt-1 font-mono uppercase tracking-wider">+ Empty</span>
                   </div>
                 );
               })}
@@ -371,14 +371,14 @@ export const PickTeamView: React.FC = () => {
           </div>
 
           {/* Right Column: Available Chips with Metallic Shine */}
-          <div className="md:col-span-5 flex flex-col justify-between pt-3 md:pt-0 border-t md:border-t-0 border-dashed border-white/15 md:pl-4">
+          <div className="md:col-span-5 flex flex-col justify-between pt-3 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-white/15 md:pl-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
+                <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 Available Chips
               </span>
               {squad.activeChip && (
-                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 animate-pulse">
+                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 animate-pulse">
                   Active
                 </span>
               )}
@@ -397,21 +397,21 @@ export const PickTeamView: React.FC = () => {
                     onClick={() => activateChip(chip.id)}
                     className={`group relative overflow-hidden flex flex-col md:flex-row items-center md:justify-between p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold border transition-all ${
                       isActive
-                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.35)]'
+                        ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20'
                         : isUsed || isSquadLocked
-                        ? 'bg-black/30 text-slate-500 border-white/5 opacity-40 cursor-not-allowed'
-                        : 'bg-black/40 hover:bg-black/60 text-slate-200 border-white/10 hover:border-emerald-500/40 active:scale-98'
+                        ? 'bg-slate-100 dark:bg-black/30 text-slate-400 dark:text-slate-500 border-slate-200/80 dark:border-white/5 opacity-60 cursor-not-allowed'
+                        : 'bg-slate-50/80 hover:bg-sky-50/70 text-slate-700 dark:bg-black/40 dark:hover:bg-black/60 dark:text-slate-200 border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/40 shadow-xs active:scale-98'
                     }`}
                   >
                     {/* Metallic sweep shine */}
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-transform" />
                     <div className="flex flex-col md:flex-row items-center gap-1.5 md:gap-2 relative z-10">
-                      <div className={`p-1 rounded-lg ${isActive ? 'bg-white/20' : 'bg-white/5'}`}>
+                      <div className={`p-1 rounded-lg ${isActive ? 'bg-white/20 text-white' : 'bg-sky-500/10 text-sky-600 dark:bg-white/5 dark:text-slate-300'}`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
                       <span className="text-[10px] md:text-xs text-center md:text-left leading-tight">{chip.label}</span>
                     </div>
-                    <span className="text-[8px] md:text-[10px] font-mono mt-1 md:mt-0 relative z-10 text-slate-400">
+                    <span className="text-[8px] md:text-[10px] font-mono mt-1 md:mt-0 relative z-10 text-sky-600 dark:text-slate-400 font-bold">
                       {isActive ? 'ACTIVE' : isUsed ? 'USED' : 'READY'}
                     </span>
                   </button>
@@ -423,7 +423,7 @@ export const PickTeamView: React.FC = () => {
 
         {/* Error notification if save fails or squad invalid */}
         {errorMessage && (
-          <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold flex items-center gap-2">
+          <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMessage}</span>
           </div>
@@ -435,8 +435,8 @@ export const PickTeamView: React.FC = () => {
           disabled={isSaving || !comp.isValid || isSquadLocked}
           className={`w-full py-3.5 px-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg ${
             !comp.isValid || isSquadLocked
-              ? 'bg-slate-800 text-slate-500 border border-white/5 cursor-not-allowed'
-              : 'bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-[#002812] shadow-[0_0_20px_rgba(16,185,129,0.35)]'
+              ? 'bg-slate-200 text-slate-500 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-500 dark:border-white/5 cursor-not-allowed shadow-none'
+              : 'bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.35)]'
           }`}
         >
           {isSaving ? (
