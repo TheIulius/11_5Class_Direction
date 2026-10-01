@@ -140,6 +140,14 @@ export const PlayersView: React.FC = () => {
       list = list.filter((p) => matchesGradeAndSection(p.clubId, selectedGrade, selectedSection));
     }
 
+    // When sorting by Rising, hide players with 0 price change
+    if (sortBy === 'rising') {
+      list = list.filter((p) => {
+        const diff = p.priceChange ?? (p.previousCost ? Math.round((p.cost - p.previousCost) * 10) / 10 : 0);
+        return diff !== 0;
+      });
+    }
+
     // Sort
     list.sort((a, b) => {
       let valA = 0;
@@ -553,9 +561,27 @@ export const PlayersView: React.FC = () => {
                 const clubShort = club?.shortName || p.clubId.replace('SCH_', '').replace('_', '/');
                 const isOwnedByMe = squad.players.some((sp) => sp.playerId === p.id);
 
+                // Divider between rising and falling when sorted by Rising
+                const priceDiff = p.priceChange ?? (p.previousCost ? Math.round((p.cost - p.previousCost) * 10) / 10 : 0);
+                const prevPlayer = idx > 0 ? filteredAndSortedPlayers[idx - 1] : null;
+                const prevDiff = prevPlayer
+                  ? (prevPlayer.priceChange ?? (prevPlayer.previousCost ? Math.round((prevPlayer.cost - prevPlayer.previousCost) * 10) / 10 : 0))
+                  : 0;
+                const showRisingDivider = sortBy === 'rising' && sortOrder === 'desc' && prevDiff > 0 && priceDiff < 0;
+                const showRisingDividerAsc = sortBy === 'rising' && sortOrder === 'asc' && prevDiff < 0 && priceDiff > 0;
+
                 return (
+                  <React.Fragment key={p.id}>
+                  {(showRisingDivider || showRisingDividerAsc) && (
+                    <div className="flex items-center gap-3 py-2">
+                      <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/60 to-emerald-500/10" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                        {showRisingDivider ? '📉 Falling' : '📈 Rising'}
+                      </span>
+                      <div className="flex-1 h-px bg-gradient-to-l from-rose-500/60 to-rose-500/10" />
+                    </div>
+                  )}
                   <div
-                    key={p.id}
                     onClick={() => setSelectedPlayerId(p.id)}
                     className="group p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-3"
                   >
@@ -644,6 +670,7 @@ export const PlayersView: React.FC = () => {
                       <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </div>
+                  </React.Fragment>
                 );
               })
             )}
