@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useFPL } from '../../context/FPLContext';
 import { fetchManagerSquadApi } from '../../services/api';
 import { Squad } from '../../types/fpl';
-import { GameweekCalculationResult, calculateGameweekSquadPoints } from '../../engine/scoring';
+import { GameweekCalculationResult, calculateGameweekSquadPoints, getEffectiveScoringPosition } from '../../engine/scoring';
 import { getFormationLayout } from '../../engine/formations';
 import { KitJersey } from '../pitch/KitJersey';
 import { CLUBS } from '../../data/clubs';
@@ -489,7 +489,11 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                   </div>
                   <div className="flex justify-between p-1.5 rounded bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                     <span>Clean Sheet:</span>
-                    <strong className="text-slate-900 dark:text-white">{sheetStats?.cleanSheet ? 'Yes (+4)' : 'No'}</strong>
+                    <strong className="text-slate-900 dark:text-white">
+                      {sheetStats?.cleanSheet
+                        ? `Yes (+${getEffectiveScoringPosition(sheetPlayer.position, sheetPlayer.id) === 'FWD' ? 0 : getEffectiveScoringPosition(sheetPlayer.position, sheetPlayer.id) === 'MID' ? 1 : 4})`
+                        : 'No'}
+                    </strong>
                   </div>
                   <div className="flex justify-between p-1.5 rounded bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800">
                     <span>Bonus:</span>

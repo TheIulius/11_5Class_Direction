@@ -1164,7 +1164,7 @@ app.post('/api/admin/stat', (req: Request, res: Response) => {
     (f: Fixture) => f.gameweek === gw && (f.homeClubId === normClub || f.awayClubId === normClub)
   );
   const isOnePrice = gwFixture?.venue === 'one_price';
-  player.gwPoints = calculatePlayerPoints(player.position, updatedStats, isOnePrice);
+  player.gwPoints = calculatePlayerPoints(player.position, updatedStats, isOnePrice, player.id);
 
   // Recalculate total points across all GWs
   let sum = 0;
@@ -1174,7 +1174,7 @@ app.post('/api/admin/stat', (req: Request, res: Response) => {
       (f: Fixture) => f.gameweek === gNum && (f.homeClubId === normClub || f.awayClubId === normClub)
     );
     const gOnePrice = gFix?.venue === 'one_price';
-    sum += calculatePlayerPoints(player.position, s, gOnePrice);
+    sum += calculatePlayerPoints(player.position, s, gOnePrice, player.id);
   });
   player.totalPoints = sum;
 
@@ -1239,11 +1239,11 @@ app.post('/api/admin/simulate', (req: Request, res: Response) => {
     };
 
     p.gwStats[gw] = stats;
-    p.gwPoints = calculatePlayerPoints(p.position, stats);
+    p.gwPoints = calculatePlayerPoints(p.position, stats, false, p.id);
 
     let sum = 0;
     Object.values(p.gwStats).forEach((s) => {
-      sum += calculatePlayerPoints(p.position, s);
+      sum += calculatePlayerPoints(p.position, s, false, p.id);
     });
     p.totalPoints = sum;
   });
@@ -1457,7 +1457,7 @@ app.post('/api/admin/gameweek', (req: Request, res: Response) => {
           (fx: any) => fx.gameweek === gNum && (fx.homeClubId === p.clubId || fx.awayClubId === p.clubId)
         );
         const isOnePrice = fix?.venue === 'one_price';
-        const pts = calculatePlayerPoints(p.position, st, isOnePrice);
+        const pts = calculatePlayerPoints(p.position, st, isOnePrice, p.id);
         total += pts;
       });
       p.totalPoints = total;
@@ -3068,7 +3068,7 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
     player.gwStats[gw] = stats;
 
     const isOnePrice = venue === 'one_price';
-    player.gwPoints = calculatePlayerPoints(player.position, stats, isOnePrice);
+    player.gwPoints = calculatePlayerPoints(player.position, stats, isOnePrice, player.id);
 
     // Recalculate total points across all GWs
     let sum = 0;
@@ -3080,7 +3080,7 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
         return f.gameweek === gwNum && (f.homeClubId === normClub || f.awayClubId === normClub);
       });
       const gwIsOnePrice = gwFixture?.venue === 'one_price';
-      sum += calculatePlayerPoints(player.position, player.gwStats[gwNum], gwIsOnePrice);
+      sum += calculatePlayerPoints(player.position, player.gwStats[gwNum], gwIsOnePrice, player.id);
     }
     player.totalPoints = sum;
   }

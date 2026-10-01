@@ -5,6 +5,7 @@ import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { useFPL } from '../../context/FPLContext';
+import { getEffectiveScoringPosition } from '../../engine/scoring';
 import { formatFixtureDate, sortFixturesByDate } from '../views/FixturesView';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -561,65 +562,74 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
                       Tactile Stat Increments (GW {actualGW})
                     </span>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {/* Goal Button Group */}
-                      <div className="flex items-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 overflow-hidden">
-                        <button
-                          disabled={!currentStats.goals}
-                          onClick={(e) =>
-                            handleStatIncrement('goals', -1, '-1 Goal', 'bg-rose-500 text-white', e)
-                          }
-                          className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-emerald-500/30 transition-colors cursor-pointer"
-                          title="Remove 1 Goal (-1)"
-                        >
-                          -1
-                        </button>
-                        <motion.button
-                          whileTap={{ scale: 0.95 }}
-                          onClick={(e) =>
-                            handleStatIncrement('goals', 1, `+${selectedPlayer.position === 'FWD' ? 6 : selectedPlayer.position === 'MID' ? 6 : 7} Goal`, 'bg-emerald-500 text-slate-950', e)
-                          }
-                          className="flex-1 p-2.5 text-emerald-300 font-black text-xs flex items-center justify-between hover:bg-emerald-500/25 transition-colors cursor-pointer"
-                        >
-                          <span>+ Goal</span>
-                          <span className="text-[10px] font-mono opacity-80 font-bold">+{selectedPlayer.position === 'FWD' ? 6 : 7}</span>
-                        </motion.button>
-                      </div>
+                    {/* Goal Button Group */}
+                    {(() => {
+                      const effectivePos = getEffectiveScoringPosition(selectedPlayer.position, selectedPlayer.id);
+                      const goalPts = effectivePos === 'GKP' ? 7 : effectivePos === 'DEF' ? 6 : effectivePos === 'MID' ? 5 : 4;
+                      const csPts = effectivePos === 'GKP' || effectivePos === 'DEF' ? 4 : effectivePos === 'MID' ? 1 : 0;
+                      return (
+                        <>
+                          <div className="flex items-center rounded-xl bg-emerald-500/15 border border-emerald-500/30 overflow-hidden">
+                            <button
+                              disabled={!currentStats.goals}
+                              onClick={(e) =>
+                                handleStatIncrement('goals', -1, '-1 Goal', 'bg-rose-500 text-white', e)
+                              }
+                              className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-emerald-500/30 transition-colors cursor-pointer"
+                              title="Remove 1 Goal (-1)"
+                            >
+                              -1
+                            </button>
+                            <motion.button
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) =>
+                                handleStatIncrement('goals', 1, `+${goalPts} Goal`, 'bg-emerald-500 text-slate-950', e)
+                              }
+                              className="flex-1 p-2.5 text-emerald-300 font-black text-xs flex items-center justify-between hover:bg-emerald-500/25 transition-colors cursor-pointer"
+                            >
+                              <span>+ Goal</span>
+                              <span className="text-[10px] font-mono opacity-80 font-bold">+{goalPts}</span>
+                            </motion.button>
+                          </div>
 
-                      {/* Assist Button Group */}
-                      <div className="flex items-center rounded-xl bg-sky-500/15 border border-sky-500/30 overflow-hidden">
-                        <button
-                          disabled={!currentStats.assists}
-                          onClick={(e) =>
-                            handleStatIncrement('assists', -1, '-1 Assist', 'bg-rose-500 text-white', e)
-                          }
-                          className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-sky-500/30 transition-colors cursor-pointer"
-                          title="Remove 1 Assist (-1)"
-                        >
-                          -1
-                        </button>
-                        <motion.button
-                          whileTap={{ scale: 0.95 }}
-                          onClick={(e) => handleStatIncrement('assists', 1, '+3 Assist', 'bg-sky-500 text-slate-950', e)}
-                          className="flex-1 p-2.5 text-sky-300 font-black text-xs flex items-center justify-between hover:bg-sky-500/25 transition-colors cursor-pointer"
-                        >
-                          <span>+ Assist</span>
-                          <span className="text-[10px] font-mono opacity-80 font-bold">+3</span>
-                        </motion.button>
-                      </div>
+                          {/* Assist Button Group */}
+                          <div className="flex items-center rounded-xl bg-sky-500/15 border border-sky-500/30 overflow-hidden">
+                            <button
+                              disabled={!currentStats.assists}
+                              onClick={(e) =>
+                                handleStatIncrement('assists', -1, '-1 Assist', 'bg-rose-500 text-white', e)
+                              }
+                              className="px-2 py-2.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-black text-xs disabled:opacity-30 disabled:cursor-not-allowed border-r border-sky-500/30 transition-colors cursor-pointer"
+                              title="Remove 1 Assist (-1)"
+                            >
+                              -1
+                            </button>
+                            <motion.button
+                              whileTap={{ scale: 0.95 }}
+                              onClick={(e) => handleStatIncrement('assists', 1, '+3 Assist', 'bg-sky-500 text-slate-950', e)}
+                              className="flex-1 p-2.5 text-sky-300 font-black text-xs flex items-center justify-between hover:bg-sky-500/25 transition-colors cursor-pointer"
+                            >
+                              <span>+ Assist</span>
+                              <span className="text-[10px] font-mono opacity-80 font-bold">+3</span>
+                            </motion.button>
+                          </div>
 
-                      {/* Clean Sheet Toggle */}
-                      <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        onClick={(e) => handleToggleStat('cleanSheet', '+4 Clean Sheet', 'bg-cyan-500 text-slate-950', e)}
-                        className={`p-2.5 rounded-xl border font-black text-xs flex items-center justify-between transition-colors cursor-pointer ${
-                          currentStats.cleanSheet
-                            ? 'bg-cyan-500 text-slate-950 border-cyan-400'
-                            : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
-                        }`}
-                      >
-                        <span>{currentStats.cleanSheet ? 'Clean Sheet ✓' : '+ Clean Sheet'}</span>
-                        <span className="text-[10px] font-mono font-bold">+4</span>
-                      </motion.button>
+                          {/* Clean Sheet Toggle */}
+                          <motion.button
+                            whileTap={{ scale: 0.95 }}
+                            onClick={(e) => handleToggleStat('cleanSheet', `+${csPts} Clean Sheet`, 'bg-cyan-500 text-slate-950', e)}
+                            className={`p-2.5 rounded-xl border font-black text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                              currentStats.cleanSheet
+                                ? 'bg-cyan-500 text-slate-950 border-cyan-400'
+                                : 'bg-cyan-500/15 border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/25'
+                            }`}
+                          >
+                            <span>{currentStats.cleanSheet ? 'Clean Sheet ✓' : '+ Clean Sheet'}</span>
+                            <span className="text-[10px] font-mono font-bold">+{csPts}</span>
+                          </motion.button>
+                        </>
+                      );
+                    })()}
 
                       {/* Save Button (GKs) */}
                       <div className="flex items-center rounded-xl bg-amber-500/15 border border-amber-500/30 overflow-hidden">

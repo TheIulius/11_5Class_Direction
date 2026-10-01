@@ -140,7 +140,7 @@ export const FixturesView: React.FC = () => {
         isMVP: false,
       };
 
-      const gamePoints = calculatePlayerPoints(p.position, stats, isOnePrice);
+      const gamePoints = calculatePlayerPoints(p.position, stats, isOnePrice, p.id);
       const bonus = stats.bonus || (stats.mvpRank === 1 ? 3 : stats.mvpRank === 2 ? 2 : stats.mvpRank === 3 ? 1 : (stats.isMVP ? 3 : 0));
       const isMVP = Boolean(stats.isMVP || bonus > 0);
 

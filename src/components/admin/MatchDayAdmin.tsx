@@ -4,7 +4,7 @@ import { KitJersey } from '../pitch/KitJersey';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { CLUBS } from '../../data/clubs';
 import { MatchGoal, Venue, Player, Club, PlayerStats } from '../../types/fpl';
-import { calculatePlayerPoints } from '../../engine/scoring';
+import { calculatePlayerPoints, getEffectiveScoringPosition } from '../../engine/scoring';
 import { adminSaveMatchEventsApi } from '../../services/api';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -323,10 +323,11 @@ export const MatchDayAdmin: React.FC = () => {
   };
 
   // Point values calculation based on venue
-  const getGoalPoints = (pos: string) => {
-    if (pos === 'GKP') return isOnePrice ? 5 : 7;
-    if (pos === 'DEF') return isOnePrice ? 4 : 6;
-    if (pos === 'MID') return isOnePrice ? 3 : 5;
+  const getGoalPoints = (pos: string, playerId?: string) => {
+    const effectivePos = getEffectiveScoringPosition(pos as any, playerId);
+    if (effectivePos === 'GKP') return isOnePrice ? 5 : 7;
+    if (effectivePos === 'DEF') return isOnePrice ? 4 : 6;
+    if (effectivePos === 'MID') return isOnePrice ? 3 : 5;
     return isOnePrice ? 2 : 4; // FWD
   };
 
@@ -411,12 +412,12 @@ export const MatchDayAdmin: React.FC = () => {
       saves: pSaves,
     };
 
-    return calculatePlayerPoints(p.position, stats, isOnePrice);
+    return calculatePlayerPoints(p.position, stats, isOnePrice, p.id);
   };
 
   // Rapid Tactile Actions on Players
   const handleRapidGoal = (player: Player, team: 'home' | 'away', e: React.MouseEvent) => {
-    const pts = getGoalPoints(player.position);
+    const pts = getGoalPoints(player.position, player.id);
     spawnFloatingPoint(`+${pts} Goal`, 'bg-emerald-500 text-slate-950 font-black', e);
 
     setGoals((prev) => [
@@ -551,7 +552,7 @@ export const MatchDayAdmin: React.FC = () => {
     if (team === 'home') setHomeScore((s) => Math.max(0, s - 1));
     else setAwayScore((s) => Math.max(0, s - 1));
 
-    const pts = getGoalPoints(player.position);
+    const pts = getGoalPoints(player.position, player.id);
     spawnFloatingPoint(`-1 Goal (-${pts})`, 'bg-rose-600 text-white font-black', e);
   };
 
@@ -988,7 +989,7 @@ export const MatchDayAdmin: React.FC = () => {
                   type="button"
                   onClick={(e) => handleRapidGoal(p, team, e)}
                   className="px-2.5 py-1 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 hover:text-slate-950 text-emerald-300 font-bold border border-emerald-500/20 transition-all text-xs cursor-pointer"
-                  title={`+1 Goal (+${getGoalPoints(p.position)} pts)`}
+                  title={`+1 Goal (+${getGoalPoints(p.position, p.id)} pts)`}
                 >
                   ⚽ +
                 </button>

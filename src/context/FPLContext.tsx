@@ -1373,7 +1373,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       );
       const isOnePrice = gwFixture?.venue === 'one_price';
 
-      const newGWPoints = calculatePlayerPoints(player.position, updatedStats, isOnePrice);
+      const newGWPoints = calculatePlayerPoints(player.position, updatedStats, isOnePrice, player.id);
 
       const updatedGWStats = {
         ...player.gwStats,
@@ -1387,7 +1387,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           (f) => f.gameweek === gNum && (f.homeClubId === normClub || f.awayClubId === normClub)
         );
         const gOnePrice = gFix?.venue === 'one_price';
-        sumTotalPoints += calculatePlayerPoints(player.position, gStats, gOnePrice);
+        sumTotalPoints += calculatePlayerPoints(player.position, gStats, gOnePrice, player.id);
       });
 
       return {

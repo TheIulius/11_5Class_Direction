@@ -21,12 +21,40 @@ import { Player, PlayerStats, Position, SquadPlayer, ChipType } from '../types/f
  *
  *  One Price Stadium: goals and MVP reduced by 1 point, assists reduced by 2 points (+1 pt).
  */
+/**
+ * Temporary position overrides for scoring calculation (e.g. before official role change in GW2).
+ * The player remains registered/displayed under their current squad position so managers' squads don't break,
+ * but their scoring rules (goals, clean sheets, conceded goals) match the overridden position.
+ */
+export const SCORING_POSITION_OVERRIDES: Record<string, Position> = {
+  p_12_3_palelashvili: 'FWD',
+  p_12_3_vashakmadze: 'FWD',
+};
+
+export function getEffectiveScoringPosition(
+  position: Position,
+  playerId?: string
+): Position {
+  if (playerId && SCORING_POSITION_OVERRIDES[playerId]) {
+    return SCORING_POSITION_OVERRIDES[playerId];
+  }
+  // Fallback: If position itself was mistakenly passed as playerId
+  if (typeof position === 'string' && SCORING_POSITION_OVERRIDES[position]) {
+    return SCORING_POSITION_OVERRIDES[position];
+  }
+  return position;
+}
+
 export function calculatePlayerPoints(
   position: Position,
   stats?: Partial<PlayerStats>,
-  isOnePriceStadium: boolean = false
+  isOnePriceStadium: boolean = false,
+  playerId?: string
 ): number {
   if (!stats) return 0;
+
+  const effectivePlayerId = playerId || (stats as any)?.playerId;
+  const effectivePosition = getEffectiveScoringPosition(position, effectivePlayerId);
 
   let points = 0;
   const minutes = stats.minutes || 0;
@@ -43,11 +71,11 @@ export function calculatePlayerPoints(
   // 2. Goals scored (position-dependent, One Price Stadium: -2 pts reduction)
   if (goals > 0) {
     let goalPts: number;
-    if (position === 'GKP') {
+    if (effectivePosition === 'GKP') {
       goalPts = 7;
-    } else if (position === 'DEF') {
+    } else if (effectivePosition === 'DEF') {
       goalPts = 6;
-    } else if (position === 'MID') {
+    } else if (effectivePosition === 'MID') {
       goalPts = 5;
     } else {
       goalPts = 4; // FWD
@@ -62,22 +90,22 @@ export function calculatePlayerPoints(
 
   // 4. Clean sheets (KCL: must play 20+ minutes)
   if (stats.cleanSheet && minutes >= 20) {
-    if (position === 'GKP' || position === 'DEF') {
+    if (effectivePosition === 'GKP' || effectivePosition === 'DEF') {
       points += 4;
-    } else if (position === 'MID') {
+    } else if (effectivePosition === 'MID') {
       points += 1;
     }
     // FWD: 0 points for clean sheet
   }
 
   // 4b. Goals conceded: goalkeepers and defenders points reduced by round_down(goals_scored_against_them / 2)
-  if (position === 'GKP' || position === 'DEF') {
+  if (effectivePosition === 'GKP' || effectivePosition === 'DEF') {
     const conceded = Math.max(0, stats.goalsConceded || 0);
     points -= Math.floor(conceded / 2);
   }
 
   // 5. Penalty saved (KCL: +3 for GK only)
-  if (position === 'GKP') {
+  if (effectivePosition === 'GKP') {
     points += (stats.penaltiesSaved || 0) * 3;
   }
 
@@ -314,7 +342,7 @@ export function calculateGameweekSquadPoints(
     if (player) {
       const stats = player.gwStats[currentGW];
       const isOnePrice = isPlayerOnePriceStadium(player);
-      rawPointsMap[sp.playerId] = calculatePlayerPoints(player.position, stats, isOnePrice);
+      rawPointsMap[sp.playerId] = calculatePlayerPoints(player.position, stats, isOnePrice, player.id);
       minutesMap[sp.playerId] = stats?.minutes || 0;
     } else {
       rawPointsMap[sp.playerId] = 0;
