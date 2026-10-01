@@ -1841,6 +1841,7 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
           (rf.isFinished && !lf.isFinished) ||
           (rf.homeScore != null && lf.homeScore == null) ||
           (rf.date && !lf.date) ||
+          (rf.venue && !lf.venue) ||
           (Array.isArray(rf.goalScorers) && rf.goalScorers.length > (lf.goalScorers?.length || 0))
         ) {
           Object.assign(lf, rf);
@@ -1875,9 +1876,18 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
             changed = true;
           } else {
             for (const [gw, st] of Object.entries(rp.gwStats)) {
-              if (!lp.gwStats[gw] || ((st as any).minutes || 0) > (lp.gwStats[gw]?.minutes || 0)) {
-                lp.gwStats[gw] = st as any;
+              const rStats = st as any;
+              const lStats = lp.gwStats[gw];
+              if (!lStats) {
+                lp.gwStats[gw] = rStats;
                 changed = true;
+              } else {
+                const rSum = (rStats.minutes || 0) + (rStats.goals || 0) + (rStats.assists || 0);
+                const lSum = (lStats.minutes || 0) + (lStats.goals || 0) + (lStats.assists || 0);
+                if (rSum > lSum || (rStats.isMVP && !lStats.isMVP) || (rStats.cleanSheet && !lStats.cleanSheet)) {
+                  lp.gwStats[gw] = { ...lStats, ...rStats };
+                  changed = true;
+                }
               }
             }
             if ((rp.totalPoints || 0) > (lp.totalPoints || 0)) {
@@ -1967,9 +1977,19 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
   
       if (force) {
         // Direct full database load (initial boot or explicit admin reset)
-        db.setData(remoteData);
-        console.log('[GitHub Sync] Remote database loaded into memory (forced).');
-        return { success: true, changed: true };
+        const local = db.getData();
+        const remoteFinished = (remoteData.fixtures || []).filter((f: any) => f.isFinished).length;
+        const localFinished = (local?.fixtures || []).filter((f: any) => f.isFinished).length;
+        if (localFinished > remoteFinished) {
+          console.warn(`[GitHub Sync] Local has ${localFinished} finished fixtures but remote only has ${remoteFinished}. Merging instead of overwriting.`);
+          const changed = mergeDatabases(local, remoteData);
+          if (changed) db.saveSilent();
+          return { success: true, changed: true };
+        } else {
+          db.setData(remoteData);
+          console.log('[GitHub Sync] Remote database loaded into memory (forced).');
+          return { success: true, changed: true };
+        }
       } else {
         // Safe non-destructive merge that never reverts local squads or approvals
         const local = db.getData();
@@ -2022,6 +2042,25 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
     if (getRes.ok) {
       const getJson: any = await getRes.json();
       sha = getJson.sha;
+
+      // CRITICAL DATA PRESERVATION GUARD:
+      // Merge remote database into local BEFORE committing!
+      // This guarantees that any matches, stats, or users that exist on GitHub will NEVER be wiped
+      // by a local in-memory instance that started with an older database state.
+      if (getJson.content) {
+        try {
+          const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
+          const remoteData = JSON.parse(remoteRaw);
+          const local = db.getData();
+          const changed = mergeDatabases(local, remoteData);
+          if (changed) {
+            console.log('[GitHub Commit Guard] Merged remote changes into local database before committing to prevent regression.');
+            db.saveSilent();
+          }
+        } catch (mergeErr) {
+          console.warn('[GitHub Commit Guard] Non-fatal error merging remote data:', mergeErr);
+        }
+      }
     }
 
     // 2. Commit the live in-memory database directly to GitHub
