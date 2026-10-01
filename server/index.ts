@@ -20,6 +20,7 @@ app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // Moderator / Admin privilege designations
 export const ADMIN_USERNAMES = ['theiulius', 'chaga'];
+export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'adminpassword';
 export const INITIAL_BUDGET = 55.0;
 
 export function isUserAdmin(username?: string): boolean {
@@ -765,7 +766,7 @@ app.post('/api/admin/login', (req: Request, res: Response) => {
 
   // 2. Fallback to PIN / Root password
   const password = req.body.password || req.body.pin;
-  const expectedPassword = process.env.ADMIN_PASSWORD || 'adminpassword';
+  const expectedPassword = ADMIN_PASSWORD;
 
   if (password && (password === expectedPassword || password === 'komarovi2025' || password === 'fantasy123')) {
     const adminToken = generateToken();
