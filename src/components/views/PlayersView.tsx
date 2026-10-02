@@ -1006,47 +1006,47 @@ export const PlayersView: React.FC = () => {
                           transition={{ duration: 0.25, ease: 'easeInOut' }}
                           className="overflow-hidden border-t border-slate-200 dark:border-white/10"
                         >
-                          <div className="p-3 sm:p-4 space-y-4 bg-slate-50/50 dark:bg-zinc-950/40">
+                          <div className="p-2 sm:p-4 space-y-3 sm:space-y-4 bg-slate-50/50 dark:bg-zinc-950/40">
                             {/* A. Detailed Stats Grid */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-center shadow-xs">
+                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-center shadow-xs">
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Total Pts</span>
-                                <span className="text-sm font-mono font-black text-amber-500">{cls.totalPoints}</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Total Pts</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-amber-500">{cls.totalPoints}</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">GW Pts</span>
-                                <span className="text-sm font-mono font-black text-emerald-500">
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">GW Pts</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-emerald-500">
                                   {cls.gwPoints > 0 ? `+${cls.gwPoints}` : cls.gwPoints}
                                 </span>
                               </div>
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Goals</span>
-                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">⚽ {cls.totalGoals}</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Goals</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">⚽ {cls.totalGoals}</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Assists</span>
-                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">🅰️ {cls.totalAssists}</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Assists</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">🅰️ {cls.totalAssists}</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Clean Sheets</span>
-                                <span className="text-sm font-mono font-black text-teal-500 dark:text-teal-400">🛡️ {cls.cleanSheets}</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Clean Sheets</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-teal-500 dark:text-teal-400">🛡️ {cls.cleanSheets}</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Squad Value</span>
-                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.totalSquadCost.toFixed(1)}m</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Squad Value</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.totalSquadCost.toFixed(1)}m</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Overall Avg</span>
-                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.avgPrice.toFixed(1)}m</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Overall Avg</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.avgPrice.toFixed(1)}m</span>
                               </div>
                               <div>
-                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Active Avg</span>
-                                <span className="text-sm font-mono font-black text-sky-500 dark:text-sky-400">£{cls.activeAvgPrice.toFixed(1)}m</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Active Avg</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-sky-500 dark:text-sky-400">£{cls.activeAvgPrice.toFixed(1)}m</span>
                               </div>
                             </div>
 
                             {/* B. 4-Column Position Roster Board (GKP | DEF | MID | FWD) */}
-                            <div className="flex md:grid md:grid-cols-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-3 md:gap-0 pb-2 md:pb-0 divide-y-0 md:divide-x divide-slate-200 dark:divide-white/[0.08]">
+                            <div className="grid grid-cols-4 gap-1 sm:gap-2 md:gap-0 md:divide-x divide-slate-200 dark:divide-white/[0.08]">
                               {(['GKP', 'DEF', 'MID', 'FWD'] as const).map((pos) => {
                                 const posPlayers = cls.players
                                   .filter((p) => p.position === pos)
@@ -1055,55 +1055,55 @@ export const PlayersView: React.FC = () => {
                                 return (
                                   <div
                                     key={pos}
-                                    className="flex-1 min-w-[140px] md:min-w-0 snap-start px-1 md:px-3 first:pl-0 last:pr-0"
+                                    className="min-w-0 px-0.5 sm:px-2 md:px-3 first:pl-0 last:pr-0"
                                   >
                                     {/* Column Header */}
-                                    <div className="text-center pb-2 mb-2 border-b border-slate-200 dark:border-white/[0.08]">
-                                      <span className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                                    <div className="text-center pb-1.5 mb-1.5 sm:pb-2 sm:mb-2 border-b border-slate-200 dark:border-white/[0.08]">
+                                      <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300">
                                         {pos}
                                       </span>
-                                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono ml-1 font-bold">
+                                      <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-mono ml-0.5 sm:ml-1 font-bold">
                                         ({posPlayers.length})
                                       </span>
                                     </div>
 
                                     {/* Player Cards */}
                                     {posPlayers.length === 0 ? (
-                                      <div className="py-6 text-center text-[11px] text-slate-400 italic">
+                                      <div className="py-4 sm:py-6 text-center text-[9px] sm:text-[11px] text-slate-400 italic">
                                         No {pos}
                                       </div>
                                     ) : (
-                                      <div className="space-y-2">
+                                      <div className="space-y-1.5 sm:space-y-2">
                                         {posPlayers.map((p) => {
                                           const isOwned = squad.players.some((sp) => sp.playerId === p.id);
                                           return (
                                             <div
                                               key={p.id}
                                               onClick={() => setSelectedPlayerId(p.id)}
-                                              className="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex flex-col items-center text-center group relative"
+                                              className="p-1.5 sm:p-2.5 rounded-xl sm:rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex flex-col items-center text-center group relative overflow-hidden"
                                             >
                                               {/* Kit Graphic */}
-                                              <div className="relative my-1">
+                                              <div className="relative my-0.5 sm:my-1">
                                                 <KitJersey
                                                   clubId={p.clubId}
                                                   position={p.position}
                                                   photoUrl={p.photoUrl}
-                                                  className="w-9 h-9 sm:w-10 sm:h-10 transition-transform group-hover:scale-105"
+                                                  className="w-7 h-7 sm:w-10 sm:h-10 transition-transform group-hover:scale-105"
                                                 />
                                                 {isOwned && (
-                                                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[8px] font-black shadow-xs">
+                                                  <span className="absolute -top-1 -right-1 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[7px] sm:text-[8px] font-black shadow-xs">
                                                     ✓
                                                   </span>
                                                 )}
                                               </div>
 
                                               {/* Name */}
-                                              <span className="font-semibold text-xs sm:text-sm truncate w-full text-slate-900 dark:text-white mt-0.5">
+                                              <span className="font-semibold text-[10px] sm:text-xs md:text-sm truncate w-full text-slate-900 dark:text-white mt-0.5 leading-tight">
                                                 {p.webName}
                                               </span>
 
                                               {/* Sub-line: £{cost.toFixed(1)}m {totalPoints}p */}
-                                              <div className="flex items-center justify-center gap-1.5 font-mono text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                              <div className="flex items-center justify-center gap-1 font-mono text-[9px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-tight">
                                                 <span>£{p.cost.toFixed(1)}m</span>
                                                 <span className="font-bold text-emerald-600 dark:text-emerald-400">
                                                   {p.totalPoints}p
@@ -1111,9 +1111,9 @@ export const PlayersView: React.FC = () => {
                                               </div>
 
                                               {/* Action Button */}
-                                              <div className="w-full mt-2" onClick={(e) => e.stopPropagation()}>
+                                              <div className="w-full mt-1.5 sm:mt-2" onClick={(e) => e.stopPropagation()}>
                                                 {isOwned ? (
-                                                  <span className="block w-full py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase text-center">
+                                                  <span className="block w-full py-1 sm:py-1.5 rounded-md sm:rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-[9px] sm:text-xs font-bold uppercase text-center leading-none">
                                                     ✓ Owned
                                                   </span>
                                                 ) : (
@@ -1121,7 +1121,7 @@ export const PlayersView: React.FC = () => {
                                                     type="button"
                                                     onClick={(e) => handleBuyPlayer(e, p)}
                                                     disabled={isSquadLocked}
-                                                    className="w-full py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-200 dark:border-white/[0.08] bg-slate-100/70 dark:bg-white/[0.06] hover:bg-emerald-500/20 hover:text-emerald-500 dark:hover:text-emerald-400 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                    className="w-full py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[9px] sm:text-xs font-bold transition-all border border-slate-200 dark:border-white/[0.08] bg-slate-100/70 dark:bg-white/[0.06] hover:bg-emerald-500/20 hover:text-emerald-500 dark:hover:text-emerald-400 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed leading-none"
                                                   >
                                                     + BUY
                                                   </button>
