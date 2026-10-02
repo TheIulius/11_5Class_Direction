@@ -1236,7 +1236,7 @@ export const MatchDayAdmin: React.FC = () => {
                 type="button"
                 onClick={() => setActiveMorePlayerId(isMoreDrawerOpen ? null : p.id)}
                 className={`p-1.5 rounded-lg border text-xs font-bold transition-colors cursor-pointer ${
-                  isMoreDrawerOpen || pOwnGoalCount > 0 || pPenMissedCount > 0 || pPenSavedCount > 0
+                  isMoreDrawerOpen || pOwnGoalCount > 0 || pPenMissedCount > 0 || pPenSavedCount > 0 || gkpGoalsConceded[p.id] !== undefined
                     ? 'bg-white/15 text-white border-white/20'
                     : 'bg-white/5 border-white/10 text-zinc-500 hover:text-zinc-300'
                 }`}
@@ -1326,6 +1326,64 @@ export const MatchDayAdmin: React.FC = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Goalkeeper Goals Conceded Override */}
+                  {p.position === 'GKP' && (playerMinutes[p.id] || 0) > 0 && (() => {
+                    const teamGoals = team === 'home' ? awayScore : homeScore;
+                    const teamGKPs = (team === 'home' ? matchPlayers.home : matchPlayers.away)
+                      .filter((tp) => tp.position === 'GKP' && (playerMinutes[tp.id] || 0) > 0);
+                    const effectiveConceded = getEffectiveGoalsConceded(p.id, team);
+                    const hasMultipleGKPs = teamGKPs.length > 1;
+
+                    return (
+                      <div className="pt-1.5 border-t border-white/10 space-y-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] text-sky-300 font-bold flex items-center gap-1">
+                            <Shield className="w-3 h-3" />
+                            Goals Conceded
+                            {hasMultipleGKPs && (
+                              <span className="text-[9px] text-amber-400 font-normal ml-1">(2 GKPs played!)</span>
+                            )}
+                          </span>
+                          <div className="inline-flex items-center rounded-lg bg-zinc-900 border border-white/10 overflow-hidden font-mono text-[10px]">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newVal = Math.max(0, effectiveConceded - 1);
+                                setGkpGoalsConceded((prev) => ({ ...prev, [p.id]: newVal }));
+                              }}
+                              className="px-1.5 py-0.5 text-zinc-400 hover:bg-zinc-800"
+                            >
+                              -
+                            </button>
+                            <span className={`px-2 font-bold ${effectiveConceded > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                              {effectiveConceded}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const newVal = Math.min(teamGoals, effectiveConceded + 1);
+                                setGkpGoalsConceded((prev) => ({ ...prev, [p.id]: newVal }));
+                              }}
+                              className="px-1.5 py-0.5 text-rose-400 hover:bg-rose-500 hover:text-white font-bold"
+                            >
+                              +
+                            </button>
+                          </div>
+                        </div>
+                        {!hasMultipleGKPs && (
+                          <span className="text-[9px] text-zinc-500 block">
+                            Auto: all {teamGoals} goals assigned to this keeper
+                          </span>
+                        )}
+                        {hasMultipleGKPs && (
+                          <span className="text-[9px] text-amber-400/80 block">
+                            ⚠️ Split {teamGoals} goals between {teamGKPs.length} keepers manually
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })()}
 
                   {/* Price Adjustment */}
                   <div className="pt-1.5 border-t border-white/10 space-y-1">
