@@ -5,7 +5,7 @@ import { CLUBS, getSortedSchoolClubs } from '../../data/clubs';
 import { KitJersey } from '../pitch/KitJersey';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
-import { ClassGridView } from '../transfers/ClassGridView';
+import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import {
   ClassTwoTierPillStrip,
   GradeOption,
@@ -31,13 +31,36 @@ import {
   Shield,
   Clock,
   ChevronRight,
+  ChevronDown,
   TrendingUp,
   Percent,
   AlertCircle,
   Trash2,
 } from 'lucide-react';
 
-type SortOption = 'points' | 'rising' | 'cost' | 'goals' | 'assists' | 'selectedByPercent' | 'minutes';
+export type SortOption = 'points' | 'rising' | 'cost' | 'goals' | 'assists' | 'selectedByPercent' | 'minutes';
+export type ClassSortOption = 'totalPoints' | 'goals' | 'avgPrice' | 'activeAvgPrice' | 'minutes' | 'gwPoints';
+export type ViewMode = 'players' | 'classes';
+
+export interface AggregatedClass {
+  id: string;
+  name: string;
+  shortName: string;
+  primaryColor: string;
+  secondaryColor: string;
+  textColor: string;
+  totalPoints: number;
+  gwPoints: number;
+  totalGoals: number;
+  totalAssists: number;
+  cleanSheets: number;
+  totalMinutes: number;
+  totalSquadCost: number;
+  avgPrice: number;
+  activeAvgPrice: number;
+  activePlayerCount: number;
+  players: any[];
+}
 
 export const PlayersView: React.FC = () => {
   const {
@@ -55,14 +78,24 @@ export const PlayersView: React.FC = () => {
     refreshServerState,
   } = useFPL();
 
-  const [viewMode, setViewMode] = useState<'list' | 'classes'>('list');
+  const [viewMode, setViewMode] = useState<ViewMode>('players');
   const [searchQuery, setSearchQuery] = useState('');
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL');
   const [selectedGrade, setSelectedGrade] = useState<GradeOption>('ALL');
   const [selectedSection, setSelectedSection] = useState<SectionOption>('ALL');
   const [sortBy, setSortBy] = useState<SortOption>('points');
+  const [classSortBy, setClassSortBy] = useState<ClassSortOption>('totalPoints');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [selectedPlayerId, setSelectedPlayerId] = useState<string | null>(null);
+  const [expandedClassId, setExpandedClassId] = useState<string | null>(null);
+  const [buyNotification, setBuyNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Auto-dismiss buy notifications
+  React.useEffect(() => {
+    if (!buyNotification) return;
+    const timer = setTimeout(() => setBuyNotification(null), 4000);
+    return () => clearTimeout(timer);
+  }, [buyNotification]);
 
   // Photo Upload State
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -196,6 +229,149 @@ export const PlayersView: React.FC = () => {
 
     return list;
   }, [enrichedPlayers, searchQuery, positionFilter, selectedGrade, selectedSection, sortBy, sortOrder, clubs]);
+
+  // Class Data Aggregation & Sorting
+  const aggregatedClasses = useMemo(() => {
+    const allClubs = getSortedSchoolClubs(clubs);
+
+    const list: AggregatedClass[] = allClubs.map((club) => {
+      const classPlayers = enrichedPlayers.filter((p) => {
+        const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+        return normClub === club.id;
+      });
+
+      const totalPoints = classPlayers.reduce((sum, p) => sum + (p.totalPoints || 0), 0);
+      const gwPoints = classPlayers.reduce((sum, p) => sum + (p.gwPoints || 0), 0);
+      const totalGoals = classPlayers.reduce((sum, p) => sum + (p.totalGoals || 0), 0);
+      const totalAssists = classPlayers.reduce((sum, p) => sum + (p.totalAssists || 0), 0);
+      const cleanSheets = classPlayers.reduce((sum, p) => {
+        if (p.position === 'GKP' || p.position === 'DEF') {
+          return sum + (p.totalCS || 0);
+        }
+        return sum;
+      }, 0);
+      const totalMinutes = classPlayers.reduce((sum, p) => sum + (p.totalMinutes || 0), 0);
+      const totalSquadCost = classPlayers.reduce((sum, p) => sum + (p.cost || 0), 0);
+      const avgPrice = classPlayers.length > 0 ? totalSquadCost / classPlayers.length : 0;
+
+      const activePlayers = classPlayers.filter((p) => (p.totalMinutes || 0) > 0);
+      const activePlayerCount = activePlayers.length;
+      const activeSquadCost = activePlayers.reduce((sum, p) => sum + (p.cost || 0), 0);
+      const activeAvgPrice = activePlayerCount > 0 ? activeSquadCost / activePlayerCount : avgPrice;
+
+      return {
+        id: club.id,
+        name: club.name,
+        shortName: club.shortName,
+        primaryColor: club.primaryColor,
+        secondaryColor: club.secondaryColor,
+        textColor: club.textColor,
+        totalPoints,
+        gwPoints,
+        totalGoals,
+        totalAssists,
+        cleanSheets,
+        totalMinutes,
+        totalSquadCost,
+        avgPrice,
+        activeAvgPrice,
+        activePlayerCount,
+        players: classPlayers,
+      };
+    });
+
+    return list;
+  }, [enrichedPlayers, clubs]);
+
+  // Filter and sort classes
+  const filteredAndSortedClasses = useMemo(() => {
+    let list = [...aggregatedClasses];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          c.shortName.toLowerCase().includes(q) ||
+          `class ${c.shortName}`.toLowerCase().includes(q) ||
+          c.id.toLowerCase().includes(q)
+      );
+    }
+
+    // Grade and Section filter
+    if (selectedGrade !== 'ALL') {
+      list = list.filter((c) => matchesGradeAndSection(c.id, selectedGrade, selectedSection));
+    }
+
+    // Sort
+    list.sort((a, b) => {
+      let valA = 0;
+      let valB = 0;
+
+      switch (classSortBy) {
+        case 'totalPoints':
+          valA = a.totalPoints;
+          valB = b.totalPoints;
+          break;
+        case 'goals':
+          valA = a.totalGoals;
+          valB = b.totalGoals;
+          break;
+        case 'avgPrice':
+          valA = a.avgPrice;
+          valB = b.avgPrice;
+          break;
+        case 'activeAvgPrice':
+          valA = a.activeAvgPrice;
+          valB = b.activeAvgPrice;
+          break;
+        case 'minutes':
+          valA = a.totalMinutes;
+          valB = b.totalMinutes;
+          break;
+        case 'gwPoints':
+          valA = a.gwPoints;
+          valB = b.gwPoints;
+          break;
+        default:
+          valA = a.totalPoints;
+          valB = b.totalPoints;
+      }
+
+      if (valA === valB) {
+        return b.totalPoints - a.totalPoints;
+      }
+
+      return sortOrder === 'desc' ? valB - valA : valA - valB;
+    });
+
+    return list;
+  }, [aggregatedClasses, searchQuery, selectedGrade, selectedSection, classSortBy, sortOrder]);
+
+  const handleBuyPlayer = (e: React.MouseEvent, p: Player) => {
+    e.stopPropagation();
+    if (isSquadLocked) {
+      setBuyNotification({ type: 'error', message: 'Lineups are locked. The deadline has passed.' });
+      return;
+    }
+    const isAlreadyOwned = squad.players.some((sp) => sp.playerId === p.id);
+    if (isAlreadyOwned) {
+      setBuyNotification({ type: 'error', message: `${p.webName} is already in your squad!` });
+      return;
+    }
+    const res = buyPlayer(p.id);
+    if (res.success) {
+      confetti({
+        particleCount: 50,
+        spread: 60,
+        origin: { y: 0.6 },
+      });
+      setBuyNotification({ type: 'success', message: `${p.webName} added to your squad!` });
+    } else {
+      setBuyNotification({ type: 'error', message: res.message || 'Could not add player to squad.' });
+    }
+  };
 
   const selectedPlayer = selectedPlayerId ? players[selectedPlayerId] : null;
   const enrichedSelectedPlayer = selectedPlayer
@@ -359,18 +535,20 @@ export const PlayersView: React.FC = () => {
             <div>
               <h2 className="text-lg font-black tracking-tight uppercase">Players / მოთამაშეები</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Browse stats, rankings, match logs and player profiles ({filteredAndSortedPlayers.length} total)
+                {viewMode === 'players'
+                  ? `Browse stats, rankings, match logs and player profiles (${filteredAndSortedPlayers.length} total)`
+                  : `Browse and compare class performance, statistics, and rosters (${filteredAndSortedClasses.length} classes)`}
               </p>
             </div>
           </div>
         </div>
 
-        {/* View Mode Toggle (List vs Classes/Calendar) */}
+        {/* View Mode Toggle (List vs Classes) */}
         <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-950 p-1 rounded-2xl border border-slate-200 dark:border-white/10 self-start sm:self-auto">
           <button
-            onClick={() => setViewMode('list')}
+            onClick={() => setViewMode('players')}
             className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              viewMode === 'list'
+              viewMode === 'players'
                 ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-black'
                 : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
             }`}
@@ -390,6 +568,32 @@ export const PlayersView: React.FC = () => {
         </div>
       </div>
 
+      {/* Buy Notification Banner */}
+      {buyNotification && (
+        <div
+          className={`p-3 rounded-2xl border text-xs font-bold flex items-center justify-between gap-2 shadow-xs animate-fade-in ${
+            buyNotification.type === 'success'
+              ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+              : 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            {buyNotification.type === 'success' ? (
+              <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0" />
+            )}
+            <span>{buyNotification.message}</span>
+          </div>
+          <button
+            onClick={() => setBuyNotification(null)}
+            className="p-1 hover:opacity-75 transition-opacity"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Photo encouragement banner */}
       <div className="p-3 bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-transparent rounded-2xl border border-sky-500/30 text-xs flex items-center justify-between gap-2 text-sky-800 dark:text-sky-200 shadow-xs">
         <div className="flex items-center gap-2 min-w-0">
@@ -400,67 +604,41 @@ export const PlayersView: React.FC = () => {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* CLASSES / CALENDAR VIEW                                                   */}
-      {/* ========================================================================= */}
-      {viewMode === 'classes' ? (
-        <div className="space-y-4">
-          <div className="p-3 bg-slate-100 dark:bg-zinc-900/60 rounded-2xl border border-slate-200 dark:border-white/10 text-xs flex items-center gap-2 text-slate-600 dark:text-slate-300">
-            <Sparkles className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Click any class to expand all players, and tap any player to view full stats & match history.</span>
+      {/* Main Container */}
+      <div className="space-y-3.5">
+        {/* Filters & Search Toolbar */}
+        <div className="p-4 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-3 shadow-xs">
+          {/* Search Input */}
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder={viewMode === 'players' ? "Search player or class (e.g. 10/1)..." : "Search class (e.g. 10/1, 10)..."}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-emerald-500 transition-colors"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
 
-          <ClassGridView
-            players={players}
-            clubs={clubs}
-            squad={squad}
-            outPlayer={null}
-            inPlayerId={null}
-            onSelectInPlayer={() => {}}
-            onBuyPlayer={(pid) => setSelectedPlayerId(pid)}
-            isSquadLocked={isSquadLocked}
-            validSquadCount={squad.players.length}
-            searchQuery={searchQuery}
-            positionFilter={positionFilter}
+          {/* Class Filter (Two-Tier Sliding Pill Strip) */}
+          <ClassTwoTierPillStrip
+            selectedGrade={selectedGrade}
+            selectedSection={selectedSection}
+            onGradeChange={setSelectedGrade}
+            onSectionChange={setSelectedSection}
+            layoutIdPrefix="playersView"
           />
-        </div>
-      ) : (
-        /* ========================================================================= */
-        /* LIST / SORTING VIEW                                                       */
-        /* ========================================================================= */
-        <div className="space-y-3.5">
-          {/* Filters & Search Toolbar */}
-          <div className="p-4 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-3 shadow-xs">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search player or class (e.g. 10/1)..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-emerald-500 transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-white"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
 
-            {/* Class Filter (Two-Tier Sliding Pill Strip) */}
-            <ClassTwoTierPillStrip
-              selectedGrade={selectedGrade}
-              selectedSection={selectedSection}
-              onGradeChange={setSelectedGrade}
-              onSectionChange={setSelectedSection}
-              layoutIdPrefix="playersView"
-            />
-
-            {/* Position Filter Pills */}
+          {/* Position Filter Pills (Only for Players viewMode) */}
+          {viewMode === 'players' && (
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
               {(['ALL', 'GKP', 'DEF', 'MID', 'FWD'] as const).map((pos) => {
                 const count =
@@ -484,60 +662,95 @@ export const PlayersView: React.FC = () => {
                 );
               })}
             </div>
+          )}
 
-            {/* Sorting Tabs */}
-            <div className="pt-2 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
-                <span className="text-[11px] font-bold text-slate-400 uppercase mr-1 flex items-center gap-1">
-                  <ArrowUpDown className="w-3 h-3" />
-                  Sort By:
-                </span>
+          {/* Sorting Tabs */}
+          <div className="pt-2 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+              <span className="text-[11px] font-bold text-slate-400 uppercase mr-1 flex items-center gap-1 shrink-0">
+                <ArrowUpDown className="w-3 h-3" />
+                Sort By:
+              </span>
 
-                {[
-                  { id: 'points', label: 'Points', icon: Trophy },
-                  { id: 'rising', label: 'Rising 📈', icon: TrendingUp },
-                  { id: 'cost', label: 'Price', icon: TrendingUp },
-                  { id: 'goals', label: 'Goals ⚽', icon: Activity },
-                  { id: 'assists', label: 'Assists 🅰️', icon: Activity },
-                  { id: 'selectedByPercent', label: '% Owned 👥', icon: Percent },
-                  { id: 'minutes', label: 'Minutes ⏱️', icon: Clock },
-                ].map((s) => {
-                  const isActive = sortBy === s.id;
-                  return (
-                    <button
-                      key={s.id}
-                      onClick={() => {
-                        if (sortBy === s.id) {
-                          setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'));
-                        } else {
-                          setSortBy(s.id as SortOption);
-                          setSortOrder('desc');
-                        }
-                      }}
-                      className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 border ${
-                        isActive
-                          ? 'bg-sky-500/15 text-sky-700 dark:text-emerald-400 border-sky-500/40 dark:border-emerald-500/40 shadow-xs'
-                          : 'bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-slate-700'
-                      }`}
-                    >
-                      <span>{s.label}</span>
-                      {isActive && <span>{sortOrder === 'desc' ? '↓' : '↑'}</span>}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Order direction toggle */}
-              <button
-                onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
-                className="px-2 py-1 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
-              >
-                {sortOrder === 'desc' ? 'Highest First (↓)' : 'Lowest First (↑)'}
-              </button>
+              {viewMode === 'players'
+                ? [
+                    { id: 'points', label: 'Points', icon: Trophy },
+                    { id: 'rising', label: 'Rising 📈', icon: TrendingUp },
+                    { id: 'cost', label: 'Price', icon: TrendingUp },
+                    { id: 'goals', label: 'Goals ⚽', icon: Activity },
+                    { id: 'assists', label: 'Assists 🅰️', icon: Activity },
+                    { id: 'selectedByPercent', label: '% Owned 👥', icon: Percent },
+                    { id: 'minutes', label: 'Minutes ⏱️', icon: Clock },
+                  ].map((s) => {
+                    const isActive = sortBy === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => {
+                          if (sortBy === s.id) {
+                            setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'));
+                          } else {
+                            setSortBy(s.id as SortOption);
+                            setSortOrder('desc');
+                          }
+                        }}
+                        className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 border ${
+                          isActive
+                            ? 'bg-sky-500/15 text-sky-700 dark:text-emerald-400 border-sky-500/40 dark:border-emerald-500/40 shadow-xs'
+                            : 'bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <span>{s.label}</span>
+                        {isActive && <span>{sortOrder === 'desc' ? '↓' : '↑'}</span>}
+                      </button>
+                    );
+                  })
+                : [
+                    { id: 'totalPoints', label: 'Total Pts', icon: Trophy },
+                    { id: 'goals', label: 'Goals ⚽', icon: Activity },
+                    { id: 'avgPrice', label: 'Avg Price', icon: TrendingUp },
+                    { id: 'activeAvgPrice', label: 'Active Avg Price', icon: TrendingUp },
+                    { id: 'minutes', label: 'Minutes ⏱️', icon: Clock },
+                    { id: 'gwPoints', label: 'Rising (GW Pts)', icon: TrendingUp },
+                  ].map((s) => {
+                    const isActive = classSortBy === s.id;
+                    return (
+                      <button
+                        key={s.id}
+                        onClick={() => {
+                          if (classSortBy === s.id) {
+                            setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'));
+                          } else {
+                            setClassSortBy(s.id as ClassSortOption);
+                            setSortOrder('desc');
+                          }
+                        }}
+                        className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 border ${
+                          isActive
+                            ? 'bg-sky-500/15 text-sky-700 dark:text-emerald-400 border-sky-500/40 dark:border-emerald-500/40 shadow-xs'
+                            : 'bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-slate-700'
+                        }`}
+                      >
+                        <span>{s.label}</span>
+                        {isActive && <span>{sortOrder === 'desc' ? '↓' : '↑'}</span>}
+                      </button>
+                    );
+                  })}
             </div>
-          </div>
 
-          {/* Player Cards / List */}
+            {/* Order direction toggle */}
+            <button
+              onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
+              className="px-2 py-1 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0"
+            >
+              {sortOrder === 'desc' ? 'Highest First (↓)' : 'Lowest First (↑)'}
+            </button>
+          </div>
+        </div>
+
+        {/* Content: Either Player Cards or Class Cards */}
+        {viewMode === 'players' ? (
+          /* Player Cards / List */
           <div className="space-y-2">
             {filteredAndSortedPlayers.length === 0 ? (
               <div className="p-8 text-center rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-2">
@@ -675,8 +888,265 @@ export const PlayersView: React.FC = () => {
               })
             )}
           </div>
-        </div>
-      )}
+        ) : (
+          /* Classes Analysis Cards with 4-Column Position Board */
+          <div className="space-y-2">
+            {filteredAndSortedClasses.length === 0 ? (
+              <div className="p-8 text-center rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-2">
+                <Users className="w-8 h-8 mx-auto text-slate-400 opacity-60" />
+                <p className="text-sm font-bold">No classes found matching your filters</p>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedGrade('ALL');
+                    setSelectedSection('ALL');
+                  }}
+                  className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            ) : (
+              filteredAndSortedClasses.map((cls, idx) => {
+                const isExpanded = expandedClassId === cls.id;
+
+                return (
+                  <div
+                    key={cls.id}
+                    className="rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs hover:border-emerald-500/50 transition-all"
+                  >
+                    {/* Collapsed Class Card UI */}
+                    <div
+                      onClick={() => setExpandedClassId((prev) => (prev === cls.id ? null : cls.id))}
+                      className="group p-3 hover:bg-slate-50/60 dark:hover:bg-white/[0.02] transition-colors cursor-pointer flex items-center justify-between gap-3"
+                    >
+                      {/* Left side: Rank badge, Crest/Avatar, Class Title, Sub-row */}
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="w-6 text-center font-mono font-black text-xs text-slate-400 dark:text-slate-500 shrink-0">
+                          #{idx + 1}
+                        </span>
+
+                        {/* Class crest / avatar with club colors */}
+                        <div className="shrink-0 flex items-center justify-center">
+                          <ClassShieldBadge clubId={cls.id} size="sm" />
+                        </div>
+
+                        {/* Class title and Sub-row */}
+                        <div className="min-w-0">
+                          <h4 className="text-sm font-black truncate text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">
+                            Class {cls.shortName}
+                          </h4>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                            <span>⚽ {cls.totalGoals}</span>
+                            <span>•</span>
+                            <span>👟 {cls.totalAssists}</span>
+                            <span>•</span>
+                            <span>👥 {cls.activePlayerCount}/{cls.players.length} Active</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right side: Selected sorting metric, bold Total Points, expand chevron */}
+                      <div className="flex items-center gap-3 sm:gap-5 shrink-0 text-right">
+                        {/* Selected sorting metric */}
+                        <div className="hidden sm:block">
+                          <span className="block text-[9px] uppercase font-bold text-slate-400">
+                            {classSortBy === 'avgPrice'
+                              ? 'Avg Price'
+                              : classSortBy === 'activeAvgPrice'
+                              ? 'Active Avg'
+                              : classSortBy === 'goals'
+                              ? 'Goals'
+                              : classSortBy === 'minutes'
+                              ? 'Minutes'
+                              : classSortBy === 'gwPoints'
+                              ? 'GW Pts'
+                              : 'GW Pts'}
+                          </span>
+                          <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
+                            {classSortBy === 'avgPrice'
+                              ? `£${cls.avgPrice.toFixed(1)}m`
+                              : classSortBy === 'activeAvgPrice'
+                              ? `£${cls.activeAvgPrice.toFixed(1)}m`
+                              : classSortBy === 'goals'
+                              ? `⚽ ${cls.totalGoals}`
+                              : classSortBy === 'minutes'
+                              ? `${cls.totalMinutes}'`
+                              : classSortBy === 'gwPoints'
+                              ? (cls.gwPoints > 0 ? `+${cls.gwPoints}` : cls.gwPoints)
+                              : (cls.gwPoints > 0 ? `+${cls.gwPoints}` : cls.gwPoints)}
+                          </span>
+                        </div>
+
+                        {/* Bold Total Points */}
+                        <div className="min-w-[48px]">
+                          <span className="block text-[9px] uppercase font-bold text-slate-400">Pts</span>
+                          <span className="text-sm sm:text-base font-mono font-black text-amber-500">
+                            {cls.totalPoints} pts
+                          </span>
+                        </div>
+
+                        {/* Chevron */}
+                        <ChevronDown
+                          className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+                            isExpanded ? 'rotate-180 text-emerald-500' : 'group-hover:translate-y-0.5'
+                          }`}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Expanded Class Detail Panel */}
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          key={`expanded-${cls.id}`}
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: 'easeInOut' }}
+                          className="overflow-hidden border-t border-slate-200 dark:border-white/10"
+                        >
+                          <div className="p-3 sm:p-4 space-y-4 bg-slate-50/50 dark:bg-zinc-950/40">
+                            {/* A. Detailed Stats Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-center shadow-xs">
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Total Pts</span>
+                                <span className="text-sm font-mono font-black text-amber-500">{cls.totalPoints}</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">GW Pts</span>
+                                <span className="text-sm font-mono font-black text-emerald-500">
+                                  {cls.gwPoints > 0 ? `+${cls.gwPoints}` : cls.gwPoints}
+                                </span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Goals</span>
+                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">⚽ {cls.totalGoals}</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Assists</span>
+                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">🅰️ {cls.totalAssists}</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Clean Sheets</span>
+                                <span className="text-sm font-mono font-black text-teal-500 dark:text-teal-400">🛡️ {cls.cleanSheets}</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Squad Value</span>
+                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.totalSquadCost.toFixed(1)}m</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Overall Avg</span>
+                                <span className="text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.avgPrice.toFixed(1)}m</span>
+                              </div>
+                              <div>
+                                <span className="block text-[9px] font-bold text-slate-400 uppercase">Active Avg</span>
+                                <span className="text-sm font-mono font-black text-sky-500 dark:text-sky-400">£{cls.activeAvgPrice.toFixed(1)}m</span>
+                              </div>
+                            </div>
+
+                            {/* B. 4-Column Position Roster Board (GKP | DEF | MID | FWD) */}
+                            <div className="flex md:grid md:grid-cols-4 overflow-x-auto md:overflow-visible snap-x snap-mandatory gap-3 md:gap-0 pb-2 md:pb-0 divide-y-0 md:divide-x divide-slate-200 dark:divide-white/[0.08]">
+                              {(['GKP', 'DEF', 'MID', 'FWD'] as const).map((pos) => {
+                                const posPlayers = cls.players
+                                  .filter((p) => p.position === pos)
+                                  .sort((a, b) => b.totalPoints - a.totalPoints || b.cost - a.cost);
+
+                                return (
+                                  <div
+                                    key={pos}
+                                    className="flex-1 min-w-[140px] md:min-w-0 snap-start px-1 md:px-3 first:pl-0 last:pr-0"
+                                  >
+                                    {/* Column Header */}
+                                    <div className="text-center pb-2 mb-2 border-b border-slate-200 dark:border-white/[0.08]">
+                                      <span className="text-xs font-black uppercase tracking-wider text-slate-600 dark:text-slate-300">
+                                        {pos}
+                                      </span>
+                                      <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono ml-1 font-bold">
+                                        ({posPlayers.length})
+                                      </span>
+                                    </div>
+
+                                    {/* Player Cards */}
+                                    {posPlayers.length === 0 ? (
+                                      <div className="py-6 text-center text-[11px] text-slate-400 italic">
+                                        No {pos}
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-2">
+                                        {posPlayers.map((p) => {
+                                          const isOwned = squad.players.some((sp) => sp.playerId === p.id);
+                                          return (
+                                            <div
+                                              key={p.id}
+                                              onClick={() => setSelectedPlayerId(p.id)}
+                                              className="p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 shadow-2xs hover:shadow-xs transition-all cursor-pointer flex flex-col items-center text-center group relative"
+                                            >
+                                              {/* Kit Graphic */}
+                                              <div className="relative my-1">
+                                                <KitJersey
+                                                  clubId={p.clubId}
+                                                  position={p.position}
+                                                  photoUrl={p.photoUrl}
+                                                  className="w-9 h-9 sm:w-10 sm:h-10 transition-transform group-hover:scale-105"
+                                                />
+                                                {isOwned && (
+                                                  <span className="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[8px] font-black shadow-xs">
+                                                    ✓
+                                                  </span>
+                                                )}
+                                              </div>
+
+                                              {/* Name */}
+                                              <span className="font-semibold text-xs sm:text-sm truncate w-full text-slate-900 dark:text-white mt-0.5">
+                                                {p.webName}
+                                              </span>
+
+                                              {/* Sub-line: £{cost.toFixed(1)}m {totalPoints}p */}
+                                              <div className="flex items-center justify-center gap-1.5 font-mono text-[10px] sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                                                <span>£{p.cost.toFixed(1)}m</span>
+                                                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                                                  {p.totalPoints}p
+                                                </span>
+                                              </div>
+
+                                              {/* Action Button */}
+                                              <div className="w-full mt-2" onClick={(e) => e.stopPropagation()}>
+                                                {isOwned ? (
+                                                  <span className="block w-full py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase text-center">
+                                                    ✓ Owned
+                                                  </span>
+                                                ) : (
+                                                  <button
+                                                    type="button"
+                                                    onClick={(e) => handleBuyPlayer(e, p)}
+                                                    disabled={isSquadLocked}
+                                                    className="w-full py-1.5 rounded-lg text-xs font-bold transition-all border border-slate-200 dark:border-white/[0.08] bg-slate-100/70 dark:bg-white/[0.06] hover:bg-emerald-500/20 hover:text-emerald-500 dark:hover:text-emerald-400 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                  >
+                                                    + BUY
+                                                  </button>
+                                                )}
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </div>
 
       {/* ========================================================================= */}
       {/* DETAILED PLAYER MODAL                                                     */}
