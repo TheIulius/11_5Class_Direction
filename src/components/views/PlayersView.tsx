@@ -49,8 +49,19 @@ export interface AggregatedClass {
   primaryColor: string;
   secondaryColor: string;
   textColor: string;
-  totalPoints: number;
-  gwPoints: number;
+  // Football League Points & Stats (3 for Win, 1 for Draw, 0 for Loss)
+  matchPoints: number;
+  matchesPlayed: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  gwMatchPoints: number;
+  // Squad / Fantasy Aggregates
+  fantasyPoints: number;
+  gwFantasyPoints: number;
   totalGoals: number;
   totalAssists: number;
   cleanSheets: number;
@@ -233,15 +244,65 @@ export const PlayersView: React.FC = () => {
   // Class Data Aggregation & Sorting
   const aggregatedClasses = useMemo(() => {
     const allClubs = getSortedSchoolClubs(clubs);
+    const normClubId = (id: string) => (id === 'SCH' ? 'SCH_11_5' : id);
 
     const list: AggregatedClass[] = allClubs.map((club) => {
-      const classPlayers = enrichedPlayers.filter((p) => {
-        const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
-        return normClub === club.id;
+      const cId = normClubId(club.id);
+
+      // Football League Match calculations from fixtures (+3 win, +1 draw, 0 loss)
+      let matchesPlayed = 0;
+      let wins = 0;
+      let draws = 0;
+      let losses = 0;
+      let goalsFor = 0;
+      let goalsAgainst = 0;
+      let gwMatchPoints = 0;
+
+      fixtures.forEach((f) => {
+        if (!f.isFinished || f.homeScore === null || f.awayScore === null) return;
+        const homeId = normClubId(f.homeClubId);
+        const awayId = normClubId(f.awayClubId);
+
+        if (homeId === cId) {
+          matchesPlayed += 1;
+          goalsFor += f.homeScore;
+          goalsAgainst += f.awayScore;
+          if (f.homeScore > f.awayScore) {
+            wins += 1;
+            if (f.gameweek === currentGW) gwMatchPoints += 3;
+          } else if (f.homeScore === f.awayScore) {
+            draws += 1;
+            if (f.gameweek === currentGW) gwMatchPoints += 1;
+          } else {
+            losses += 1;
+          }
+        } else if (awayId === cId) {
+          matchesPlayed += 1;
+          goalsFor += f.awayScore;
+          goalsAgainst += f.homeScore;
+          if (f.awayScore > f.homeScore) {
+            wins += 1;
+            if (f.gameweek === currentGW) gwMatchPoints += 3;
+          } else if (f.awayScore === f.homeScore) {
+            draws += 1;
+            if (f.gameweek === currentGW) gwMatchPoints += 1;
+          } else {
+            losses += 1;
+          }
+        }
       });
 
-      const totalPoints = classPlayers.reduce((sum, p) => sum + (p.totalPoints || 0), 0);
-      const gwPoints = classPlayers.reduce((sum, p) => sum + (p.gwPoints || 0), 0);
+      const matchPoints = wins * 3 + draws * 1;
+      const goalDifference = goalsFor - goalsAgainst;
+
+      // Squad & Player Aggregates
+      const classPlayers = enrichedPlayers.filter((p) => {
+        const pClub = normClubId(p.clubId);
+        return pClub === cId;
+      });
+
+      const fantasyPoints = classPlayers.reduce((sum, p) => sum + (p.totalPoints || 0), 0);
+      const gwFantasyPoints = classPlayers.reduce((sum, p) => sum + (p.gwPoints || 0), 0);
       const totalGoals = classPlayers.reduce((sum, p) => sum + (p.totalGoals || 0), 0);
       const totalAssists = classPlayers.reduce((sum, p) => sum + (p.totalAssists || 0), 0);
       const cleanSheets = classPlayers.reduce((sum, p) => {
@@ -266,8 +327,17 @@ export const PlayersView: React.FC = () => {
         primaryColor: club.primaryColor,
         secondaryColor: club.secondaryColor,
         textColor: club.textColor,
-        totalPoints,
-        gwPoints,
+        matchPoints,
+        matchesPlayed,
+        wins,
+        draws,
+        losses,
+        goalsFor,
+        goalsAgainst,
+        goalDifference,
+        gwMatchPoints,
+        fantasyPoints,
+        gwFantasyPoints,
         totalGoals,
         totalAssists,
         cleanSheets,
@@ -281,7 +351,7 @@ export const PlayersView: React.FC = () => {
     });
 
     return list;
-  }, [enrichedPlayers, clubs]);
+  }, [enrichedPlayers, clubs, fixtures, currentGW]);
 
   // Filter and sort classes
   const filteredAndSortedClasses = useMemo(() => {
@@ -306,17 +376,40 @@ export const PlayersView: React.FC = () => {
 
     // Sort
     list.sort((a, b) => {
+      if (classSortBy === 'totalPoints') {
+        // Primary: Match Points (+3 for win, +1 for draw, 0 for defeat)
+        if (a.matchPoints !== b.matchPoints) {
+          return sortOrder === 'desc' ? b.matchPoints - a.matchPoints : a.matchPoints - b.matchPoints;
+        }
+        // Secondary: Goal Difference
+        if (a.goalDifference !== b.goalDifference) {
+          return sortOrder === 'desc' ? b.goalDifference - a.goalDifference : a.goalDifference - b.goalDifference;
+        }
+        // Tertiary: Goals For (Scored)
+        if (a.goalsFor !== b.goalsFor) {
+          return sortOrder === 'desc' ? b.goalsFor - a.goalsFor : a.goalsFor - b.goalsFor;
+        }
+        // Quaternary: Fantasy Points
+        return sortOrder === 'desc' ? b.fantasyPoints - a.fantasyPoints : a.fantasyPoints - b.fantasyPoints;
+      }
+
+      if (classSortBy === 'gwPoints') {
+        if (a.gwMatchPoints !== b.gwMatchPoints) {
+          return sortOrder === 'desc' ? b.gwMatchPoints - a.gwMatchPoints : a.gwMatchPoints - b.gwMatchPoints;
+        }
+        if (a.goalDifference !== b.goalDifference) {
+          return sortOrder === 'desc' ? b.goalDifference - a.goalDifference : a.goalDifference - b.goalDifference;
+        }
+        return sortOrder === 'desc' ? b.matchPoints - a.matchPoints : a.matchPoints - b.matchPoints;
+      }
+
       let valA = 0;
       let valB = 0;
 
       switch (classSortBy) {
-        case 'totalPoints':
-          valA = a.totalPoints;
-          valB = b.totalPoints;
-          break;
         case 'goals':
-          valA = a.totalGoals;
-          valB = b.totalGoals;
+          valA = a.goalsFor;
+          valB = b.goalsFor;
           break;
         case 'avgPrice':
           valA = a.avgPrice;
@@ -330,17 +423,16 @@ export const PlayersView: React.FC = () => {
           valA = a.totalMinutes;
           valB = b.totalMinutes;
           break;
-        case 'gwPoints':
-          valA = a.gwPoints;
-          valB = b.gwPoints;
-          break;
         default:
-          valA = a.totalPoints;
-          valB = b.totalPoints;
+          valA = a.matchPoints;
+          valB = b.matchPoints;
       }
 
       if (valA === valB) {
-        return b.totalPoints - a.totalPoints;
+        if (a.matchPoints !== b.matchPoints) {
+          return b.matchPoints - a.matchPoints;
+        }
+        return b.goalDifference - a.goalDifference;
       }
 
       return sortOrder === 'desc' ? valB - valA : valA - valB;
@@ -706,12 +798,12 @@ export const PlayersView: React.FC = () => {
                     );
                   })
                 : [
-                    { id: 'totalPoints', label: 'Total Pts', icon: Trophy },
+                    { id: 'totalPoints', label: 'Match Pts', icon: Trophy },
                     { id: 'goals', label: 'Goals ⚽', icon: Activity },
                     { id: 'avgPrice', label: 'Avg Price', icon: TrendingUp },
                     { id: 'activeAvgPrice', label: 'Active Avg Price', icon: TrendingUp },
                     { id: 'minutes', label: 'Minutes ⏱️', icon: Clock },
-                    { id: 'gwPoints', label: 'Rising (GW Pts)', icon: TrendingUp },
+                    { id: 'gwPoints', label: 'GW Match Pts', icon: TrendingUp },
                   ].map((s) => {
                     const isActive = classSortBy === s.id;
                     return (
@@ -936,10 +1028,16 @@ export const PlayersView: React.FC = () => {
                           <h4 className="text-sm font-black truncate text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">
                             Class {cls.shortName}
                           </h4>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
-                            <span>⚽ {cls.totalGoals}</span>
+                          <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5 flex-wrap">
+                            <span className="font-bold text-slate-700 dark:text-slate-200">
+                              {cls.matchesPlayed} MP ({cls.wins}W {cls.draws}D {cls.losses}L)
+                            </span>
                             <span>•</span>
-                            <span>👟 {cls.totalAssists}</span>
+                            <span className={cls.goalDifference > 0 ? 'text-emerald-500 font-bold' : cls.goalDifference < 0 ? 'text-rose-500 font-bold' : 'text-slate-400'}>
+                              GD {cls.goalDifference > 0 ? `+${cls.goalDifference}` : cls.goalDifference}
+                            </span>
+                            <span>•</span>
+                            <span>⚽ {cls.goalsFor}</span>
                             <span>•</span>
                             <span>👥 {cls.activePlayerCount}/{cls.players.length} Active</span>
                           </div>
@@ -960,8 +1058,8 @@ export const PlayersView: React.FC = () => {
                               : classSortBy === 'minutes'
                               ? 'Minutes'
                               : classSortBy === 'gwPoints'
-                              ? 'GW Pts'
-                              : 'GW Pts'}
+                              ? 'GW Match Pts'
+                              : 'Goal Diff'}
                           </span>
                           <span className="text-xs font-mono font-bold text-slate-700 dark:text-slate-300">
                             {classSortBy === 'avgPrice'
@@ -969,12 +1067,12 @@ export const PlayersView: React.FC = () => {
                               : classSortBy === 'activeAvgPrice'
                               ? `£${cls.activeAvgPrice.toFixed(1)}m`
                               : classSortBy === 'goals'
-                              ? `⚽ ${cls.totalGoals}`
+                              ? `⚽ ${cls.goalsFor}`
                               : classSortBy === 'minutes'
                               ? `${cls.totalMinutes}'`
                               : classSortBy === 'gwPoints'
-                              ? (cls.gwPoints > 0 ? `+${cls.gwPoints}` : cls.gwPoints)
-                              : (cls.gwPoints > 0 ? `+${cls.gwPoints}` : cls.gwPoints)}
+                              ? (cls.gwMatchPoints > 0 ? `+${cls.gwMatchPoints}` : cls.gwMatchPoints)
+                              : (cls.goalDifference > 0 ? `+${cls.goalDifference}` : cls.goalDifference)}
                           </span>
                         </div>
 
@@ -982,7 +1080,7 @@ export const PlayersView: React.FC = () => {
                         <div className="min-w-[48px]">
                           <span className="block text-[9px] uppercase font-bold text-slate-400">Pts</span>
                           <span className="text-sm sm:text-base font-mono font-black text-amber-500">
-                            {cls.totalPoints} pts
+                            {cls.matchPoints} pts
                           </span>
                         </div>
 
@@ -1010,34 +1108,38 @@ export const PlayersView: React.FC = () => {
                             {/* A. Detailed Stats Grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5 sm:gap-2 p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-center shadow-xs">
                               <div>
-                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Total Pts</span>
-                                <span className="text-xs sm:text-sm font-mono font-black text-amber-500">{cls.totalPoints}</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Match Pts</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-amber-500">{cls.matchPoints}</span>
                               </div>
                               <div>
-                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">GW Pts</span>
-                                <span className="text-xs sm:text-sm font-mono font-black text-emerald-500">
-                                  {cls.gwPoints > 0 ? `+${cls.gwPoints}` : cls.gwPoints}
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Record</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">
+                                  {cls.wins}W-{cls.draws}D-{cls.losses}L
                                 </span>
                               </div>
                               <div>
-                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Goals</span>
-                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">⚽ {cls.totalGoals}</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Goal Diff</span>
+                                <span className={`text-xs sm:text-sm font-mono font-black ${cls.goalDifference > 0 ? 'text-emerald-500' : cls.goalDifference < 0 ? 'text-rose-500' : 'text-slate-700 dark:text-slate-300'}`}>
+                                  {cls.goalDifference > 0 ? `+${cls.goalDifference}` : cls.goalDifference}
+                                </span>
                               </div>
                               <div>
-                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Assists</span>
-                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">🅰️ {cls.totalAssists}</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Goals (GF/GA)</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">
+                                  ⚽ {cls.goalsFor} / {cls.goalsAgainst}
+                                </span>
                               </div>
                               <div>
                                 <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Clean Sheets</span>
                                 <span className="text-xs sm:text-sm font-mono font-black text-teal-500 dark:text-teal-400">🛡️ {cls.cleanSheets}</span>
                               </div>
                               <div>
-                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Squad Value</span>
-                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.totalSquadCost.toFixed(1)}m</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Fantasy Pts</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-emerald-500">{cls.fantasyPoints}p</span>
                               </div>
                               <div>
-                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Overall Avg</span>
-                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.avgPrice.toFixed(1)}m</span>
+                                <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Squad Value</span>
+                                <span className="text-xs sm:text-sm font-mono font-black text-slate-800 dark:text-white">£{cls.totalSquadCost.toFixed(1)}m</span>
                               </div>
                               <div>
                                 <span className="block text-[8px] sm:text-[9px] font-bold text-slate-400 uppercase leading-tight">Active Avg</span>
