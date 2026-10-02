@@ -996,8 +996,8 @@
       "clubId": "SCH_9_3",
       "position": "GKP",
       "cost": 4.5,
-      "totalPoints": 5,
-      "gwPoints": 5,
+      "totalPoints": 7,
+      "gwPoints": 7,
       "form": 5,
       "selectedByPercent": 0,
       "isAvailable": true,
@@ -1007,7 +1007,7 @@
           "goals": 2,
           "assists": 0,
           "cleanSheet": false,
-          "goalsConceded": 12,
+          "goalsConceded": 8,
           "yellowCards": 0,
           "redCards": 0,
           "penaltiesSaved": 0,
@@ -1026,8 +1026,8 @@
       "clubId": "SCH_9_3",
       "position": "GKP",
       "cost": 4,
-      "totalPoints": -5,
-      "gwPoints": -5,
+      "totalPoints": -1,
+      "gwPoints": -1,
       "form": 5,
       "selectedByPercent": 0,
       "isAvailable": true,
@@ -1037,7 +1037,7 @@
           "goals": 0,
           "assists": 0,
           "cleanSheet": false,
-          "goalsConceded": 12,
+          "goalsConceded": 4,
           "yellowCards": 0,
           "redCards": 0,
           "penaltiesSaved": 0,
@@ -5869,12 +5869,66 @@
       "gameweek": 1,
       "homeClubId": "SCH_12_2",
       "awayClubId": "SCH_9_5",
-      "homeScore": null,
-      "awayScore": null,
-      "isFinished": false,
+      "homeScore": 2,
+      "awayScore": 1,
+      "isFinished": true,
       "isLive": false,
       "kickoffTime": "Matchday 1",
-      "events": []
+      "events": [],
+      "completedAt": "2026-10-02T13:52:45.507Z",
+      "date": "2026-10-02",
+      "venue": "parki",
+      "goalScorers": [
+        {
+          "playerId": "p_12_2_gorozia",
+          "isOwnGoal": false
+        },
+        {
+          "playerId": "p_12_2_gorozia",
+          "isOwnGoal": false
+        },
+        {
+          "playerId": "p_9_5_gogolidze",
+          "isOwnGoal": false
+        }
+      ],
+      "mvpPlayerIds": [
+        "p_12_2_gorozia",
+        "p_custom_1790194825803",
+        "p_12_2_gagishvili"
+      ],
+      "mvpBonus": {
+        "p_12_2_gorozia": 3,
+        "p_custom_1790194825803": 2,
+        "p_12_2_gagishvili": 1
+      },
+      "playerMinutes": {
+        "p_12_2_gorozia": 30,
+        "p_custom_1790194825803": 30,
+        "p_12_2_gagishvili": 30,
+        "p_12_2_kakabadze": 30,
+        "p_12_2_giguashvili": 30,
+        "p_12_2_labadze": 30,
+        "p_12_2_odishvili": 30,
+        "p_9_5_guruli": 30,
+        "p_9_5_gogolidze": 30,
+        "p_9_5_asatiani": 30,
+        "p_9_5_miqeladze": 30,
+        "p_9_5_gvelesiani": 15,
+        "p_9_5_xaindrava": 15
+      },
+      "yellowCards": [
+        "p_12_2_giguashvili"
+      ],
+      "redCards": [],
+      "penaltiesSaved": {},
+      "penaltiesMissed": {},
+      "playerAssists": {
+        "p_12_2_kakabadze": 1,
+        "p_12_2_giguashvili": 1,
+        "p_custom_1790194825803": 1
+      },
+      "playerSaves": {}
     },
     {
       "id": "fix_gw1_5",
@@ -6098,12 +6152,69 @@
       "gameweek": 1,
       "homeClubId": "SCH_11_4",
       "awayClubId": "SCH_10_1",
-      "homeScore": null,
-      "awayScore": null,
-      "isFinished": false,
+      "homeScore": 0,
+      "awayScore": 4,
+      "isFinished": true,
       "isLive": false,
       "kickoffTime": "Matchday 1",
-      "events": []
+      "events": [],
+      "completedAt": "2026-10-02T13:08:20.854Z",
+      "date": "2026-10-02",
+      "venue": "parki",
+      "goalScorers": [
+        {
+          "playerId": "p_10_1_chakvetadze",
+          "isOwnGoal": false
+        },
+        {
+          "playerId": "p_10_1_shengelia",
+          "isOwnGoal": false
+        },
+        {
+          "playerId": "p_10_1_shengelia",
+          "isOwnGoal": false
+        },
+        {
+          "playerId": "p_10_1_shengelia",
+          "isOwnGoal": false
+        }
+      ],
+      "mvpPlayerIds": [
+        "p_10_1_katamadze",
+        "p_10_1_shengelia",
+        "p_10_1_chakvetadze"
+      ],
+      "mvpBonus": {
+        "p_10_1_katamadze": 3,
+        "p_10_1_shengelia": 2,
+        "p_10_1_chakvetadze": 1
+      },
+      "playerMinutes": {
+        "p_11_4_akofovi": 30,
+        "p_custom_1790259253781": 30,
+        "p_11_4_bulia": 30,
+        "p_11_4_gogoladze": 30,
+        "p_custom_1790279796584": 30,
+        "p_11_4_mshvidobadze": 30,
+        "p_10_1_gogsadze": 30,
+        "p_10_1_chakvetadze": 30,
+        "p_10_1_chikovani": 30,
+        "p_10_1_katamadze": 30,
+        "p_10_1_shengelia": 30,
+        "p_10_1_roinishvili": 30
+      },
+      "yellowCards": [
+        "p_10_1_chakvetadze",
+        "p_10_1_chikovani"
+      ],
+      "redCards": [],
+      "penaltiesSaved": {},
+      "penaltiesMissed": {},
+      "playerAssists": {
+        "p_10_1_roinishvili": 1,
+        "p_10_1_katamadze": 2
+      },
+      "playerSaves": {}
     },
     {
       "id": "fix_gw1_12",

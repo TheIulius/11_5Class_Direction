@@ -1949,61 +1949,86 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
     const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
     const branch = process.env.GITHUB_BRANCH || 'data';
     const filePath = 'data/db.json';
-  
-    if (!token) {
-      return { success: false, changed: false, error: 'No GitHub token configured' };
-    }
-  
-    try {
-      const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/vnd.github.v3+json',
-          'User-Agent': 'Premier-League-Fantasy-App',
-        },
-      });
-  
-      if (!getRes.ok) {
-        return { success: false, changed: false, error: `GitHub fetch returned ${getRes.status}` };
-      }
-  
-      const getJson: any = await getRes.json();
-      if (!getJson.content) {
-        return { success: false, changed: false, error: 'No content in response' };
-      }
-  
-      const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
-      const remoteData = JSON.parse(remoteRaw);
-  
-      if (force) {
-        // Direct full database load (initial boot or explicit admin reset)
-        const local = db.getData();
-        const remoteFinished = (remoteData.fixtures || []).filter((f: any) => f.isFinished).length;
-        const localFinished = (local?.fixtures || []).filter((f: any) => f.isFinished).length;
-        if (localFinished > remoteFinished) {
-          console.warn(`[GitHub Sync] Local has ${localFinished} finished fixtures but remote only has ${remoteFinished}. Merging instead of overwriting.`);
-          const changed = mergeDatabases(local, remoteData);
-          if (changed) db.saveSilent();
-          return { success: true, changed: true };
+    let remoteData: any = null;
+
+    // Method 1: Try GitHub REST API if token is configured
+    if (token) {
+      try {
+        const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json',
+            'User-Agent': 'Premier-League-Fantasy-App',
+          },
+        });
+
+        if (getRes.ok) {
+          const getJson: any = await getRes.json();
+          if (getJson.content) {
+            const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
+            remoteData = JSON.parse(remoteRaw);
+            console.log('[GitHub Sync] Retrieved latest database via GitHub REST API.');
+          }
         } else {
-          db.setData(remoteData);
-          console.log('[GitHub Sync] Remote database loaded into memory (forced).');
-          return { success: true, changed: true };
+          console.warn(`[GitHub Sync] GitHub REST API returned HTTP ${getRes.status}. Attempting git fallback...`);
         }
-      } else {
-        // Safe non-destructive merge that never reverts local squads or approvals
-        const local = db.getData();
-        const changed = mergeDatabases(local, remoteData);
-        if (changed) {
-          db.saveSilent();
-          console.log('[GitHub Sync] Remote database merged into memory without clobbering local changes.');
-        }
-        return { success: true, changed };
+      } catch (apiErr: any) {
+        console.warn('[GitHub Sync] GitHub REST API request failed:', apiErr?.message || apiErr);
       }
-    } catch (err: any) {
-      console.warn('[GitHub Sync] Error syncing from GitHub:', err?.message || err);
-      return { success: false, changed: false, error: err?.message };
     }
+
+    // Method 2: Git CLI fallback (works on Render when repo was cloned by git)
+    if (!remoteData) {
+      try {
+        const { execSync } = await import('child_process');
+        execSync('git fetch origin data --depth=1', { stdio: 'pipe', timeout: 15000 });
+        const gitRaw = execSync('git show origin/data:data/db.json', {
+          encoding: 'utf-8',
+          timeout: 15000,
+          maxBuffer: 50 * 1024 * 1024,
+        });
+        if (gitRaw && gitRaw.trim().startsWith('{')) {
+          remoteData = JSON.parse(gitRaw);
+          console.log('[GitHub Sync] Successfully retrieved latest database via local git CLI fallback.');
+        }
+      } catch (gitErr: any) {
+        console.warn('[GitHub Sync] Git CLI fallback skipped or failed:', gitErr?.message || gitErr);
+      }
+    }
+
+    if (!remoteData) {
+      const errReason = token ? 'Failed to fetch from GitHub API and Git CLI' : 'No GitHub token configured and git CLI fallback failed';
+      return { success: false, changed: false, error: errReason };
+    }
+
+    if (force) {
+      // Direct full database load (initial boot or explicit admin reset)
+      const local = db.getData();
+      const remoteFinished = (remoteData.fixtures || []).filter((f: any) => f.isFinished).length;
+      const localFinished = (local?.fixtures || []).filter((f: any) => f.isFinished).length;
+      if (localFinished > remoteFinished) {
+        console.warn(`[GitHub Sync] Local has ${localFinished} finished fixtures but remote only has ${remoteFinished}. Merging instead of overwriting.`);
+        const changed = mergeDatabases(local, remoteData);
+        if (changed) db.saveSilent();
+        return { success: true, changed: true };
+      } else {
+        db.setData(remoteData);
+        console.log('[GitHub Sync] Remote database loaded into memory (forced).');
+        return { success: true, changed: true };
+      }
+    } else {
+      // Safe non-destructive merge that never reverts local squads or approvals
+      const local = db.getData();
+      const changed = mergeDatabases(local, remoteData);
+      if (changed) {
+        db.saveSilent();
+        console.log('[GitHub Sync] Remote database merged into memory without clobbering local changes.');
+      }
+      return { success: true, changed };
+    }
+  } catch (err: any) {
+    console.warn('[GitHub Sync] Error syncing from GitHub:', err?.message || err);
+    return { success: false, changed: false, error: err?.message };
   } finally {
     db.isSyncing = false;
   }
@@ -3153,9 +3178,11 @@ async function startServer() {
     const syncRes = await syncDatabaseFromGitHub(undefined, true);
     if (syncRes.success) {
       console.log(`[Startup] GitHub database sync successful (changed: ${syncRes.changed})`);
+    } else {
+      console.warn(`[Startup] GitHub database sync skipped/failed: ${syncRes.error}`);
     }
   } catch (e) {
-    console.warn('[Startup] Initial GitHub database sync skipped or failed:', e);
+    console.warn('[Startup] Initial GitHub database sync exception:', e);
   }
 
   app.listen(PORT, () => {
