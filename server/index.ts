@@ -1649,13 +1649,176 @@ app.delete('/api/admin/activation-codes/:code', (req: Request, res: Response) =>
 });
 
 // In-memory runtime GitHub token (can be set via environment variable or admin portal)
-let runtimeGithubToken = process.env.GITHUB_TOKEN || '';
+const TOKEN_FILE = path.join(process.env.DATA_DIR || path.join(process.cwd(), 'data'), '.github_token');
+
+export function loadStoredGithubToken(): string {
+  if (process.env.GITHUB_TOKEN && process.env.GITHUB_TOKEN.trim()) {
+    return process.env.GITHUB_TOKEN.trim();
+  }
+  try {
+    if (fs.existsSync(TOKEN_FILE)) {
+      const stored = fs.readFileSync(TOKEN_FILE, 'utf-8').trim();
+      if (stored) return stored;
+    }
+  } catch (e) {}
+  return '';
+}
+
+export function saveStoredGithubToken(token: string) {
+  runtimeGithubToken = token;
+  try {
+    if (token) {
+      fs.writeFileSync(TOKEN_FILE, token, 'utf-8');
+    } else if (fs.existsSync(TOKEN_FILE)) {
+      fs.unlinkSync(TOKEN_FILE);
+    }
+  } catch (e) {
+    console.warn('Failed to persist token file:', e);
+  }
+}
+
+let runtimeGithubToken = loadStoredGithubToken();
 let autoSyncTimer: NodeJS.Timeout | null = null;
 let hasPendingLocalChanges = false;
 let lastLocalWriteTime = 0;
 let isCommittingToGitHub = false;
 let pendingCommitAfterCurrent = false;
 let pendingCommitReason = '';
+
+export function applyFixtureEventsToPlayers(
+  fixture: Fixture,
+  data: DatabaseSchema,
+  overrideBody?: any
+): boolean {
+  if (!fixture || !fixture.isFinished || !data.players) return false;
+
+  const playerMinutes = overrideBody?.playerMinutes ?? fixture.playerMinutes ?? {};
+  if (!playerMinutes || Object.keys(playerMinutes).length === 0) return false;
+
+  const gw = fixture.gameweek;
+  const homeScore = overrideBody?.homeScore ?? fixture.homeScore ?? 0;
+  const awayScore = overrideBody?.awayScore ?? fixture.awayScore ?? 0;
+  const goalScorers = overrideBody?.goalScorers ?? fixture.goalScorers ?? [];
+  const yellowCards = overrideBody?.yellowCards ?? fixture.yellowCards ?? [];
+  const redCards = overrideBody?.redCards ?? fixture.redCards ?? [];
+  const penaltiesSaved = overrideBody?.penaltiesSaved ?? fixture.penaltiesSaved ?? {};
+  const penaltiesMissed = overrideBody?.penaltiesMissed ?? fixture.penaltiesMissed ?? {};
+  const playerAssists = overrideBody?.playerAssists ?? fixture.playerAssists ?? {};
+  const playerSaves = overrideBody?.playerSaves ?? fixture.playerSaves ?? {};
+  const mvpPlayerIds = overrideBody?.mvpPlayerIds ?? fixture.mvpPlayerIds ?? [];
+  const mvpBonus = overrideBody?.mvpBonus ?? fixture.mvpBonus ?? {};
+  const venue = overrideBody?.venue ?? fixture.venue ?? 'parki';
+
+  const normClub = (c: string) => (c === 'SCH' ? 'SCH_11_5' : c);
+  const homePlayers = Object.values(data.players).filter(
+    (p: Player) => normClub(p.clubId) === normClub(fixture.homeClubId)
+  );
+  const awayPlayers = Object.values(data.players).filter(
+    (p: Player) => normClub(p.clubId) === normClub(fixture.awayClubId)
+  );
+  const allMatchPlayers = [...homePlayers, ...awayPlayers];
+
+  const goalCount: Record<string, number> = {};
+  const assistCount: Record<string, number> = { ...(playerAssists || {}) };
+  const ownGoalCount: Record<string, number> = {};
+
+  (goalScorers || []).forEach((g: any) => {
+    if (g.isOwnGoal) {
+      ownGoalCount[g.playerId] = (ownGoalCount[g.playerId] || 0) + 1;
+    } else {
+      goalCount[g.playerId] = (goalCount[g.playerId] || 0) + 1;
+    }
+    if (g.assistPlayerId && (!playerAssists || playerAssists[g.assistPlayerId] === undefined)) {
+      assistCount[g.assistPlayerId] = (assistCount[g.assistPlayerId] || 0) + 1;
+    }
+  });
+
+  const homeCleanSheet = (awayScore || 0) === 0;
+  const awayCleanSheet = (homeScore || 0) === 0;
+
+  let anyModified = false;
+
+  for (const player of allMatchPlayers) {
+    const mins = playerMinutes?.[player.id] || 0;
+    if (mins === 0) continue;
+
+    const isHomeTeam = homePlayers.some((p: Player) => p.id === player.id);
+    const hasCleanSheet = isHomeTeam ? homeCleanSheet : awayCleanSheet;
+    const goalsConceded = isHomeTeam ? (awayScore || 0) : (homeScore || 0);
+
+    let bonus = 0;
+    let isMVP = false;
+    let mvpRank: 1 | 2 | 3 | undefined = undefined;
+
+    if (mvpBonus && typeof mvpBonus[player.id] === 'number') {
+      bonus = mvpBonus[player.id];
+      isMVP = bonus > 0;
+      if (bonus === 3) mvpRank = 1;
+      else if (bonus === 2) mvpRank = 2;
+      else if (bonus === 1) mvpRank = 3;
+    } else if (Array.isArray(mvpPlayerIds)) {
+      const idx = mvpPlayerIds.indexOf(player.id);
+      if (idx === 0) { bonus = 3; isMVP = true; mvpRank = 1; }
+      else if (idx === 1) { bonus = 2; isMVP = true; mvpRank = 2; }
+      else if (idx === 2) { bonus = 1; isMVP = true; mvpRank = 3; }
+    }
+
+    if (!player.gwStats) player.gwStats = {};
+
+    const stats: PlayerStats = {
+      minutes: mins,
+      goals: goalCount[player.id] || 0,
+      assists: assistCount[player.id] || 0,
+      cleanSheet: hasCleanSheet && mins >= 20,
+      goalsConceded: goalsConceded,
+      yellowCards: (yellowCards || []).filter((id: string) => id === player.id).length,
+      redCards: (redCards || []).filter((id: string) => id === player.id).length,
+      penaltiesSaved: penaltiesSaved?.[player.id] || 0,
+      penaltiesMissed: penaltiesMissed?.[player.id] || 0,
+      ownGoals: ownGoalCount[player.id] || 0,
+      isMVP: isMVP,
+      bonus: bonus,
+      mvpRank: mvpRank,
+      saves: playerSaves?.[player.id] || 0,
+    };
+
+    player.gwStats[gw] = stats;
+
+    const isOnePrice = venue === 'one_price';
+    player.gwPoints = calculatePlayerPoints(player.position, stats, isOnePrice, player.id);
+
+    // Recalculate total points across all GWs
+    let sum = 0;
+    for (const gwKey of Object.keys(player.gwStats)) {
+      const gwNum = parseInt(gwKey, 10);
+      const gwFixture = data.fixtures.find((f: Fixture) => {
+        const nClub = normClub(player.clubId);
+        return f.gameweek === gwNum && (normClub(f.homeClubId) === nClub || normClub(f.awayClubId) === nClub);
+      });
+      const gwIsOnePrice = gwFixture?.venue === 'one_price';
+      sum += calculatePlayerPoints(player.position, player.gwStats[gwNum], gwIsOnePrice, player.id);
+    }
+    player.totalPoints = sum;
+    anyModified = true;
+  }
+
+  return anyModified;
+}
+
+export function syncAllFinishedFixturesStats(data: DatabaseSchema): boolean {
+  if (!data || !Array.isArray(data.fixtures) || !data.players) return false;
+  let changed = false;
+  for (const f of data.fixtures) {
+    if (f.isFinished && f.playerMinutes && Object.keys(f.playerMinutes).length > 0) {
+      const updated = applyFixtureEventsToPlayers(f, data);
+      if (updated) changed = true;
+    }
+  }
+  if (changed) {
+    recalculateAllManagersLeaguePoints(data);
+  }
+  return changed;
+}
 
 export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
   if (!remote || typeof remote !== 'object') return false;
@@ -1837,12 +2000,21 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
     for (const rf of remote.fixtures) {
       const lf = local.fixtures.find((f) => f.id === rf.id);
       if (lf) {
+        const remoteHasMoreMinutes = Object.keys(rf.playerMinutes || {}).length > Object.keys(lf.playerMinutes || {}).length;
+        const remoteIsFinished = rf.isFinished && !lf.isFinished;
+        const remoteScoreUpdated = rf.homeScore != null && (lf.homeScore == null || rf.homeScore !== lf.homeScore || rf.awayScore !== lf.awayScore);
+        const remoteHasMoreScorers = Array.isArray(rf.goalScorers) && rf.goalScorers.length > (lf.goalScorers?.length || 0);
+        const remoteHasBonus = Object.keys(rf.mvpBonus || {}).length > Object.keys(lf.mvpBonus || {}).length;
+
         if (
-          (rf.isFinished && !lf.isFinished) ||
-          (rf.homeScore != null && lf.homeScore == null) ||
+          remoteIsFinished ||
+          remoteScoreUpdated ||
+          remoteHasMoreMinutes ||
+          remoteHasMoreScorers ||
+          remoteHasBonus ||
           (rf.date && !lf.date) ||
           (rf.venue && !lf.venue) ||
-          (Array.isArray(rf.goalScorers) && rf.goalScorers.length > (lf.goalScorers?.length || 0))
+          (rf.completedAt && !lf.completedAt)
         ) {
           Object.assign(lf, rf);
           changed = true;
@@ -1930,6 +2102,11 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
     }
   }
 
+  const fixturesSynced = syncAllFinishedFixturesStats(local);
+  if (fixturesSynced) {
+    changed = true;
+  }
+
   return changed;
 }
 
@@ -1944,7 +2121,7 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
 
   db.isSyncing = true;
   try {
-    const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN;
+    const token = explicitToken || runtimeGithubToken || loadStoredGithubToken();
     const owner = process.env.GITHUB_OWNER || 'TheIulius';
     const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
     const branch = process.env.GITHUB_BRANCH || 'data';
@@ -1977,12 +2154,15 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
       }
     }
 
-    // Method 2: Git CLI fallback (works on Render when repo was cloned by git)
+    // Method 2: Git CLI fallback (works on Render and local)
     if (!remoteData) {
       try {
         const { execSync } = await import('child_process');
-        execSync('git fetch origin data --depth=1', { stdio: 'pipe', timeout: 15000 });
-        const gitRaw = execSync('git show origin/data:data/db.json', {
+        const gitUrl = token
+          ? `https://x-access-token:${token}@github.com/${owner}/${repo}.git`
+          : 'origin';
+        execSync(`git fetch ${gitUrl} data --depth=1`, { stdio: 'pipe', timeout: 15000 });
+        const gitRaw = execSync('git show FETCH_HEAD:data/db.json', {
           encoding: 'utf-8',
           timeout: 15000,
           maxBuffer: 50 * 1024 * 1024,
@@ -2009,10 +2189,12 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
       if (localFinished > remoteFinished) {
         console.warn(`[GitHub Sync] Local has ${localFinished} finished fixtures but remote only has ${remoteFinished}. Merging instead of overwriting.`);
         const changed = mergeDatabases(local, remoteData);
+        syncAllFinishedFixturesStats(local);
         if (changed) db.saveSilent();
         return { success: true, changed: true };
       } else {
         db.setData(remoteData);
+        syncAllFinishedFixturesStats(db.getData());
         console.log('[GitHub Sync] Remote database loaded into memory (forced).');
         return { success: true, changed: true };
       }
@@ -2020,6 +2202,7 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
       // Safe non-destructive merge that never reverts local squads or approvals
       const local = db.getData();
       const changed = mergeDatabases(local, remoteData);
+      syncAllFinishedFixturesStats(local);
       if (changed) {
         db.saveSilent();
         console.log('[GitHub Sync] Remote database merged into memory without clobbering local changes.');
@@ -2158,7 +2341,7 @@ db.setOnSaveCallback((reason) => {
 
 // Check Server Auto-Sync Status
 app.get('/api/admin/db/sync-status', (req: Request, res: Response) => {
-  const hasToken = Boolean(runtimeGithubToken || process.env.GITHUB_TOKEN);
+  const hasToken = Boolean(runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken());
   res.json({
     hasServerToken: hasToken,
     owner: process.env.GITHUB_OWNER || 'TheIulius',
@@ -2167,22 +2350,22 @@ app.get('/api/admin/db/sync-status', (req: Request, res: Response) => {
   });
 });
 
-// Set or Update Server Token in Memory
+// Set or Update Server Token in Memory & Disk
 app.post('/api/admin/db/set-token', (req: Request, res: Response) => {
   const { token } = req.body;
   if (token && typeof token === 'string' && token.trim().length > 0) {
-    runtimeGithubToken = token.trim();
+    saveStoredGithubToken(token.trim());
     return res.json({ success: true, message: 'Server GitHub token activated! Auto-sync is now active.' });
   }
-  runtimeGithubToken = '';
+  saveStoredGithubToken('');
   res.json({ success: true, message: 'Server GitHub token cleared.' });
 });
 
 // 11c. Sync / Commit Database directly to GitHub
 app.post('/api/admin/db/sync-github', async (req: Request, res: Response) => {
-  const token = req.body.token || runtimeGithubToken || process.env.GITHUB_TOKEN;
+  const token = req.body.token || runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
   if (req.body.token && !runtimeGithubToken) {
-    runtimeGithubToken = req.body.token;
+    saveStoredGithubToken(req.body.token.trim());
   }
 
   if (!token) {
@@ -3038,8 +3221,6 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
   const fixture = data.fixtures.find((f: Fixture) => f.id === fixtureId);
   if (!fixture) return res.status(404).json({ error: 'Fixture not found' });
 
-  const gw = fixture.gameweek;
-
   // Update fixture
   fixture.homeScore = homeScore;
   fixture.awayScore = awayScore;
@@ -3056,101 +3237,11 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
   fixture.penaltiesMissed = penaltiesMissed || {};
   fixture.playerAssists = playerAssists || {};
   fixture.playerSaves = playerSaves || {};
+  fixture.completedAt = new Date().toISOString();
 
-  // Determine which players are on each team
-  const homePlayers = Object.values(data.players).filter(
-    (p: Player) => (p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId) === fixture.homeClubId
-  );
-  const awayPlayers = Object.values(data.players).filter(
-    (p: Player) => (p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId) === fixture.awayClubId
-  );
-  const allMatchPlayers = [...homePlayers, ...awayPlayers];
-
-  // Tally goals, assists, own goals per player from goalScorers array and playerAssists
-  const goalCount: Record<string, number> = {};
-  const assistCount: Record<string, number> = { ...(playerAssists || {}) };
-  const ownGoalCount: Record<string, number> = {};
-
-  (goalScorers || []).forEach((g: any) => {
-    if (g.isOwnGoal) {
-      ownGoalCount[g.playerId] = (ownGoalCount[g.playerId] || 0) + 1;
-    } else {
-      goalCount[g.playerId] = (goalCount[g.playerId] || 0) + 1;
-    }
-    if (g.assistPlayerId && (!playerAssists || playerAssists[g.assistPlayerId] === undefined)) {
-      assistCount[g.assistPlayerId] = (assistCount[g.assistPlayerId] || 0) + 1;
-    }
-  });
-
-  // Determine clean sheets from final score
-  const homeCleanSheet = (awayScore || 0) === 0;
-  const awayCleanSheet = (homeScore || 0) === 0;
-
-  // Update each match player's stats
-  for (const player of allMatchPlayers) {
-    const mins = playerMinutes?.[player.id] || 0;
-    if (mins === 0) continue; // Skip players who didn't participate
-
-    const isHomeTeam = homePlayers.some((p: Player) => p.id === player.id);
-    const hasCleanSheet = isHomeTeam ? homeCleanSheet : awayCleanSheet;
-    const goalsConceded = isHomeTeam ? (awayScore || 0) : (homeScore || 0);
-
-    let bonus = 0;
-    let isMVP = false;
-    let mvpRank: 1 | 2 | 3 | undefined = undefined;
-
-    if (req.body.mvpBonus && typeof req.body.mvpBonus[player.id] === 'number') {
-      bonus = req.body.mvpBonus[player.id];
-      isMVP = bonus > 0;
-      if (bonus === 3) mvpRank = 1;
-      else if (bonus === 2) mvpRank = 2;
-      else if (bonus === 1) mvpRank = 3;
-    } else if (Array.isArray(mvpPlayerIds)) {
-      const idx = mvpPlayerIds.indexOf(player.id);
-      if (idx === 0) { bonus = 3; isMVP = true; mvpRank = 1; }
-      else if (idx === 1) { bonus = 2; isMVP = true; mvpRank = 2; }
-      else if (idx === 2) { bonus = 1; isMVP = true; mvpRank = 3; }
-    }
-
-    const stats: PlayerStats = {
-      minutes: mins,
-      goals: goalCount[player.id] || 0,
-      assists: assistCount[player.id] || 0,
-      cleanSheet: hasCleanSheet && mins >= 20,
-      goalsConceded: goalsConceded,
-      yellowCards: (yellowCards || []).filter((id: string) => id === player.id).length,
-      redCards: (redCards || []).filter((id: string) => id === player.id).length,
-      penaltiesSaved: penaltiesSaved?.[player.id] || 0,
-      penaltiesMissed: penaltiesMissed?.[player.id] || 0,
-      ownGoals: ownGoalCount[player.id] || 0,
-      isMVP: isMVP,
-      bonus: bonus,
-      mvpRank: mvpRank,
-      saves: playerSaves?.[player.id] || 0,
-    };
-
-    player.gwStats[gw] = stats;
-
-    const isOnePrice = venue === 'one_price';
-    player.gwPoints = calculatePlayerPoints(player.position, stats, isOnePrice, player.id);
-
-    // Recalculate total points across all GWs
-    let sum = 0;
-    for (const gwKey of Object.keys(player.gwStats)) {
-      const gwNum = parseInt(gwKey, 10);
-      // Determine if this GW's fixture was at One Price Stadium
-      const gwFixture = data.fixtures.find((f: Fixture) => {
-        const normClub = player.clubId === 'SCH' ? 'SCH_11_5' : player.clubId;
-        return f.gameweek === gwNum && (f.homeClubId === normClub || f.awayClubId === normClub);
-      });
-      const gwIsOnePrice = gwFixture?.venue === 'one_price';
-      sum += calculatePlayerPoints(player.position, player.gwStats[gwNum], gwIsOnePrice, player.id);
-    }
-    player.totalPoints = sum;
-  }
-
+  applyFixtureEventsToPlayers(fixture, data, req.body);
   recalculateAllManagersLeaguePoints(data);
-  db.save();
+  db.save(`Match stats saved for ${fixture.homeClubId} vs ${fixture.awayClubId}`);
   res.json({ success: true, fixture, players: data.players });
 });
 
@@ -3183,6 +3274,18 @@ async function startServer() {
     }
   } catch (e) {
     console.warn('[Startup] Initial GitHub database sync exception:', e);
+  }
+
+  // Ensure all finished fixtures have their player stats and manager points fully calculated
+  try {
+    const data = db.getData();
+    const statsSynced = syncAllFinishedFixturesStats(data);
+    if (statsSynced) {
+      db.saveSilent();
+      console.log('[Startup] Verified and synced player stats from all finished match fixtures.');
+    }
+  } catch (e) {
+    console.warn('[Startup] Error auto-syncing finished fixtures stats:', e);
   }
 
   app.listen(PORT, () => {

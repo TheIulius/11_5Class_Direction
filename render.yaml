@@ -10,3 +10,9 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: GITHUB_OWNER
+        value: TheIulius
+      - key: GITHUB_REPO
+        value: premier-league-fantasy
+      - key: GITHUB_BRANCH
+        value: data
