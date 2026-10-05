@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "server": "tsx watch server/index.ts",
-    "build": "(git fetch origin data --depth=1 && git checkout origin/data -- data/db.json || true) && tsc -b && vite build && esbuild server/index.ts --bundle --platform=node --target=node20 --format=esm --packages=external --outfile=dist-server/index.mjs",
+    "build": "(git fetch origin data --depth=1 && git checkout origin/data -- data/db.json || true) && npx tsx scripts/merge-seed-players.ts && tsc -b && vite build && esbuild server/index.ts --bundle --platform=node --target=node20 --format=esm --packages=external --outfile=dist-server/index.mjs",
     "start": "node dist-server/index.mjs",
     "preview": "vite preview"
   },
