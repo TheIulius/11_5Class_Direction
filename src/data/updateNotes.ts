@@ -26,6 +26,51 @@ export interface UpdateRelease {
 
 export const UPDATE_NOTES: UpdateRelease[] = [
   {
+    id: 'update_2026_10_10_gw1_ended_gw2_open',
+    version: 'v1.3.0',
+    date: '10 ოქტომბერი, 2026',
+    timestamp: 1791580800000,
+    titleKa: 'GW1 დასრულდა — შემადგენლობები გახსნილია! ⚽',
+    titleEn: 'GW1 Finished — Lineups Open for GW2! ⚽',
+    summaryKa: 'პირველი ტური დასრულდა! შემადგენლობები და ტრანსფერები გახსნილია GW2 დედლაინამდე (12/10/2026, 14:20).',
+    summaryEn: 'Gameweek 1 has concluded! Lineups and transfers are open until the GW2 kickoff deadline (12/10/2026, 14:20).',
+    tagKa: 'უახლესი განახლება',
+    tagEn: 'Latest Update',
+    items: [
+      {
+        id: 'gw1_ended_gw2_open',
+        titleKa: '🔓 შემადგენლობები და ტრანსფერები გახსნილია GW2-სთვის!',
+        titleEn: '🔓 Lineups & Transfers Open for GW2!',
+        descriptionKa: 'პირველი ტური წარმატებით დასრულდა და შემადგენლობები განბლოკილია! შეგიძლიათ გამოიყენოთ უფასო ტრანსფერები, შეცვალოთ სასტარტო შემადგენლობა და კაპიტანი. ცვლილებების შეტანა შეგიძლიათ მე-2 ტურის დედლაინამდე: 12 ოქტომბერი, 2026, 14:20.',
+        descriptionEn: 'Gameweek 1 has concluded and lineups are unlocked! You can now make free transfers, change your starting 6, and select your captain. Changes are allowed until the GW2 kickoff deadline: October 12, 2026 at 14:20.',
+        badgeKa: 'დედლაინი ⏱️',
+        badgeEn: 'Deadline ⏱️',
+        icon: 'clock',
+        highlight: true,
+      },
+      {
+        id: 'gw_navigation_and_scores',
+        titleKa: '📜 გასული ტურების არქივი და ქულები',
+        titleEn: '📜 Past Gameweek Archive & Points',
+        descriptionKa: 'Pick Team გვერდზე დაემატა ტურებს შორის გადართვის ღილაკები (< და >). შეგიძლიათ ნახოთ თქვენი GW1 შემადგენლობა, გააქტიურებული ჩიპი და მოთამაშეების მიერ აღებული ქულები.',
+        descriptionEn: 'Gameweek navigation (< and >) has been added to the Pick Team page. You can easily view your GW1 squad, chips used, and the points scored by each player.',
+        badgeKa: 'სიახლე ✨',
+        badgeEn: 'New ✨',
+        icon: 'sparkles',
+      },
+      {
+        id: 'free_transfers_rules',
+        titleKa: '🔄 უფასო ტრანსფერების დაგროვების სისტემა',
+        titleEn: '🔄 Free Transfer Accumulation Rules',
+        descriptionKa: 'ყოველ ტურში გეძლევათ 1 უფასო ტრანსფერი, რომელიც არგამოყენების შემთხვევაში გროვდება (მაქსიმუმ 3). ლიმიტის ამოწურვის შემდეგ ყოველი დამატებითი ტრანსფერი აკლდება საერთო ქულებს (-4 ქულა).',
+        descriptionEn: 'Every gameweek you receive 1 free transfer, accumulating up to 3 if unused. Additional transfers beyond your free balance incur a -4 points deduction on your overall score.',
+        badgeKa: 'წესები 📌',
+        badgeEn: 'Rules 📌',
+        icon: 'trending',
+      },
+    ],
+  },
+  {
     id: 'update_2026_10_01_photos_fixed',
     version: 'v1.2.5',
     date: '1 ოქტომბერი, 2026',
@@ -34,8 +79,8 @@ export const UPDATE_NOTES: UpdateRelease[] = [
     titleEn: 'Player Photo Uploads are Live! 📸',
     summaryKa: 'ტექნიკური შეფერხება გასწორდა — ახლა უკვე ყველას შეუძლია მოთამაშეებს ფოტოები დაამატოს!',
     summaryEn: 'Bug fixed — now EVERYONE can add photos to players!',
-    tagKa: 'უახლესი განახლება',
-    tagEn: 'Latest Update',
+    tagKa: 'წინა განახლება',
+    tagEn: 'Previous Update',
     items: [
       {
         id: 'player_photos_fixed',

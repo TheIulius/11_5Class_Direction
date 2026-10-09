@@ -40,8 +40,8 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
   const [internalIsOpen, setInternalIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Accordion state: Set of opened item IDs. By default, the standout photo feature is open!
-  const [expandedId, setExpandedId] = useState<string | null>('player_photos_fixed');
+  // Accordion state: Set of opened item IDs. By default, the GW1 ended / GW2 deadline item is open!
+  const [expandedId, setExpandedId] = useState<string | null>('gw1_ended_gw2_open');
 
   useEffect(() => {
     setMounted(true);
