@@ -278,6 +278,86 @@ assert.strictEqual(calculatedOverall1, calculatedOverall2, 'Repeated recalculati
 assert.strictEqual(squadE.accumulatedTransferPenalties, penaltyBefore, 'Penalties must not accumulate repeatedly');
 console.log('✓ PASS: Penalty deductions are strictly idempotent.\n');
 
+// -------------------------------------------------------------
+// TEST 11: Single-Use Chip Rule (One GW use only per season)
+// -------------------------------------------------------------
+console.log('Test 11: Single-Use Chip Rule (Triple Captain used in GW1 is locked for season)');
+const squadChipTest = createMockSquad();
+squadChipTest.activeChip = 'triple_captain';
+
+// Simulate advancing/concluding GW1:
+const endingGW = 1;
+squadChipTest.gameweekSquads[endingGW] = JSON.parse(JSON.stringify(squadChipTest.players));
+squadChipTest.gameweekChips[endingGW] = squadChipTest.activeChip;
+squadChipTest.usedChips[squadChipTest.activeChip!] = true;
+squadChipTest.activeChip = null;
+
+assert.strictEqual(squadChipTest.usedChips.triple_captain, true, 'Triple Captain must be marked as used');
+assert.strictEqual(squadChipTest.activeChip, null, 'activeChip must be cleared after gameweek');
+assert.strictEqual(squadChipTest.gameweekChips[1], 'triple_captain', 'gameweekChips[1] must preserve the chip played in GW1');
+
+// Function simulating chip activation attempt in subsequent gameweek
+function tryActivateChip(squad: Squad, chip: 'triple_captain' | 'bench_boost' | 'wildcard'): boolean {
+  const isAlreadyUsed = Boolean(
+    squad.usedChips?.[chip] ||
+    (squad.gameweekChips && Object.values(squad.gameweekChips).includes(chip))
+  );
+  if (isAlreadyUsed) return false;
+  squad.activeChip = squad.activeChip === chip ? null : chip;
+  return true;
+}
+
+const canReactivateTC = tryActivateChip(squadChipTest, 'triple_captain');
+assert.strictEqual(canReactivateTC, false, 'Attempt to reactivate already used Triple Captain must fail');
+assert.strictEqual(squadChipTest.activeChip, null, 'activeChip must remain null');
+console.log('✓ PASS: Triple Captain used in GW1 is permanently locked and cannot be reactivated in future GWs.\n');
+
+// -------------------------------------------------------------
+// TEST 12: Historical Chip Multiplier Preservation vs Future GWs
+// -------------------------------------------------------------
+console.log('Test 12: Historical Chip Multiplier Preservation vs Future Normal Captaincy');
+// In GW1 with Triple Captain:
+const gw1WithTC = calculateGameweekSquadPoints(
+  squadChipTest.gameweekSquads[1],
+  allPlayers,
+  1,
+  squadChipTest.gameweekChips[1], // 'triple_captain'
+  0,
+  1,
+  []
+);
+// In GW2 without chip:
+const gw2WithoutTC = calculateGameweekSquadPoints(
+  squadChipTest.players,
+  allPlayers,
+  2,
+  squadChipTest.activeChip, // null
+  0,
+  1,
+  []
+);
+
+assert.strictEqual(gw1WithTC.isTripleCaptain, true, 'GW1 calculation must apply Triple Captain multiplier');
+assert.strictEqual(gw2WithoutTC.isTripleCaptain, false, 'GW2 calculation must NOT apply Triple Captain multiplier');
+assert.strictEqual(gw2WithoutTC.isBenchBoost, false, 'GW2 calculation must have no active chips');
+console.log('✓ PASS: Historical GW1 retained 3x multiplier while subsequent GW2 uses standard scoring.\n');
+
+// -------------------------------------------------------------
+// TEST 13: Remaining Chips Availability
+// -------------------------------------------------------------
+console.log('Test 13: Remaining Unused Chips (Bench Boost, Wildcard) Remain Usable');
+assert.strictEqual(squadChipTest.usedChips.bench_boost, false, 'Bench Boost is still unused');
+assert.strictEqual(squadChipTest.usedChips.wildcard, false, 'Wildcard is still unused');
+
+const canActivateBB = tryActivateChip(squadChipTest, 'bench_boost');
+assert.strictEqual(canActivateBB, true, 'Manager CAN activate Bench Boost in future gameweek');
+assert.strictEqual(squadChipTest.activeChip, 'bench_boost', 'Bench Boost becomes active');
+
+const canDeactivateBB = tryActivateChip(squadChipTest, 'bench_boost');
+assert.strictEqual(canDeactivateBB, true, 'Manager can toggle off active chip before deadline');
+assert.strictEqual(squadChipTest.activeChip, null, 'Chip toggled off');
+console.log('✓ PASS: Remaining chips (Bench Boost, Wildcard) remain fully accessible.\n');
+
 console.log('=================================================================');
-console.log('ALL 10 FREE TRANSFER ACCUMULATION & PENALTY TESTS PASSED! 🎉');
+console.log('ALL 13 TRANSFER, PENALTY & CHIP SINGLE-USE TESTS PASSED! 🎉');
 console.log('=================================================================');

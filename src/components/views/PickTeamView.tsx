@@ -377,7 +377,7 @@ export const PickTeamView: React.FC = () => {
                 <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 Available Chips
               </span>
-              {squad.activeChip && (
+              {squad.activeChip && !squad.usedChips?.[squad.activeChip] && (
                 <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 animate-pulse">
                   Active
                 </span>
@@ -387,8 +387,11 @@ export const PickTeamView: React.FC = () => {
             <div className="grid grid-cols-3 md:grid-cols-1 gap-2 flex-1 items-stretch">
               {chips.map((chip) => {
                 const Icon = chip.icon;
-                const isUsed = squad.usedChips[chip.id];
-                const isActive = squad.activeChip === chip.id;
+                const isUsed = Boolean(
+                  squad.usedChips?.[chip.id] ||
+                  (squad.gameweekChips && Object.values(squad.gameweekChips).includes(chip.id))
+                );
+                const isActive = !isUsed && squad.activeChip === chip.id;
 
                 return (
                   <button
@@ -398,7 +401,9 @@ export const PickTeamView: React.FC = () => {
                     className={`group relative overflow-hidden flex flex-col md:flex-row items-center md:justify-between p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold border transition-all ${
                       isActive
                         ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20'
-                        : isUsed || isSquadLocked
+                        : isUsed
+                        ? 'bg-slate-100/80 dark:bg-black/40 text-slate-400 dark:text-slate-500 border-slate-200/80 dark:border-white/5 opacity-50 cursor-not-allowed'
+                        : isSquadLocked
                         ? 'bg-slate-100 dark:bg-black/30 text-slate-400 dark:text-slate-500 border-slate-200/80 dark:border-white/5 opacity-60 cursor-not-allowed'
                         : 'bg-slate-50/80 hover:bg-sky-50/70 text-slate-700 dark:bg-black/40 dark:hover:bg-black/60 dark:text-slate-200 border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/40 shadow-xs active:scale-98'
                     }`}
@@ -406,13 +411,15 @@ export const PickTeamView: React.FC = () => {
                     {/* Metallic sweep shine */}
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-transform" />
                     <div className="flex flex-col md:flex-row items-center gap-1.5 md:gap-2 relative z-10">
-                      <div className={`p-1 rounded-lg ${isActive ? 'bg-white/20 text-white' : 'bg-sky-500/10 text-sky-600 dark:bg-white/5 dark:text-slate-300'}`}>
+                      <div className={`p-1 rounded-lg ${isActive ? 'bg-white/20 text-white' : isUsed ? 'bg-slate-200/50 dark:bg-white/5 text-slate-400 dark:text-slate-500' : 'bg-sky-500/10 text-sky-600 dark:bg-white/5 dark:text-slate-300'}`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
                       <span className="text-[10px] md:text-xs text-center md:text-left leading-tight">{chip.label}</span>
                     </div>
-                    <span className="text-[8px] md:text-[10px] font-mono mt-1 md:mt-0 relative z-10 text-sky-600 dark:text-slate-400 font-bold">
-                      {isActive ? 'ACTIVE' : isUsed ? 'USED' : 'READY'}
+                    <span className={`text-[8px] md:text-[10px] font-mono mt-1 md:mt-0 relative z-10 font-bold ${
+                      isUsed ? 'text-rose-500 dark:text-rose-400' : isActive ? 'text-white' : 'text-sky-600 dark:text-slate-400'
+                    }`}>
+                      {isUsed ? '🔒 USED' : isActive ? 'ACTIVE' : 'READY'}
                     </span>
                   </button>
                 );

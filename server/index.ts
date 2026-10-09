@@ -984,6 +984,24 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
       if (firstNonCap) firstNonCap.isViceCaptain = true;
     }
 
+    const currentGWKey = data.currentGW || 1;
+    const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === currentGWKey);
+    const isCurrentGWFinished = gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished));
+    if (isCurrentGWFinished) {
+      if (!manager.squad.gameweekSquads) manager.squad.gameweekSquads = {};
+      if (!manager.squad.gameweekChips) manager.squad.gameweekChips = {};
+      if (!manager.squad.gameweekSquads[currentGWKey] && manager.squad.players?.length === 9) {
+        manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(manager.squad.players));
+        manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip || null;
+      }
+      if (manager.squad.activeChip) {
+        if (!manager.squad.usedChips) manager.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
+        manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip;
+        manager.squad.usedChips[manager.squad.activeChip] = true;
+        manager.squad.activeChip = null;
+      }
+    }
+
     manager.squad.players = sanitizedPlayers;
     if (typeof bank === 'number') {
       manager.squad.bank = Math.round(bank * 10) / 10;
@@ -1021,6 +1039,11 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
   const { managerId, chip } = req.body;
   const data = db.getData();
 
+  // Deadline check: cannot activate/change chips once lineups are locked
+  if (data.deadline && new Date() >= new Date(data.deadline.deadlineTime)) {
+    return res.status(403).json({ error: 'Lineups are locked. The deadline has passed.' });
+  }
+
   // Account approval check
   const user = data.users?.[managerId];
   if (user && !isUserAdmin(user.username) && !user.isApproved) {
@@ -1045,6 +1068,10 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
           transfersMadeThisGW: 0,
           activeChip: null,
           usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+          accumulatedTransferPenalties: 0,
+          gwTransferPenalties: {},
+          gameweekSquads: {},
+          gameweekChips: {},
         },
         joinedAt: new Date().toISOString(),
       };
@@ -1056,20 +1083,34 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
 
   const normalizedChip = chip === 'free_hit' ? 'wildcard' : chip;
 
+  if (!manager.squad.usedChips) {
+    manager.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
+  }
+  if (!manager.squad.gameweekChips) {
+    manager.squad.gameweekChips = {};
+  }
+
   if (manager.squad.usedChips) {
     if ((manager.squad.usedChips as any).free_hit !== undefined && (manager.squad.usedChips as any).wildcard === undefined) {
       (manager.squad.usedChips as any).wildcard = (manager.squad.usedChips as any).free_hit;
     }
   }
 
-  if (normalizedChip && manager.squad.usedChips[normalizedChip]) {
-    return res.status(400).json({ error: 'Chip already used' });
+  // Strict one-use per season rule: check usedChips and any past gameweek in gameweekChips
+  const isAlreadyUsed = Boolean(
+    manager.squad.usedChips[normalizedChip] ||
+    Object.values(manager.squad.gameweekChips || {}).some((c) => c === normalizedChip)
+  );
+
+  if (normalizedChip && isAlreadyUsed) {
+    manager.squad.usedChips[normalizedChip] = true;
+    return res.status(400).json({ error: 'Chip already used. Each chip can only be used once per season.' });
   }
 
   manager.squad.activeChip = manager.squad.activeChip === normalizedChip ? null : normalizedChip;
   db.save();
 
-  res.json({ success: true, activeChip: manager.squad.activeChip });
+  res.json({ success: true, activeChip: manager.squad.activeChip, usedChips: manager.squad.usedChips });
 });
 
 // 6. Execute Transfer
@@ -1169,6 +1210,14 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
       manager.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(manager.squad.players));
       manager.squad.gameweekChips[gw] = manager.squad.activeChip || null;
     }
+  }
+
+  // If the gameweek is finished, any chip played in it is permanently consumed and locked
+  if (isCurrentGWFinished && manager.squad.activeChip) {
+    if (!manager.squad.usedChips) manager.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
+    manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip;
+    manager.squad.usedChips[manager.squad.activeChip] = true;
+    manager.squad.activeChip = null;
   }
 
   // Free transfer consumption & penalty (Rules 1-6, 8, 9)
@@ -1377,13 +1426,28 @@ function recalculateAllManagersLeaguePoints(data: any) {
     if (!m.squad.gameweekChips) m.squad.gameweekChips = {};
     if (!m.squad.gwTransferPenalties) m.squad.gwTransferPenalties = {};
 
-    // Auto-snapshot completed gameweek squads if missing
+    // Auto-snapshot completed gameweek squads if missing, and permanently lock used chips
+    if (!m.squad.usedChips) m.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
     for (let gw = 1; gw <= currentGW; gw++) {
       const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === gw);
       const isGwFinished = gw < currentGW || (gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished)));
-      if (isGwFinished && !m.squad.gameweekSquads[gw] && m.squad.players?.length === 9) {
-        m.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(m.squad.players));
-        m.squad.gameweekChips[gw] = m.squad.activeChip || null;
+      if (isGwFinished) {
+        if (!m.squad.gameweekSquads[gw] && m.squad.players?.length === 9) {
+          m.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(m.squad.players));
+        }
+        if (!m.squad.gameweekChips[gw] && m.squad.activeChip) {
+          m.squad.gameweekChips[gw] = m.squad.activeChip;
+          m.squad.usedChips[m.squad.activeChip] = true;
+          m.squad.activeChip = null;
+        } else if (m.squad.gameweekChips[gw]) {
+          const usedChip = m.squad.gameweekChips[gw];
+          if (usedChip && !m.squad.usedChips[usedChip]) {
+            m.squad.usedChips[usedChip] = true;
+          }
+          if (m.squad.activeChip === usedChip) {
+            m.squad.activeChip = null;
+          }
+        }
       }
     }
 
@@ -1428,11 +1492,15 @@ function recalculateAllManagersLeaguePoints(data: any) {
       ? m.squad.gameweekSquads[currentGW]
       : (m.squad.players || []);
 
+    const chipForCurrentGW = (m.squad.gameweekChips && m.squad.gameweekChips[currentGW] !== undefined)
+      ? m.squad.gameweekChips[currentGW]
+      : (m.squad.activeChip || null);
+
     const currentCalc = calculateGameweekSquadPoints(
       displaySquad,
       data.players,
       currentGW,
-      m.squad.activeChip || null,
+      chipForCurrentGW,
       0,
       1,
       data.fixtures,
@@ -1476,7 +1544,7 @@ function recalculateAllManagersLeaguePoints(data: any) {
 
         member.gwPoints = latestGWGrossPoints;
         member.totalPoints = overallTotalPoints;
-        member.activeChip = m.squad?.activeChip || null;
+        member.activeChip = chipForCurrentGW;
         member.lineup = lineupSummary;
       }
     });
@@ -1933,8 +2001,9 @@ export function syncAllFinishedFixturesStats(data: DatabaseSchema): boolean {
     }
   }
 
-  // Ensure all managers have historical snapshots initialized for completed gameweeks
+  // Ensure all managers have historical snapshots initialized for completed gameweeks and used chips locked
   if (data.managers) {
+    const maxGW = Math.max(Number(data.currentGW || 1), 1);
     for (const m of Object.values(data.managers)) {
       if (!m.squad) continue;
       if (!m.squad.gameweekSquads) {
@@ -1943,6 +2012,10 @@ export function syncAllFinishedFixturesStats(data: DatabaseSchema): boolean {
       }
       if (!m.squad.gameweekChips) {
         m.squad.gameweekChips = {};
+        changed = true;
+      }
+      if (!m.squad.usedChips) {
+        m.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
         changed = true;
       }
       if (!m.squad.gwTransferPenalties) {
@@ -1957,11 +2030,41 @@ export function syncAllFinishedFixturesStats(data: DatabaseSchema): boolean {
         m.squad.freeTransfers = 1;
         changed = true;
       }
-      if (!m.squad.gameweekSquads[1] && m.squad.players?.length === 9) {
-        m.squad.gameweekSquads[1] = JSON.parse(JSON.stringify(m.squad.players));
-        m.squad.gameweekChips[1] = m.squad.activeChip || null;
-        m.squad.gwTransferPenalties[1] = 0;
-        changed = true;
+
+      // Any chip in gameweekChips must be permanently locked in usedChips
+      for (const chipName of Object.values(m.squad.gameweekChips)) {
+        if (chipName && !m.squad.usedChips[chipName]) {
+          m.squad.usedChips[chipName] = true;
+          changed = true;
+        }
+      }
+
+      for (let gw = 1; gw <= maxGW; gw++) {
+        const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === gw);
+        const isGwFinished = gw < maxGW || (gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished)));
+        if (isGwFinished) {
+          if (!m.squad.gameweekSquads[gw] && m.squad.players?.length === 9) {
+            m.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(m.squad.players));
+            if (!m.squad.gwTransferPenalties[gw]) m.squad.gwTransferPenalties[gw] = 0;
+            changed = true;
+          }
+          if (!m.squad.gameweekChips[gw] && m.squad.activeChip) {
+            m.squad.gameweekChips[gw] = m.squad.activeChip;
+            m.squad.usedChips[m.squad.activeChip] = true;
+            m.squad.activeChip = null;
+            changed = true;
+          } else if (m.squad.gameweekChips[gw]) {
+            const usedChip = m.squad.gameweekChips[gw];
+            if (usedChip && !m.squad.usedChips[usedChip]) {
+              m.squad.usedChips[usedChip] = true;
+              changed = true;
+            }
+            if (m.squad.activeChip === usedChip) {
+              m.squad.activeChip = null;
+              changed = true;
+            }
+          }
+        }
       }
     }
   }
@@ -2088,6 +2191,24 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
             for (const [gwKey, snap] of Object.entries(rMgr.squad.gameweekSquads)) {
               if (!lMgr.squad.gameweekSquads[gwKey]) {
                 lMgr.squad.gameweekSquads[gwKey] = snap;
+                changed = true;
+              }
+            }
+          }
+          if (rMgr.squad.gameweekChips && typeof rMgr.squad.gameweekChips === 'object') {
+            if (!lMgr.squad.gameweekChips) lMgr.squad.gameweekChips = {};
+            for (const [gwKey, chip] of Object.entries(rMgr.squad.gameweekChips)) {
+              if (!lMgr.squad.gameweekChips[gwKey] && chip) {
+                lMgr.squad.gameweekChips[gwKey] = chip;
+                changed = true;
+              }
+            }
+          }
+          if (rMgr.squad.usedChips && typeof rMgr.squad.usedChips === 'object') {
+            if (!lMgr.squad.usedChips) lMgr.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
+            for (const [chipKey, isUsed] of Object.entries(rMgr.squad.usedChips)) {
+              if (isUsed && !lMgr.squad.usedChips[chipKey]) {
+                lMgr.squad.usedChips[chipKey] = true;
                 changed = true;
               }
             }

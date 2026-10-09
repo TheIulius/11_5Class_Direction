@@ -223,12 +223,17 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                 ) : <span />}
 
                 <div className="flex items-center gap-1.5">
-                  {managerData.squad.activeChip && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white flex items-center gap-1">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      {managerData.squad.activeChip.replace('_', ' ').toUpperCase()}
-                    </span>
-                  )}
+                  {(() => {
+                    const activeChipForSelectedGW = (managerData.squad.gameweekChips && managerData.squad.gameweekChips[selectedGW] !== undefined)
+                      ? managerData.squad.gameweekChips[selectedGW]
+                      : (selectedGW === currentGW ? managerData.squad.activeChip : null);
+                    return activeChipForSelectedGW ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500 text-white flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        {activeChipForSelectedGW.replace('_', ' ').toUpperCase()}
+                      </span>
+                    ) : null;
+                  })()}
                   {calcResult.transferCost > 0 && (
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
                       -{calcResult.transferCost} pts

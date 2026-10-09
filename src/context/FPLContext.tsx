@@ -270,16 +270,29 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         const parsed = JSON.parse(saved);
         if (parsed && Array.isArray(parsed.players) && parsed.players.length <= 9) {
-          if (parsed.usedChips) {
-            if ((parsed.usedChips as any).free_hit !== undefined && parsed.usedChips.wildcard === undefined) {
-              parsed.usedChips.wildcard = (parsed.usedChips as any).free_hit;
-            }
-            if (parsed.usedChips.wildcard === undefined) {
-              parsed.usedChips.wildcard = false;
+          if (!parsed.usedChips) {
+            parsed.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
+          }
+          if ((parsed.usedChips as any).free_hit !== undefined && parsed.usedChips.wildcard === undefined) {
+            parsed.usedChips.wildcard = (parsed.usedChips as any).free_hit;
+          }
+          if (parsed.usedChips.triple_captain === undefined) parsed.usedChips.triple_captain = false;
+          if (parsed.usedChips.bench_boost === undefined) parsed.usedChips.bench_boost = false;
+          if (parsed.usedChips.wildcard === undefined) parsed.usedChips.wildcard = false;
+
+          if (parsed.gameweekChips && typeof parsed.gameweekChips === 'object') {
+            for (const c of Object.values(parsed.gameweekChips) as (ChipType | null)[]) {
+              if (c && parsed.usedChips[c] !== undefined) {
+                parsed.usedChips[c] = true;
+              }
             }
           }
+
           if ((parsed.activeChip as any) === 'free_hit') {
             parsed.activeChip = 'wildcard';
+          }
+          if (parsed.activeChip && parsed.usedChips[parsed.activeChip]) {
+            parsed.activeChip = null;
           }
           parsed.players = sanitizeCaptaincy(parsed.players);
           return parsed;
@@ -1299,7 +1312,11 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Activate Chip
   const activateChip = (chip: ChipType): boolean => {
-    if (isSquadLocked || squad.usedChips[chip]) return false;
+    const isAlreadyUsed = Boolean(
+      squad.usedChips?.[chip] ||
+      (squad.gameweekChips && Object.values(squad.gameweekChips).includes(chip))
+    );
+    if (isSquadLocked || isAlreadyUsed) return false;
     const newActive = squad.activeChip === chip ? null : chip;
     lastSquadEditTimeRef.current = Date.now();
     const updatedSquad = { ...squad, activeChip: newActive };
@@ -1372,6 +1389,9 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const currentGWKey = currentGW || 1;
     const gwSnapshots = { ...(squad.gameweekSquads || {}) };
     const gwChips = { ...(squad.gameweekChips || {}) };
+    const updatedUsedChips = { ...(squad.usedChips || { triple_captain: false, bench_boost: false, wildcard: false }) };
+    let currentActiveChip = squad.activeChip;
+
     if (isCurrentGWFinished || isSquadLocked) {
       if (!gwSnapshots[currentGWKey] && squad.players.length === 9) {
         gwSnapshots[currentGWKey] = [...squad.players];
@@ -1383,6 +1403,13 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         gwSnapshots[g] = [...squad.players];
         gwChips[g] = squad.activeChip || null;
       }
+    }
+
+    // Lock finished gameweek chip permanently
+    if (isCurrentGWFinished && currentActiveChip) {
+      gwChips[currentGWKey] = currentActiveChip;
+      updatedUsedChips[currentActiveChip] = true;
+      currentActiveChip = null;
     }
 
     const currentPenalties = squad.accumulatedTransferPenalties || 0;
@@ -1400,6 +1427,8 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       gwTransferPenalties: currentGwPenalties,
       gameweekSquads: gwSnapshots,
       gameweekChips: gwChips,
+      activeChip: currentActiveChip,
+      usedChips: updatedUsedChips,
       players: updatedPlayers,
     };
 
