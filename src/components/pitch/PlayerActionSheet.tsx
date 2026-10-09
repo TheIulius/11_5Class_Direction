@@ -7,12 +7,23 @@ import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { suggestPlayerPhotoApi } from '../../services/api';
 
+import { GameweekCalculationResult, calculatePlayerPoints } from '../../engine/scoring';
+
 interface PlayerActionSheetProps {
   playerId: string | null;
   onClose: () => void;
+  selectedGW?: number;
+  readOnly?: boolean;
+  customCalculation?: GameweekCalculationResult;
 }
 
-export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, onClose }) => {
+export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
+  playerId,
+  onClose,
+  selectedGW,
+  readOnly = false,
+  customCalculation,
+}) => {
   const {
     players,
     squad,
@@ -28,6 +39,8 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
     playerOwnership,
     authUser,
     refreshServerState,
+    fixtures,
+    clubs,
   } = useFPL();
 
   const [showOwnershipList, setShowOwnershipList] = useState(false);
@@ -37,19 +50,22 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
   const player = players[playerId];
   if (!player) return null;
 
+  const activeCalc = customCalculation || calculationResult;
+  const activeGW = selectedGW ?? currentGW;
+
   const squadPlayer = squad.players.find((p) => p.playerId === playerId);
   const isStarter = squadPlayer?.isStarter ?? false;
   const isCaptain = squadPlayer?.isCaptain ?? false;
   const isViceCaptain = squadPlayer?.isViceCaptain ?? false;
   const benchOrder = squadPlayer?.benchOrder || 0;
 
-  const club = CLUBS[player.clubId];
-  const stats = player.gwStats[currentGW];
-  const breakdown = calculationResult.playerPointsBreakdown[playerId];
-  const isScoringActive = (squadPlayer?.isStarter ?? false) || breakdown?.isAutoSubIn || calculationResult.isBenchBoost;
+  const club = clubs?.[player.clubId] || CLUBS[player.clubId];
+  const stats = player.gwStats[activeGW];
+  const breakdown = activeCalc.playerPointsBreakdown?.[playerId];
+  const isScoringActive = (squadPlayer?.isStarter ?? false) || breakdown?.isAutoSubIn || activeCalc.isBenchBoost;
   const currentPts = breakdown
     ? (isScoringActive ? breakdown.finalPoints : breakdown.rawPoints)
-    : (stats ? player.gwPoints : 0);
+    : (stats ? calculatePlayerPoints(player.position, stats, false, player.id) : 0);
 
   const ownership = playerId && playerOwnership ? playerOwnership[playerId] : null;
   const ownershipPercent = ownership?.percent ?? (player?.selectedByPercent ?? 0);
@@ -259,7 +275,9 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-emerald-500" />
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-semibold">GW {currentGW} Score</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold">
+                GW {activeGW} Score {activeGW !== currentGW ? '(Archive)' : ''}
+              </span>
               <div className="flex items-center gap-2 mt-0.5 text-xs text-slate-600 dark:text-slate-300">
                 <span>Mins: <strong className="text-slate-900 dark:text-white">{stats?.minutes || 0}'</strong></span>
                 {stats?.goals ? <span>• Goals: <strong className="text-emerald-600 dark:text-emerald-400">{stats.goals}</strong></span> : null}
@@ -273,6 +291,76 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
             <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">{currentPts}</span>
             <span className="text-[10px] text-slate-400 block -mt-1">PTS</span>
           </div>
+        </div>
+
+        {/* Gameweek Performance History */}
+        <div className="my-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300">
+              <Activity className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Gameweek Performance History</span>
+            </div>
+            <span className="text-[10px] font-mono font-bold text-slate-400">
+              {Object.keys(player.gwStats || {}).length} matchday{Object.keys(player.gwStats || {}).length === 1 ? '' : 's'}
+            </span>
+          </div>
+
+          {Object.keys(player.gwStats || {}).length === 0 ? (
+            <p className="text-[11px] text-slate-400 italic">No gameweek appearances recorded yet.</p>
+          ) : (
+            <div className="space-y-1.5 pt-1">
+              {Object.entries(player.gwStats)
+                .sort(([a], [b]) => Number(b) - Number(a))
+                .map(([gwStr, st]) => {
+                  const gwNum = Number(gwStr);
+                  const normClub = player.clubId === 'SCH' ? 'SCH_11_5' : player.clubId;
+                  const fix = fixtures?.find(
+                    (f) => f.gameweek === gwNum && (f.homeClubId === normClub || f.awayClubId === normClub)
+                  );
+                  const isHome = fix ? fix.homeClubId === normClub : true;
+                  const oppId = fix ? (isHome ? fix.awayClubId : fix.homeClubId) : null;
+                  const oppClub = oppId ? clubs?.[oppId] || CLUBS[oppId] : null;
+                  const isOnePrice = fix?.venue === 'one_price';
+                  const ptsForGW = calculatePlayerPoints(player.position, st, isOnePrice, player.id);
+
+                  return (
+                    <div
+                      key={`perf-gw-${gwNum}`}
+                      className="p-2 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200/80 dark:border-white/5 flex items-center justify-between gap-2 text-xs"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-white/10 font-mono font-black text-[10px]">
+                            GW {gwNum}
+                          </span>
+                          <span className="font-bold truncate text-slate-800 dark:text-slate-200">
+                            {oppClub ? `vs ${oppClub.shortName} (${isHome ? 'H' : 'A'})` : `Matchday ${gwNum}`}
+                          </span>
+                          {fix && fix.homeScore !== null && fix.awayScore !== null && (
+                            <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                              {fix.homeScore}-{fix.awayScore}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                          <span>⏱️ {st.minutes || 0}'</span>
+                          {st.goals > 0 && <span className="text-emerald-500 font-bold">⚽ {st.goals}</span>}
+                          {st.assists > 0 && <span className="text-sky-400 font-bold">🅰️ {st.assists}</span>}
+                          {st.cleanSheet && <span className="text-teal-400 font-bold">🛡️ CS</span>}
+                          {st.bonus && st.bonus > 0 && <span className="text-amber-400 font-bold">⭐ +{st.bonus}</span>}
+                        </div>
+                      </div>
+
+                      <div className="text-right shrink-0">
+                        <span className="text-sm font-mono font-black text-emerald-500">
+                          {ptsForGW}p
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
         </div>
 
         {/* Ownership Section */}
@@ -329,15 +417,22 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
           )}
         </div>
 
+        {/* Read-Only Archive Notice */}
+        {readOnly && (
+          <div className="my-2 p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-bold text-center">
+            📜 Viewing Gameweek {activeGW} Archive (Read-Only)
+          </div>
+        )}
+
         {/* Lock warning if locked */}
-        {isSquadLocked && (
+        {!readOnly && isSquadLocked && (
           <div className="my-2 p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold text-center">
             🔒 Lineups are locked for this Gameweek
           </div>
         )}
 
-        {/* Bench Priority Reordering Section (Only for Substitutes) */}
-        {!isStarter && (
+        {/* Bench Priority Reordering Section (Only for Substitutes in active GW) */}
+        {!readOnly && !isStarter && (
           <div className="my-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -405,70 +500,76 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({ playerId, 
           </div>
         )}
 
-        {/* Quick Action Grid */}
-        <div className="grid grid-cols-2 gap-2 mt-3">
-          {/* Substitute / Swap Button */}
-          <button
-            onClick={handleStartSwap}
-            disabled={isSquadLocked}
-            className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-              isSquadLocked
-                ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
-                : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-            }`}
-          >
-            <ArrowLeftRight className="w-4 h-4 text-amber-500" />
-            <span>Substitute</span>
-          </button>
-
-          {/* Transfer Button */}
-          <button
-            onClick={handleTransfer}
-            disabled={isSquadLocked}
-            className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-              isSquadLocked
-                ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
-                : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-            }`}
-          >
-            <ArrowRight className="w-4 h-4 text-sky-500" />
-            <span>Transfer Out</span>
-          </button>
-
-          {/* Make Captain (Only for Starters) */}
-          {isStarter && (
+        {/* Quick Action Grid (Disabled in Read-Only Archive) */}
+        {!readOnly ? (
+          <div className="grid grid-cols-2 gap-2 mt-3">
+            {/* Substitute / Swap Button */}
             <button
-              onClick={handleMakeCaptain}
-              disabled={isCaptain}
+              onClick={handleStartSwap}
+              disabled={isSquadLocked}
               className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-                isCaptain
-                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 cursor-default'
-                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <Crown className="w-4 h-4 text-amber-500" />
-              <span>{isCaptain ? 'Captain (C)' : 'Make Captain'}</span>
-            </button>
-          )}
-
-          {/* Make Vice Captain (Only for Starters) */}
-          {isStarter && (
-            <button
-              onClick={handleMakeViceCaptain}
-              disabled={isViceCaptain || isCaptain}
-              className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-                isViceCaptain
-                  ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30 cursor-default'
-                  : isCaptain
+                isSquadLocked
                   ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
                   : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
               }`}
             >
-              <ShieldAlert className="w-4 h-4 text-sky-500" />
-              <span>{isViceCaptain ? 'Vice Captain (V)' : 'Make Vice C'}</span>
+              <ArrowLeftRight className="w-4 h-4 text-amber-500" />
+              <span>Substitute</span>
             </button>
-          )}
-        </div>
+
+            {/* Transfer Button */}
+            <button
+              onClick={handleTransfer}
+              disabled={isSquadLocked}
+              className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                isSquadLocked
+                  ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
+                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+              }`}
+            >
+              <ArrowRight className="w-4 h-4 text-sky-500" />
+              <span>Transfer Out</span>
+            </button>
+
+            {/* Make Captain (Only for Starters) */}
+            {isStarter && (
+              <button
+                onClick={handleMakeCaptain}
+                disabled={isCaptain}
+                className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                  isCaptain
+                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 cursor-default'
+                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <Crown className="w-4 h-4 text-amber-500" />
+                <span>{isCaptain ? 'Captain (C)' : 'Make Captain'}</span>
+              </button>
+            )}
+
+            {/* Make Vice Captain (Only for Starters) */}
+            {isStarter && (
+              <button
+                onClick={handleMakeViceCaptain}
+                disabled={isViceCaptain || isCaptain}
+                className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                  isViceCaptain
+                    ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30 cursor-default'
+                    : isCaptain
+                    ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
+                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <ShieldAlert className="w-4 h-4 text-sky-500" />
+                <span>{isViceCaptain ? 'Vice Captain (V)' : 'Make Vice C'}</span>
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">
+            Lineup substitutions, captaincy, and transfers are only editable on the current gameweek.
+          </div>
+        )}
       </div>
     </div>
   );

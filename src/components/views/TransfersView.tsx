@@ -18,7 +18,7 @@ import {
   Sparkles,
   ChevronRight,
 } from 'lucide-react';
-import { validateSquadComposition } from '../../engine/scoring';
+import { validateSquadComposition, calculatePlayerPoints } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { ClassGridView } from '../transfers/ClassGridView';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
@@ -739,11 +739,28 @@ export const TransfersView: React.FC = () => {
                                     {clubs[p.clubId]?.shortName || p.clubId}
                                   </span>
                                 </div>
-                                <div className="flex items-center gap-2 mt-0.5">
+                                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                                   <PlayerPriceBadge player={p} className="text-[11px] font-mono tabular-nums font-bold text-emerald-600 dark:text-emerald-400" />
                                   <span className="text-[10px] font-mono tabular-nums text-slate-400">
                                     {p.totalPoints} pts
                                   </span>
+                                  {Object.entries(p.gwStats || {}).length > 0 && (
+                                    <span className="text-[9.5px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                                      {Object.entries(p.gwStats)
+                                        .sort(([a], [b]) => Number(a) - Number(b))
+                                        .map(([gwStr, st]) => {
+                                          const gw = Number(gwStr);
+                                          const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+                                          const fix = fpl.fixtures?.find(
+                                            (f) => f.gameweek === gw && (f.homeClubId === normClub || f.awayClubId === normClub)
+                                          );
+                                          const isOnePrice = fix?.venue === 'one_price';
+                                          const gwPts = calculatePlayerPoints(p.position, st, isOnePrice, p.id);
+                                          return `(GW${gw}: ${gwPts}p)`;
+                                        })
+                                        .join(' ')}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                             </div>

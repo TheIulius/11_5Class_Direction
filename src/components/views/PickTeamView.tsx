@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { PitchView } from '../pitch/PitchView';
 import { PlayerCard } from '../pitch/PlayerCard';
 import { PlayerActionSheet } from '../pitch/PlayerActionSheet';
 import { getFormationLayout } from '../../engine/formations';
 import { ChipType } from '../../types/fpl';
-import { Zap, CheckCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, Lock, ArrowLeft, ArrowRight, Clock, Award } from 'lucide-react';
-import { validateSquadComposition } from '../../engine/scoring';
+import { Zap, CheckCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, Lock, ArrowLeft, ArrowRight, Clock, Award } from 'lucide-react';
+import { validateSquadComposition, calculateGameweekSquadPoints } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { TripleCaptainIcon, BenchBoostIcon, WildcardIcon } from '../icons/ChipIcons';
 
@@ -25,7 +25,50 @@ export const PickTeamView: React.FC = () => {
     currentGW,
     reorderBenchPlayer,
     deadline,
+    fixtures,
+    calculationResult,
   } = useFPL();
+
+  const [selectedGW, setSelectedGW] = useState<number>(currentGW);
+  useEffect(() => {
+    setSelectedGW(currentGW);
+  }, [currentGW]);
+
+  const isPastGW = selectedGW < currentGW;
+
+  const activeSquadPlayers = useMemo(() => {
+    if (!isPastGW) {
+      return squad.players;
+    }
+    return (squad.gameweekSquads && squad.gameweekSquads[selectedGW])
+      ? squad.gameweekSquads[selectedGW]
+      : squad.players;
+  }, [isPastGW, squad.players, squad.gameweekSquads, selectedGW]);
+
+  const activeGWChip = useMemo(() => {
+    if (!isPastGW) {
+      return squad.activeChip;
+    }
+    return (squad.gameweekChips && squad.gameweekChips[selectedGW] !== undefined)
+      ? squad.gameweekChips[selectedGW]
+      : null;
+  }, [isPastGW, squad.activeChip, squad.gameweekChips, selectedGW]);
+
+  const activeCalculation = useMemo(() => {
+    if (!isPastGW) {
+      return calculationResult;
+    }
+    return calculateGameweekSquadPoints(
+      activeSquadPlayers,
+      players,
+      selectedGW,
+      activeGWChip,
+      0,
+      1,
+      fixtures,
+      true
+    );
+  }, [isPastGW, calculationResult, activeSquadPlayers, players, selectedGW, activeGWChip, fixtures]);
 
   const [timeLeft, setTimeLeft] = useState<string>('');
 
@@ -62,10 +105,10 @@ export const PickTeamView: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const comp = validateSquadComposition(squad.players, players);
-  const [showCompDetails, setShowCompDetails] = useState<boolean>(!comp.isValid && squad.players.length > 0);
+  const comp = validateSquadComposition(activeSquadPlayers, players);
+  const [showCompDetails, setShowCompDetails] = useState<boolean>(!comp.isValid && activeSquadPlayers.length > 0);
 
-  const layout = getFormationLayout(squad.players, players);
+  const layout = getFormationLayout(activeSquadPlayers, players);
   const benchSlots = [1, 2, 3];
 
   const chips: { id: ChipType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
@@ -106,7 +149,7 @@ export const PickTeamView: React.FC = () => {
     }
   };
 
-  const validCount = squad.players.filter((sp) => Boolean(players[sp.playerId])).length;
+  const validCount = activeSquadPlayers.filter((sp) => Boolean(players[sp.playerId])).length;
 
   return (
     <div className="flex flex-col pb-24 md:pb-12 px-2 sm:px-4 md:px-6 pt-2 md:pt-4 max-w-4xl lg:max-w-5xl mx-auto w-full transition-colors duration-200">
@@ -169,6 +212,88 @@ export const PickTeamView: React.FC = () => {
             </span>
           </div>
         )}
+
+        {/* Read-Only Archive Notification Banner for Past Gameweeks */}
+        {isPastGW && (
+          <div className="p-2.5 md:p-3 rounded-2xl bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-bold flex items-center justify-between shadow-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <Clock className="w-4 h-4 flex-shrink-0 text-sky-400" />
+              <span className="truncate">
+                Viewing Gameweek {selectedGW} archive. Historical lineup and player scores are read-only.
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedGW(currentGW)}
+              className="px-2.5 py-1 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-black text-xs transition-all shrink-0 cursor-pointer shadow-xs active:scale-95 ml-2 flex items-center gap-1"
+            >
+              <span>Jump to GW {currentGW}</span>
+              <span>→</span>
+            </button>
+          </div>
+        )}
+
+        {/* Gameweek Navigation Strip with 2 Arrows and Caption */}
+        <div className="flex items-center justify-between p-2 sm:p-2.5 rounded-2xl bg-white/95 dark:bg-zinc-950/80 border border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-xs">
+          <button
+            type="button"
+            onClick={() => setSelectedGW((prev) => Math.max(1, prev - 1))}
+            disabled={selectedGW <= 1}
+            aria-label="Previous Gameweek"
+            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 active:scale-95 cursor-pointer disabled:pointer-events-none"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="hidden sm:inline text-xs font-bold">GW {selectedGW - 1}</span>
+          </button>
+
+          <div className="flex flex-col items-center text-center">
+            <div className="flex items-center gap-2">
+              <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
+                Gameweek {selectedGW} Lineup
+              </span>
+              {selectedGW === currentGW ? (
+                <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                  Current
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30">
+                  Archive
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 mt-0.5 text-[11px] font-mono">
+              <span className="font-extrabold text-amber-500">
+                {activeCalculation.totalPoints} PTS
+              </span>
+              {activeGWChip && (
+                <>
+                  <span className="text-slate-400">•</span>
+                  <span className="text-sky-500 font-bold uppercase">
+                    ⚡ {activeGWChip.replace('_', ' ')}
+                  </span>
+                </>
+              )}
+              {isPastGW && (
+                <>
+                  <span className="text-slate-400">•</span>
+                  <span className="text-slate-400 text-[10px]">Read-only</span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setSelectedGW((prev) => Math.min(currentGW, prev + 1))}
+            disabled={selectedGW >= currentGW}
+            aria-label="Next Gameweek"
+            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 active:scale-95 cursor-pointer disabled:pointer-events-none"
+          >
+            <span className="hidden sm:inline text-xs font-bold">GW {selectedGW + 1}</span>
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
 
         {/* Monospace Quick Metrics Bar */}
         <div className="flex items-center justify-between flex-wrap gap-2 px-3 py-2 rounded-xl bg-white/95 dark:bg-zinc-950/80 border border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-xs">
@@ -270,9 +395,13 @@ export const PickTeamView: React.FC = () => {
 
         {/* Tactical Pitch Surface (Bench decoupled to Section 2) */}
         <PitchView
-          showPoints={false}
+          showPoints={isPastGW}
           renderBench={false}
           onCardClick={(id) => setActiveSheetPlayerId(id)}
+          customSquad={activeSquadPlayers}
+          customCalculation={activeCalculation}
+          selectedGW={selectedGW}
+          readOnly={isPastGW}
         />
       </section>
 
@@ -313,7 +442,7 @@ export const PickTeamView: React.FC = () => {
                           {order === 1 ? '1st Sub ★' : order === 2 ? '2nd Sub' : '3rd Sub'}
                         </span>
                         {/* Quick Reorder Arrow Buttons */}
-                        {!isSquadLocked && layout.bench.length > 1 && (
+                        {!isSquadLocked && !isPastGW && layout.bench.length > 1 && (
                           <div className="flex items-center gap-1">
                             {order > 1 && (
                               <button
@@ -350,7 +479,10 @@ export const PickTeamView: React.FC = () => {
                         isCaptain={sp.isCaptain}
                         isViceCaptain={sp.isViceCaptain}
                         onCardClick={(id) => setActiveSheetPlayerId(id)}
-                        showPoints={false}
+                        showPoints={isPastGW}
+                        customCalculation={activeCalculation}
+                        selectedGW={selectedGW}
+                        readOnly={isPastGW}
                       />
                     </div>
                   );
@@ -359,11 +491,15 @@ export const PickTeamView: React.FC = () => {
                 return (
                   <div
                     key={`empty-bench-${order}`}
-                    onClick={() => setActiveTab('transfers')}
-                    className="flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-black/20 text-slate-500 dark:text-slate-400 hover:border-sky-400 hover:bg-sky-50/50 cursor-pointer transition-all min-h-[90px]"
+                    onClick={() => {
+                      if (!isPastGW) setActiveTab('transfers');
+                    }}
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-black/20 text-slate-500 dark:text-slate-400 transition-all min-h-[90px] ${
+                      isPastGW ? 'cursor-default opacity-50' : 'hover:border-sky-400 hover:bg-sky-50/50 cursor-pointer'
+                    }`}
                   >
                     <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Sub {order}</span>
-                    <span className="text-[8px] text-sky-600 dark:text-emerald-400 mt-1 font-mono uppercase tracking-wider">+ Empty</span>
+                    <span className="text-[8px] text-sky-600 dark:text-emerald-400 mt-1 font-mono uppercase tracking-wider">{isPastGW ? 'Empty' : '+ Empty'}</span>
                   </div>
                 );
               })}
@@ -375,9 +511,9 @@ export const PickTeamView: React.FC = () => {
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
-                Available Chips
+                {isPastGW ? `GW ${selectedGW} Chip` : 'Available Chips'}
               </span>
-              {squad.activeChip && !squad.usedChips?.[squad.activeChip] && (
+              {((isPastGW && activeGWChip) || (!isPastGW && squad.activeChip && !squad.usedChips?.[squad.activeChip])) && (
                 <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 animate-pulse">
                   Active
                 </span>
@@ -387,21 +523,25 @@ export const PickTeamView: React.FC = () => {
             <div className="grid grid-cols-3 md:grid-cols-1 gap-2 flex-1 items-stretch">
               {chips.map((chip) => {
                 const Icon = chip.icon;
-                const isUsed = Boolean(
+                const isUsedInSeason = Boolean(
                   squad.usedChips?.[chip.id] ||
                   (squad.gameweekChips && Object.values(squad.gameweekChips).includes(chip.id))
                 );
-                const isActive = !isUsed && squad.activeChip === chip.id;
+                const isActiveInThisGW = isPastGW
+                  ? activeGWChip === chip.id
+                  : (!isUsedInSeason && squad.activeChip === chip.id);
 
                 return (
                   <button
                     key={chip.id}
-                    disabled={isUsed || isSquadLocked}
+                    disabled={isPastGW || isUsedInSeason || isSquadLocked}
                     onClick={() => activateChip(chip.id)}
                     className={`group relative overflow-hidden flex flex-col md:flex-row items-center md:justify-between p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold border transition-all ${
-                      isActive
+                      isActiveInThisGW
                         ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20'
-                        : isUsed
+                        : isPastGW
+                        ? 'bg-slate-100/60 dark:bg-black/20 text-slate-400 dark:text-slate-500 border-slate-200/60 dark:border-white/5 opacity-50 cursor-not-allowed'
+                        : isUsedInSeason
                         ? 'bg-slate-100/80 dark:bg-black/40 text-slate-400 dark:text-slate-500 border-slate-200/80 dark:border-white/5 opacity-50 cursor-not-allowed'
                         : isSquadLocked
                         ? 'bg-slate-100 dark:bg-black/30 text-slate-400 dark:text-slate-500 border-slate-200/80 dark:border-white/5 opacity-60 cursor-not-allowed'
@@ -411,15 +551,15 @@ export const PickTeamView: React.FC = () => {
                     {/* Metallic sweep shine */}
                     <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent pointer-events-none transition-transform" />
                     <div className="flex flex-col md:flex-row items-center gap-1.5 md:gap-2 relative z-10">
-                      <div className={`p-1 rounded-lg ${isActive ? 'bg-white/20 text-white' : isUsed ? 'bg-slate-200/50 dark:bg-white/5 text-slate-400 dark:text-slate-500' : 'bg-sky-500/10 text-sky-600 dark:bg-white/5 dark:text-slate-300'}`}>
+                      <div className={`p-1 rounded-lg ${isActiveInThisGW ? 'bg-white/20 text-white' : isUsedInSeason ? 'bg-slate-200/50 dark:bg-white/5 text-slate-400 dark:text-slate-500' : 'bg-sky-500/10 text-sky-600 dark:bg-white/5 dark:text-slate-300'}`}>
                         <Icon className="w-3.5 h-3.5" />
                       </div>
                       <span className="text-[10px] md:text-xs text-center md:text-left leading-tight">{chip.label}</span>
                     </div>
                     <span className={`text-[8px] md:text-[10px] font-mono mt-1 md:mt-0 relative z-10 font-bold ${
-                      isUsed ? 'text-rose-500 dark:text-rose-400' : isActive ? 'text-white' : 'text-sky-600 dark:text-slate-400'
+                      isActiveInThisGW ? 'text-white' : isPastGW ? 'text-slate-400' : isUsedInSeason ? 'text-rose-500 dark:text-rose-400' : 'text-sky-600 dark:text-slate-400'
                     }`}>
-                      {isUsed ? '🔒 USED' : isActive ? 'ACTIVE' : 'READY'}
+                      {isActiveInThisGW ? 'ACTIVE' : isPastGW ? 'INACTIVE' : isUsedInSeason ? '🔒 USED' : 'READY'}
                     </span>
                   </button>
                 );
@@ -436,32 +576,43 @@ export const PickTeamView: React.FC = () => {
           </div>
         )}
 
-        {/* Tactile Lineup Save Action */}
-        <button
-          onClick={handleSaveTeam}
-          disabled={isSaving || !comp.isValid || isSquadLocked}
-          className={`w-full py-3.5 px-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg ${
-            !comp.isValid || isSquadLocked
-              ? 'bg-slate-200 text-slate-500 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-500 dark:border-white/5 cursor-not-allowed shadow-none'
-              : 'bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.35)]'
-          }`}
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Saving Lineup...</span>
-            </>
-          ) : isSquadLocked ? (
-            <span>Lineups Locked for GW {currentGW}</span>
-          ) : saveSuccess ? (
-            <>
-              <CheckCircle className="w-4 h-4" />
-              <span>Squad Saved Successfully!</span>
-            </>
-          ) : (
-            <span>Save Team Lineup</span>
-          )}
-        </button>
+        {/* Tactile Lineup Save Action / Past GW Jump Button */}
+        {isPastGW ? (
+          <button
+            type="button"
+            onClick={() => setSelectedGW(currentGW)}
+            className="w-full py-3.5 px-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg bg-sky-500 hover:bg-sky-400 active:scale-98 text-slate-950 cursor-pointer"
+          >
+            <Clock className="w-4 h-4" />
+            <span>Viewing GW {selectedGW} Archive • Jump to Current GW {currentGW} →</span>
+          </button>
+        ) : (
+          <button
+            onClick={handleSaveTeam}
+            disabled={isSaving || !comp.isValid || isSquadLocked}
+            className={`w-full py-3.5 px-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg ${
+              !comp.isValid || isSquadLocked
+                ? 'bg-slate-200 text-slate-500 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-500 dark:border-white/5 cursor-not-allowed shadow-none'
+                : 'bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.35)]'
+            }`}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Saving Lineup...</span>
+              </>
+            ) : isSquadLocked ? (
+              <span>Lineups Locked for GW {currentGW}</span>
+            ) : saveSuccess ? (
+              <>
+                <CheckCircle className="w-4 h-4" />
+                <span>Squad Saved Successfully!</span>
+              </>
+            ) : (
+              <span>Save Team Lineup</span>
+            )}
+          </button>
+        )}
       </section>
 
       {/* Modal Action Sheet for Selected Player */}
@@ -469,6 +620,9 @@ export const PickTeamView: React.FC = () => {
         <PlayerActionSheet
           playerId={activeSheetPlayerId}
           onClose={() => setActiveSheetPlayerId(null)}
+          selectedGW={selectedGW}
+          readOnly={isPastGW}
+          customCalculation={activeCalculation}
         />
       )}
     </div>

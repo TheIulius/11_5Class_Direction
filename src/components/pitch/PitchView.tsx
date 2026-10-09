@@ -5,16 +5,27 @@ import { PlayerCard } from './PlayerCard';
 import { PlayerActionSheet } from './PlayerActionSheet';
 import { X, Sparkles, Shield, UserPlus, Plus } from 'lucide-react';
 
+import { SquadPlayer } from '../../types/fpl';
+import { GameweekCalculationResult } from '../../engine/scoring';
+
 interface PitchViewProps {
   showPoints?: boolean;
   renderBench?: boolean;
   onCardClick?: (playerId: string) => void;
+  customSquad?: SquadPlayer[];
+  customCalculation?: GameweekCalculationResult;
+  selectedGW?: number;
+  readOnly?: boolean;
 }
 
 export const PitchView: React.FC<PitchViewProps> = ({
   showPoints = false,
   renderBench = true,
   onCardClick,
+  customSquad,
+  customCalculation,
+  selectedGW,
+  readOnly = false,
 }) => {
   const {
     players,
@@ -37,7 +48,12 @@ export const PitchView: React.FC<PitchViewProps> = ({
     }
   };
 
-  const activeSquadPlayers = (showPoints && isCurrentGWFinished && squad.gameweekSquads?.[currentGW])
+  const activeCalc = customCalculation || calculationResult;
+  const activeGW = selectedGW ?? currentGW;
+
+  const activeSquadPlayers = customSquad
+    ? customSquad
+    : (showPoints && isCurrentGWFinished && squad.gameweekSquads?.[currentGW])
     ? squad.gameweekSquads[currentGW]
     : squad.players;
 
@@ -47,13 +63,17 @@ export const PitchView: React.FC<PitchViewProps> = ({
   // Bench slots (strictly 3 outfield reserves)
   const benchSlots = [1, 2, 3];
 
+  const activeChip = readOnly
+    ? (squad.gameweekChips?.[activeGW] || null)
+    : squad.activeChip;
+
   // Dynamic pulsing border style based on active chip
   const chipBorderClass =
-    squad.activeChip === 'triple_captain'
+    activeChip === 'triple_captain'
       ? 'border-2 border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.35)] ring-2 ring-amber-400/20 animate-pulse'
-      : squad.activeChip === 'bench_boost'
+      : activeChip === 'bench_boost'
       ? 'border-2 border-cyan-400 shadow-[0_0_30px_rgba(56,189,248,0.35)] ring-2 ring-cyan-400/20 animate-pulse'
-      : squad.activeChip === 'wildcard'
+      : activeChip === 'wildcard'
       ? 'border-2 border-indigo-400 shadow-[0_0_30px_rgba(129,140,248,0.35)] ring-2 ring-indigo-400/20 animate-pulse'
       : 'border-2 border-[#125c27] shadow-2xl';
 
@@ -104,21 +124,21 @@ export const PitchView: React.FC<PitchViewProps> = ({
 
   // Strict captaincy validation: guaranteed at most 1 captain and 1 vice-captain on the pitch
   const singleCaptainId = useMemo(() => {
-    const starterCap = squad.players.find((sp) => sp.isStarter && sp.isCaptain);
+    const starterCap = activeSquadPlayers.find((sp) => sp.isStarter && sp.isCaptain);
     return starterCap ? starterCap.playerId : null;
-  }, [squad.players]);
+  }, [activeSquadPlayers]);
 
   const singleViceCaptainId = useMemo(() => {
-    const starterVice = squad.players.find(
+    const starterVice = activeSquadPlayers.find(
       (sp) => sp.isStarter && sp.isViceCaptain && sp.playerId !== singleCaptainId
     );
     return starterVice ? starterVice.playerId : null;
-  }, [squad.players, singleCaptainId]);
+  }, [activeSquadPlayers, singleCaptainId]);
 
   return (
     <div className="relative w-full overflow-hidden select-none pb-2">
       {/* Swap Mode Notification Floating Bar */}
-      {selectedPlayerForSwap && (
+      {!readOnly && selectedPlayerForSwap && (
         <div className="sticky top-0 z-30 bg-[#ffe600] text-black px-3 py-2 text-xs font-black flex items-center justify-between shadow-lg animate-bounce">
           <span className="flex items-center gap-1.5 truncate">
             <Sparkles className="w-3.5 h-3.5 text-purple-900" />
@@ -213,7 +233,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
 
           {showPoints && (
             <span className="text-[10px] md:text-xs font-extrabold px-2 py-0.5 md:px-3 md:py-1 rounded-full bg-[#00ff87] text-[#37003c] shadow-glow-green">
-              {calculationResult.totalPoints} PTS
+              {activeCalc.totalPoints} PTS
             </span>
           )}
         </div>
@@ -222,7 +242,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
         <div className="relative z-10 w-full min-h-[440px] sm:min-h-[480px] md:min-h-[560px] lg:min-h-[620px] my-1">
           {/* Active Starters */}
           {layout.pitchPositions.map((pos) => {
-            const sp = squad.players.find((p) => p.playerId === pos.playerId);
+            const sp = activeSquadPlayers.find((p) => p.playerId === pos.playerId);
             if (!sp) return null;
 
             return (
@@ -246,13 +266,16 @@ export const PitchView: React.FC<PitchViewProps> = ({
                   isViceCaptain={sp.playerId === singleViceCaptainId}
                   onCardClick={handleCardClick}
                   showPoints={showPoints}
+                  customCalculation={activeCalc}
+                  selectedGW={activeGW}
+                  readOnly={readOnly}
                 />
               </div>
             );
           })}
 
           {/* Missing Starter Target Slots (Luminous Pulsing Dotted Rings) */}
-          {missingSlots.map((slot, idx) => (
+          {!readOnly && missingSlots.map((slot, idx) => (
             <div
               key={`missing-${slot.role}-${idx}`}
               onClick={() => setActiveTab('transfers')}
@@ -321,6 +344,9 @@ export const PitchView: React.FC<PitchViewProps> = ({
                         isViceCaptain={false}
                         onCardClick={handleCardClick}
                         showPoints={showPoints}
+                        customCalculation={activeCalc}
+                        selectedGW={activeGW}
+                        readOnly={readOnly}
                       />
                     </div>
                   );
@@ -329,11 +355,15 @@ export const PitchView: React.FC<PitchViewProps> = ({
                 return (
                   <div
                     key={`empty-bench-${order}`}
-                    onClick={() => setActiveTab('transfers')}
-                    className="flex flex-col items-center justify-center p-2 rounded-lg border border-dashed border-white/20 bg-black/20 text-gray-500 min-h-[90px] cursor-pointer hover:border-emerald-400/50 hover:bg-emerald-500/5 transition-all"
+                    onClick={() => {
+                      if (!readOnly) setActiveTab('transfers');
+                    }}
+                    className={`flex flex-col items-center justify-center p-2 rounded-lg border border-dashed border-white/20 bg-black/20 text-gray-500 min-h-[90px] transition-all ${
+                      readOnly ? 'cursor-default opacity-50' : 'cursor-pointer hover:border-emerald-400/50 hover:bg-emerald-500/5'
+                    }`}
                   >
                     <span className="text-[10px] font-bold text-gray-400">Sub {order}</span>
-                    <span className="text-[8px] text-gray-500 mt-0.5">+ Empty</span>
+                    <span className="text-[8px] text-gray-500 mt-0.5">{readOnly ? 'Empty' : '+ Empty'}</span>
                   </div>
                 );
               })}
@@ -347,6 +377,9 @@ export const PitchView: React.FC<PitchViewProps> = ({
         <PlayerActionSheet
           playerId={internalSheetPlayerId}
           onClose={() => setInternalSheetPlayerId(null)}
+          selectedGW={activeGW}
+          readOnly={readOnly}
+          customCalculation={activeCalc}
         />
       )}
     </div>

@@ -13,6 +13,7 @@ import {
   matchesGradeAndSection,
 } from '../common/ClassTwoTierPillStrip';
 import { suggestPlayerPhotoApi, adminRemovePlayerPhotoApi } from '../../services/api';
+import { calculatePlayerPoints } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -941,6 +942,32 @@ export const PlayersView: React.FC = () => {
                           <span>•</span>
                           <span>⏱️ {p.totalMinutes}'</span>
                         </div>
+
+                        {/* Gameweek points chips */}
+                        {Object.entries(p.gwStats || {}).length > 0 && (
+                          <div className="flex items-center gap-1 mt-1 flex-wrap">
+                            {Object.entries(p.gwStats)
+                              .sort(([a], [b]) => Number(a) - Number(b))
+                              .map(([gwStr, st]) => {
+                                const gw = Number(gwStr);
+                                const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+                                const fix = fixtures.find(
+                                  (f) => f.gameweek === gw && (f.homeClubId === normClub || f.awayClubId === normClub)
+                                );
+                                const isOnePrice = fix?.venue === 'one_price';
+                                const gwPts = calculatePlayerPoints(p.position, st, isOnePrice, p.id);
+                                return (
+                                  <span
+                                    key={`gw-${gw}`}
+                                    className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10"
+                                    title={`Gameweek ${gw}: ${gwPts} pts (${st.minutes || 0} mins)`}
+                                  >
+                                    GW{gw}: <strong className="text-emerald-600 dark:text-emerald-400">{gwPts}p</strong>
+                                  </span>
+                                );
+                              })}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -1211,6 +1238,32 @@ export const PlayersView: React.FC = () => {
                                                   {p.totalPoints}p
                                                 </span>
                                               </div>
+
+                                              {/* Past GW points micro-badges */}
+                                              {Object.entries(p.gwStats || {}).length > 0 && (
+                                                <div className="flex items-center justify-center gap-0.5 mt-0.5 flex-wrap">
+                                                  {Object.entries(p.gwStats)
+                                                    .sort(([a], [b]) => Number(a) - Number(b))
+                                                    .map(([gwStr, st]) => {
+                                                      const gw = Number(gwStr);
+                                                      const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+                                                      const fix = fixtures.find(
+                                                        (f) => f.gameweek === gw && (f.homeClubId === normClub || f.awayClubId === normClub)
+                                                      );
+                                                      const isOnePrice = fix?.venue === 'one_price';
+                                                      const gwPts = calculatePlayerPoints(p.position, st as any, isOnePrice, p.id);
+                                                      return (
+                                                        <span
+                                                          key={gw}
+                                                          className="text-[7.5px] sm:text-[8.5px] font-mono px-1 py-0.2 rounded bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300"
+                                                          title={`Gameweek ${gw}: ${gwPts}p`}
+                                                        >
+                                                          G{gw}:{gwPts}p
+                                                        </span>
+                                                      );
+                                                    })}
+                                                </div>
+                                              )}
 
                                               {/* Action Button */}
                                               <div className="w-full mt-1.5 sm:mt-2" onClick={(e) => e.stopPropagation()}>
@@ -1490,6 +1543,8 @@ export const PlayersView: React.FC = () => {
                           const isHome = fix ? fix.homeClubId === normClub : true;
                           const oppId = fix ? (isHome ? fix.awayClubId : fix.homeClubId) : null;
                           const oppClub = oppId ? clubs[oppId] || CLUBS[oppId] : null;
+                          const isOnePrice = fix?.venue === 'one_price';
+                          const gwCalculatedPts = calculatePlayerPoints(selectedPlayer.position, st, isOnePrice, selectedPlayer.id);
 
                           return (
                             <div
@@ -1525,7 +1580,7 @@ export const PlayersView: React.FC = () => {
                               <div className="text-right shrink-0">
                                 <span className="block text-[9px] uppercase font-bold text-slate-400">GW Pts</span>
                                 <span className="text-sm font-mono font-black text-amber-500">
-                                  {selectedPlayer.gwPoints || 0}
+                                  {gwCalculatedPts}
                                 </span>
                               </div>
                             </div>

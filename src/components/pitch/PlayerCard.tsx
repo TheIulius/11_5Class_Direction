@@ -5,6 +5,7 @@ import { canSwapPlayers } from '../../engine/formations';
 import { ArrowLeftRight, Check } from 'lucide-react';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import { GameweekCalculationResult, calculatePlayerPoints } from '../../engine/scoring';
 
 interface PlayerCardProps {
   playerId: string;
@@ -14,6 +15,9 @@ interface PlayerCardProps {
   isViceCaptain: boolean;
   onCardClick: (playerId: string) => void;
   showPoints?: boolean;
+  customCalculation?: GameweekCalculationResult;
+  selectedGW?: number;
+  readOnly?: boolean;
 }
 
 export const PlayerCard: React.FC<PlayerCardProps> = ({
@@ -24,6 +28,9 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   isViceCaptain,
   onCardClick,
   showPoints = false,
+  customCalculation,
+  selectedGW,
+  readOnly = false,
 }) => {
   const {
     players,
@@ -38,24 +45,33 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   const player = players[playerId];
   if (!player) return null;
 
-  const isSwapSource = selectedPlayerForSwap === playerId;
+  const activeCalc = customCalculation || calculationResult;
+  const activeGW = selectedGW ?? currentGW;
+
+  const isSwapSource = !readOnly && selectedPlayerForSwap === playerId;
   const isSwapTargetEligible =
+    !readOnly &&
     selectedPlayerForSwap &&
     selectedPlayerForSwap !== playerId &&
     canSwapPlayers(selectedPlayerForSwap, playerId, squad.players, players).canSwap;
 
   // Breakdown for points
-  const breakdown = calculationResult.playerPointsBreakdown[playerId];
+  const breakdown = activeCalc.playerPointsBreakdown?.[playerId];
   const isAutoSubIn = breakdown?.isAutoSubIn;
   const isAutoSubOut = breakdown?.isAutoSubOut;
-  const isTripleCap = isCaptain && calculationResult.isTripleCaptain;
-  const isScoringActive = isStarter || isAutoSubIn || calculationResult.isBenchBoost;
+  const isTripleCap = isCaptain && activeCalc.isTripleCaptain;
+  const isScoringActive = isStarter || isAutoSubIn || activeCalc.isBenchBoost;
   const pts = breakdown
     ? (isScoringActive ? breakdown.finalPoints : breakdown.rawPoints)
-    : (player.gwStats[currentGW] ? player.gwPoints : 0);
+    : (player.gwStats?.[activeGW] ? calculatePlayerPoints(player.position, player.gwStats[activeGW], false, player.id) : 0);
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+
+    if (readOnly) {
+      onCardClick(playerId);
+      return;
+    }
 
     // If currently in substitution mode
     if (selectedPlayerForSwap) {
@@ -80,7 +96,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   };
 
   const isDimmedDuringSwap =
-    selectedPlayerForSwap && !isSwapSource && !isSwapTargetEligible;
+    !readOnly && selectedPlayerForSwap && !isSwapSource && !isSwapTargetEligible;
 
   const sourceSp = selectedPlayerForSwap ? squad.players.find((p) => p.playerId === selectedPlayerForSwap) : null;
   const isBenchToBench = sourceSp && !sourceSp.isStarter && !isStarter;

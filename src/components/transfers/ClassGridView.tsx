@@ -5,6 +5,7 @@ import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from '../pitch/KitJersey';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
+import { calculatePlayerPoints } from '../../engine/scoring';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft,
@@ -553,6 +554,32 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                               {p.totalPoints}p
                             </span>
                           </div>
+
+                          {/* Past GW points micro-badges */}
+                          {Object.entries(p.gwStats || {}).length > 0 && (
+                            <div className="flex items-center justify-center gap-0.5 mt-0.5 flex-wrap">
+                              {Object.entries(p.gwStats)
+                                .sort(([a], [b]) => Number(a) - Number(b))
+                                .map(([gwStr, st]) => {
+                                  const gw = Number(gwStr);
+                                  const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+                                  const fix = fixtures?.find(
+                                    (f) => f.gameweek === gw && (f.homeClubId === normClub || f.awayClubId === normClub)
+                                  );
+                                  const isOnePrice = fix?.venue === 'one_price';
+                                  const gwPts = calculatePlayerPoints(p.position, st, isOnePrice, p.id);
+                                  return (
+                                    <span
+                                      key={gw}
+                                      className="text-[7px] sm:text-[8px] font-mono px-0.5 py-0.2 rounded bg-slate-100 dark:bg-white/10 text-slate-500 dark:text-slate-400"
+                                      title={`Gameweek ${gw}: ${gwPts}p`}
+                                    >
+                                      G{gw}:{gwPts}p
+                                    </span>
+                                  );
+                                })}
+                            </div>
+                          )}
 
                           {/* Action Button */}
                           <div className="w-full mt-1" onClick={(e) => e.stopPropagation()}>
