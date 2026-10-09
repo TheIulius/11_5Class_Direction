@@ -8,6 +8,7 @@
     "server": "tsx watch server/index.ts",
     "build": "(git fetch origin data --depth=1 && git checkout origin/data -- data/db.json || true) && npx tsx scripts/merge-seed-players.ts && tsc -b && vite build && esbuild server/index.ts --bundle --platform=node --target=node20 --format=esm --packages=external --outfile=dist-server/index.mjs",
     "start": "node dist-server/index.mjs",
+    "test": "npx tsx scripts/test-transfer-rules.ts && node scripts/verify-fpl.js",
     "preview": "vite preview"
   },
   "dependencies": {

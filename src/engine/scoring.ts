@@ -477,7 +477,9 @@ export function calculateGameweekSquadPoints(
     transferCost = (transfersMadeThisGW - freeTransfers) * 4;
   }
 
-  const totalPoints = Math.max(0, grossPoints - transferCost);
+  // Rule 7: Transfer penalties affect overall fantasy points only,
+  // never individual gameweek scores or gameweek rankings.
+  const totalPoints = grossPoints;
 
   return {
     totalPoints,

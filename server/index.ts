@@ -78,6 +78,10 @@ app.get('/api/state', (req: Request, res: Response) => {
           transfersMadeThisGW: 0,
           activeChip: null,
           usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+          accumulatedTransferPenalties: 0,
+          gwTransferPenalties: {},
+          gameweekSquads: {},
+          gameweekChips: {},
         },
         joinedAt: new Date().toISOString(),
       };
@@ -217,6 +221,10 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
           transfersMadeThisGW: 0,
           activeChip: null,
           usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+          accumulatedTransferPenalties: 0,
+          gwTransferPenalties: {},
+          gameweekSquads: {},
+          gameweekChips: {},
         },
         joinedAt: new Date().toISOString(),
       };
@@ -261,13 +269,20 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
     });
   }
 
+  const squadForCalc = (manager.squad.gameweekSquads && manager.squad.gameweekSquads[data.currentGW])
+    ? manager.squad.gameweekSquads[data.currentGW]
+    : manager.squad.players;
+  const chipForCalc = (manager.squad.gameweekChips && manager.squad.gameweekChips[data.currentGW] !== undefined)
+    ? manager.squad.gameweekChips[data.currentGW]
+    : manager.squad.activeChip;
+
   const calc = calculateGameweekSquadPoints(
-    manager.squad.players,
+    squadForCalc,
     data.players,
     data.currentGW,
-    manager.squad.activeChip,
-    manager.squad.transfersMadeThisGW,
-    manager.squad.freeTransfers,
+    chipForCalc,
+    0,
+    1,
     data.fixtures
   );
 
@@ -872,6 +887,10 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
         transfersMadeThisGW: 0,
         activeChip: null,
         usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+        accumulatedTransferPenalties: 0,
+        gwTransferPenalties: {},
+        gameweekSquads: {},
+        gameweekChips: {},
       },
       joinedAt: new Date().toISOString(),
     };
@@ -1087,6 +1106,10 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
           transfersMadeThisGW: 0,
           activeChip: null,
           usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+          accumulatedTransferPenalties: 0,
+          gwTransferPenalties: {},
+          gameweekSquads: {},
+          gameweekChips: {},
         },
         joinedAt: new Date().toISOString(),
       };
@@ -1095,6 +1118,13 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Manager not found' });
     }
   }
+
+  if (!manager.squad.gameweekSquads) manager.squad.gameweekSquads = {};
+  if (!manager.squad.gameweekChips) manager.squad.gameweekChips = {};
+  if (!manager.squad.gwTransferPenalties) manager.squad.gwTransferPenalties = {};
+  if (typeof manager.squad.accumulatedTransferPenalties !== 'number') manager.squad.accumulatedTransferPenalties = 0;
+  if (typeof manager.squad.freeTransfers !== 'number') manager.squad.freeTransfers = 1;
+  if (typeof manager.squad.transfersMadeThisGW !== 'number') manager.squad.transfersMadeThisGW = 0;
 
   const outP = data.players[outPlayerId];
   const inP = data.players[inPlayerId];
@@ -1123,12 +1153,43 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Insufficient funds' });
   }
 
-  manager.squad.bank = newBank;
+  // Snapshot completed gameweek squads before mutating manager.squad.players
+  const currentGWKey = data.currentGW || 1;
+  const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === currentGWKey);
+  const isCurrentGWFinished = gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished));
+
+  if (isCurrentGWFinished || (data.deadline && new Date() >= new Date(data.deadline.deadlineTime))) {
+    if (!manager.squad.gameweekSquads[currentGWKey] && manager.squad.players?.length === 9) {
+      manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(manager.squad.players));
+      manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip || null;
+    }
+  }
+  for (let gw = 1; gw < currentGWKey; gw++) {
+    if (!manager.squad.gameweekSquads[gw] && manager.squad.players?.length === 9) {
+      manager.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(manager.squad.players));
+      manager.squad.gameweekChips[gw] = manager.squad.activeChip || null;
+    }
+  }
+
+  // Free transfer consumption & penalty (Rules 1-6, 8, 9)
+  const isWildcard = manager.squad.activeChip === 'wildcard' || (manager.squad.activeChip as any) === 'free_hit';
+  if (!isWildcard) {
+    if (manager.squad.freeTransfers > 0) {
+      manager.squad.freeTransfers -= 1;
+    } else {
+      // Free transfer balance is 0: additional transfer incurs -4 point penalty
+      manager.squad.accumulatedTransferPenalties += 4;
+      manager.squad.gwTransferPenalties[currentGWKey] = (manager.squad.gwTransferPenalties[currentGWKey] || 0) + 4;
+    }
+  }
   manager.squad.transfersMadeThisGW += 1;
+
+  manager.squad.bank = newBank;
   manager.squad.players = manager.squad.players.map((sp) =>
     sp.playerId === outPlayerId ? { ...sp, playerId: inPlayerId } : sp
   );
 
+  recalculateAllManagersLeaguePoints(data);
   db.save();
   res.json({ success: true, squad: manager.squad });
 });
@@ -1273,6 +1334,10 @@ function recalculateAllManagersLeaguePoints(data: any) {
           transfersMadeThisGW: 0,
           activeChip: null,
           usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+          accumulatedTransferPenalties: 0,
+          gwTransferPenalties: {},
+          gameweekSquads: {},
+          gameweekChips: {},
         },
         joinedAt: u.createdAt || new Date().toISOString(),
       };
@@ -1307,32 +1372,74 @@ function recalculateAllManagersLeaguePoints(data: any) {
   });
 
   Object.values(data.managers).forEach((m: any) => {
-    const squadPlayers = Array.isArray(m.squad?.players) ? m.squad.players : [];
-    const currentCalc = calculateGameweekSquadPoints(
-      squadPlayers,
-      data.players,
-      currentGW,
-      m.squad?.activeChip || null,
-      m.squad?.transfersMadeThisGW || 0,
-      m.squad?.freeTransfers || 1,
-      data.fixtures
-    );
+    if (!m.squad) return;
+    if (!m.squad.gameweekSquads) m.squad.gameweekSquads = {};
+    if (!m.squad.gameweekChips) m.squad.gameweekChips = {};
+    if (!m.squad.gwTransferPenalties) m.squad.gwTransferPenalties = {};
 
-    let cumulativeTotal = 0;
+    // Auto-snapshot completed gameweek squads if missing
     for (let gw = 1; gw <= currentGW; gw++) {
-      const gwCalc = calculateGameweekSquadPoints(
-        squadPlayers,
-        data.players,
-        gw,
-        gw === currentGW ? m.squad?.activeChip || null : null,
-        gw === currentGW ? m.squad?.transfersMadeThisGW || 0 : 0,
-        m.squad?.freeTransfers || 1,
-        data.fixtures
-      );
-      cumulativeTotal += gwCalc.totalPoints;
+      const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === gw);
+      const isGwFinished = gw < currentGW || (gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished)));
+      if (isGwFinished && !m.squad.gameweekSquads[gw] && m.squad.players?.length === 9) {
+        m.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(m.squad.players));
+        m.squad.gameweekChips[gw] = m.squad.activeChip || null;
+      }
     }
 
-    const lineupSummary = squadPlayers
+    let cumulativeGrossTotal = 0;
+    let latestGWGrossPoints = 0;
+
+    for (let gw = 1; gw <= currentGW; gw++) {
+      const gwPlayers = (m.squad.gameweekSquads && m.squad.gameweekSquads[gw])
+        ? m.squad.gameweekSquads[gw]
+        : (m.squad.players || []);
+
+      const chipForGw = (m.squad.gameweekChips && m.squad.gameweekChips[gw] !== undefined)
+        ? m.squad.gameweekChips[gw]
+        : (gw === currentGW ? m.squad.activeChip || null : null);
+
+      const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === gw);
+      const isGwFinished = gw < currentGW || (gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished)));
+
+      const gwCalc = calculateGameweekSquadPoints(
+        gwPlayers,
+        data.players,
+        gw,
+        chipForGw,
+        0, // Rule 7: Individual gameweek score is unpenalized gross score
+        1,
+        data.fixtures,
+        isGwFinished
+      );
+
+      cumulativeGrossTotal += gwCalc.grossPoints;
+      if (gw === currentGW) {
+        latestGWGrossPoints = gwCalc.grossPoints;
+      }
+    }
+
+    // Rule 7: Transfer penalties affect overall fantasy points only,
+    // never individual gameweek scores or gameweek rankings.
+    const totalPenalties = m.squad.accumulatedTransferPenalties || 0;
+    const overallTotalPoints = cumulativeGrossTotal - totalPenalties;
+
+    const displaySquad = (m.squad.gameweekSquads && m.squad.gameweekSquads[currentGW])
+      ? m.squad.gameweekSquads[currentGW]
+      : (m.squad.players || []);
+
+    const currentCalc = calculateGameweekSquadPoints(
+      displaySquad,
+      data.players,
+      currentGW,
+      m.squad.activeChip || null,
+      0,
+      1,
+      data.fixtures,
+      true
+    );
+
+    const lineupSummary = displaySquad
       .map((sp: any) => {
         const p = data.players?.[sp.playerId];
         if (!p) return null;
@@ -1352,6 +1459,9 @@ function recalculateAllManagersLeaguePoints(data: any) {
       })
       .filter(Boolean);
 
+    m.gwPoints = latestGWGrossPoints;
+    m.totalPoints = overallTotalPoints;
+
     (data.leagues || []).forEach((l: any) => {
       const member = l.members.find((mem: any) => mem.id === m.id);
       if (member) {
@@ -1363,15 +1473,9 @@ function recalculateAllManagersLeaguePoints(data: any) {
         if (m.showRealNamePublicly !== undefined || u?.showRealNamePublicly !== undefined) {
           member.showRealNamePublicly = m.showRealNamePublicly ?? u?.showRealNamePublicly;
         }
-        // Safety guard: only update points if we have a valid non-zero calculation or if the member had 0
-        // Never wipe existing points to 0 if memory was temporarily missing player stats
-        if (cumulativeTotal > 0 || (member.totalPoints === 0 && currentCalc.totalPoints === 0)) {
-          member.gwPoints = currentCalc.totalPoints;
-          member.totalPoints = cumulativeTotal;
-        } else if (currentCalc.totalPoints > 0) {
-          member.gwPoints = currentCalc.totalPoints;
-          member.totalPoints = Math.max(member.totalPoints || 0, cumulativeTotal);
-        }
+
+        member.gwPoints = latestGWGrossPoints;
+        member.totalPoints = overallTotalPoints;
         member.activeChip = m.squad?.activeChip || null;
         member.lineup = lineupSummary;
       }
@@ -1406,16 +1510,30 @@ app.post('/api/admin/gameweek', (req: Request, res: Response) => {
   const data = db.getData();
 
   if (action === 'advance') {
-    recalculateAllManagersLeaguePoints(data);
+    const endingGW = data.currentGW || 1;
     Object.values(data.managers || {}).forEach((m: any) => {
+      if (!m.squad) return;
+      if (!m.squad.gameweekSquads) m.squad.gameweekSquads = {};
+      if (!m.squad.gameweekChips) m.squad.gameweekChips = {};
+
+      if (!m.squad.gameweekSquads[endingGW] && m.squad.players?.length === 9) {
+        m.squad.gameweekSquads[endingGW] = JSON.parse(JSON.stringify(m.squad.players));
+        m.squad.gameweekChips[endingGW] = m.squad.activeChip || null;
+      }
+
       if (m.squad.activeChip) {
+        if (!m.squad.usedChips) m.squad.usedChips = {};
         m.squad.usedChips[m.squad.activeChip] = true;
         m.squad.activeChip = null;
       }
       m.squad.transfersMadeThisGW = 0;
-      m.squad.freeTransfers = Math.min(5, (m.squad.freeTransfers || 1) + 1);
+      // Rules 1, 2, 3, 6:
+      // Each new gameweek adds 1 free transfer to the existing balance, capped at 3!
+      const currentBalance = typeof m.squad.freeTransfers === 'number' ? m.squad.freeTransfers : 1;
+      m.squad.freeTransfers = Math.min(3, currentBalance + 1);
     });
-    data.currentGW = (data.currentGW || 1) + 1;
+    data.currentGW = endingGW + 1;
+    recalculateAllManagersLeaguePoints(data);
     db.save();
     scheduleAutoSyncToGitHub(`Advanced to GW ${data.currentGW}`);
     return res.json({ success: true, currentGW: data.currentGW });
@@ -1814,6 +1932,40 @@ export function syncAllFinishedFixturesStats(data: DatabaseSchema): boolean {
       if (updated) changed = true;
     }
   }
+
+  // Ensure all managers have historical snapshots initialized for completed gameweeks
+  if (data.managers) {
+    for (const m of Object.values(data.managers)) {
+      if (!m.squad) continue;
+      if (!m.squad.gameweekSquads) {
+        m.squad.gameweekSquads = {};
+        changed = true;
+      }
+      if (!m.squad.gameweekChips) {
+        m.squad.gameweekChips = {};
+        changed = true;
+      }
+      if (!m.squad.gwTransferPenalties) {
+        m.squad.gwTransferPenalties = {};
+        changed = true;
+      }
+      if (typeof m.squad.accumulatedTransferPenalties !== 'number') {
+        m.squad.accumulatedTransferPenalties = 0;
+        changed = true;
+      }
+      if (typeof m.squad.freeTransfers !== 'number') {
+        m.squad.freeTransfers = 1;
+        changed = true;
+      }
+      if (!m.squad.gameweekSquads[1] && m.squad.players?.length === 9) {
+        m.squad.gameweekSquads[1] = JSON.parse(JSON.stringify(m.squad.players));
+        m.squad.gameweekChips[1] = m.squad.activeChip || null;
+        m.squad.gwTransferPenalties[1] = 0;
+        changed = true;
+      }
+    }
+  }
+
   if (changed) {
     recalculateAllManagersLeaguePoints(data);
   }
@@ -1930,6 +2082,16 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
         if (lSquadCount === 0 && rSquadCount > 0) {
           lMgr.squad = rMgr.squad;
           changed = true;
+        } else if (lMgr.squad && rMgr.squad) {
+          if (rMgr.squad.gameweekSquads && typeof rMgr.squad.gameweekSquads === 'object') {
+            if (!lMgr.squad.gameweekSquads) lMgr.squad.gameweekSquads = {};
+            for (const [gwKey, snap] of Object.entries(rMgr.squad.gameweekSquads)) {
+              if (!lMgr.squad.gameweekSquads[gwKey]) {
+                lMgr.squad.gameweekSquads[gwKey] = snap;
+                changed = true;
+              }
+            }
+          }
         }
       }
     }

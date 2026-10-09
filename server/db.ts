@@ -128,6 +128,10 @@ function getDefaultData(): DatabaseSchema {
         bench_boost: false,
         wildcard: false,
       },
+      accumulatedTransferPenalties: 0,
+      gwTransferPenalties: {},
+      gameweekSquads: {},
+      gameweekChips: {},
     },
     joinedAt: new Date().toISOString(),
   };
@@ -377,6 +381,10 @@ class Database {
         if (m.squad) {
           m.squad.transfersMadeThisGW = 0;
           m.squad.freeTransfers = 1;
+          m.squad.accumulatedTransferPenalties = 0;
+          m.squad.gwTransferPenalties = {};
+          m.squad.gameweekSquads = {};
+          m.squad.gameweekChips = {};
           m.squad.activeChip = null;
           m.squad.usedChips = {
             triple_captain: false,

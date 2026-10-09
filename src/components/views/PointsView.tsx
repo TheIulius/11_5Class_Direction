@@ -4,10 +4,14 @@ import { PitchView } from '../pitch/PitchView';
 import { Award, Activity, AlertCircle } from 'lucide-react';
 
 export const PointsView: React.FC = () => {
-  const { currentGW, calculationResult, players, squad } = useFPL();
+  const { currentGW, calculationResult, players, squad, isCurrentGWFinished } = useFPL();
+
+  const activeSquadPlayers = (isCurrentGWFinished && squad.gameweekSquads?.[currentGW])
+    ? squad.gameweekSquads[currentGW]
+    : squad.players;
 
   // Find top performer in user's squad
-  const squadPointsList = squad.players
+  const squadPointsList = activeSquadPlayers
     .map((sp) => {
       const p = players[sp.playerId];
       const bd = calculationResult.playerPointsBreakdown[sp.playerId];

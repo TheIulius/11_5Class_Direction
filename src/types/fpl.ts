@@ -73,6 +73,10 @@ export interface Squad {
   transfersMadeThisGW: number;
   activeChip: ChipType | null;
   usedChips: Record<ChipType, boolean>;
+  accumulatedTransferPenalties?: number;
+  gwTransferPenalties?: Record<number, number>;
+  gameweekSquads?: Record<number, SquadPlayer[]>;
+  gameweekChips?: Record<number, ChipType | null>;
 }
 
 export type Venue = 'parki' | 'delisi' | 'one_price';

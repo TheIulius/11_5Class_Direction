@@ -299,6 +299,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         bench_boost: false,
         wildcard: false,
       },
+      accumulatedTransferPenalties: 0,
+      gwTransferPenalties: {},
+      gameweekSquads: {},
+      gameweekChips: {},
     };
   });
 
@@ -615,16 +619,30 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Calculate points dynamically
   const calculationResult = useMemo(() => {
-    return calculateGameweekSquadPoints(
-      squad.players,
+    const squadToUse = (isCurrentGWFinished && squad.gameweekSquads?.[currentGW])
+      ? squad.gameweekSquads[currentGW]
+      : squad.players;
+
+    const chipToUse = (squad.gameweekChips && squad.gameweekChips[currentGW] !== undefined)
+      ? squad.gameweekChips[currentGW]
+      : squad.activeChip;
+
+    const res = calculateGameweekSquadPoints(
+      squadToUse,
       players,
       currentGW,
-      squad.activeChip,
-      squad.transfersMadeThisGW,
-      squad.freeTransfers,
+      chipToUse,
+      0, // Rule 7: Individual gameweek points are unpenalized
+      1,
       fixtures,
       isCurrentGWFinished
     );
+
+    const gwCost = squad.gwTransferPenalties?.[currentGW] || 0;
+    return {
+      ...res,
+      transferCost: gwCost,
+    };
   }, [squad, players, currentGW, fixtures, isCurrentGWFinished]);
 
   const teamValue = useMemo(() => {
@@ -639,7 +657,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const freeTransfersRemaining =
     squad.activeChip === 'wildcard'
       ? 999
-      : Math.max(0, squad.freeTransfers - squad.transfersMadeThisGW);
+      : Math.max(0, squad.freeTransfers ?? 0);
 
   // Switch Manager Profile
   const switchManager = (managerId: string) => {
@@ -675,6 +693,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transfersMadeThisGW: 0,
         activeChip: null,
         usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+        accumulatedTransferPenalties: 0,
+        gwTransferPenalties: {},
+        gameweekSquads: {},
+        gameweekChips: {},
       });
     }
   };
@@ -705,6 +727,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transfersMadeThisGW: 0,
         activeChip: null,
         usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+        accumulatedTransferPenalties: 0,
+        gwTransferPenalties: {},
+        gameweekSquads: {},
+        gameweekChips: {},
       };
       setSquad(userSquad);
       localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(userSquad));
@@ -745,6 +771,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         transfersMadeThisGW: 0,
         activeChip: null,
         usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+        accumulatedTransferPenalties: 0,
+        gwTransferPenalties: {},
+        gameweekSquads: {},
+        gameweekChips: {},
       };
       setSquad(initialSquad);
       localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(initialSquad));
@@ -790,6 +820,10 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       transfersMadeThisGW: 0,
       activeChip: null,
       usedChips: { triple_captain: false, bench_boost: false, wildcard: false },
+      accumulatedTransferPenalties: 0,
+      gwTransferPenalties: {},
+      gameweekSquads: {},
+      gameweekChips: {},
     });
   };
 
@@ -1324,10 +1358,48 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
 
+    const isWildcard = squad.activeChip === 'wildcard' || (squad.activeChip as any) === 'free_hit';
+    let newFreeTransfers = squad.freeTransfers ?? 1;
+    let penaltyAdded = 0;
+    if (!isWildcard) {
+      if (newFreeTransfers > 0) {
+        newFreeTransfers -= 1;
+      } else {
+        penaltyAdded = 4;
+      }
+    }
+
+    const currentGWKey = currentGW || 1;
+    const gwSnapshots = { ...(squad.gameweekSquads || {}) };
+    const gwChips = { ...(squad.gameweekChips || {}) };
+    if (isCurrentGWFinished || isSquadLocked) {
+      if (!gwSnapshots[currentGWKey] && squad.players.length === 9) {
+        gwSnapshots[currentGWKey] = [...squad.players];
+        gwChips[currentGWKey] = squad.activeChip || null;
+      }
+    }
+    for (let g = 1; g < currentGWKey; g++) {
+      if (!gwSnapshots[g] && squad.players.length === 9) {
+        gwSnapshots[g] = [...squad.players];
+        gwChips[g] = squad.activeChip || null;
+      }
+    }
+
+    const currentPenalties = squad.accumulatedTransferPenalties || 0;
+    const currentGwPenalties = { ...(squad.gwTransferPenalties || {}) };
+    if (penaltyAdded > 0) {
+      currentGwPenalties[currentGWKey] = (currentGwPenalties[currentGWKey] || 0) + penaltyAdded;
+    }
+
     const updatedSquad: Squad = {
       ...squad,
       bank: Math.round(newBank * 10) / 10,
-      transfersMadeThisGW: squad.transfersMadeThisGW + 1,
+      freeTransfers: newFreeTransfers,
+      transfersMadeThisGW: (squad.transfersMadeThisGW || 0) + 1,
+      accumulatedTransferPenalties: currentPenalties + penaltyAdded,
+      gwTransferPenalties: currentGwPenalties,
+      gameweekSquads: gwSnapshots,
+      gameweekChips: gwChips,
       players: updatedPlayers,
     };
 
@@ -1336,7 +1408,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const activeId = authUser?.id || currentManagerId;
     if (activeId) {
-      api.transferPlayerApi(activeId, outPlayerId, inPlayerId).catch((e) => {
+      api.transferPlayerApi(activeId, outPlayerId, inPlayerId).then((res) => {
+        if (res.squad) {
+          setSquad(res.squad);
+          localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(res.squad));
+        }
+      }).catch((e) => {
         console.warn('transferPlayerApi failed, syncing via saveSquadApi:', e);
         api.saveSquadApi(activeId, updatedPlayers, updatedSquad.teamName, updatedSquad.bank).catch(console.error);
       });
@@ -1620,6 +1697,11 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       await refreshServerState();
     } catch {
       setCurrentGW((prev) => prev + 1);
+      setSquad((prev) => ({
+        ...prev,
+        freeTransfers: Math.min(3, (prev.freeTransfers || 0) + 1),
+        transfersMadeThisGW: 0,
+      }));
     }
   };
 

@@ -57,13 +57,20 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
     if (managerData && !isLineupHidden && selectedGW && managerData.squad?.players?.length > 0) {
       const isPastGW = selectedGW < currentGW;
       const isThisGWFinished = isPastGW || (selectedGW === currentGW ? isCurrentGWFinished : false);
+      const gwSquad = (managerData.squad.gameweekSquads && managerData.squad.gameweekSquads[selectedGW])
+        ? managerData.squad.gameweekSquads[selectedGW]
+        : managerData.squad.players;
+      const gwChip = (managerData.squad.gameweekChips && managerData.squad.gameweekChips[selectedGW] !== undefined)
+        ? managerData.squad.gameweekChips[selectedGW]
+        : (selectedGW === currentGW ? managerData.squad.activeChip : null);
+
       const pastCalc = calculateGameweekSquadPoints(
-        managerData.squad.players,
+        gwSquad,
         players,
         selectedGW,
-        selectedGW === currentGW ? managerData.squad.activeChip : null,
-        selectedGW === currentGW ? managerData.squad.transfersMadeThisGW : 0,
-        managerData.squad.freeTransfers,
+        gwChip,
+        0,
+        1,
         fixtures,
         isThisGWFinished
       );
@@ -76,7 +83,10 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   const isSelf = Boolean(authUser?.id && managerId === authUser.id);
   const shouldHideLineup = (!isSelf && !isLineupsVisible) || isLineupHidden;
 
-  const squadPlayers = shouldHideLineup ? [] : (managerData?.squad.players || []);
+  const activeGwSquad = (managerData?.squad.gameweekSquads && managerData?.squad.gameweekSquads[selectedGW])
+    ? managerData.squad.gameweekSquads[selectedGW]
+    : (managerData?.squad.players || []);
+  const squadPlayers = shouldHideLineup ? [] : activeGwSquad;
   const layout = getFormationLayout(squadPlayers, players);
 
   // Top performer

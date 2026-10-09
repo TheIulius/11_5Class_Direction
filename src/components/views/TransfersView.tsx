@@ -310,6 +310,13 @@ export const TransfersView: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.09]">
+            <ArrowLeftRight className="w-3.5 h-3.5 text-sky-500 dark:text-cyan-400" />
+            <span className="text-xs font-mono tabular-nums font-bold text-slate-800 dark:text-slate-200">
+              {squad.activeChip === 'wildcard' ? '∞' : (squad.freeTransfers ?? 0)} FT
+            </span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.09]">
             <Coins className="w-3.5 h-3.5 text-sky-500 dark:text-emerald-400" />
             <span className="text-xs font-mono tabular-nums font-bold text-slate-800 dark:text-slate-200">
               £{squad.bank.toFixed(1)}m
@@ -375,10 +382,10 @@ export const TransfersView: React.FC = () => {
                     <span className="text-rose-500 dark:text-rose-400 font-bold">(Over Budget)</span>
                   ) : squad.activeChip === 'wildcard' ? (
                     <span className="text-indigo-600 dark:text-indigo-400 font-bold">• Wildcard (Free)</span>
-                  ) : squad.transfersMadeThisGW >= squad.freeTransfers ? (
-                    <span className="text-amber-600 dark:text-amber-400 font-bold">• -4 pts hit</span>
+                  ) : (squad.freeTransfers ?? 0) > 0 ? (
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">• Free Transfer ({squad.freeTransfers} left)</span>
                   ) : (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">• Free Transfer</span>
+                    <span className="text-amber-600 dark:text-amber-400 font-bold">• -4 pts hit</span>
                   )}
                 </div>
               </div>

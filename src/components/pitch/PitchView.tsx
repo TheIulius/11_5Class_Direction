@@ -23,6 +23,8 @@ export const PitchView: React.FC<PitchViewProps> = ({
     setSelectedPlayerForSwap,
     calculationResult,
     setActiveTab,
+    currentGW,
+    isCurrentGWFinished,
   } = useFPL();
 
   const [internalSheetPlayerId, setInternalSheetPlayerId] = useState<string | null>(null);
@@ -35,8 +37,12 @@ export const PitchView: React.FC<PitchViewProps> = ({
     }
   };
 
-  const layout = getFormationLayout(squad.players, players);
-  const starters = squad.players.filter((p) => p.isStarter);
+  const activeSquadPlayers = (showPoints && isCurrentGWFinished && squad.gameweekSquads?.[currentGW])
+    ? squad.gameweekSquads[currentGW]
+    : squad.players;
+
+  const layout = getFormationLayout(activeSquadPlayers, players);
+  const starters = activeSquadPlayers.filter((p) => p.isStarter);
 
   // Bench slots (strictly 3 outfield reserves)
   const benchSlots = [1, 2, 3];
