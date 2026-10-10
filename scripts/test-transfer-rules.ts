@@ -430,50 +430,62 @@ assert.strictEqual(recalculatedGw1Score, originalGw1Score, 'Historical GW1 point
 console.log('✓ PASS: GW2 squad mutations have zero effect on preserved GW1 lineups and scores.\n');
 
 // -------------------------------------------------------------
-// TEST 16: Squad Save (Sell + Buy) Transfer Accounting
+// TEST 16: Squad Save (Sell + Buy) Transfer Accounting with 2 FT (Rule 5A)
 // -------------------------------------------------------------
-console.log('Test 16: Squad Save / Sell + Buy Accounting');
+console.log('Test 16: Squad Save / Sell + Buy Accounting with 2 FT (Rule 5A)');
 const squadSaveTest = createMockSquad();
 squadSaveTest.gameweekSquads = {
   1: JSON.parse(JSON.stringify(squadSaveTest.players)),
 };
-squadSaveTest.freeTransfers = 1;
-squadSaveTest.startFreeTransfers = 1;
+squadSaveTest.freeTransfers = 2;
+squadSaveTest.startFreeTransfers = 2;
 squadSaveTest.transfersMadeThisGW = 0;
 
 // User replaces 1 player via save / buy (p_3 DEF -> p_11 DEF)
 squadSaveTest.players[2].playerId = 'p_11';
 const res16_1 = calculateSquadTransfers(squadSaveTest, 2);
 assert.strictEqual(res16_1.transfersMadeThisGW, 1, '1 transfer detected');
-assert.strictEqual(res16_1.freeTransfers, 0, '1 free transfer consumed -> 0 remaining');
+assert.strictEqual(res16_1.freeTransfers, 1, '1 free transfer consumed -> 1 remaining');
 assert.strictEqual(res16_1.currentGWPenalty, 0, '0 penalty for free transfer');
-console.log('✓ PASS: 1 player replacement via squad save correctly consumes 1 FT with 0 penalty.\n');
+console.log('✓ PASS: 1 player replacement via squad save correctly consumes 1 FT with 1 remaining and 0 penalty.\n');
 
 // -------------------------------------------------------------
-// TEST 17: User Scenario (theiulius): GKP + DEF Replacement with 1 FT
+// TEST 17: User Scenario (theiulius): GKP + DEF Replacement with 2 FT
 // -------------------------------------------------------------
-console.log('Test 17: User Bug Reproduction (theiulius GKP + DEF replacement with 1 FT)');
+console.log('Test 17: User Scenario (theiulius GKP + DEF replacement with 2 FT)');
 // User replaces 2nd player (p_1 GKP -> p_10 GKP)
 squadSaveTest.players[0].playerId = 'p_10';
 const res17 = calculateSquadTransfers(squadSaveTest, 2);
 assert.strictEqual(res17.transfersMadeThisGW, 2, '2 transfers made');
 assert.strictEqual(res17.freeTransfers, 0, '0 free transfers remaining');
-assert.strictEqual(res17.currentGWPenalty, 4, '2nd transfer incurs 4 pt penalty');
-assert.strictEqual(res17.accumulatedTransferPenalties, 4, 'Total accumulated penalty is 4 pts');
-console.log('✓ PASS: Changing GKP and DEF consumes 1 FT (balance 0) and incurs -4 pt penalty.\n');
+assert.strictEqual(res17.currentGWPenalty, 0, '2nd transfer is covered by 2nd free transfer -> 0 penalty');
+assert.strictEqual(res17.accumulatedTransferPenalties, 0, 'Total accumulated penalty is 0 pts');
+console.log('✓ PASS: Changing GKP and DEF consumes both 2 FT (balance 0) and incurs 0 penalty.\n');
+
+// -------------------------------------------------------------
+// TEST 17B: 3rd transfer exceeds 2 FT and incurs -4 penalty
+// -------------------------------------------------------------
+console.log('Test 17B: 3rd transfer exceeds 2 FT and incurs -4 pt penalty');
+squadSaveTest.players[4].playerId = 'p_13'; // 3rd player replacement
+const res17B = calculateSquadTransfers(squadSaveTest, 2);
+assert.strictEqual(res17B.transfersMadeThisGW, 3, '3 transfers made');
+assert.strictEqual(res17B.freeTransfers, 0, '0 free transfers remaining');
+assert.strictEqual(res17B.currentGWPenalty, 4, '3rd transfer incurs 4 pt penalty');
+assert.strictEqual(res17B.accumulatedTransferPenalties, 4, 'Total accumulated penalty is 4 pts');
+console.log('✓ PASS: 3rd transfer exceeds 2 FT and incurs 4 pt penalty.\n');
 
 // -------------------------------------------------------------
 // TEST 18: Transfer Reversal Before Deadline
 // -------------------------------------------------------------
 console.log('Test 18: Reverting a transfer before deadline restores FT and clears penalty');
-// User changes mind and reverts p_10 GKP back to baseline p_1 GKP
-squadSaveTest.players[0].playerId = 'p_1';
+// User changes mind and reverts p_13 back to p_5
+squadSaveTest.players[4].playerId = 'p_5';
 const res18 = calculateSquadTransfers(squadSaveTest, 2);
-assert.strictEqual(res18.transfersMadeThisGW, 1, 'Only 1 transfer remaining from baseline');
-assert.strictEqual(res18.freeTransfers, 0, '1 free transfer consumed for the 1 remaining transfer');
+assert.strictEqual(res18.transfersMadeThisGW, 2, '2 transfers remaining');
+assert.strictEqual(res18.freeTransfers, 0, '2 free transfers consumed');
 assert.strictEqual(res18.currentGWPenalty, 0, 'Penalty is cleared back to 0');
 assert.strictEqual(res18.accumulatedTransferPenalties, 0, 'Accumulated penalty restored to 0');
-console.log('✓ PASS: Reverting transfer restores penalty and reflects net changes.\n');
+console.log('✓ PASS: Reverting 3rd transfer clears penalty and restores 0 penalty state.\n');
 
 // -------------------------------------------------------------
 // TEST 19: Wildcard on Squad Save

@@ -25,9 +25,18 @@ export function calculateSquadTransfers(
   const gwPenalties = { ...(squad.gwTransferPenalties || {}) };
 
   // Determine starting free transfers for this GW
-  const startFT = typeof squad.startFreeTransfers === 'number'
-    ? squad.startFreeTransfers
-    : Math.min(3, Math.max(1, (squad.freeTransfers || 0) + (squad.transfersMadeThisGW ? 1 : 0)));
+  // Rules 1, 2, 5A, 6:
+  // Managers carry over unused free transfers from previous GW + 1 new transfer for the new GW, capped at 3.
+  // E.g. Start GW1 with 1 FT, use none -> start GW2 with 2 FT (Rule 5 Example A).
+  let startFT: number;
+  if (typeof squad.startFreeTransfers === 'number') {
+    startFT = squad.startFreeTransfers;
+  } else if (prevGW === 1) {
+    // GW2: All managers with a valid GW1 baseline carried over 1 unused FT + 1 new FT = 2 FT
+    startFT = 2;
+  } else {
+    startFT = Math.min(3, Math.max(1, (squad.freeTransfers || 0) + (squad.transfersMadeThisGW || 0)));
+  }
 
   // If no previous completed GW (e.g. GW1), transfers are unlimited & free for initial squad selection
   if (prevGW < 1) {

@@ -8479,7 +8479,7 @@
           "id": "user_1790454858175",
           "managerName": "Tato kopaleishvili",
           "teamName": "12-7",
-          "totalPoints": 93,
+          "totalPoints": 97,
           "gwPoints": 0,
           "rank": 2,
           "previousRank": 2,
@@ -8939,7 +8939,7 @@
           "id": "user_1790456463804",
           "managerName": "Gega",
           "teamName": "Kai bichebi",
-          "totalPoints": 85,
+          "totalPoints": 89,
           "gwPoints": 0,
           "rank": 6,
           "previousRank": 6,
@@ -9514,7 +9514,7 @@
           "id": "user_1790357898196",
           "managerName": "Nika",
           "teamName": "Chaga XI",
-          "totalPoints": 91,
+          "totalPoints": 95,
           "gwPoints": 0,
           "rank": 11,
           "previousRank": 11,
@@ -9859,7 +9859,7 @@
           "id": "user_1790455242152",
           "managerName": "Sandro",
           "teamName": "Parto FC",
-          "totalPoints": 67,
+          "totalPoints": 71,
           "gwPoints": 0,
           "rank": 14,
           "previousRank": 14,
@@ -10089,7 +10089,7 @@
           "id": "user_1790465908990",
           "managerName": "Gengi",
           "teamName": "Chiyliyo",
-          "totalPoints": 68,
+          "totalPoints": 72,
           "gwPoints": 0,
           "rank": 16,
           "previousRank": 16,
@@ -10204,7 +10204,7 @@
           "id": "user_1790502990337",
           "managerName": "Iva",
           "teamName": "IvaHavertz",
-          "totalPoints": 63,
+          "totalPoints": 67,
           "gwPoints": 0,
           "rank": 17,
           "previousRank": 17,
@@ -10779,7 +10779,7 @@
           "id": "user_1790353103544",
           "managerName": "Ilia",
           "teamName": "giorgievski's tractati",
-          "totalPoints": 65,
+          "totalPoints": 69,
           "gwPoints": 0,
           "rank": 22,
           "previousRank": 22,
@@ -12151,7 +12151,7 @@
           "id": "user_1790454966962",
           "managerName": "Jafara",
           "teamName": "Jafara",
-          "totalPoints": 49,
+          "totalPoints": 53,
           "gwPoints": 0,
           "rank": 34,
           "previousRank": 34,
@@ -12841,7 +12841,7 @@
           "id": "user_1790457204921",
           "managerName": "Nika",
           "teamName": "bostanshekatamo",
-          "totalPoints": 28,
+          "totalPoints": 32,
           "gwPoints": 0,
           "rank": 40,
           "previousRank": 40,
@@ -13646,7 +13646,7 @@
           "id": "user_1790533247493",
           "managerName": "andria",
           "teamName": "fc wurwu",
-          "totalPoints": 21,
+          "totalPoints": 25,
           "gwPoints": 0,
           "rank": 47,
           "previousRank": 47,
@@ -16392,13 +16392,13 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 4
+          "2": 0
         },
-        "accumulatedTransferPenalties": 4,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 0,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-25T16:18:23.548Z",
-      "totalPoints": 65,
+      "totalPoints": 69,
       "gameweekPoints": 0,
       "grade": "11",
       "parallel": "5",
@@ -16559,13 +16559,13 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 4
+          "2": 0
         },
-        "accumulatedTransferPenalties": 4,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 0,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-25T17:38:18.197Z",
-      "totalPoints": 91,
+      "totalPoints": 95,
       "gameweekPoints": 0,
       "grade": "11",
       "parallel": "5",
@@ -16897,10 +16897,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 12
+          "2": 8
         },
-        "accumulatedTransferPenalties": 12,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 8,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:34:18.176Z",
       "grade": "12",
@@ -16908,7 +16908,7 @@
       "realName": "Tato Kopaleishvili",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 93
+      "totalPoints": 97
     },
     "user_1790454882615": {
       "id": "user_1790454882615",
@@ -16983,7 +16983,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -17066,7 +17066,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:34:42.615Z",
       "grade": "10",
@@ -17149,7 +17149,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -17232,7 +17232,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:34:52.416Z",
       "grade": "9",
@@ -17561,10 +17561,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 4
+          "2": 0
         },
-        "accumulatedTransferPenalties": 4,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 0,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:36:06.963Z",
       "grade": "11",
@@ -17572,7 +17572,7 @@
       "realName": "giorgi Japaridze",
       "showRealNamePublicly": false,
       "gwPoints": 0,
-      "totalPoints": 49
+      "totalPoints": 53
     },
     "user_1790455001790": {
       "id": "user_1790455001790",
@@ -17735,7 +17735,7 @@
           }
         ],
         "bank": 0.4,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -17818,7 +17818,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:36:50.999Z",
       "grade": "11",
@@ -17901,7 +17901,7 @@
           }
         ],
         "bank": 0.3,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -17984,7 +17984,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:37:45.878Z",
       "grade": "12",
@@ -18067,7 +18067,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -18150,7 +18150,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:39:18.452Z",
       "grade": "სხვა",
@@ -18313,10 +18313,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 16
+          "2": 12
         },
-        "accumulatedTransferPenalties": 16,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 12,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:40:42.153Z",
       "grade": "სხვა",
@@ -18324,7 +18324,7 @@
       "realName": "სანდრო კობახიძე",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 67
+      "totalPoints": 71
     },
     "user_1790455263797": {
       "id": "user_1790455263797",
@@ -18399,7 +18399,7 @@
           }
         ],
         "bank": 0.3,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -18482,7 +18482,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:41:03.797Z",
       "grade": "10",
@@ -18565,7 +18565,7 @@
           }
         ],
         "bank": 0.6,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -18648,7 +18648,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:44:31.753Z",
       "grade": "11",
@@ -18731,7 +18731,7 @@
           }
         ],
         "bank": 0.3,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -18814,7 +18814,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:50:08.606Z",
       "grade": "9",
@@ -18897,7 +18897,7 @@
           }
         ],
         "bank": 13.8,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -18980,7 +18980,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T20:56:15.425Z",
       "gwPoints": 0,
@@ -19305,10 +19305,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 16
+          "2": 12
         },
-        "accumulatedTransferPenalties": 16,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 12,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T21:01:03.805Z",
       "grade": "12",
@@ -19316,7 +19316,7 @@
       "realName": "Gega Vashakmadze",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 85
+      "totalPoints": 89
     },
     "user_1790456870935": {
       "id": "user_1790456870935",
@@ -19391,7 +19391,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 0,
+        "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
@@ -19474,7 +19474,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T21:07:50.935Z",
       "grade": "12",
@@ -19664,10 +19664,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 20
+          "2": 16
         },
-        "accumulatedTransferPenalties": 20,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 16,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T21:13:24.922Z",
       "grade": "12",
@@ -19675,7 +19675,7 @@
       "realName": "Nikoloz Dzagania",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 28
+      "totalPoints": 32
     },
     "user_1790457887365": {
       "id": "user_1790457887365",
@@ -19916,7 +19916,7 @@
           }
         ],
         "bank": 0.2,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -19999,7 +19999,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T21:25:27.645Z",
       "grade": "10",
@@ -20275,7 +20275,7 @@
           }
         ],
         "bank": 1.2,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -20358,7 +20358,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T22:35:43.821Z",
       "grade": "12",
@@ -20521,10 +20521,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 8
+          "2": 4
         },
-        "accumulatedTransferPenalties": 8,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 4,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-26T23:38:28.991Z",
       "grade": "10",
@@ -20532,7 +20532,7 @@
       "realName": "dachi gengiuri",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 68
+      "totalPoints": 72
     },
     "user_1790485461233": {
       "id": "user_1790485461233",
@@ -20804,7 +20804,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -20887,7 +20887,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T05:37:58.796Z",
       "grade": "10",
@@ -21136,7 +21136,7 @@
           }
         ],
         "bank": 0.9,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -21219,7 +21219,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T06:46:08.898Z",
       "grade": "12",
@@ -21468,7 +21468,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -21551,7 +21551,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T07:09:52.565Z",
       "grade": "11",
@@ -21634,7 +21634,7 @@
           }
         ],
         "bank": 0.4,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -21717,7 +21717,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T07:10:50.493Z",
       "grade": "9",
@@ -21966,7 +21966,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -22049,7 +22049,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T07:56:53.030Z",
       "grade": "9",
@@ -22132,7 +22132,7 @@
           }
         ],
         "bank": 0.5,
-        "freeTransfers": 0,
+        "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
@@ -22215,7 +22215,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T08:11:08.503Z",
       "grade": "10",
@@ -22325,7 +22325,7 @@
           }
         ],
         "bank": 0.3,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -22408,7 +22408,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T08:55:58.474Z",
       "grade": "9",
@@ -22790,10 +22790,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 12
+          "2": 8
         },
-        "accumulatedTransferPenalties": 12,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 8,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T09:56:30.338Z",
       "grade": "12",
@@ -22801,7 +22801,7 @@
       "realName": "Iva Mekravishvili",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 63
+      "totalPoints": 67
     },
     "user_1790503565226": {
       "id": "user_1790503565226",
@@ -23112,7 +23112,7 @@
           }
         ],
         "bank": 0.5,
-        "freeTransfers": 0,
+        "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
@@ -23195,7 +23195,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T11:22:22.818Z",
       "grade": "10",
@@ -23278,7 +23278,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -23361,7 +23361,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T11:41:24.464Z",
       "grade": "12",
@@ -23444,7 +23444,7 @@
           }
         ],
         "bank": 1,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -23527,7 +23527,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T11:48:47.661Z",
       "grade": "11",
@@ -23610,7 +23610,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -23693,7 +23693,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T11:52:12.064Z",
       "grade": "12",
@@ -23776,7 +23776,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -23859,7 +23859,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T12:04:01.785Z",
       "grade": "11",
@@ -23942,7 +23942,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -24025,7 +24025,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T12:43:54.382Z",
       "grade": "9",
@@ -24108,7 +24108,7 @@
           }
         ],
         "bank": 0.1,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -24191,7 +24191,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T12:52:12.133Z",
       "grade": "9",
@@ -24274,7 +24274,7 @@
           }
         ],
         "bank": 0.1,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -24357,7 +24357,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T13:11:24.216Z",
       "gwPoints": 0,
@@ -24436,7 +24436,7 @@
           }
         ],
         "bank": 0.1,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -24519,7 +24519,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T14:56:04.303Z",
       "grade": "10",
@@ -24602,7 +24602,7 @@
           }
         ],
         "bank": 1,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -24685,7 +24685,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T15:27:57.095Z",
       "grade": "10",
@@ -24768,7 +24768,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -24851,7 +24851,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T15:50:40.796Z",
       "grade": "10",
@@ -24934,7 +24934,7 @@
           }
         ],
         "bank": 0.1,
-        "freeTransfers": 0,
+        "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
@@ -25017,7 +25017,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T16:19:59.098Z",
       "grade": "10",
@@ -25100,7 +25100,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -25183,7 +25183,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T18:10:56.501Z",
       "grade": "10",
@@ -25346,10 +25346,10 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 28
+          "2": 24
         },
-        "accumulatedTransferPenalties": 28,
-        "startFreeTransfers": 1
+        "accumulatedTransferPenalties": 24,
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T18:20:47.494Z",
       "grade": "12",
@@ -25357,7 +25357,7 @@
       "realName": "Andria Tsurtsumia",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 21
+      "totalPoints": 25
     },
     "user_1790533277030": {
       "id": "user_1790533277030",
@@ -25432,7 +25432,7 @@
           }
         ],
         "bank": 0.5,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -25515,7 +25515,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T18:21:17.092Z",
       "grade": "9",
@@ -25598,7 +25598,7 @@
           }
         ],
         "bank": 2,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -25681,7 +25681,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T18:45:12.203Z",
       "gwPoints": 0,
@@ -25760,7 +25760,7 @@
           }
         ],
         "bank": 0.2,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -25843,7 +25843,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T18:58:13.988Z",
       "gwPoints": 0,
@@ -25922,7 +25922,7 @@
           }
         ],
         "bank": 1.2,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -26005,7 +26005,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T19:09:23.896Z",
       "grade": "10",
@@ -26088,7 +26088,7 @@
           }
         ],
         "bank": 0.2,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -26171,7 +26171,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-27T19:51:55.443Z",
       "grade": "11",
@@ -26254,7 +26254,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 7,
         "activeChip": "wildcard",
         "usedChips": {
@@ -26337,7 +26337,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-28T10:00:03.202Z",
       "grade": "12",
@@ -26420,7 +26420,7 @@
           }
         ],
         "bank": 0.2,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -26503,7 +26503,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-28T10:06:54.101Z",
       "grade": "12",
@@ -26674,7 +26674,7 @@
           }
         ],
         "bank": 0,
-        "freeTransfers": 1,
+        "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
         "usedChips": {
@@ -26757,7 +26757,7 @@
           "2": 0
         },
         "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1
+        "startFreeTransfers": 2
       },
       "joinedAt": "2026-09-28T10:18:33.998Z",
       "grade": "10",
