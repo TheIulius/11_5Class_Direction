@@ -29,11 +29,15 @@ export function calculateSquadTransfers(
   // Managers carry over unused free transfers from previous GW + 1 new transfer for the new GW, capped at 3.
   // E.g. Start GW1 with 1 FT, use none -> start GW2 with 2 FT (Rule 5 Example A).
   let startFT: number;
+  const gw1Baseline = gwSquads[1];
+  const hasValidGW1Baseline = Array.isArray(gw1Baseline) && gw1Baseline.length === 9;
+
   if (typeof squad.startFreeTransfers === 'number') {
     startFT = squad.startFreeTransfers;
   } else if (prevGW === 1) {
-    // GW2: All managers with a valid GW1 baseline carried over 1 unused FT + 1 new FT = 2 FT
-    startFT = 2;
+    // GW2: Managers who played in GW1 carried over 1 unused FT + 1 new FT = 2 FT
+    // Late joiners who did not participate in GW1 start with 1 FT
+    startFT = hasValidGW1Baseline ? 2 : 1;
   } else {
     startFT = Math.min(3, Math.max(1, (squad.freeTransfers || 0) + (squad.transfersMadeThisGW || 0)));
   }
@@ -51,12 +55,12 @@ export function calculateSquadTransfers(
   }
 
   const baselineSquad = gwSquads[prevGW];
-  // Late joiner with no previous GW baseline has unlimited free transfers until first deadline
+  // Late joiner with no previous GW baseline has unlimited free transfers for initial setup until first deadline
   if (!baselineSquad || !Array.isArray(baselineSquad) || baselineSquad.length !== 9) {
     return {
-      freeTransfers: squad.freeTransfers ?? 1,
-      transfersMadeThisGW: squad.transfersMadeThisGW ?? 0,
-      startFreeTransfers: startFT,
+      freeTransfers: 1,
+      transfersMadeThisGW: 0,
+      startFreeTransfers: 1,
       currentGWPenalty: 0,
       accumulatedTransferPenalties: squad.accumulatedTransferPenalties || 0,
       gwTransferPenalties: gwPenalties,
