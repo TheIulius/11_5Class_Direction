@@ -24,6 +24,7 @@ import {
   validateSquadComposition,
 } from '../engine/scoring';
 import { canSwapPlayers, normalizeSquadLineup, isValidFormation, sanitizeCaptaincy } from '../engine/formations';
+import { calculateSquadTransfers } from '../engine/transferAccounting';
 import * as api from '../services/api';
 
 export const INITIAL_BUDGET = 55.0;
@@ -1027,23 +1028,53 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       newPlayers = normalizeSquadLineup(newPlayers, { ...players, [p.id]: p });
     }
 
+    const currentGWKey = currentGW || 1;
+    let successMessage = `Added ${p.webName} to squad!`;
+    let transResult: any = null;
+
+    if (newPlayers.length === 9) {
+      transResult = calculateSquadTransfers(
+        { ...squad, players: newPlayers },
+        currentGWKey
+      );
+      if (squad.activeChip === 'wildcard') {
+        successMessage = `Added ${p.webName} (Wildcard active)`;
+      } else if (transResult.currentGWPenalty > (squad.gwTransferPenalties?.[currentGWKey] || 0)) {
+        successMessage = `Added ${p.webName} (-4 pts transfer penalty)`;
+      } else if (transResult.freeTransfers < (squad.freeTransfers ?? 1)) {
+        successMessage = `Added ${p.webName} (Free Transfer used, ${transResult.freeTransfers} left)`;
+      }
+    }
+
     lastSquadEditTimeRef.current = Date.now();
     const updatedSquad: Squad = {
       ...squad,
       players: newPlayers,
       bank: newBank,
+      ...(transResult ? {
+        freeTransfers: transResult.freeTransfers,
+        transfersMadeThisGW: transResult.transfersMadeThisGW,
+        startFreeTransfers: transResult.startFreeTransfers,
+        gwTransferPenalties: transResult.gwTransferPenalties,
+        accumulatedTransferPenalties: transResult.accumulatedTransferPenalties,
+      } : {}),
     };
 
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
     const activeId = authUser?.id || currentManagerId;
     if (activeId) {
-      api.saveSquadApi(activeId, newPlayers, updatedSquad.teamName, newBank).catch((e) => {
+      api.saveSquadApi(activeId, newPlayers, updatedSquad.teamName, newBank).then((res) => {
+        if (res && res.squad) {
+          setSquad(res.squad);
+          localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(res.squad));
+        }
+      }).catch((e) => {
         console.warn('Auto-save squad buy player failed:', e);
       });
     }
 
-    return { success: true };
+    return { success: true, message: successMessage };
   };
 
   // Remove/Sell a player from squad and refund 100% of price back to bank
@@ -1375,17 +1406,6 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       )
     );
 
-    const isWildcard = squad.activeChip === 'wildcard' || (squad.activeChip as any) === 'free_hit';
-    let newFreeTransfers = squad.freeTransfers ?? 1;
-    let penaltyAdded = 0;
-    if (!isWildcard) {
-      if (newFreeTransfers > 0) {
-        newFreeTransfers -= 1;
-      } else {
-        penaltyAdded = 4;
-      }
-    }
-
     const currentGWKey = currentGW || 1;
     const gwSnapshots = { ...(squad.gameweekSquads || {}) };
     const gwChips = { ...(squad.gameweekChips || {}) };
@@ -1406,19 +1426,23 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       currentActiveChip = null;
     }
 
-    const currentPenalties = squad.accumulatedTransferPenalties || 0;
-    const currentGwPenalties = { ...(squad.gwTransferPenalties || {}) };
-    if (penaltyAdded > 0) {
-      currentGwPenalties[currentGWKey] = (currentGwPenalties[currentGWKey] || 0) + penaltyAdded;
-    }
+    const transResult = calculateSquadTransfers(
+      {
+        ...squad,
+        players: updatedPlayers,
+        transfersMadeThisGW: (squad.transfersMadeThisGW || 0) + 1,
+      },
+      currentGWKey
+    );
 
     const updatedSquad: Squad = {
       ...squad,
       bank: Math.round(newBank * 10) / 10,
-      freeTransfers: newFreeTransfers,
-      transfersMadeThisGW: (squad.transfersMadeThisGW || 0) + 1,
-      accumulatedTransferPenalties: currentPenalties + penaltyAdded,
-      gwTransferPenalties: currentGwPenalties,
+      freeTransfers: transResult.freeTransfers,
+      transfersMadeThisGW: transResult.transfersMadeThisGW,
+      startFreeTransfers: transResult.startFreeTransfers,
+      accumulatedTransferPenalties: transResult.accumulatedTransferPenalties,
+      gwTransferPenalties: transResult.gwTransferPenalties,
       gameweekSquads: gwSnapshots,
       gameweekChips: gwChips,
       activeChip: currentActiveChip,
@@ -1438,7 +1462,12 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         }
       }).catch((e) => {
         console.warn('transferPlayerApi failed, syncing via saveSquadApi:', e);
-        api.saveSquadApi(activeId, updatedPlayers, updatedSquad.teamName, updatedSquad.bank).catch(console.error);
+        api.saveSquadApi(activeId, updatedPlayers, updatedSquad.teamName, updatedSquad.bank).then((res) => {
+          if (res && res.squad) {
+            setSquad(res.squad);
+            localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(res.squad));
+          }
+        }).catch(console.error);
       });
     }
     return { success: true };

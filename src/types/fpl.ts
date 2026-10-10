@@ -73,6 +73,7 @@ export interface Squad {
   transfersMadeThisGW: number;
   activeChip: ChipType | null;
   usedChips: Record<ChipType, boolean>;
+  startFreeTransfers?: number;
   accumulatedTransferPenalties?: number;
   gwTransferPenalties?: Record<number, number>;
   gameweekSquads?: Record<number, SquadPlayer[]>;

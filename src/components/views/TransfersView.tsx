@@ -220,7 +220,7 @@ export const TransfersView: React.FC = () => {
     const res = buyPlayer(playerId);
     if (res.success) {
       confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
-      setTransferMessage({ type: 'success', text: `Added ${target.webName} to squad!` });
+      setTransferMessage({ type: 'success', text: res.message || `Added ${target.webName} to squad!` });
       setTimeout(() => setTransferMessage(null), 3000);
     } else {
       setTransferMessage({ type: 'error', text: res.message || 'Failed to buy player' });

@@ -1,5 +1,6 @@
 import assert from 'node:assert';
 import { calculateGameweekSquadPoints } from '../src/engine/scoring';
+import { calculateSquadTransfers } from '../src/engine/transferAccounting';
 import { Squad, SquadPlayer, Player, Fixture } from '../src/types/fpl';
 
 console.log('=== RUNNING FREE TRANSFER RULES & HISTORICAL PRESERVATION TEST SUITE ===\n');
@@ -428,6 +429,77 @@ const recalculatedGw1Score = calculateGameweekSquadPoints(
 assert.strictEqual(recalculatedGw1Score, originalGw1Score, 'Historical GW1 points remain 100% identical');
 console.log('✓ PASS: GW2 squad mutations have zero effect on preserved GW1 lineups and scores.\n');
 
+// -------------------------------------------------------------
+// TEST 16: Squad Save (Sell + Buy) Transfer Accounting
+// -------------------------------------------------------------
+console.log('Test 16: Squad Save / Sell + Buy Accounting');
+const squadSaveTest = createMockSquad();
+squadSaveTest.gameweekSquads = {
+  1: JSON.parse(JSON.stringify(squadSaveTest.players)),
+};
+squadSaveTest.freeTransfers = 1;
+squadSaveTest.startFreeTransfers = 1;
+squadSaveTest.transfersMadeThisGW = 0;
+
+// User replaces 1 player via save / buy (p_3 DEF -> p_11 DEF)
+squadSaveTest.players[2].playerId = 'p_11';
+const res16_1 = calculateSquadTransfers(squadSaveTest, 2);
+assert.strictEqual(res16_1.transfersMadeThisGW, 1, '1 transfer detected');
+assert.strictEqual(res16_1.freeTransfers, 0, '1 free transfer consumed -> 0 remaining');
+assert.strictEqual(res16_1.currentGWPenalty, 0, '0 penalty for free transfer');
+console.log('✓ PASS: 1 player replacement via squad save correctly consumes 1 FT with 0 penalty.\n');
+
+// -------------------------------------------------------------
+// TEST 17: User Scenario (theiulius): GKP + DEF Replacement with 1 FT
+// -------------------------------------------------------------
+console.log('Test 17: User Bug Reproduction (theiulius GKP + DEF replacement with 1 FT)');
+// User replaces 2nd player (p_1 GKP -> p_10 GKP)
+squadSaveTest.players[0].playerId = 'p_10';
+const res17 = calculateSquadTransfers(squadSaveTest, 2);
+assert.strictEqual(res17.transfersMadeThisGW, 2, '2 transfers made');
+assert.strictEqual(res17.freeTransfers, 0, '0 free transfers remaining');
+assert.strictEqual(res17.currentGWPenalty, 4, '2nd transfer incurs 4 pt penalty');
+assert.strictEqual(res17.accumulatedTransferPenalties, 4, 'Total accumulated penalty is 4 pts');
+console.log('✓ PASS: Changing GKP and DEF consumes 1 FT (balance 0) and incurs -4 pt penalty.\n');
+
+// -------------------------------------------------------------
+// TEST 18: Transfer Reversal Before Deadline
+// -------------------------------------------------------------
+console.log('Test 18: Reverting a transfer before deadline restores FT and clears penalty');
+// User changes mind and reverts p_10 GKP back to baseline p_1 GKP
+squadSaveTest.players[0].playerId = 'p_1';
+const res18 = calculateSquadTransfers(squadSaveTest, 2);
+assert.strictEqual(res18.transfersMadeThisGW, 1, 'Only 1 transfer remaining from baseline');
+assert.strictEqual(res18.freeTransfers, 0, '1 free transfer consumed for the 1 remaining transfer');
+assert.strictEqual(res18.currentGWPenalty, 0, 'Penalty is cleared back to 0');
+assert.strictEqual(res18.accumulatedTransferPenalties, 0, 'Accumulated penalty restored to 0');
+console.log('✓ PASS: Reverting transfer restores penalty and reflects net changes.\n');
+
+// -------------------------------------------------------------
+// TEST 19: Wildcard on Squad Save
+// -------------------------------------------------------------
+console.log('Test 19: Wildcard on Squad Save grants unlimited transfers without penalty');
+const squadWCSave = createMockSquad();
+squadWCSave.gameweekSquads = {
+  1: JSON.parse(JSON.stringify(squadWCSave.players)),
+};
+squadWCSave.freeTransfers = 1;
+squadWCSave.startFreeTransfers = 1;
+squadWCSave.activeChip = 'wildcard';
+
+// Replace 5 players
+squadWCSave.players[0].playerId = 'p_10';
+squadWCSave.players[1].playerId = 'p_11';
+squadWCSave.players[2].playerId = 'p_12';
+squadWCSave.players[3].playerId = 'p_13';
+squadWCSave.players[4].playerId = 'p_14';
+
+const res19 = calculateSquadTransfers(squadWCSave, 2);
+assert.strictEqual(res19.transfersMadeThisGW, 5, '5 transfers made');
+assert.strictEqual(res19.freeTransfers, 1, 'Wildcard preserves starting FT balance');
+assert.strictEqual(res19.currentGWPenalty, 0, '0 penalty with Wildcard active');
+console.log('✓ PASS: Wildcard grants unlimited squad save transfers without consuming FT or penalizing.\n');
+
 console.log('=================================================================');
-console.log('ALL 15 TRANSFER, PENALTY, CHIP & HISTORICAL INTEGRITY TESTS PASSED! 🎉');
+console.log('ALL 19 TRANSFER, PENALTY, CHIP & HISTORICAL INTEGRITY TESTS PASSED! 🎉');
 console.log('=================================================================');

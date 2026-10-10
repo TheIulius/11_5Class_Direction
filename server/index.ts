@@ -4,6 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema } from './db';
 import { calculateGameweekSquadPoints, calculatePlayerPoints } from '../src/engine/scoring';
+import { applyTransferAccountingToManager } from '../src/engine/transferAccounting';
 import { DEFAULT_SQUAD_PLAYER_IDS } from '../src/data/seedPlayers';
 import { CLUBS } from '../src/data/clubs';
 import { Player, PlayerStats, Fixture, Club } from '../src/types/fpl';
@@ -850,6 +851,15 @@ app.post('/api/manager/login', (req: Request, res: Response) => {
   res.json({ success: true, manager: existing });
 });
 
+/**
+ * Unified transfer accounting engine (Rules 1-6, 8, 9)
+ * Synchronizes freeTransfers, transfersMadeThisGW, gwTransferPenalties, and accumulatedTransferPenalties
+ * across all transfer mechanisms (1-for-1 swaps, sell+buy, and complete squad saves).
+ */
+export function updateManagerTransferAccounting(manager: any, data: any) {
+  applyTransferAccountingToManager(manager, Number(data.currentGW || 1));
+}
+
 // 4. Save Squad Lineup
 app.post('/api/squad/save', (req: Request, res: Response) => {
   const { managerId, players, teamName, bank } = req.body;
@@ -1009,6 +1019,10 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
       const totalCost = players.reduce((sum: number, sp: any) => sum + (data.players[sp.playerId]?.cost || 0), 0);
       manager.squad.bank = Math.max(0, Math.round((INITIAL_BUDGET - totalCost) * 10) / 10);
     }
+
+    if (sanitizedPlayers.length === 9) {
+      updateManagerTransferAccounting(manager, data);
+    }
   }
 
   const registeredUser = data.users?.[managerId];
@@ -1109,9 +1123,11 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
   }
 
   manager.squad.activeChip = manager.squad.activeChip === normalizedChip ? null : normalizedChip;
+  updateManagerTransferAccounting(manager, data);
+  recalculateAllManagersLeaguePoints(data);
   db.save();
 
-  res.json({ success: true, activeChip: manager.squad.activeChip, usedChips: manager.squad.usedChips });
+  res.json({ success: true, activeChip: manager.squad.activeChip, usedChips: manager.squad.usedChips, squad: manager.squad });
 });
 
 // 6. Execute Transfer
@@ -1215,24 +1231,13 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
     manager.squad.activeChip = null;
   }
 
-  // Free transfer consumption & penalty (Rules 1-6, 8, 9)
-  const isWildcard = manager.squad.activeChip === 'wildcard' || (manager.squad.activeChip as any) === 'free_hit';
-  if (!isWildcard) {
-    if (manager.squad.freeTransfers > 0) {
-      manager.squad.freeTransfers -= 1;
-    } else {
-      // Free transfer balance is 0: additional transfer incurs -4 point penalty
-      manager.squad.accumulatedTransferPenalties += 4;
-      manager.squad.gwTransferPenalties[currentGWKey] = (manager.squad.gwTransferPenalties[currentGWKey] || 0) + 4;
-    }
-  }
-  manager.squad.transfersMadeThisGW += 1;
-
   manager.squad.bank = newBank;
   manager.squad.players = manager.squad.players.map((sp) =>
     sp.playerId === outPlayerId ? { ...sp, playerId: inPlayerId } : sp
   );
+  manager.squad.transfersMadeThisGW = (manager.squad.transfersMadeThisGW || 0) + 1;
 
+  updateManagerTransferAccounting(manager, data);
   recalculateAllManagersLeaguePoints(data);
   db.save();
   res.json({ success: true, squad: manager.squad });
@@ -1417,6 +1422,7 @@ function recalculateAllManagersLeaguePoints(data: any) {
 
   Object.values(data.managers).forEach((m: any) => {
     if (!m.squad) return;
+    updateManagerTransferAccounting(m, data);
     if (!m.squad.gameweekSquads) m.squad.gameweekSquads = {};
     if (!m.squad.gameweekChips) m.squad.gameweekChips = {};
     if (!m.squad.gwTransferPenalties) m.squad.gwTransferPenalties = {};
@@ -1588,6 +1594,9 @@ app.post('/api/admin/gameweek', (req: Request, res: Response) => {
       // Each new gameweek adds 1 free transfer to the existing balance, capped at 3!
       const currentBalance = typeof m.squad.freeTransfers === 'number' ? m.squad.freeTransfers : 1;
       m.squad.freeTransfers = Math.min(3, currentBalance + 1);
+      m.squad.startFreeTransfers = m.squad.freeTransfers;
+      if (!m.squad.gwTransferPenalties) m.squad.gwTransferPenalties = {};
+      m.squad.gwTransferPenalties[endingGW + 1] = 0;
     });
     data.currentGW = endingGW + 1;
     recalculateAllManagersLeaguePoints(data);
@@ -3337,14 +3346,8 @@ app.post('/api/league/create', (req: Request, res: Response) => {
   if (!manager) return res.status(404).json({ error: 'Manager not found' });
 
   const code = 'KCL-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-  const calc = calculateGameweekSquadPoints(
-    manager.squad.players,
-    data.players,
-    manager.squad.activeChip,
-    manager.squad.transfersMadeThisGW,
-    manager.squad.freeTransfers
-  );
-  const currentPts = calc.totalPoints || 0;
+  const currentPts = typeof manager.totalPoints === 'number' ? manager.totalPoints : 0;
+  const currentGwPts = typeof manager.gwPoints === 'number' ? manager.gwPoints : 0;
 
   const newLeague = {
     id: 'league_' + Date.now(),
@@ -3357,7 +3360,7 @@ app.post('/api/league/create', (req: Request, res: Response) => {
         managerName: manager.managerName,
         teamName: manager.teamName,
         totalPoints: currentPts,
-        gwPoints: currentPts,
+        gwPoints: currentGwPts,
         rank: 1,
         previousRank: 1,
       },
@@ -3387,21 +3390,15 @@ app.post('/api/league/join', (req: Request, res: Response) => {
   if (!league) return res.status(404).json({ error: 'League code not found' });
 
   if (!league.members.some((m) => m.id === manager.id)) {
-    const calc = calculateGameweekSquadPoints(
-      manager.squad.players,
-      data.players,
-      manager.squad.activeChip,
-      manager.squad.transfersMadeThisGW,
-      manager.squad.freeTransfers
-    );
-    const currentPts = calc.totalPoints || 0;
+    const currentPts = typeof manager.totalPoints === 'number' ? manager.totalPoints : 0;
+    const currentGwPts = typeof manager.gwPoints === 'number' ? manager.gwPoints : 0;
 
     league.members.push({
       id: manager.id,
       managerName: manager.managerName,
       teamName: manager.teamName,
       totalPoints: currentPts,
-      gwPoints: currentPts,
+      gwPoints: currentGwPts,
       rank: league.members.length + 1,
       previousRank: league.members.length + 1,
     });
