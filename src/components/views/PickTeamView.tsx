@@ -40,9 +40,9 @@ export const PickTeamView: React.FC = () => {
     if (!isPastGW) {
       return squad.players;
     }
-    return (squad.gameweekSquads && squad.gameweekSquads[selectedGW])
+    return (squad.gameweekSquads && squad.gameweekSquads[selectedGW] && squad.gameweekSquads[selectedGW].length > 0)
       ? squad.gameweekSquads[selectedGW]
-      : squad.players;
+      : [];
   }, [isPastGW, squad.players, squad.gameweekSquads, selectedGW]);
 
   const activeGWChip = useMemo(() => {
@@ -230,6 +230,19 @@ export const PickTeamView: React.FC = () => {
               <span>Jump to GW {currentGW}</span>
               <span>→</span>
             </button>
+          </div>
+        )}
+
+        {/* Notice for Past GW without Registered Lineup */}
+        {isPastGW && activeSquadPlayers.length === 0 && (
+          <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold flex items-center gap-2.5 shadow-xs">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 text-amber-400" />
+            <div>
+              <span className="font-extrabold text-amber-200">ამ ტურში შემადგენლობა არ გყავდათ დარეგისტრირებული (0 ქულა)</span>
+              <span className="hidden sm:inline text-amber-300/80 font-normal ml-1">
+                • No lineup was registered for Gameweek {selectedGW}.
+              </span>
+            </div>
           </div>
         )}
 

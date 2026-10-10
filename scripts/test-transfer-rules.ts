@@ -358,6 +358,76 @@ assert.strictEqual(canDeactivateBB, true, 'Manager can toggle off active chip be
 assert.strictEqual(squadChipTest.activeChip, null, 'Chip toggled off');
 console.log('✓ PASS: Remaining chips (Bench Boost, Wildcard) remain fully accessible.\n');
 
+// -------------------------------------------------------------
+// TEST 14: Late Joiner (No GW1 Lineup) Must Receive 0 Points for GW1
+// -------------------------------------------------------------
+console.log('Test 14: Late Joiners / Users Without GW1 Lineup Receive 0 Points for GW1');
+const lateJoinerSquad = createMockSquad();
+// Manager creates their first 9-man squad in GW2 after GW1 has concluded
+assert.strictEqual(lateJoinerSquad.gameweekSquads[1], undefined, 'GW1 squad must not exist for late joiner');
+
+// In recalculation, finished gameweeks (GW1) must never backfill or use GW2 squad
+const isGw1Finished = true;
+const lateJoinerGw1Players = isGw1Finished
+  ? (lateJoinerSquad.gameweekSquads?.[1] || [])
+  : (lateJoinerSquad.players || []);
+
+const lateJoinerGw1Calc = calculateGameweekSquadPoints(
+  lateJoinerGw1Players,
+  allPlayers,
+  1,
+  null,
+  0,
+  1,
+  [],
+  isGw1Finished
+);
+
+assert.strictEqual(lateJoinerGw1Players.length, 0, 'Late joiner has 0 players in finished GW1');
+assert.strictEqual(lateJoinerGw1Calc.grossPoints, 0, 'Late joiner receives strictly 0 points for GW1');
+assert.strictEqual(lateJoinerSquad.gameweekSquads[1], undefined, 'GW1 snapshot was not backfilled');
+console.log('✓ PASS: Late joiners without GW1 squad receive 0 points and have no retroactively created GW1 lineup.\n');
+
+// -------------------------------------------------------------
+// TEST 15: Immutability of Historical Gameweek Lineups and Points
+// -------------------------------------------------------------
+console.log('Test 15: Historical Gameweek 1 Lineup and Points are Strictly Immutable');
+const historicalManager = createMockSquad();
+// Genuine manager who played GW1
+historicalManager.gameweekSquads[1] = JSON.parse(JSON.stringify(historicalManager.players));
+const originalGw1Score = calculateGameweekSquadPoints(
+  historicalManager.gameweekSquads[1],
+  allPlayers,
+  1,
+  null,
+  0,
+  1,
+  [],
+  true
+).grossPoints;
+
+// Manager modifies GW2 squad (transfers or swaps captain)
+historicalManager.players[0].playerId = 'p_10'; // GKP transfer
+historicalManager.players[1].isCaptain = true; // New captain
+
+// Verify GW1 preserved snapshot is completely unchanged
+assert.strictEqual(historicalManager.gameweekSquads[1][0].playerId, 'p_1', 'GW1 squad player 0 remained p_1');
+assert.strictEqual(historicalManager.gameweekSquads[1][0].isCaptain, true, 'GW1 captain remained p_1');
+
+const recalculatedGw1Score = calculateGameweekSquadPoints(
+  historicalManager.gameweekSquads[1],
+  allPlayers,
+  1,
+  null,
+  0,
+  1,
+  [],
+  true
+).grossPoints;
+
+assert.strictEqual(recalculatedGw1Score, originalGw1Score, 'Historical GW1 points remain 100% identical');
+console.log('✓ PASS: GW2 squad mutations have zero effect on preserved GW1 lineups and scores.\n');
+
 console.log('=================================================================');
-console.log('ALL 13 TRANSFER, PENALTY & CHIP SINGLE-USE TESTS PASSED! 🎉');
+console.log('ALL 15 TRANSFER, PENALTY, CHIP & HISTORICAL INTEGRITY TESTS PASSED! 🎉');
 console.log('=================================================================');

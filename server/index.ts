@@ -1030,6 +1030,7 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
     }
   }
 
+  recalculateAllManagersLeaguePoints(data);
   db.save();
   res.json({ success: true, squad: manager.squad, manager });
 });
@@ -1203,12 +1204,6 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
     if (!manager.squad.gameweekSquads[currentGWKey] && manager.squad.players?.length === 9) {
       manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(manager.squad.players));
       manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip || null;
-    }
-  }
-  for (let gw = 1; gw < currentGWKey; gw++) {
-    if (!manager.squad.gameweekSquads[gw] && manager.squad.players?.length === 9) {
-      manager.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(manager.squad.players));
-      manager.squad.gameweekChips[gw] = manager.squad.activeChip || null;
     }
   }
 
@@ -1426,27 +1421,18 @@ function recalculateAllManagersLeaguePoints(data: any) {
     if (!m.squad.gameweekChips) m.squad.gameweekChips = {};
     if (!m.squad.gwTransferPenalties) m.squad.gwTransferPenalties = {};
 
-    // Auto-snapshot completed gameweek squads if missing, and permanently lock used chips
+    // Lock used chips from completed gameweeks permanently
     if (!m.squad.usedChips) m.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
     for (let gw = 1; gw <= currentGW; gw++) {
       const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === gw);
       const isGwFinished = gw < currentGW || (gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished)));
-      if (isGwFinished) {
-        if (!m.squad.gameweekSquads[gw] && m.squad.players?.length === 9) {
-          m.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(m.squad.players));
+      if (isGwFinished && m.squad.gameweekChips?.[gw]) {
+        const usedChip = m.squad.gameweekChips[gw];
+        if (usedChip && !m.squad.usedChips[usedChip]) {
+          m.squad.usedChips[usedChip] = true;
         }
-        if (!m.squad.gameweekChips[gw] && m.squad.activeChip) {
-          m.squad.gameweekChips[gw] = m.squad.activeChip;
-          m.squad.usedChips[m.squad.activeChip] = true;
+        if (m.squad.activeChip === usedChip) {
           m.squad.activeChip = null;
-        } else if (m.squad.gameweekChips[gw]) {
-          const usedChip = m.squad.gameweekChips[gw];
-          if (usedChip && !m.squad.usedChips[usedChip]) {
-            m.squad.usedChips[usedChip] = true;
-          }
-          if (m.squad.activeChip === usedChip) {
-            m.squad.activeChip = null;
-          }
         }
       }
     }
@@ -1455,16 +1441,19 @@ function recalculateAllManagersLeaguePoints(data: any) {
     let latestGWGrossPoints = 0;
 
     for (let gw = 1; gw <= currentGW; gw++) {
-      const gwPlayers = (m.squad.gameweekSquads && m.squad.gameweekSquads[gw])
-        ? m.squad.gameweekSquads[gw]
-        : (m.squad.players || []);
-
-      const chipForGw = (m.squad.gameweekChips && m.squad.gameweekChips[gw] !== undefined)
-        ? m.squad.gameweekChips[gw]
-        : (gw === currentGW ? m.squad.activeChip || null : null);
-
       const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === gw);
       const isGwFinished = gw < currentGW || (gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished)));
+
+      // Completed / past gameweeks MUST strictly use their preserved snapshot.
+      // If a manager did not have a squad registered for that gameweek, they have 0 players and 0 points.
+      // Under no circumstances should current squad be backfilled or used as fallback for finished gameweeks.
+      const gwPlayers = (isGwFinished || gw < currentGW)
+        ? (m.squad.gameweekSquads?.[gw] || [])
+        : (m.squad.gameweekSquads?.[gw] || m.squad.players || []);
+
+      const chipForGw = (isGwFinished || gw < currentGW)
+        ? (m.squad.gameweekChips?.[gw] || null)
+        : (m.squad.gameweekChips?.[gw] !== undefined ? m.squad.gameweekChips[gw] : m.squad.activeChip || null);
 
       const gwCalc = calculateGameweekSquadPoints(
         gwPlayers,
@@ -2043,17 +2032,7 @@ export function syncAllFinishedFixturesStats(data: DatabaseSchema): boolean {
         const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === gw);
         const isGwFinished = gw < maxGW || (gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished)));
         if (isGwFinished) {
-          if (!m.squad.gameweekSquads[gw] && m.squad.players?.length === 9) {
-            m.squad.gameweekSquads[gw] = JSON.parse(JSON.stringify(m.squad.players));
-            if (!m.squad.gwTransferPenalties[gw]) m.squad.gwTransferPenalties[gw] = 0;
-            changed = true;
-          }
-          if (!m.squad.gameweekChips[gw] && m.squad.activeChip) {
-            m.squad.gameweekChips[gw] = m.squad.activeChip;
-            m.squad.usedChips[m.squad.activeChip] = true;
-            m.squad.activeChip = null;
-            changed = true;
-          } else if (m.squad.gameweekChips[gw]) {
+          if (m.squad.gameweekChips[gw]) {
             const usedChip = m.squad.gameweekChips[gw];
             if (usedChip && !m.squad.usedChips[usedChip]) {
               m.squad.usedChips[usedChip] = true;
@@ -2186,13 +2165,29 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
           lMgr.squad = rMgr.squad;
           changed = true;
         } else if (lMgr.squad && rMgr.squad) {
+          const joinedMs = new Date(lMgr.joinedAt || local.users?.[mid]?.createdAt || 0).getTime();
+          const gw1DeadlineMs = new Date('2026-09-28T11:12:21.384Z').getTime();
+
           if (rMgr.squad.gameweekSquads && typeof rMgr.squad.gameweekSquads === 'object') {
             if (!lMgr.squad.gameweekSquads) lMgr.squad.gameweekSquads = {};
             for (const [gwKey, snap] of Object.entries(rMgr.squad.gameweekSquads)) {
+              if (gwKey === '1' && joinedMs > gw1DeadlineMs) {
+                continue;
+              }
               if (!lMgr.squad.gameweekSquads[gwKey]) {
                 lMgr.squad.gameweekSquads[gwKey] = snap;
                 changed = true;
               }
+            }
+          }
+          if (joinedMs > gw1DeadlineMs) {
+            if (lMgr.squad.gameweekSquads?.[1]) {
+              delete lMgr.squad.gameweekSquads[1];
+              changed = true;
+            }
+            if (lMgr.squad.gameweekChips?.[1]) {
+              delete lMgr.squad.gameweekChips[1];
+              changed = true;
             }
           }
           if (rMgr.squad.gameweekChips && typeof rMgr.squad.gameweekChips === 'object') {
@@ -3563,10 +3558,9 @@ async function startServer() {
   try {
     const data = db.getData();
     const statsSynced = syncAllFinishedFixturesStats(data);
-    if (statsSynced) {
-      db.saveSilent();
-      console.log('[Startup] Verified and synced player stats from all finished match fixtures.');
-    }
+    recalculateAllManagersLeaguePoints(data);
+    db.saveSilent();
+    console.log('[Startup] Verified and synced player stats and manager points from all finished match fixtures.');
   } catch (e) {
     console.warn('[Startup] Error auto-syncing finished fixtures stats:', e);
   }

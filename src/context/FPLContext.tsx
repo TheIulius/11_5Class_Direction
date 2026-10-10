@@ -1398,12 +1398,6 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         gwChips[currentGWKey] = squad.activeChip || null;
       }
     }
-    for (let g = 1; g < currentGWKey; g++) {
-      if (!gwSnapshots[g] && squad.players.length === 9) {
-        gwSnapshots[g] = [...squad.players];
-        gwChips[g] = squad.activeChip || null;
-      }
-    }
 
     // Lock finished gameweek chip permanently
     if (isCurrentGWFinished && currentActiveChip) {

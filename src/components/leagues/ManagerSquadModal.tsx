@@ -59,7 +59,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
       const isThisGWFinished = isPastGW || (selectedGW === currentGW ? isCurrentGWFinished : false);
       const gwSquad = (managerData.squad.gameweekSquads && managerData.squad.gameweekSquads[selectedGW])
         ? managerData.squad.gameweekSquads[selectedGW]
-        : managerData.squad.players;
+        : (isPastGW ? [] : managerData.squad.players);
       const gwChip = (managerData.squad.gameweekChips && managerData.squad.gameweekChips[selectedGW] !== undefined)
         ? managerData.squad.gameweekChips[selectedGW]
         : (selectedGW === currentGW ? managerData.squad.activeChip : null);
@@ -85,7 +85,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
 
   const activeGwSquad = (managerData?.squad.gameweekSquads && managerData?.squad.gameweekSquads[selectedGW])
     ? managerData.squad.gameweekSquads[selectedGW]
-    : (managerData?.squad.players || []);
+    : (selectedGW < currentGW ? [] : (managerData?.squad.players || []));
   const squadPlayers = shouldHideLineup ? [] : activeGwSquad;
   const layout = getFormationLayout(squadPlayers, players);
 
