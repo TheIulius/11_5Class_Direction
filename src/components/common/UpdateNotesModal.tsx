@@ -252,6 +252,25 @@ export const UpdateNotesModal: React.FC<UpdateNotesModalProps> = ({
                           <div className="px-3.5 pb-3.5 pt-0.5 text-[11.5px] text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-200/60 dark:border-slate-800/40 font-sans">
                             {item.descriptionKa}
 
+                            {item.id === 'free_transfers_rules' && (
+                              <div className="mt-2.5 pt-2 border-t border-emerald-400/20 dark:border-emerald-500/20 flex items-center justify-between gap-2">
+                                <span className="text-[10px] text-emerald-700 dark:text-emerald-300/90 font-medium">
+                                  📜 წაიკითხეთ ტრანსფერების სრული წესები:
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewAllHistory();
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] transition-colors shrink-0 shadow-xs flex items-center gap-1 cursor-pointer"
+                                >
+                                  <BookOpen className="w-3 h-3" />
+                                  <span>„წესები“ ნახვა →</span>
+                                </button>
+                              </div>
+                            )}
+
                             {isStandout && (
                               <div className="mt-2.5 pt-2 border-t border-sky-400/20 dark:border-sky-500/20 flex items-center justify-between gap-2">
                                 <span className="text-[10px] text-sky-700 dark:text-sky-300/90 font-medium">

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from './KitJersey';
 import { CLUBS } from '../../data/clubs';
-import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, ChevronDown, Camera, Check } from 'lucide-react';
+import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, ChevronDown, Camera, Check, AlertCircle, Sparkles } from 'lucide-react';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { suggestPlayerPhotoApi } from '../../services/api';
@@ -44,11 +44,16 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
   } = useFPL();
 
   const [showOwnershipList, setShowOwnershipList] = useState(false);
+  const [showTransferConfirm, setShowTransferConfirm] = useState(false);
 
   if (!playerId) return null;
 
   const player = players[playerId];
   if (!player) return null;
+
+  const freeTransfersCount = squad?.freeTransfers ?? 0;
+  const isWildcard = squad?.activeChip === 'wildcard';
+  const hasFreeTransfer = freeTransfersCount > 0;
 
   const activeCalc = customCalculation || calculationResult;
   const activeGW = selectedGW ?? currentGW;
@@ -164,6 +169,11 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
   };
 
   const handleTransfer = () => {
+    if (isSquadLocked) return;
+    setShowTransferConfirm(true);
+  };
+
+  const handleProceedTransfer = () => {
     if (isSquadLocked) return;
     setTransferOutPlayerId(playerId);
     setActiveTab('transfers');
@@ -502,69 +512,166 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
 
         {/* Quick Action Grid (Disabled in Read-Only Archive) */}
         {!readOnly ? (
-          <div className="grid grid-cols-2 gap-2 mt-3">
-            {/* Substitute / Swap Button */}
-            <button
-              onClick={handleStartSwap}
-              disabled={isSquadLocked}
-              className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-                isSquadLocked
-                  ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
-                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <ArrowLeftRight className="w-4 h-4 text-amber-500" />
-              <span>Substitute</span>
-            </button>
+          showTransferConfirm ? (
+            <div className="my-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-3 animate-fade-in text-left">
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`p-2 rounded-xl shrink-0 ${
+                    isWildcard
+                      ? 'bg-indigo-500/15 text-indigo-500'
+                      : hasFreeTransfer
+                      ? 'bg-emerald-500/15 text-emerald-500'
+                      : 'bg-rose-500/15 text-rose-500'
+                  }`}
+                >
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider truncate">
+                    მოთამაშის შეცვლა / Transfer Out
+                  </h4>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                    {player.webName} (£{player.cost.toFixed(1)}m • {player.position})
+                  </p>
+                </div>
+              </div>
 
-            {/* Transfer Button */}
-            <button
-              onClick={handleTransfer}
-              disabled={isSquadLocked}
-              className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-                isSquadLocked
-                  ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
-                  : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
-              }`}
-            >
-              <ArrowRight className="w-4 h-4 text-sky-500" />
-              <span>Transfer Out</span>
-            </button>
-
-            {/* Make Captain (Only for Starters) */}
-            {isStarter && (
-              <button
-                onClick={handleMakeCaptain}
-                disabled={isCaptain}
-                className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-                  isCaptain
-                    ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 cursor-default'
-                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+              {/* Warning Notice Box */}
+              <div
+                className={`p-3 rounded-xl border text-[11px] leading-relaxed ${
+                  isWildcard
+                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-800 dark:text-indigo-200'
+                    : hasFreeTransfer
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-900 dark:text-emerald-200'
+                    : 'bg-rose-500/10 border-rose-500/30 text-rose-900 dark:text-rose-200'
                 }`}
               >
-                <Crown className="w-4 h-4 text-amber-500" />
-                <span>{isCaptain ? 'Captain (C)' : 'Make Captain'}</span>
-              </button>
-            )}
+                {isWildcard ? (
+                  <>
+                    <strong className="block font-black mb-0.5 text-indigo-600 dark:text-indigo-400">
+                      ✨ Wildcard გააქტიურებულია:
+                    </strong>
+                    ეს ტრანსფერი სრულიად უფასოა და არ დააკლდება ქულები თქვენს გუნდს (0 ჯარიმა).
+                  </>
+                ) : hasFreeTransfer ? (
+                  <>
+                    <strong className="block font-black mb-0.5 text-emerald-700 dark:text-emerald-300">
+                      🟢 უფასო ტრანსფერის გამოყენება:
+                    </strong>
+                    თქვენ გაქვთ <strong>{freeTransfersCount} უფასო ტრანსფერი</strong>. ამ მოთამაშის შეცვლით გამოიყენებთ <strong>1 უფასო ტრანსფერს</strong> (დაგრჩებათ <strong>{freeTransfersCount - 1} FT</strong>, 0 ქულა ჯარიმა).
+                  </>
+                ) : (
+                  <>
+                    <strong className="block font-black mb-0.5 text-rose-600 dark:text-rose-400">
+                      ⚠️ ყურადღება — -4 ქულა ჯარიმა!
+                    </strong>
+                    თქვენ ამოგეწურათ უფასო ტრანსფერები (<strong>0 FT დარჩენილი</strong>). ამ მოთამაშის შეცვლა დაგიჯდებათ <strong>-4 ქულა</strong> თქვენი საერთო ფენტეზი ქულებიდან!
+                  </>
+                )}
+              </div>
 
-            {/* Make Vice Captain (Only for Starters) */}
-            {isStarter && (
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowTransferConfirm(false)}
+                  className="flex-1 py-2 px-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-200/80 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                >
+                  გაუქმება / Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleProceedTransfer}
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
+                    !hasFreeTransfer && !isWildcard
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-emerald-500/25'
+                  }`}
+                >
+                  <span>გადასვლა →</span>
+                  <span className="text-[10px] font-mono opacity-80">
+                    {isWildcard ? '(0 pts)' : hasFreeTransfer ? '(1 FT)' : '(-4 pts)'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2 mt-3">
+              {/* Substitute / Swap Button */}
               <button
-                onClick={handleMakeViceCaptain}
-                disabled={isViceCaptain || isCaptain}
+                onClick={handleStartSwap}
+                disabled={isSquadLocked}
                 className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
-                  isViceCaptain
-                    ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30 cursor-default'
-                    : isCaptain
+                  isSquadLocked
                     ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
                     : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
                 }`}
               >
-                <ShieldAlert className="w-4 h-4 text-sky-500" />
-                <span>{isViceCaptain ? 'Vice Captain (V)' : 'Make Vice C'}</span>
+                <ArrowLeftRight className="w-4 h-4 text-amber-500" />
+                <span>Substitute</span>
               </button>
-            )}
-          </div>
+
+              {/* Transfer Button */}
+              <button
+                onClick={handleTransfer}
+                disabled={isSquadLocked}
+                className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl border transition-colors ${
+                  isSquadLocked
+                    ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
+                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <div className="flex items-center space-x-1.5 font-bold text-xs">
+                  <ArrowRight className="w-3.5 h-3.5 text-sky-500" />
+                  <span>Transfer Out</span>
+                </div>
+                <span
+                  className={`text-[9.5px] font-mono font-black mt-0.5 ${
+                    isWildcard
+                      ? 'text-indigo-500'
+                      : hasFreeTransfer
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-amber-600 dark:text-amber-400'
+                  }`}
+                >
+                  {isWildcard ? 'Wildcard (Free)' : hasFreeTransfer ? `1 FT (${freeTransfersCount} left)` : '⚠️ -4 pts hit'}
+                </span>
+              </button>
+
+              {/* Make Captain (Only for Starters) */}
+              {isStarter && (
+                <button
+                  onClick={handleMakeCaptain}
+                  disabled={isCaptain}
+                  className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                    isCaptain
+                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 cursor-default'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  <Crown className="w-4 h-4 text-amber-500" />
+                  <span>{isCaptain ? 'Captain (C)' : 'Make Captain'}</span>
+                </button>
+              )}
+
+              {/* Make Vice Captain (Only for Starters) */}
+              {isStarter && (
+                <button
+                  onClick={handleMakeViceCaptain}
+                  disabled={isViceCaptain || isCaptain}
+                  className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                    isViceCaptain
+                      ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30 cursor-default'
+                      : isCaptain
+                      ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
+                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                  }`}
+                >
+                  <ShieldAlert className="w-4 h-4 text-sky-500" />
+                  <span>{isViceCaptain ? 'Vice Captain (V)' : 'Make Vice C'}</span>
+                </button>
+              )}
+            </div>
+          )
         ) : (
           <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">
             Lineup substitutions, captaincy, and transfers are only editable on the current gameweek.

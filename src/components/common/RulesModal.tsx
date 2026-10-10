@@ -17,6 +17,7 @@ import {
   Trophy,
   SlidersHorizontal,
   ChevronDown,
+  ArrowLeftRight,
 } from 'lucide-react';
 import { UPDATE_NOTES, UpdateItem } from '../../data/updateNotes';
 
@@ -486,6 +487,129 @@ export const RulesModal: React.FC<RulesModalProps> = ({
                         </>
                       )}
                     </p>
+                  </div>
+
+                  {/* 5. Transfers & Free Transfer Accumulation Rules */}
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                      <ArrowLeftRight className="w-4 h-4" />
+                      <span>{lang === 'geo' ? '5. ტრანსფერები და უფასო ტრანსფერების სისტემა' : '5. Transfers & Free Transfer Rules'}</span>
+                    </h3>
+
+                    {/* Core Rules Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-1">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                          {lang === 'geo' ? '🔄 1 უფასო ტრანსფერი' : '🔄 1 Free Transfer'}
+                        </span>
+                        <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                          {lang === 'geo'
+                            ? 'თითოეულ ტურში გეძლევათ 1 უფასო ტრანსფერი (FT).'
+                            : 'Every manager receives 1 free transfer per gameweek.'}
+                        </p>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-1">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                          {lang === 'geo' ? '📦 დაგროვება (Rollover)' : '📦 Carryover (Rollover)'}
+                        </span>
+                        <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                          {lang === 'geo'
+                            ? 'გამოუყენებელი ტრანსფერი გადადის მომდევნო ტურში.'
+                            : 'Unused free transfers carry over to the next gameweek.'}
+                        </p>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-1">
+                        <span className="font-bold text-slate-800 dark:text-slate-200 block">
+                          {lang === 'geo' ? '🛑 მაქსიმუმ 3 FT ლიმიტი' : '🛑 Max Cap: 3 FT'}
+                        </span>
+                        <p className="text-[10px] text-slate-600 dark:text-slate-400 leading-relaxed">
+                          {lang === 'geo'
+                            ? 'უფასო ტრანსფერების ბალანსი არასდროს აღემატება 3-ს.'
+                            : 'The balance of free transfers can never exceed 3.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Penalty & Timing Information */}
+                    <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 space-y-1.5 text-[11px]">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-rose-700 dark:text-rose-300">
+                          {lang === 'geo' ? '⚠️ დამატებითი ტრანსფერების ჯარიმა: -4 ქულა' : '⚠️ Extra Transfer Penalty: -4 Points'}
+                        </span>
+                        <span className="font-mono font-black text-rose-600 dark:text-rose-400">-4 pts / extra</span>
+                      </div>
+                      <p className="text-[10px] text-slate-700 dark:text-slate-300 leading-relaxed">
+                        {lang === 'geo'
+                          ? 'როდესაც მოთამაშეს შეცვლით, პირველ რიგში იხარჯება არსებული უფასო ტრანსფერები. უფასო ტრანსფერების ამოწურვის შემდეგ, ყოველი დამატებითი ტრანსფერი ჩამოგაჭრით -4 ქულას საერთო რეიტინგში. ტრანსფერის ჯარიმა აკლდება მხოლოდ საერთო ქულებს და არასდროს ცვლის კონკრეტული ტურის მატჩის ქულებს.'
+                          : 'Transfers consume available free transfers first. If no free transfers remain, each additional transfer costs -4 points from your overall fantasy score. Transfer penalties affect overall standings only, never individual gameweek scores.'}
+                      </p>
+                    </div>
+
+                    {/* Concrete Rule Examples */}
+                    <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 space-y-2">
+                      <span className="font-bold text-slate-800 dark:text-slate-200 block text-[11px]">
+                        {lang === 'geo' ? '💡 პრაქტიკული მაგალითები:' : '💡 Official Rule Examples:'}
+                      </span>
+                      <ul className="space-y-1.5 text-[10.5px] text-slate-600 dark:text-slate-400">
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 font-bold">•</span>
+                          <span>
+                            <strong className="text-slate-800 dark:text-slate-200">
+                              {lang === 'geo' ? 'GW1 → GW2:' : 'GW1 → GW2:'}
+                            </strong>{' '}
+                            {lang === 'geo'
+                              ? 'დაიწყეთ GW1 1 FT-ით. თუ არ გამოიყენეთ, GW2-ში იწყებთ 2 უფასო ტრანსფერით!'
+                              : 'Start GW1 with 1 FT. Use none: start GW2 with 2 free transfers!'}
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-500 font-bold">•</span>
+                          <span>
+                            <strong className="text-slate-800 dark:text-slate-200">
+                              {lang === 'geo' ? 'GW2 → GW3:' : 'GW2 → GW3:'}
+                            </strong>{' '}
+                            {lang === 'geo'
+                              ? 'დაიწყეთ GW2 2 FT-ით. თუ არ გამოიყენეთ, GW3-ში იწყებთ 3 უფასო ტრანსფერით!'
+                              : 'Start GW2 with 2 FT. Use none: start GW3 with 3 free transfers!'}
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 font-bold">•</span>
+                          <span>
+                            <strong className="text-slate-800 dark:text-slate-200">
+                              {lang === 'geo' ? '3 FT ლიმიტი:' : '3 FT Cap:'}
+                            </strong>{' '}
+                            {lang === 'geo'
+                              ? 'დაიწყეთ ტური 3 FT-ით. თუ არცერთს არ გამოიყენებთ, მომდევნო ტურშიც დარჩება 3 FT (ლიმიტი).'
+                              : 'Start a gameweek with 3 FT. Use none: remain capped at 3 for the next gameweek.'}
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-sky-500 font-bold">•</span>
+                          <span>
+                            <strong className="text-slate-800 dark:text-slate-200">
+                              {lang === 'geo' ? '2 ტრანსფერის გაკეთება:' : 'Making 2 Transfers:'}
+                            </strong>{' '}
+                            {lang === 'geo'
+                              ? 'თუ გაქვთ 2 FT და შეცვლით 2 მოთამაშეს — ორივე ტრანსფერი უფასოა (0 ჯარიმა) და დაგრჩებათ 0 FT.'
+                              : 'Start with 2 FT and make 2 transfers: finish with 0 FT remaining and 0 point penalty.'}
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-rose-500 font-bold">•</span>
+                          <span>
+                            <strong className="text-slate-800 dark:text-slate-200">
+                              {lang === 'geo' ? 'ჯარიმა (Hits):' : 'Penalties (Hits):'}
+                            </strong>{' '}
+                            {lang === 'geo'
+                              ? 'თუ გაქვთ 1 FT და შეცვლით 3 მოთამაშეს — 1 უფასოა, დარჩენილი 2 კი დაჯარიმდება -4 და -4 ქულით = სულ -8 ქულა.'
+                              : 'Start with 1 FT and make 3 transfers: 1 free, 2 excess at -4 pts each = -8 total overall points.'}
+                          </span>
+                        </li>
+                      </ul>
+                    </div>
                   </div>
                 </>
               ) : (

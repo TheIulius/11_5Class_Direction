@@ -58,6 +58,7 @@ export const TransfersView: React.FC = () => {
   // Selected player for replacement / transfer
   const [outPlayerId, setOutPlayerId] = useState<string | null>(transferOutPlayerId || null);
   const [inPlayerId, setInPlayerId] = useState<string | null>(null);
+  const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
 
   // Filters & Search
   const [positionFilter, setPositionFilter] = useState<Position | 'ALL'>('ALL');
@@ -366,56 +367,297 @@ export const TransfersView: React.FC = () => {
             initial={{ opacity: 0, y: 20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-20 left-4 right-4 max-w-md mx-auto z-40 p-3.5 rounded-2xl bg-white/95 dark:bg-[#0c121e]/95 backdrop-blur-2xl border border-sky-400/50 dark:border-emerald-500/40 shadow-2xl text-slate-900 dark:text-white"
+            className="fixed bottom-20 left-4 right-4 max-w-lg mx-auto z-40 p-3.5 sm:p-4 rounded-3xl bg-white/95 dark:bg-[#0c121e]/95 backdrop-blur-2xl border border-sky-400/50 dark:border-emerald-500/40 shadow-2xl text-slate-900 dark:text-white"
           >
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <div className="min-w-0">
-                <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold block">1-for-1 Transfer</span>
-                <div className="flex items-center gap-1.5 font-bold truncate">
-                  <span className="text-rose-500 dark:text-rose-400 truncate">{outPlayer.webName}</span>
-                  <ArrowLeftRight className="w-3.5 h-3.5 text-sky-500 dark:text-emerald-400 flex-shrink-0" />
-                  <span className="text-emerald-600 dark:text-emerald-400 truncate">{inPlayer.webName}</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <div className="min-w-0">
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-extrabold block tracking-wider">
+                    1-for-1 Transfer
+                  </span>
+                  <div className="flex items-center gap-1.5 font-bold truncate mt-0.5">
+                    <span className="text-rose-500 dark:text-rose-400 truncate">{outPlayer.webName}</span>
+                    <ArrowLeftRight className="w-3.5 h-3.5 text-sky-500 dark:text-emerald-400 flex-shrink-0" />
+                    <span className="text-emerald-600 dark:text-emerald-400 truncate">{inPlayer.webName}</span>
+                  </div>
+                  <div className="text-[11px] font-mono tabular-nums text-slate-600 dark:text-slate-300 mt-0.5">
+                    <span>ბანკი: £{potentialBank.toFixed(1)}m</span>
+                  </div>
                 </div>
-                <div className="text-[11px] font-mono tabular-nums text-slate-600 dark:text-slate-300 mt-0.5 flex items-center gap-1 flex-wrap">
-                  <span>Bank: £{potentialBank.toFixed(1)}m</span>
-                  {potentialBank < 0 ? (
-                    <span className="text-rose-500 dark:text-rose-400 font-bold">(Over Budget)</span>
-                  ) : squad.activeChip === 'wildcard' ? (
-                    <span className="text-indigo-600 dark:text-indigo-400 font-bold">• Wildcard (Free)</span>
-                  ) : (squad.freeTransfers ?? 0) > 0 ? (
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">• Free Transfer ({squad.freeTransfers} left)</span>
-                  ) : (
-                    <span className="text-amber-600 dark:text-amber-400 font-bold">• -4 pts hit</span>
-                  )}
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => {
+                      setOutPlayerId(null);
+                      setInPlayerId(null);
+                      setShowConfirmModal(false);
+                    }}
+                    className="px-3 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => setShowConfirmModal(true)}
+                    disabled={potentialBank < 0 || isSquadLocked}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer ${
+                      potentialBank < 0 || isSquadLocked
+                        ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed shadow-none'
+                        : (squad.freeTransfers ?? 0) === 0 && squad.activeChip !== 'wildcard'
+                        ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
+                        : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-emerald-500/25'
+                    }`}
+                  >
+                    <span>Confirm</span>
+                    <span className="text-[10px] font-mono opacity-85">
+                      {squad.activeChip === 'wildcard'
+                        ? '(0 pts)'
+                        : (squad.freeTransfers ?? 0) > 0
+                        ? '(1 FT)'
+                        : '(-4 pts)'}
+                    </span>
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                <button
-                  onClick={() => {
-                    setOutPlayerId(null);
-                    setInPlayerId(null);
-                  }}
-                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleConfirmTransfer}
-                  disabled={potentialBank < 0 || isSquadLocked}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
-                    potentialBank < 0 || isSquadLocked
-                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
-                      : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-md'
-                  }`}
-                >
-                  Confirm
-                </button>
+              {/* Prominent Warning Note */}
+              <div
+                className={`p-2.5 rounded-2xl border text-[11px] leading-relaxed flex items-center gap-2 ${
+                  potentialBank < 0
+                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
+                    : squad.activeChip === 'wildcard'
+                    ? 'bg-indigo-500/10 border-indigo-500/30 text-indigo-800 dark:text-indigo-300'
+                    : (squad.freeTransfers ?? 0) > 0
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-900 dark:text-emerald-300'
+                    : 'bg-amber-500/15 border-amber-500/30 text-amber-900 dark:text-amber-200'
+                }`}
+              >
+                {potentialBank < 0 ? (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
+                    <span><strong>ბიუჯეტის გადაჭარბება:</strong> თანხა არ არის საკმარისი (£{potentialBank.toFixed(1)}m).</span>
+                  </>
+                ) : squad.activeChip === 'wildcard' ? (
+                  <>
+                    <Sparkles className="w-4 h-4 text-indigo-500 shrink-0" />
+                    <span><strong>Wildcard აქტიურია:</strong> ტრანსფერი უფასოა (0 ქულა ჯარიმა).</span>
+                  </>
+                ) : (squad.freeTransfers ?? 0) > 0 ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>
+                      <strong>1 უფასო ტრანსფერი:</strong> დაიხარჯება 1 FT (დაგრჩებათ {(squad.freeTransfers ?? 0) - 1} FT, 0 ქულა ჯარიმა).
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <AlertCircle className="w-4 h-4 text-amber-500 shrink-0 animate-pulse" />
+                    <span>
+                      <strong>ყურადღება (-4 ქულა):</strong> 0 უფასო ტრანსფერი! ეს ტრანსფერი ჩამოგაჭრით -4 ქულას საერთო რეიტინგში.
+                    </span>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Transfer Confirmation Modal */}
+      <AnimatePresence>
+        {showConfirmModal && outPlayer && inPlayer && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in select-none"
+            onClick={() => setShowConfirmModal(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4 text-slate-900 dark:text-white"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 rounded-xl bg-sky-500/10 text-sky-500 dark:text-sky-400">
+                    <ArrowLeftRight className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black uppercase tracking-wider">
+                      ტრანსფერის დადასტურება
+                    </h3>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Gameweek {currentGW} • {squad.teamName}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmModal(false)}
+                  className="p-1.5 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Player Swap Comparison */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* Out Player */}
+                <div className="p-3 rounded-2xl bg-rose-500/5 dark:bg-rose-500/10 border border-rose-500/20 text-center space-y-1">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-rose-500 block">
+                    გადის (OUT)
+                  </span>
+                  <div className="flex justify-center py-1">
+                    <KitJersey clubId={outPlayer.clubId} position={outPlayer.position} className="w-8 h-8 drop-shadow-xs" />
+                  </div>
+                  <span className="font-black text-xs block text-slate-900 dark:text-white truncate">
+                    {outPlayer.webName}
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block">
+                    £{outPlayer.cost.toFixed(1)}m • {outPlayer.position}
+                  </span>
+                </div>
+
+                {/* In Player */}
+                <div className="p-3 rounded-2xl bg-emerald-500/5 dark:bg-emerald-500/10 border border-emerald-500/20 text-center space-y-1">
+                  <span className="text-[9px] font-black uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">
+                    შედის (IN)
+                  </span>
+                  <div className="flex justify-center py-1">
+                    <KitJersey clubId={inPlayer.clubId} position={inPlayer.position} className="w-8 h-8 drop-shadow-xs" />
+                  </div>
+                  <span className="font-black text-xs block text-slate-900 dark:text-white truncate">
+                    {inPlayer.webName}
+                  </span>
+                  <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono block">
+                    £{inPlayer.cost.toFixed(1)}m • {inPlayer.position}
+                  </span>
+                </div>
+              </div>
+
+              {/* Financial Balance Summary */}
+              <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 text-xs">
+                <span className="text-slate-600 dark:text-slate-400 font-medium">დარჩენილი ბიუჯეტი (Bank):</span>
+                <span className={`font-mono font-black ${potentialBank < 0 ? 'text-rose-500' : 'text-slate-900 dark:text-white'}`}>
+                  £{potentialBank.toFixed(1)}m
+                </span>
+              </div>
+
+              {/* Explicit Cost & Points Hit Warning Notice */}
+              <div
+                className={`p-3.5 rounded-2xl border text-[11.5px] leading-relaxed ${
+                  potentialBank < 0
+                    ? 'bg-rose-500/15 border-rose-500/35 text-rose-800 dark:text-rose-200'
+                    : squad.activeChip === 'wildcard'
+                    ? 'bg-indigo-500/15 border-indigo-500/35 text-indigo-900 dark:text-indigo-200'
+                    : (squad.freeTransfers ?? 0) > 0
+                    ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-950 dark:text-emerald-200'
+                    : 'bg-amber-500/20 border-amber-500/40 text-amber-950 dark:text-amber-200'
+                }`}
+              >
+                {potentialBank < 0 ? (
+                  <>
+                    <strong className="block font-black text-rose-600 dark:text-rose-400 mb-0.5">
+                      ⛔ არასაკმარისი ბიუჯეტი:
+                    </strong>
+                    მოთამაშის ფასი აღემატება თქვენს ბიუჯეტს. ტრანსფერის განხორციელება შეუძლებელია.
+                  </>
+                ) : squad.activeChip === 'wildcard' ? (
+                  <>
+                    <strong className="block font-black text-indigo-600 dark:text-indigo-400 mb-0.5">
+                      ✨ Wildcard გააქტიურებულია (0 ქულა):
+                    </strong>
+                    ეს ტრანსფერი სრულიად უფასოა და არ აკლდება თქვენს უფასო ტრანსფერების ბალანსს ან ქულებს.
+                  </>
+                ) : (squad.freeTransfers ?? 0) > 0 ? (
+                  <>
+                    <strong className="block font-black text-emerald-700 dark:text-emerald-300 mb-0.5">
+                      🟢 1 უფასო ტრანსფერი (0 ქულა ჯარიმა):
+                    </strong>
+                    თქვენ გაქვთ <strong>{squad.freeTransfers} უფასო ტრანსფერი</strong>. ამ ტრანსფერის დადასტურებით დაიხარჯება 1 უფასო ტრანსფერი და დაგრჩებათ <strong>{(squad.freeTransfers ?? 0) - 1} FT</strong>.
+                  </>
+                ) : (
+                  <>
+                    <strong className="block font-black text-amber-700 dark:text-amber-300 mb-0.5 flex items-center gap-1">
+                      <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>⚠️ გაფრთხილება — -4 ქულა ჯარიმა!</span>
+                    </strong>
+                    თქვენ გაქვთ <strong>0 უფასო ტრანსფერი</strong>. ამ ტრანსფერის განხორციელება დაგიჯდებათ <strong>-4 ქულა</strong> თქვენი საერთო ფენტეზი რეიტინგიდან!
+                  </>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmModal(false)}
+                  className="flex-1 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/15 transition-colors cursor-pointer"
+                >
+                  გაუქმება / Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowConfirmModal(false);
+                    handleConfirmTransfer();
+                  }}
+                  disabled={potentialBank < 0 || isSquadLocked}
+                  className={`flex-1 py-2.5 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
+                    potentialBank < 0 || isSquadLocked
+                      ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed shadow-none'
+                      : (squad.freeTransfers ?? 0) === 0 && squad.activeChip !== 'wildcard'
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
+                      : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-emerald-500/25'
+                  }`}
+                >
+                  <span>დადასტურება</span>
+                  <span className="text-[10px] font-mono opacity-80">
+                    {squad.activeChip === 'wildcard' ? '(0 pts)' : (squad.freeTransfers ?? 0) > 0 ? '(1 FT)' : '(-4 pts)'}
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Outgoing Player Notice Strip */}
+      {outPlayer && (
+        <div className="w-full max-w-[1400px] mx-auto px-3 sm:px-6 pt-2">
+          <div className="p-2.5 sm:p-3 rounded-2xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200 dark:border-sky-800/60 flex items-center justify-between gap-3 shadow-xs">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="p-1.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0">
+                <ArrowLeftRight className="w-4 h-4" />
+              </div>
+              <div className="text-xs min-w-0">
+                <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold block uppercase">
+                  მოთამაშის შემცვლელის შერჩევა (Replacing Player)
+                </span>
+                <span className="font-extrabold text-slate-900 dark:text-white truncate">
+                  {outPlayer.webName} ({outPlayer.position} • £{outPlayer.cost.toFixed(1)}m)
+                </span>
+                <span className="text-[11px] ml-2 font-mono font-black text-sky-600 dark:text-sky-400">
+                  {squad.activeChip === 'wildcard'
+                    ? '• Wildcard (0 pts)'
+                    : (squad.freeTransfers ?? 0) > 0
+                    ? `• 1 FT (${squad.freeTransfers} დარჩა)`
+                    : '• ⚠️ -4 ქულა ჯარიმა'}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setOutPlayerId(null);
+                setInPlayerId(null);
+              }}
+              className="px-2.5 py-1 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
+            >
+              ✕ გაუქმება
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ========================================================================= */}
       {/* SIDE-BY-SIDE LAYOUT: My Team Selection (Left) & Player Market (Right)     */}
