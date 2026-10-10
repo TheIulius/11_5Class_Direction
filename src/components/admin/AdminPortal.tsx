@@ -7,6 +7,7 @@ import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { IOSSwitch } from '../common/IOSSwitch';
 import { CommandPalette } from './CommandPalette';
 import { MatchDayAdmin } from './MatchDayAdmin';
+import { UndoTransfersAdmin } from './UndoTransfersAdmin';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Wrench,
@@ -61,7 +62,7 @@ import {
 } from '../../services/api';
 import confetti from 'canvas-confetti';
 
-export type LifecycleStep = 1 | 2 | 3 | 4;
+export type LifecycleStep = 1 | 2 | 3 | 4 | 5;
 
 export const AdminPortal: React.FC = () => {
   const {
@@ -471,9 +472,9 @@ export const AdminPortal: React.FC = () => {
         </div>
       )}
 
-      {/* 2. 4-STEP GAMEWEEK LIFECYCLE STEPPER */}
+      {/* 2. 5-STEP GAMEWEEK LIFECYCLE STEPPER */}
       <div className="max-w-5xl mx-auto px-3 sm:px-6 pt-4 pb-2">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5 p-1 rounded-2xl bg-zinc-900 border border-white/10 text-xs select-none">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-1 rounded-2xl bg-zinc-900 border border-white/10 text-xs select-none">
           {/* Step 1: Setup Deadline */}
           <button
             onClick={() => setActiveStep(1)}
@@ -535,6 +536,22 @@ export const AdminPortal: React.FC = () => {
             <div className="text-left truncate">
               <span className="block text-[9px] uppercase tracking-wider opacity-75 font-mono">Step 4</span>
               <span className="truncate block">Finalize & Advance</span>
+            </div>
+          </button>
+
+          {/* Step 5: Undo Transfers (GW1 Rollback) */}
+          <button
+            onClick={() => setActiveStep(5)}
+            className={`p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
+              activeStep === 5
+                ? 'bg-amber-400 text-slate-950 shadow-md font-black'
+                : 'text-zinc-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <RotateCcw className="w-4 h-4 flex-shrink-0" />
+            <div className="text-left truncate">
+              <span className="block text-[9px] uppercase tracking-wider opacity-75 font-mono">Step 5</span>
+              <span className="truncate block">Undo Transfers</span>
             </div>
           </button>
         </div>
@@ -1198,6 +1215,15 @@ export const AdminPortal: React.FC = () => {
                 </span>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ========================================================= */}
+        {/* STEP 5: UNDO TRANSFERS (GW1 ROLLBACK FOR MANAGERS)       */}
+        {/* ========================================================= */}
+        {activeStep === 5 && (
+          <div className="animate-fade-in">
+            <UndoTransfersAdmin />
           </div>
         )}
       </main>

@@ -3331,6 +3331,153 @@ app.post('/api/admin/user/reset', (req: Request, res: Response) => {
   });
 });
 
+/**
+ * Helper to compute the live breakdown of all managers who made GW2 transfers
+ */
+export function getLiveTransfersBreakdown(data: any) {
+  const managers = Object.values(data.managers || {}) as any[];
+  const list: any[] = [];
+  const allEligible: any[] = [];
+
+  for (const m of managers) {
+    const squad = m.squad;
+    if (!squad) continue;
+
+    const gw1Squad = squad.gameweekSquads?.['1'] || [];
+    const hadGW1 = Array.isArray(gw1Squad) && gw1Squad.length === 9;
+    const currentPlayers = squad.players || [];
+
+    let netTransfers = 0;
+    if (hadGW1 && currentPlayers.length === 9) {
+      const gw1Ids = new Set(gw1Squad.map((p: any) => p.playerId));
+      netTransfers = currentPlayers.filter((p: any) => !gw1Ids.has(p.playerId)).length;
+    }
+    const recorded = Number(squad.transfersMadeThisGW || 0);
+
+    const gw1Calc = hadGW1
+      ? calculateGameweekSquadPoints(
+          gw1Squad,
+          data.players,
+          1,
+          squad.gameweekChips?.['1'] || null,
+          0,
+          1,
+          data.fixtures,
+          true
+        )
+      : { grossPoints: 0 };
+
+    const summary = {
+      id: m.id,
+      managerName: m.managerName,
+      teamName: m.teamName,
+      grade: m.grade || data.users?.[m.id]?.grade,
+      parallel: m.parallel || data.users?.[m.id]?.parallel,
+      realName: m.realName || data.users?.[m.id]?.realName,
+      chip: squad.activeChip || 'none',
+      gw1Gross: gw1Calc.grossPoints,
+      netDiff: netTransfers,
+      recordedTransfers: recorded,
+      startFT: squad.startFreeTransfers ?? (hadGW1 ? 2 : 1),
+      remainingFT: squad.freeTransfers ?? (hadGW1 ? 2 : 1),
+      penalty: squad.accumulatedTransferPenalties || 0,
+      totalPoints: m.totalPoints ?? gw1Calc.grossPoints,
+      gwPoints: m.gwPoints ?? 0,
+      hadGW1,
+      canReset: hadGW1 && (netTransfers > 0 || recorded > 0 || (squad.accumulatedTransferPenalties || 0) > 0 || Boolean(squad.activeChip)),
+      isAtGW1Baseline: hadGW1 && netTransfers === 0 && recorded === 0 && (squad.accumulatedTransferPenalties || 0) === 0 && !squad.activeChip,
+    };
+
+    if (hadGW1) {
+      allEligible.push(summary);
+    }
+
+    if (netTransfers > 0 || recorded > 0 || (squad.accumulatedTransferPenalties || 0) > 0 || squad.activeChip) {
+      list.push(summary);
+    }
+  }
+
+  list.sort((a, b) => b.penalty - a.penalty || b.recordedTransfers - a.recordedTransfers || b.totalPoints - a.totalPoints);
+  allEligible.sort((a, b) => a.managerName.localeCompare(b.managerName));
+
+  return { list, allEligible };
+}
+
+// 11i. Developer Admin: Live Breakdown of Managers who made GW2 Transfers
+app.get('/api/admin/transfers-breakdown', (req: Request, res: Response) => {
+  const data = db.getData();
+  const breakdown = getLiveTransfersBreakdown(data);
+  res.json({ success: true, ...breakdown });
+});
+
+// 11j. Developer Admin: Reset Individual Manager's Transfers Back to GW1 Locked State
+app.post('/api/admin/manager/reset-to-gw1', (req: Request, res: Response) => {
+  const { managerId } = req.body;
+  if (!managerId) {
+    return res.status(400).json({ error: 'managerId is required' });
+  }
+
+  const data = db.getData();
+  const manager = data.managers?.[managerId];
+  if (!manager || !manager.squad) {
+    return res.status(404).json({ error: 'Manager not found' });
+  }
+
+  const gw1Squad = manager.squad.gameweekSquads?.['1'];
+  if (!gw1Squad || !Array.isArray(gw1Squad) || gw1Squad.length !== 9) {
+    return res.status(400).json({
+      error: `Manager ${manager.managerName} (${manager.teamName}) has no valid GW1 locked lineup snapshot.`,
+    });
+  }
+
+  // 1. Restore exact locked GW1 players (starters, benchOrder, captain, vice-captain)
+  manager.squad.players = JSON.parse(JSON.stringify(gw1Squad));
+
+  // 2. Recalculate bank based on restored squad
+  const totalCost = manager.squad.players.reduce(
+    (sum: number, sp: any) => sum + (data.players?.[sp.playerId]?.cost || 0),
+    0
+  );
+  manager.squad.bank = Math.max(0, Math.round((INITIAL_BUDGET - totalCost) * 10) / 10);
+
+  // 3. Reset transfer counts and restore 2 Free Transfers for GW2 (Rule 5A & Rule 6)
+  manager.squad.transfersMadeThisGW = 0;
+  manager.squad.startFreeTransfers = 2;
+  manager.squad.freeTransfers = 2;
+
+  // 4. Reset GW2 transfer penalties to 0
+  if (!manager.squad.gwTransferPenalties) manager.squad.gwTransferPenalties = {};
+  manager.squad.gwTransferPenalties[2] = 0;
+  manager.squad.gwTransferPenalties[1] = 0;
+  manager.squad.accumulatedTransferPenalties = 0;
+
+  // 5. Revert any chips activated in GW2
+  if (manager.squad.activeChip) {
+    const chip = manager.squad.activeChip;
+    manager.squad.activeChip = null;
+    if (manager.squad.usedChips && manager.squad.gameweekChips?.['1'] !== chip) {
+      manager.squad.usedChips[chip] = false;
+    }
+  }
+  if (manager.squad.gameweekChips) {
+    delete manager.squad.gameweekChips[2];
+  }
+
+  // 6. Recalculate league points, ranks, and totalPoints
+  recalculateAllManagersLeaguePoints(data);
+
+  db.save(`Reset manager ${manager.managerName} (${manager.teamName}) transfers back to GW1 locked state`);
+  scheduleAutoSyncToGitHub(`Admin reset ${manager.managerName} transfers to GW1 state`, true);
+
+  const breakdown = getLiveTransfersBreakdown(data);
+  res.json({
+    success: true,
+    message: `${manager.managerName} (${manager.teamName}) წარმატებით დაბრუნდა GW1-ის შემადგენლობაზე, ქულებსა (სრული ${manager.totalPoints} ქულა) და 2 უფასო ტრანსფერზე!`,
+    manager,
+    ...breakdown,
+  });
+});
+
 // 12. Create / Join / Delete Mini-League
 app.post('/api/league/create', (req: Request, res: Response) => {
   const { name, managerId } = req.body;

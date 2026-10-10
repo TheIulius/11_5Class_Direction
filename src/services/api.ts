@@ -634,3 +634,30 @@ export async function adminRemovePlayerPhotoApi(playerId: string) {
   return safeJson(res, 'ფოტოს წაშლა ვერ მოხერხდა (Failed to remove player photo)');
 }
 
+export async function adminFetchTransfersBreakdownApi(): Promise<{
+  success: boolean;
+  list: any[];
+  allEligible: any[];
+}> {
+  const res = await fetch(`${API_BASE}/api/admin/transfers-breakdown`, {
+    headers: getAuthHeaders(),
+  });
+  return safeJson(res, 'ტრანსფერების სიის მიღება ვერ მოხერხდა (Failed to fetch transfers breakdown)');
+}
+
+export async function adminResetManagerToGW1Api(managerId: string): Promise<{
+  success: boolean;
+  message: string;
+  manager: any;
+  list: any[];
+  allEligible: any[];
+}> {
+  const res = await fetch(`${API_BASE}/api/admin/manager/reset-to-gw1`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ managerId }),
+  });
+  return safeJson(res, 'მენეჯერის GW1-ზე დაბრუნება ვერ მოხერხდა (Failed to reset manager to GW1)');
+}
+
+
