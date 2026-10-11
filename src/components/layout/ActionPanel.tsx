@@ -4,17 +4,14 @@ import { ChipType } from '../../types/fpl';
 import { TripleCaptainIcon, BenchBoostIcon, WildcardIcon } from '../icons/ChipIcons';
 import {
   Zap,
-  CheckCircle,
   AlertCircle,
   Lock,
   Clock,
   Award,
-  Loader2,
   ArrowRight,
   ShieldAlert,
 } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
-import confetti from 'canvas-confetti';
 
 interface ActionPanelProps {
   selectedGW: number;
@@ -39,7 +36,6 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     activateChip,
     teamValue,
     freeTransfersRemaining,
-    saveSquad,
     setActiveTab,
     isSquadLocked,
     isReferee,
@@ -51,9 +47,6 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     authUser,
   } = useFPL();
 
-  const [isSaving, setIsSaving] = React.useState(false);
-  const [saveSuccess, setSaveSuccess] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const [timeLeft, setTimeLeft] = React.useState<string>('');
 
   React.useEffect(() => {
@@ -95,40 +88,6 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
     { id: 'bench_boost', label: 'Bench Boost', icon: BenchBoostIcon },
     { id: 'wildcard', label: 'Wildcard', icon: WildcardIcon },
   ];
-
-  const handleSaveTeam = async () => {
-    if (!comp.isValid) {
-      setErrorMessage(comp.message || 'Squad incomplete: Need 1 GK, 3 DEF, 3 MID, 2 FWD!');
-      setTimeout(() => setErrorMessage(null), 4000);
-      return;
-    }
-    setIsSaving(true);
-    setErrorMessage(null);
-    try {
-      const res = await saveSquad(undefined, true);
-      if (res.success) {
-        triggerHaptic('success');
-        setSaveSuccess(true);
-        confetti({
-          particleCount: 40,
-          spread: 50,
-          origin: { y: 0.8 },
-          colors: ['#ffffff', '#38bdf8', '#f59e0b'],
-        });
-        setTimeout(() => setSaveSuccess(false), 2500);
-      } else {
-        triggerHaptic('warning');
-        setErrorMessage(res.message || 'Failed to save lineup');
-        setTimeout(() => setErrorMessage(null), 4000);
-      }
-    } catch (err: any) {
-      triggerHaptic('warning');
-      setErrorMessage(err?.message || 'Failed to save lineup to database');
-      setTimeout(() => setErrorMessage(null), 4000);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   return (
     <aside className="hidden lg:flex flex-col w-[320px] xl:w-[340px] h-screen sticky top-0 border-l border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/80 backdrop-blur-2xl z-40 select-none overflow-y-auto p-4 space-y-4 transition-colors">
@@ -394,7 +353,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                       : 'text-slate-400'
                   }`}
                 >
-                  {isActiveInThisGW ? 'ACTIVE' : isUsedInSeason ? 'LOCKED' : 'READY'}
+                  {isActiveInThisGW ? 'ACTIVE' : isUsedInSeason ? 'LOCKED' : 'AVAILABLE'}
                 </span>
               </button>
             );
@@ -402,17 +361,9 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         </div>
       </div>
 
-      {/* Error Message Notice */}
-      {errorMessage && (
-        <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
-          <AlertCircle className="w-4 h-4 shrink-0" />
-          <span>{errorMessage}</span>
-        </div>
-      )}
-
-      {/* Primary Action Button (Clean Luxury Styling) */}
-      <div className="pt-2">
-        {isPastGW ? (
+      {/* Return to current GW button when viewing historical GWs */}
+      {isPastGW && (
+        <div className="pt-2">
           <button
             type="button"
             onClick={() => setSelectedGW(currentGW)}
@@ -421,38 +372,8 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
             <Clock className="w-4 h-4" />
             <span>Return to Current GW {currentGW}</span>
           </button>
-        ) : (
-          <button
-            onClick={handleSaveTeam}
-            disabled={isSaving || !comp.isValid || isSquadLocked}
-            className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-[0.98] ${
-              isSquadLocked
-                ? 'bg-slate-100 dark:bg-slate-800/40 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-800 cursor-not-allowed shadow-none'
-                : !comp.isValid
-                ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 cursor-not-allowed shadow-none'
-                : 'bg-blue-600 hover:bg-blue-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 border border-transparent'
-            }`}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Saving Lineup...</span>
-              </>
-            ) : isSquadLocked ? (
-              <span>Lineups Locked</span>
-            ) : comp.hasPositionChangedPlayers ? (
-              <span>Action Required</span>
-            ) : saveSuccess ? (
-              <>
-                <CheckCircle className="w-4 h-4" />
-                <span>Saved Successfully</span>
-              </>
-            ) : (
-              <span>Save Team Lineup</span>
-            )}
-          </button>
-        )}
-      </div>
+        </div>
+      )}
     </aside>
   );
 };

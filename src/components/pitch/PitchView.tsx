@@ -3,7 +3,7 @@ import { useFPL } from '../../context/FPLContext';
 import { getFormationLayout } from '../../engine/formations';
 import { PlayerCard } from './PlayerCard';
 import { PlayerActionSheet } from './PlayerActionSheet';
-import { X, Sparkles, Shield, UserPlus, Plus, Zap } from 'lucide-react';
+import { X, Sparkles, Shield, UserPlus, Plus } from 'lucide-react';
 
 import { SquadPlayer } from '../../types/fpl';
 import { GameweekCalculationResult } from '../../engine/scoring';
@@ -62,11 +62,6 @@ export const PitchView: React.FC<PitchViewProps> = ({
 
   // Bench slots (strictly 3 outfield reserves)
   const benchSlots = [1, 2, 3];
-
-  const activeChip = readOnly
-    ? (squad.gameweekChips?.[activeGW] || null)
-    : squad.activeChip;
-
 
   // Calculate missing starter placeholder slots if starters < 6
   const getMissingSlots = () => {
@@ -206,12 +201,6 @@ export const PitchView: React.FC<PitchViewProps> = ({
               <Shield className="w-2.5 h-2.5 opacity-70" />
               {layout.isValid ? layout.formationString : 'Incomplete'}
             </span>
-            {activeChip && (
-              <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full backdrop-blur-md border bg-black/30 text-amber-300 border-amber-400/20 flex items-center gap-1">
-                <Zap className="w-2.5 h-2.5 text-amber-400" />
-                {activeChip.replace('_', ' ')}
-              </span>
-            )}
           </div>
 
           {showPoints && (

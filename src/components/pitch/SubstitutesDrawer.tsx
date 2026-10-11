@@ -242,7 +242,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
           }}
           transition={SPRING_CONFIG}
           style={{ willChange: 'transform' }}
-          className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-2 max-w-md mx-auto z-38 h-[200px] rounded-t-[26px] bg-[#121822]/95 backdrop-blur-2xl border-t border-x border-white/10 shadow-lg flex flex-col overflow-hidden select-none pointer-events-auto"
+          className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 w-full z-38 h-[200px] rounded-t-[26px] bg-[#121822]/95 backdrop-blur-2xl border-t border-white/10 shadow-lg flex flex-col overflow-hidden select-none pointer-events-auto"
         >
           {/* Header Handle Bar with touch-action: none */}
           <div
@@ -318,7 +318,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
           }}
           transition={SPRING_CONFIG}
           style={{ willChange: 'transform' }}
-          className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-2 max-w-md mx-auto z-40 h-[400px] rounded-t-[28px] bg-[#17202c]/95 backdrop-blur-2xl border-t border-x border-white/10 shadow-2xl flex flex-col overflow-hidden select-none pointer-events-auto"
+          className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 w-full z-40 h-[400px] rounded-t-[28px] bg-[#17202c]/95 backdrop-blur-2xl border-t border-white/10 shadow-2xl flex flex-col overflow-hidden select-none pointer-events-auto"
         >
           {/* Header Handle Bar with touch-action: none */}
           <div

@@ -41,6 +41,8 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
           className={`flex-1 min-w-0 w-full flex flex-col ${
             isDevMode
               ? 'p-0 pb-12'
+              : activeTab === 'team'
+              ? 'pb-14 lg:pb-6 overflow-hidden lg:overflow-visible'
               : 'pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6'
           }`}
         >

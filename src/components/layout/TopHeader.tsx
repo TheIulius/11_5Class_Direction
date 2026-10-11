@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useFPL } from '../../context/FPLContext';
-import { BookOpen, Sun, Moon, Eye, Check, AlertCircle, ChevronDown } from 'lucide-react';
+import { BookOpen, Sun, Moon, Eye } from 'lucide-react';
 import { hasManagerSeenLatestUpdate } from '../../data/updateNotes';
-import { validateSquadComposition } from '../../engine/scoring';
 import { triggerHaptic } from '../../utils/haptics';
 
 export const TopHeader: React.FC = () => {
@@ -23,7 +22,6 @@ export const TopHeader: React.FC = () => {
   } = useFPL();
 
   const [timeLeft, setTimeLeft] = useState<string>('');
-  const [showStatusDetails, setShowStatusDetails] = useState<boolean>(false);
 
   useEffect(() => {
     if (!deadline) {
@@ -52,12 +50,6 @@ export const TopHeader: React.FC = () => {
     const timer = setInterval(updateCountdown, 1000);
     return () => clearInterval(timer);
   }, [deadline]);
-
-  const comp = useMemo(() => {
-    return validateSquadComposition(squad.players, players, currentGW);
-  }, [squad.players, players, currentGW]);
-
-  const isLineupReady = comp.isValid;
 
   return (
     <header className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 select-none transition-colors">
@@ -112,28 +104,6 @@ export const TopHeader: React.FC = () => {
               <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[170px] sm:max-w-[220px] leading-tight mt-0.5">
                 GW {currentGW} · {authUser?.teamName || squad.teamName}
               </div>
-
-              {/* Status Pill Badge: ✓ Lineup Ready ⌄ */}
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setShowStatusDetails((prev) => !prev);
-                }}
-                className={`inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-[9.5px] font-bold border transition-all cursor-pointer self-start ${
-                  isLineupReady
-                    ? 'bg-emerald-500/10 hover:bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                    : 'bg-rose-500/10 hover:bg-rose-500/15 border-rose-500/30 text-rose-600 dark:text-rose-400'
-                }`}
-              >
-                {isLineupReady ? (
-                  <Check className="w-2.5 h-2.5 text-emerald-500" />
-                ) : (
-                  <AlertCircle className="w-2.5 h-2.5 text-rose-500" />
-                )}
-                <span>{isLineupReady ? 'Lineup Ready' : `Incomplete (${squad.players.length}/9)`}</span>
-                <ChevronDown className="w-2.5 h-2.5 opacity-60 ml-0.5" />
-              </button>
             </div>
           </div>
 
@@ -208,30 +178,6 @@ export const TopHeader: React.FC = () => {
             </span>
           </div>
         </div>
-
-        {/* Optional Dropdown Status Card for Lineup Validation */}
-        {showStatusDetails && (
-          <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-900 dark:text-slate-200 space-y-1.5 shadow-xl animate-in slide-in-from-top-2 duration-150">
-            <div className="flex items-center justify-between pb-1 border-b border-white/10">
-              <span className="font-bold text-white">Lineup Validation Status</span>
-              <button
-                type="button"
-                onClick={() => setShowStatusDetails(false)}
-                className="text-[10px] text-slate-400 hover:text-white"
-              >
-                Close
-              </button>
-            </div>
-            <div className="text-[11px] space-y-0.5">
-              <p className={comp.isValid ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
-                {comp.isValid ? '✓ Full starting 6 and 3 substitutes registered' : `⚠️ ${comp.message}`}
-              </p>
-              <p className="text-slate-400 text-[10.5px]">
-                Rules: 1 GK, 3 DEF, 3 MID, 2 FWD total (6 starters + 3 bench reserves).
-              </p>
-            </div>
-          </div>
-        )}
       </div>
     </header>
   );
