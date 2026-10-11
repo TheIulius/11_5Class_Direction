@@ -1508,7 +1508,8 @@ function recalculateAllManagersLeaguePoints(data: any) {
     // Rule 7: Transfer penalties affect overall fantasy points only,
     // never individual gameweek scores or gameweek rankings.
     const totalPenalties = m.squad.accumulatedTransferPenalties || 0;
-    const overallTotalPoints = cumulativeGrossTotal - totalPenalties;
+    const bonusAdjustment = typeof m.bonusPointsAdjustment === 'number' ? m.bonusPointsAdjustment : 0;
+    const overallTotalPoints = cumulativeGrossTotal - totalPenalties + bonusAdjustment;
 
     const displaySquad = (m.squad.gameweekSquads && m.squad.gameweekSquads[currentGW])
       ? m.squad.gameweekSquads[currentGW]
@@ -3520,6 +3521,249 @@ app.post('/api/admin/remediate-illegal-players', (req: Request, res: Response) =
   res.json({ success: true, modified, message: 'Illegal players remediated and bank refunded successfully.' });
 });
 
+// 11l. Developer Admin: Adjust Manager Bank, Free Transfers, Points, Chips
+app.post('/api/admin/manager/adjust', (req: Request, res: Response) => {
+  const {
+    managerId,
+    bank,
+    bankDelta,
+    freeTransfers,
+    freeTransfersDelta,
+    pointsDelta,
+    activeChip,
+    usedChips,
+  } = req.body;
+
+  if (!managerId) return res.status(400).json({ error: 'managerId is required' });
+
+  const data = db.getData();
+  const manager = data.managers?.[managerId];
+  if (!manager || !manager.squad) return res.status(404).json({ error: 'Manager not found' });
+
+  // 1. Bank adjustments
+  if (typeof bank === 'number') {
+    manager.squad.bank = Math.round(bank * 10) / 10;
+  } else if (typeof bankDelta === 'number') {
+    manager.squad.bank = Math.round(((manager.squad.bank || 0) + bankDelta) * 10) / 10;
+  }
+
+  // 2. Free Transfers adjustments
+  if (typeof freeTransfers === 'number') {
+    manager.squad.freeTransfers = Math.max(0, freeTransfers);
+    manager.squad.startFreeTransfers = Math.max(0, freeTransfers);
+  } else if (typeof freeTransfersDelta === 'number') {
+    manager.squad.freeTransfers = Math.max(0, (manager.squad.freeTransfers || 0) + freeTransfersDelta);
+    manager.squad.startFreeTransfers = Math.max(0, (manager.squad.startFreeTransfers || 0) + freeTransfersDelta);
+  }
+
+  // 3. Points adjustment
+  if (typeof pointsDelta === 'number') {
+    manager.bonusPointsAdjustment = (manager.bonusPointsAdjustment || 0) + pointsDelta;
+  }
+
+  // 4. Active Chip
+  if (activeChip !== undefined) {
+    const currentGWKey = data.currentGW || 1;
+    manager.squad.activeChip = activeChip;
+    if (activeChip) {
+      if (!manager.squad.gameweekChips) manager.squad.gameweekChips = {};
+      manager.squad.gameweekChips[currentGWKey] = activeChip;
+    } else {
+      if (manager.squad.gameweekChips) {
+        delete manager.squad.gameweekChips[currentGWKey];
+      }
+    }
+  }
+
+  // 5. Used Chips
+  if (usedChips && typeof usedChips === 'object') {
+    manager.squad.usedChips = {
+      ...(manager.squad.usedChips || { triple_captain: false, bench_boost: false, wildcard: false }),
+      ...usedChips,
+    };
+  }
+
+  updateManagerTransferAccounting(manager, data);
+  recalculateAllManagersLeaguePoints(data);
+  db.save(`Admin adjusted manager ${manager.managerName} (${manager.teamName})`);
+  scheduleAutoSyncToGitHub(`Admin adjusted manager ${manager.managerName}`, true);
+
+  res.json({ success: true, manager });
+});
+
+// 11m. Developer Admin: Remove & Refund Player from Manager Squad
+app.post('/api/admin/manager/remove-player', (req: Request, res: Response) => {
+  const { managerId, playerId, refund = true } = req.body;
+  if (!managerId || !playerId) return res.status(400).json({ error: 'managerId and playerId are required' });
+
+  const data = db.getData();
+  const manager = data.managers?.[managerId];
+  if (!manager || !manager.squad) return res.status(404).json({ error: 'Manager not found' });
+
+  const p = data.players?.[playerId];
+  const existingIndex = (manager.squad.players || []).findIndex((sp: any) => sp.playerId === playerId);
+  if (existingIndex === -1) return res.status(404).json({ error: 'Player not in manager squad' });
+
+  if (refund && p) {
+    const cost = p.cost || 0;
+    manager.squad.bank = Math.round(((manager.squad.bank || 0) + cost) * 10) / 10;
+  }
+
+  manager.squad.players.splice(existingIndex, 1);
+
+  // Re-sanitize captaincy
+  const starters = manager.squad.players.filter((sp: any) => sp.isStarter);
+  let cap = starters.find((sp: any) => sp.isCaptain);
+  let vc = starters.find((sp: any) => sp.isViceCaptain && sp !== cap);
+  if (!cap && starters.length > 0) {
+    starters[0].isCaptain = true;
+    starters[0].isViceCaptain = false;
+    cap = starters[0];
+  }
+  if (!vc && starters.length > 1) {
+    const next = starters.find((sp: any) => sp !== cap);
+    if (next) next.isViceCaptain = true;
+  }
+
+  // Re-index bench orders
+  let benchIndex = 1;
+  manager.squad.players.forEach((sp: any) => {
+    if (!sp.isStarter) {
+      sp.benchOrder = benchIndex++;
+    } else {
+      sp.benchOrder = 0;
+    }
+  });
+
+  updateManagerTransferAccounting(manager, data);
+  recalculateAllManagersLeaguePoints(data);
+  db.save(`Admin removed player ${p?.webName || playerId} from manager ${manager.managerName}`);
+  scheduleAutoSyncToGitHub(`Admin removed player ${p?.webName || playerId} from ${manager.managerName}`, true);
+
+  res.json({ success: true, manager });
+});
+
+// 11n. Developer Admin: Add Player to Manager Squad
+app.post('/api/admin/manager/add-player', (req: Request, res: Response) => {
+  const { managerId, playerId, deductCost = true, isStarter } = req.body;
+  if (!managerId || !playerId) return res.status(400).json({ error: 'managerId and playerId are required' });
+
+  const data = db.getData();
+  const manager = data.managers?.[managerId];
+  if (!manager || !manager.squad) return res.status(404).json({ error: 'Manager not found' });
+
+  const p = data.players?.[playerId];
+  if (!p) return res.status(404).json({ error: 'Player not found in database' });
+
+  if ((manager.squad.players || []).some((sp: any) => sp.playerId === playerId)) {
+    return res.status(400).json({ error: 'Player is already in this manager squad' });
+  }
+
+  if (deductCost) {
+    const cost = p.cost || 0;
+    manager.squad.bank = Math.round(((manager.squad.bank || 0) - cost) * 10) / 10;
+  }
+
+  const startersCount = (manager.squad.players || []).filter((sp: any) => sp.isStarter).length;
+  const starterFlag = typeof isStarter === 'boolean' ? isStarter : startersCount < 6;
+
+  const benchOrders = (manager.squad.players || []).filter((sp: any) => !sp.isStarter).map((sp: any) => sp.benchOrder || 0);
+  const nextBenchOrder = starterFlag ? 0 : (benchOrders.length > 0 ? Math.max(...benchOrders) + 1 : 1);
+
+  manager.squad.players.push({
+    playerId,
+    isStarter: starterFlag,
+    isCaptain: false,
+    isViceCaptain: false,
+    benchOrder: nextBenchOrder,
+  });
+
+  updateManagerTransferAccounting(manager, data);
+  recalculateAllManagersLeaguePoints(data);
+  db.save(`Admin added player ${p.webName} to manager ${manager.managerName}`);
+  scheduleAutoSyncToGitHub(`Admin added player ${p.webName} to ${manager.managerName}`, true);
+
+  res.json({ success: true, manager });
+});
+
+// 11o. Developer Admin: Swap / Transfer Player in Manager Squad
+app.post('/api/admin/manager/swap-player', (req: Request, res: Response) => {
+  const { managerId, outPlayerId, inPlayerId, adjustBank = true } = req.body;
+  if (!managerId || !outPlayerId || !inPlayerId) {
+    return res.status(400).json({ error: 'managerId, outPlayerId, and inPlayerId are required' });
+  }
+
+  const data = db.getData();
+  const manager = data.managers?.[managerId];
+  if (!manager || !manager.squad) return res.status(404).json({ error: 'Manager not found' });
+
+  const outP = data.players?.[outPlayerId];
+  const inP = data.players?.[inPlayerId];
+  if (!inP) return res.status(404).json({ error: 'Replacement player not found' });
+
+  const existingIdx = (manager.squad.players || []).findIndex((sp: any) => sp.playerId === outPlayerId);
+  if (existingIdx === -1) return res.status(404).json({ error: 'Out player not found in squad' });
+
+  if (adjustBank) {
+    const outCost = outP?.cost || 0;
+    const inCost = inP.cost || 0;
+    const diff = outCost - inCost;
+    manager.squad.bank = Math.round(((manager.squad.bank || 0) + diff) * 10) / 10;
+  }
+
+  manager.squad.players[existingIdx].playerId = inPlayerId;
+
+  updateManagerTransferAccounting(manager, data);
+  recalculateAllManagersLeaguePoints(data);
+  db.save(`Admin swapped player ${outP?.webName || outPlayerId} for ${inP.webName} in manager ${manager.managerName}`);
+  scheduleAutoSyncToGitHub(`Admin swapped player for ${manager.managerName}`, true);
+
+  res.json({ success: true, manager });
+});
+
+// 11p. Developer Admin: Toggle Player Role (Starter/Bench, Captain, Vice-Captain)
+app.post('/api/admin/manager/toggle-role', (req: Request, res: Response) => {
+  const { managerId, playerId, role } = req.body;
+  if (!managerId || !playerId || !role) {
+    return res.status(400).json({ error: 'managerId, playerId, and role are required' });
+  }
+
+  const data = db.getData();
+  const manager = data.managers?.[managerId];
+  if (!manager || !manager.squad) return res.status(404).json({ error: 'Manager not found' });
+
+  const target = (manager.squad.players || []).find((sp: any) => sp.playerId === playerId);
+  if (!target) return res.status(404).json({ error: 'Player not found in squad' });
+
+  if (role === 'captain') {
+    manager.squad.players.forEach((sp: any) => { sp.isCaptain = false; });
+    target.isCaptain = true;
+    target.isViceCaptain = false;
+    target.isStarter = true;
+    target.benchOrder = 0;
+  } else if (role === 'viceCaptain') {
+    manager.squad.players.forEach((sp: any) => { sp.isViceCaptain = false; });
+    target.isViceCaptain = true;
+    target.isCaptain = false;
+    target.isStarter = true;
+    target.benchOrder = 0;
+  } else if (role === 'starter') {
+    target.isStarter = true;
+    target.benchOrder = 0;
+  } else if (role === 'bench') {
+    target.isStarter = false;
+    target.isCaptain = false;
+    target.isViceCaptain = false;
+    const benchOrders = manager.squad.players.filter((sp: any) => !sp.isStarter && sp !== target).map((sp: any) => sp.benchOrder || 0);
+    target.benchOrder = benchOrders.length > 0 ? Math.max(...benchOrders) + 1 : 1;
+  }
+
+  recalculateAllManagersLeaguePoints(data);
+  db.save(`Admin toggled role ${role} for player ${playerId} in manager ${manager.managerName}`);
+
+  res.json({ success: true, manager });
+});
+
 // 12. Create / Join / Delete Mini-League
 app.post('/api/league/create', (req: Request, res: Response) => {
   const { name, managerId } = req.body;
@@ -3831,6 +4075,24 @@ export function applyPositionChangesAndRemediation(data: any): boolean {
       kirtadze.squad.usedChips.triple_captain = false;
       modified = true;
       console.log('[Remediation] Corrected Nikoloz Kirtadze TC: disabled in GW1 and activated for GW2.');
+    }
+  }
+
+  // 5. Ensure Gega Vashakmadze (user_1790456463804) has Wildcard active for GW2 and not locked in GW1, and FT reduced by 1
+  const gega = data.managers?.['user_1790456463804'];
+  if (gega?.squad) {
+    if (gega.squad.gameweekChips?.[1] === 'wildcard' || gega.squad.gameweekChips?.['1'] === 'wildcard') {
+      delete gega.squad.gameweekChips[1];
+      delete gega.squad.gameweekChips['1'];
+      gega.squad.activeChip = 'wildcard';
+      gega.squad.gameweekChips = gega.squad.gameweekChips || {};
+      gega.squad.gameweekChips[2] = 'wildcard';
+      gega.squad.usedChips = gega.squad.usedChips || { triple_captain: false, bench_boost: false, wildcard: false };
+      gega.squad.usedChips.wildcard = false;
+      gega.squad.freeTransfers = 2;
+      gega.squad.startFreeTransfers = 2;
+      modified = true;
+      console.log('[Remediation] Corrected Gega Vashakmadze Wildcard: disabled in GW1 and activated for GW2, FT set to 2.');
     }
   }
 

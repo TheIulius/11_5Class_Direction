@@ -660,4 +660,78 @@ export async function adminResetManagerToGW1Api(managerId: string): Promise<{
   return safeJson(res, 'მენეჯერის GW1-ზე დაბრუნება ვერ მოხერხდა (Failed to reset manager to GW1)');
 }
 
+export const adminResetManagerGW1Api = adminResetManagerToGW1Api;
+
+export async function adminAdjustManagerApi(params: {
+  managerId: string;
+  bank?: number;
+  bankDelta?: number;
+  freeTransfers?: number;
+  freeTransfersDelta?: number;
+  pointsDelta?: number;
+  activeChip?: string | null;
+  usedChips?: Record<string, boolean>;
+}): Promise<{ success: boolean; manager: any }> {
+  const res = await fetch(`${API_BASE}/api/admin/manager/adjust`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(params),
+  });
+  return safeJson(res, 'მენეჯერის მონაცემების განახლება ვერ მოხერხდა (Failed to adjust manager)');
+}
+
+export async function adminRemoveManagerPlayerApi(
+  managerId: string,
+  playerId: string,
+  refund: boolean = true
+): Promise<{ success: boolean; manager: any }> {
+  const res = await fetch(`${API_BASE}/api/admin/manager/remove-player`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ managerId, playerId, refund }),
+  });
+  return safeJson(res, 'ფეხბურთელის წაშლა ვერ მოხერხდა (Failed to remove player)');
+}
+
+export async function adminAddManagerPlayerApi(
+  managerId: string,
+  playerId: string,
+  deductCost: boolean = true,
+  isStarter?: boolean
+): Promise<{ success: boolean; manager: any }> {
+  const res = await fetch(`${API_BASE}/api/admin/manager/add-player`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ managerId, playerId, deductCost, isStarter }),
+  });
+  return safeJson(res, 'ფეხბურთელის დამატება ვერ მოხერხდა (Failed to add player)');
+}
+
+export async function adminSwapManagerPlayerApi(
+  managerId: string,
+  outPlayerId: string,
+  inPlayerId: string,
+  adjustBank: boolean = true
+): Promise<{ success: boolean; manager: any }> {
+  const res = await fetch(`${API_BASE}/api/admin/manager/swap-player`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ managerId, outPlayerId, inPlayerId, adjustBank }),
+  });
+  return safeJson(res, 'ტრანსფერის შესრულება ვერ მოხერხდა (Failed to swap player)');
+}
+
+export async function adminToggleManagerPlayerRoleApi(
+  managerId: string,
+  playerId: string,
+  role: 'captain' | 'viceCaptain' | 'starter' | 'bench'
+): Promise<{ success: boolean; manager: any }> {
+  const res = await fetch(`${API_BASE}/api/admin/manager/toggle-role`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ managerId, playerId, role }),
+  });
+  return safeJson(res, 'როლის შეცვლა ვერ მოხერხდა (Failed to toggle player role)');
+}
+
 
