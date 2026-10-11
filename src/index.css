@@ -43,6 +43,13 @@
     background-color: var(--bg-page);
     transition: background-color 0.2s ease;
   }
+
+  /* Prevent iOS Safari auto-zoom when focusing inputs while retaining compact appearance */
+  @media screen and (max-width: 768px) {
+    input, select, textarea {
+      font-size: 16px;
+    }
+  }
 }
 
 /* Custom scrollbar for mobile feel */
