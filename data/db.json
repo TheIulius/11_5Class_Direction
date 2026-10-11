@@ -15626,10 +15626,10 @@
               "webName": "Tvauri",
               "clubId": "SCH_9_3",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -15692,10 +15692,10 @@
               "webName": "Tabatadze",
               "clubId": "SCH_12_4",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 0,
               "points": 0
             }
           ],
@@ -17842,8 +17842,8 @@
           },
           {
             "playerId": "p_9_3_tvauri",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -17884,8 +17884,8 @@
           },
           {
             "playerId": "p_12_4_tabatadze",
-            "isStarter": false,
-            "benchOrder": 3,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
