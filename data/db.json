@@ -5660,7 +5660,7 @@
       "totalPoints": 10,
       "gwPoints": 10,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 4,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -16425,17 +16425,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_6_dzagania",
-              "webName": "Dzagania",
-              "clubId": "SCH_12_6",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_custom_1790259242808",
               "webName": "Topuria",
               "clubId": "SCH_11_3",
@@ -16454,7 +16443,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -16476,7 +16465,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 3,
               "points": 0
             }
           ],
@@ -27837,13 +27826,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_12_6_dzagania",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_custom_1790259242808",
             "isStarter": true,
             "benchOrder": 0,
@@ -27853,7 +27835,7 @@
           {
             "playerId": "p_9_4_kuwashvili",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -27867,12 +27849,12 @@
           {
             "playerId": "p_10_3_kapanadze",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 0,
+        "bank": 5.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": "triple_captain",
