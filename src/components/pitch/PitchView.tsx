@@ -3,7 +3,7 @@ import { useFPL } from '../../context/FPLContext';
 import { getFormationLayout } from '../../engine/formations';
 import { PlayerCard } from './PlayerCard';
 import { PlayerActionSheet } from './PlayerActionSheet';
-import { X, Sparkles, Shield, UserPlus, Plus } from 'lucide-react';
+import { X, Sparkles, Shield, UserPlus, Plus, Zap } from 'lucide-react';
 
 import { SquadPlayer } from '../../types/fpl';
 import { GameweekCalculationResult } from '../../engine/scoring';
@@ -67,15 +67,6 @@ export const PitchView: React.FC<PitchViewProps> = ({
     ? (squad.gameweekChips?.[activeGW] || null)
     : squad.activeChip;
 
-  // Dynamic pulsing border style based on active chip
-  const chipBorderClass =
-    activeChip === 'triple_captain'
-      ? 'border-2 border-amber-400 shadow-[0_0_30px_rgba(251,191,36,0.35)] ring-2 ring-amber-400/20 animate-pulse'
-      : activeChip === 'bench_boost'
-      ? 'border-2 border-cyan-400 shadow-[0_0_30px_rgba(56,189,248,0.35)] ring-2 ring-cyan-400/20 animate-pulse'
-      : activeChip === 'wildcard'
-      ? 'border-2 border-indigo-400 shadow-[0_0_30px_rgba(129,140,248,0.35)] ring-2 ring-indigo-400/20 animate-pulse'
-      : 'border-2 border-[#125c27] shadow-2xl';
 
   // Calculate missing starter placeholder slots if starters < 6
   const getMissingSlots = () => {
@@ -159,7 +150,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
 
       {/* Football Pitch Container with Alternating Mowing Lawn Stripes */}
       <div
-        className={`relative mx-1 sm:mx-2 md:mx-auto my-2 rounded-2xl md:rounded-3xl overflow-hidden md:max-w-3xl lg:max-w-4xl transition-all duration-300 ${chipBorderClass}`}
+        className="relative mx-1 sm:mx-2 md:mx-auto my-2 rounded-2xl md:rounded-3xl overflow-hidden md:max-w-3xl lg:max-w-4xl border-2 border-[#125c27] shadow-2xl transition-all duration-300"
         style={{
           background: 'repeating-linear-gradient(180deg, #115e2a 0px, #115e2a 34px, #0e5023 34px, #0e5023 68px)',
         }}
@@ -223,6 +214,12 @@ export const PitchView: React.FC<PitchViewProps> = ({
                 <>Starters: {layout.pitchPositions.length}/6 (Incomplete)</>
               )}
             </span>
+            {activeChip && (
+              <span className="text-[10px] md:text-xs font-black uppercase px-2.5 py-0.5 md:px-3 md:py-1 rounded-full backdrop-blur-xs border flex items-center gap-1.5 shadow-md bg-black/60 text-amber-300 border-amber-400/30">
+                <Zap className="w-3 h-3 text-amber-400" />
+                {activeChip.replace('_', ' ')}
+              </span>
+            )}
             {layout.isValid ? (
               <span className="hidden sm:inline-block text-[9px] font-bold text-gray-300 uppercase tracking-wider bg-black/30 px-2 py-0.5 rounded-full border border-white/10">
                 1 GK • {layout.defs.length} DEF • {layout.mids.length} MID • {layout.fwds.length} FWD
