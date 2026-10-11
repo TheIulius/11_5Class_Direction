@@ -110,7 +110,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
     return (
       <div
         onClick={handleClick}
-        className={`w-full relative flex flex-col items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition-all cursor-pointer active:scale-95 select-none ${
+        className={`w-full relative flex flex-col items-center justify-between p-1.5 py-2 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition-all cursor-pointer active:scale-95 select-none ${
           isSwapSource
             ? 'ring-2 ring-amber-400 bg-amber-500/10'
             : isSwapTargetEligible
@@ -135,17 +135,17 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
         )}
 
         {/* Kit Jersey */}
-        <div className="relative my-1">
+        <div className="relative my-0.5">
           <KitJersey
             clubId={player.clubId}
             position={player.position}
             photoUrl={player.photoUrl}
-            className="w-11 h-11 sm:w-12 sm:h-12 drop-shadow-md"
+            className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-md"
           />
         </div>
 
         {/* Player Web Name */}
-        <span className="text-[11px] font-bold text-white tracking-tight truncate max-w-full text-center mt-1">
+        <span className="text-[10px] font-bold text-white tracking-tight truncate max-w-full text-center mt-0.5">
           {player.webName}
         </span>
       </div>
@@ -156,7 +156,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div
       onClick={handleClick}
-      className={`relative flex flex-col items-center justify-between w-[78px] sm:w-[86px] md:w-[96px] min-h-[96px] sm:min-h-[106px] p-1.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/10 shadow-lg cursor-pointer transition-all duration-200 select-none ${
+      className={`relative flex flex-col items-center justify-between w-[72px] sm:w-[82px] md:w-[94px] min-h-[86px] sm:min-h-[98px] p-1 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/10 shadow-lg cursor-pointer transition-all duration-200 select-none ${
         isSwapSource
           ? 'scale-105 ring-2 ring-amber-400 bg-amber-500/15 z-30 shadow-xl'
           : isSwapTargetEligible
@@ -203,7 +203,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
           clubId={player.clubId}
           position={player.position}
           photoUrl={player.photoUrl}
-          className="w-11 h-11 sm:w-12 sm:h-12 md:w-13 md:h-13 drop-shadow-md"
+          className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 drop-shadow-md"
         />
 
         {/* Captaincy Badges */}

@@ -21,8 +21,8 @@ interface SubstitutesDrawerProps {
 
 // Physical height configuration for iOS-native peek & expand snap behavior
 const PRI_HEIGHT = 560; // Total physical height of the sliding hub (px)
-const PRI_PEEK_VISIBLE = 148; // Height of drag handle + header + 3 substitute jerseys (px)
-const PRI_PEEK_Y = PRI_HEIGHT - PRI_PEEK_VISIBLE; // Offset in resting peek state (~412px)
+const PRI_PEEK_VISIBLE = 186; // Height of drag handle + header + 3 substitute jerseys and names (px)
+const PRI_PEEK_Y = PRI_HEIGHT - PRI_PEEK_VISIBLE; // Offset in resting peek state (~374px)
 
 const SPRING_CONFIG = {
   type: 'spring' as const,
@@ -346,67 +346,69 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
               })}
             </div>
 
-            {/* 2. GW History (Full Natural Height - No Internal Scrollbar) */}
-            <div className="bg-zinc-900/50 rounded-2xl p-4 border border-white/5 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="font-sans text-xs font-bold tracking-wider text-zinc-400 uppercase">
-                    GW History
-                  </span>
+            {/* 2. GW History (Visible when expanded at full natural height) */}
+            {isPrimaryExpanded && (
+              <div className="bg-zinc-900/50 rounded-2xl p-4 border border-white/5 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="font-sans text-xs font-bold tracking-wider text-zinc-400 uppercase">
+                      GW History
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              {pointsHistory.length > 0 ? (
-                <div className="space-y-2">
-                  {pointsHistory.map((item, idx) => (
-                    <div
-                      key={`${item.playerId}-${idx}`}
-                      className="p-2.5 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-xs gap-2"
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div
-                          className="w-2.5 h-2.5 rounded-full shrink-0"
-                          style={{ backgroundColor: CLUBS[item.clubId]?.primaryColor || '#64748b' }}
-                        />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="font-bold text-white truncate font-sans">
-                              {item.playerName}
-                            </span>
-                            {item.isCaptain && (
-                              <span className="text-[9px] font-bold text-amber-400 px-1 py-0.2 rounded bg-amber-400/10 border border-amber-400/20 font-sans">
-                                C
+                {pointsHistory.length > 0 ? (
+                  <div className="space-y-2">
+                    {pointsHistory.map((item, idx) => (
+                      <div
+                        key={`${item.playerId}-${idx}`}
+                        className="p-2.5 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-xs gap-2"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div
+                            className="w-2.5 h-2.5 rounded-full shrink-0"
+                            style={{ backgroundColor: CLUBS[item.clubId]?.primaryColor || '#64748b' }}
+                          />
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="font-bold text-white truncate font-sans">
+                                {item.playerName}
                               </span>
-                            )}
-                            {item.matchInfo && (
-                              <span className="text-[10px] text-zinc-400 font-sans">
-                                ({item.matchInfo})
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-zinc-400 truncate mt-0.5 font-sans">
-                            {item.events.join(' • ')}
+                              {item.isCaptain && (
+                                <span className="text-[9px] font-bold text-amber-400 px-1 py-0.2 rounded bg-amber-400/10 border border-amber-400/20 font-sans">
+                                  C
+                                </span>
+                              )}
+                              {item.matchInfo && (
+                                <span className="text-[10px] text-zinc-400 font-sans">
+                                  ({item.matchInfo})
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[11px] text-zinc-400 truncate mt-0.5 font-sans">
+                              {item.events.join(' • ')}
+                            </div>
                           </div>
                         </div>
-                      </div>
 
-                      <span
-                        className={`font-mono font-bold shrink-0 text-xs ${
-                          item.totalPts > 0 ? 'text-emerald-400' : item.totalPts < 0 ? 'text-rose-400' : 'text-zinc-500'
-                        }`}
-                      >
-                        {item.totalPts > 0 ? `+${item.totalPts}` : item.totalPts} pts
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4 text-xs text-zinc-500 font-sans">
-                  empty
-                </div>
-              )}
-            </div>
+                        <span
+                          className={`font-mono font-bold shrink-0 text-xs ${
+                            item.totalPts > 0 ? 'text-emerald-400' : item.totalPts < 0 ? 'text-rose-400' : 'text-zinc-500'
+                          }`}
+                        >
+                          {item.totalPts > 0 ? `+${item.totalPts}` : item.totalPts} pts
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-xs text-zinc-500 font-sans">
+                    empty
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </motion.div>
       </div>
