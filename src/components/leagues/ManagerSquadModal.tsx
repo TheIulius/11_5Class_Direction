@@ -87,7 +87,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
     ? managerData.squad.gameweekSquads[selectedGW]
     : (selectedGW < currentGW ? [] : (managerData?.squad.players || []));
   const squadPlayers = shouldHideLineup ? [] : activeGwSquad;
-  const layout = getFormationLayout(squadPlayers, players);
+  const layout = getFormationLayout(squadPlayers, players, selectedGW);
 
   // Top performer
   const squadPointsList = squadPlayers

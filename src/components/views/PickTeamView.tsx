@@ -115,10 +115,10 @@ export const PickTeamView: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const comp = validateSquadComposition(activeSquadPlayers, players);
+  const comp = validateSquadComposition(activeSquadPlayers, players, selectedGW);
   const [showCompDetails, setShowCompDetails] = useState<boolean>(!comp.isValid && activeSquadPlayers.length > 0);
 
-  const layout = getFormationLayout(activeSquadPlayers, players);
+  const layout = getFormationLayout(activeSquadPlayers, players, selectedGW);
   const benchSlots = [1, 2, 3];
 
   const chips: { id: ChipType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [

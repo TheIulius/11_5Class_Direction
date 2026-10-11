@@ -1,4 +1,5 @@
 import { Position, SquadPlayer, Player } from '../types/fpl';
+import { getPlayerPositionForGameweek } from './scoring';
 
 /**
  * The 5 permitted outfield formations (DEF-MID-FWD) for 6-a-side starting lineups.
@@ -43,7 +44,8 @@ export interface FormationLayout {
  */
 export function getFormationLayout(
   squadPlayers: SquadPlayer[],
-  allPlayers: Record<string, Player>
+  allPlayers: Record<string, Player>,
+  targetGW: number = 2
 ): FormationLayout {
   const validPlayers = squadPlayers.filter((sp) => Boolean(allPlayers[sp.playerId]));
   const starters = validPlayers.filter((p) => p.isStarter);
@@ -59,10 +61,11 @@ export function getFormationLayout(
   starters.forEach((sp) => {
     const player = allPlayers[sp.playerId];
     if (!player) return;
-    if (player.position === 'GKP') gks.push(sp);
-    else if (player.position === 'DEF') defs.push(sp);
-    else if (player.position === 'MID') mids.push(sp);
-    else if (player.position === 'FWD') fwds.push(sp);
+    const pos = getPlayerPositionForGameweek(sp.playerId, targetGW, player.position);
+    if (pos === 'GKP') gks.push(sp);
+    else if (pos === 'DEF') defs.push(sp);
+    else if (pos === 'MID') mids.push(sp);
+    else if (pos === 'FWD') fwds.push(sp);
   });
 
   const formationString = `${defs.length}-${mids.length}-${fwds.length}`;

@@ -88,7 +88,7 @@ export const TransfersView: React.FC = () => {
     }
   }, [transferOutPlayerId, players, setTransferOutPlayerId]);
 
-  const comp = useMemo(() => validateSquadComposition(squad.players, players), [squad.players, players]);
+  const comp = useMemo(() => validateSquadComposition(squad.players, players, currentGW), [squad.players, players, currentGW]);
   const outPlayer = outPlayerId ? players[outPlayerId] : null;
   const inPlayer = inPlayerId ? players[inPlayerId] : null;
 

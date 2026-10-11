@@ -899,7 +899,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const targetPlayers = customPlayers || squad.players;
 
       if (validateComplete) {
-        const compValidation = validateSquadComposition(targetPlayers, players);
+        const compValidation = validateSquadComposition(targetPlayers, players, currentGW);
         if (!compValidation.isValid) {
           return {
             success: false,

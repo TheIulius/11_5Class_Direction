@@ -57,7 +57,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
     ? squad.gameweekSquads[currentGW]
     : squad.players;
 
-  const layout = getFormationLayout(activeSquadPlayers, players);
+  const layout = getFormationLayout(activeSquadPlayers, players, activeGW);
   const starters = activeSquadPlayers.filter((p) => p.isStarter);
 
   // Bench slots (strictly 3 outfield reserves)

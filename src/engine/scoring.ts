@@ -227,18 +227,37 @@ export interface SquadCompositionValidation {
 }
 
 /**
+/**
+ * Resolves the historical or current position of a player for a specific gameweek.
+ * For gameweeks strictly before effectiveGW (e.g. GW 1), returns oldPosition.
+ * For gameweeks >= effectiveGW (e.g. GW 2+), returns the updated position.
+ */
+export function getPlayerPositionForGameweek(
+  playerId: string,
+  targetGW: number = 2,
+  defaultPosition?: Position
+): Position {
+  const change = POSITION_CHANGED_PLAYERS[playerId];
+  if (change && targetGW < change.effectiveGW) {
+    return change.oldPosition;
+  }
+  return defaultPosition || change?.newPosition || 'MID';
+}
+
+/**
  * Validates that each fantasy team has:
  * - Exactly 1 Goalkeeper (GK)
  * - Exactly 3 Defenders (mcveli)
  * - Exactly 3 Midfielders
  * - Exactly 2 Forwards
  * - Maximum 2 players from the same class (e.g. 11/1, 9/2)
- * - Zero players who have undergone mandatory position change for GW2 (must be transferred out)
+ * - Zero players who have undergone mandatory position change for GW2 (must be transferred out for GW2+)
  * (Total: 9 players). A team cannot play without these exact rules.
  */
 export function validateSquadComposition(
   squadPlayers: SquadPlayer[],
-  allPlayers: Record<string, Player>
+  allPlayers: Record<string, Player>,
+  targetGW: number = 2
 ): SquadCompositionValidation {
   let gkCount = 0;
   let defCount = 0;
@@ -247,16 +266,21 @@ export function validateSquadComposition(
   const clubCounts: Record<string, number> = {};
   const affectedPlayers: PositionChangeInfo[] = [];
 
+  // Position change restrictions and position shifts only apply for GW2 onwards
+  const isGW2OrLater = targetGW >= 2;
+
   for (const sp of squadPlayers) {
-    if (POSITION_CHANGED_PLAYERS[sp.playerId]) {
+    if (isGW2OrLater && POSITION_CHANGED_PLAYERS[sp.playerId]) {
       affectedPlayers.push(POSITION_CHANGED_PLAYERS[sp.playerId]);
     }
     const p = allPlayers[sp.playerId];
     if (!p) continue;
-    if (p.position === 'GKP') gkCount++;
-    else if (p.position === 'DEF') defCount++;
-    else if (p.position === 'MID') midCount++;
-    else if (p.position === 'FWD') fwdCount++;
+
+    const pos = getPlayerPositionForGameweek(sp.playerId, targetGW, p.position);
+    if (pos === 'GKP') gkCount++;
+    else if (pos === 'DEF') defCount++;
+    else if (pos === 'MID') midCount++;
+    else if (pos === 'FWD') fwdCount++;
 
     const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
     clubCounts[normClub] = (clubCounts[normClub] || 0) + 1;
@@ -347,7 +371,7 @@ export function calculateGameweekSquadPoints(
   fixtures?: { homeClubId: string; awayClubId: string; venue?: string; isFinished?: boolean; gameweek?: number }[],
   isGWFinished?: boolean
 ): GameweekCalculationResult {
-  const compValidation = validateSquadComposition(squadPlayers, allPlayers);
+  const compValidation = validateSquadComposition(squadPlayers, allPlayers, currentGW);
 
   // If squad does not meet the exact 1 GK, 3 DEF, 3 MID, 2 FWD requirements, they cannot play (0 points)
   if (!compValidation.isValid) {
@@ -395,7 +419,7 @@ export function calculateGameweekSquadPoints(
     return fix?.venue === 'one_price';
   };
 
-  // Calculate raw points for all 9 players
+  // Calculate raw points for all 9 players using gameweek-accurate position
   const rawPointsMap: Record<string, number> = {};
   const minutesMap: Record<string, number> = {};
 
@@ -404,7 +428,8 @@ export function calculateGameweekSquadPoints(
     if (player) {
       const stats = player.gwStats[currentGW];
       const isOnePrice = isPlayerOnePriceStadium(player);
-      rawPointsMap[sp.playerId] = calculatePlayerPoints(player.position, stats, isOnePrice, player.id);
+      const pos = getPlayerPositionForGameweek(sp.playerId, currentGW, player.position);
+      rawPointsMap[sp.playerId] = calculatePlayerPoints(pos, stats, isOnePrice, player.id);
       minutesMap[sp.playerId] = stats?.minutes || 0;
     } else {
       rawPointsMap[sp.playerId] = 0;
@@ -437,11 +462,11 @@ export function calculateGameweekSquadPoints(
   if (gwEnded && !isBenchBoost) {
     // 1. Goalkeeper auto-sub (if starter played 0 minutes)
     const starterGK = currentStartingPlayers.find(
-      (sp) => allPlayers[sp.playerId]?.position === 'GKP'
+      (sp) => getPlayerPositionForGameweek(sp.playerId, currentGW, allPlayers[sp.playerId]?.position) === 'GKP'
     );
     if (starterGK && (minutesMap[starterGK.playerId] || 0) === 0) {
       const benchGK = bench.find(
-        (bp) => allPlayers[bp.playerId]?.position === 'GKP' && (minutesMap[bp.playerId] || 0) > 0
+        (bp) => getPlayerPositionForGameweek(bp.playerId, currentGW, allPlayers[bp.playerId]?.position) === 'GKP' && (minutesMap[bp.playerId] || 0) > 0
       );
       if (benchGK) {
         const idx = currentStartingPlayers.findIndex((p) => p.playerId === starterGK.playerId);
@@ -463,19 +488,21 @@ export function calculateGameweekSquadPoints(
     for (let i = 0; i < currentStartingPlayers.length; i++) {
       const sp = currentStartingPlayers[i];
       const player = allPlayers[sp.playerId];
-      if (player?.position !== 'GKP' && (minutesMap[sp.playerId] || 0) === 0) {
+      const spPos = getPlayerPositionForGameweek(sp.playerId, currentGW, player?.position);
+      if (spPos !== 'GKP' && (minutesMap[sp.playerId] || 0) === 0) {
         for (const bp of bench) {
           const benchPlayer = allPlayers[bp.playerId];
+          const bpPos = getPlayerPositionForGameweek(bp.playerId, currentGW, benchPlayer?.position);
           if (
             benchPlayer &&
-            benchPlayer.position !== 'GKP' &&
+            bpPos !== 'GKP' &&
             !usedBenchPlayerIds.has(bp.playerId) &&
             (minutesMap[bp.playerId] || 0) > 0
           ) {
             const candidateStarting = [...currentStartingPlayers];
             candidateStarting[i] = bp;
             const candidatePositions = candidateStarting.map(
-              (p) => allPlayers[p.playerId]?.position
+              (p) => getPlayerPositionForGameweek(p.playerId, currentGW, allPlayers[p.playerId]?.position)
             );
 
             if (isValidStartingXI(candidatePositions)) {

@@ -116,6 +116,18 @@ const acct3 = calculateSquadTransfers(squadAfter4Transfers, 2);
 assert(acct3.freeTransfers === 0, '0 FT remaining');
 assert(acct3.currentGWPenalty === 4, '4th transfer incurs standard -4 pt penalty');
 
+// 4. GW1 Immutability: Squads from GW1 must be valid and scored with GW1 positions
+console.log('\nTest 4: GW1 Historical Preservation & Scoring');
+// In GW1, Shakarishvili was a Goalkeeper (GKP)
+const validGW1SquadWithShakara: SquadPlayer[] = [
+  { playerId: 'p_10_5_shakarishvili', isStarter: true, benchOrder: 0, isCaptain: false, isViceCaptain: false },
+  ...validSquad.slice(1), // p_d1, p_d2, p_d3, p_m1, p_m2, p_m3, p_f1, p_f2
+];
+const gw1Res = validateSquadComposition(validGW1SquadWithShakara, mockPlayers, 1);
+assert(gw1Res.isValid === true, 'GW1 squad containing Shakarishvili is valid (was legal as GKP in GW1)');
+assert(gw1Res.hasPositionChangedPlayers === false, 'hasPositionChangedPlayers is false for GW1');
+assert(gw1Res.gkCount === 1, 'Shakarishvili counted as 1 GKP in GW1');
+
 console.log('\n=================================================================');
 console.log('ALL GW2 POSITION CHANGE & REMEDIATION TESTS PASSED! 🎉');
 console.log('=================================================================');
