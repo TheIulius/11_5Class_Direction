@@ -16117,7 +16117,7 @@
           "gwPoints": 0,
           "rank": 73,
           "previousRank": 73,
-          "activeChip": "triple_captain",
+          "activeChip": null,
           "lineup": [
             {
               "playerId": "p_9_6_kalandadze",
@@ -27406,7 +27406,7 @@
         "bank": 0.2,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
-        "activeChip": "triple_captain",
+        "activeChip": null,
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
