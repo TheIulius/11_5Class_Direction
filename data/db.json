@@ -1153,7 +1153,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 9,
+      "selectedByPercent": 8,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9075,17 +9075,6 @@
               "playerId": "p_9_2_chalatashvili",
               "webName": "Chalatashvili",
               "clubId": "SCH_9_2",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_9_4_kuwashvili",
-              "webName": "Kuwashvili",
-              "clubId": "SCH_9_4",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
@@ -20245,13 +20234,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_4_kuwashvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_1_katamadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -20294,7 +20276,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 1,
+        "bank": 5.4,
         "freeTransfers": 1,
         "transfersMadeThisGW": 3,
         "activeChip": null,
