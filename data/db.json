@@ -1092,7 +1092,7 @@
       "totalPoints": 8,
       "gwPoints": 8,
       "form": 5,
-      "selectedByPercent": 6,
+      "selectedByPercent": 8,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5138,7 +5138,7 @@
       "totalPoints": 15,
       "gwPoints": 15,
       "form": 5,
-      "selectedByPercent": 9,
+      "selectedByPercent": 8,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -8367,7 +8367,7 @@
           "totalPoints": 137,
           "gwPoints": 0,
           "rank": 1,
-          "previousRank": 48,
+          "previousRank": 1,
           "activeChip": null,
           "lineup": [
             {
@@ -8482,7 +8482,7 @@
           "totalPoints": 104,
           "gwPoints": 0,
           "rank": 2,
-          "previousRank": 49,
+          "previousRank": 2,
           "activeChip": null,
           "lineup": [
             {
@@ -8597,7 +8597,7 @@
           "totalPoints": 103,
           "gwPoints": 0,
           "rank": 3,
-          "previousRank": 1,
+          "previousRank": 3,
           "activeChip": null,
           "lineup": [
             {
@@ -8712,7 +8712,7 @@
           "totalPoints": 103,
           "gwPoints": 0,
           "rank": 4,
-          "previousRank": 50,
+          "previousRank": 4,
           "activeChip": null,
           "lineup": [
             {
@@ -8827,7 +8827,7 @@
           "totalPoints": 101,
           "gwPoints": 0,
           "rank": 5,
-          "previousRank": 2,
+          "previousRank": 5,
           "activeChip": null,
           "lineup": [
             {
@@ -8942,7 +8942,7 @@
           "totalPoints": 100,
           "gwPoints": 0,
           "rank": 6,
-          "previousRank": 51,
+          "previousRank": 6,
           "activeChip": null,
           "lineup": [
             {
@@ -9057,7 +9057,7 @@
           "totalPoints": 99,
           "gwPoints": 0,
           "rank": 7,
-          "previousRank": 52,
+          "previousRank": 7,
           "activeChip": null,
           "lineup": [
             {
@@ -9172,7 +9172,7 @@
           "totalPoints": 96,
           "gwPoints": 0,
           "rank": 8,
-          "previousRank": 53,
+          "previousRank": 8,
           "activeChip": null,
           "lineup": [
             {
@@ -9287,7 +9287,7 @@
           "totalPoints": 95,
           "gwPoints": 0,
           "rank": 9,
-          "previousRank": 3,
+          "previousRank": 9,
           "activeChip": null,
           "lineup": [
             {
@@ -9402,7 +9402,7 @@
           "totalPoints": 95,
           "gwPoints": 0,
           "rank": 10,
-          "previousRank": 4,
+          "previousRank": 10,
           "activeChip": null,
           "lineup": [
             {
@@ -9517,7 +9517,7 @@
           "totalPoints": 93,
           "gwPoints": 0,
           "rank": 11,
-          "previousRank": 82,
+          "previousRank": 11,
           "activeChip": null,
           "lineup": [
             {
@@ -9632,7 +9632,7 @@
           "totalPoints": 89,
           "gwPoints": 0,
           "rank": 12,
-          "previousRank": 5,
+          "previousRank": 12,
           "activeChip": null,
           "lineup": [
             {
@@ -9747,7 +9747,7 @@
           "totalPoints": 87,
           "gwPoints": 0,
           "rank": 13,
-          "previousRank": 6,
+          "previousRank": 13,
           "activeChip": null,
           "lineup": [
             {
@@ -9862,7 +9862,7 @@
           "totalPoints": 78,
           "gwPoints": 0,
           "rank": 14,
-          "previousRank": 54,
+          "previousRank": 14,
           "activeChip": "wildcard",
           "lineup": [
             {
@@ -9977,7 +9977,7 @@
           "totalPoints": 76,
           "gwPoints": 0,
           "rank": 15,
-          "previousRank": 7,
+          "previousRank": 15,
           "activeChip": null,
           "lineup": [
             {
@@ -10092,7 +10092,7 @@
           "totalPoints": 75,
           "gwPoints": 0,
           "rank": 16,
-          "previousRank": 8,
+          "previousRank": 16,
           "activeChip": null,
           "lineup": [
             {
@@ -10207,7 +10207,7 @@
           "totalPoints": 75,
           "gwPoints": 0,
           "rank": 17,
-          "previousRank": 55,
+          "previousRank": 17,
           "activeChip": null,
           "lineup": [
             {
@@ -10322,7 +10322,7 @@
           "totalPoints": 72,
           "gwPoints": 0,
           "rank": 18,
-          "previousRank": 9,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": [
             {
@@ -10437,7 +10437,7 @@
           "totalPoints": 71,
           "gwPoints": 0,
           "rank": 19,
-          "previousRank": 10,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": [
             {
@@ -10552,7 +10552,7 @@
           "totalPoints": 70,
           "gwPoints": 0,
           "rank": 20,
-          "previousRank": 11,
+          "previousRank": 20,
           "activeChip": null,
           "lineup": [
             {
@@ -10667,7 +10667,7 @@
           "totalPoints": 69,
           "gwPoints": 0,
           "rank": 21,
-          "previousRank": 12,
+          "previousRank": 21,
           "activeChip": "triple_captain",
           "lineup": [
             {
@@ -10782,7 +10782,7 @@
           "totalPoints": 69,
           "gwPoints": 0,
           "rank": 22,
-          "previousRank": 56,
+          "previousRank": 22,
           "activeChip": null,
           "lineup": [
             {
@@ -10897,7 +10897,7 @@
           "totalPoints": 67,
           "gwPoints": 0,
           "rank": 23,
-          "previousRank": 13,
+          "previousRank": 23,
           "activeChip": null,
           "lineup": [
             {
@@ -11012,7 +11012,7 @@
           "totalPoints": 63,
           "gwPoints": 0,
           "rank": 24,
-          "previousRank": 14,
+          "previousRank": 24,
           "activeChip": null,
           "lineup": [
             {
@@ -11123,7 +11123,7 @@
           "totalPoints": 63,
           "gwPoints": 0,
           "rank": 25,
-          "previousRank": 15,
+          "previousRank": 25,
           "activeChip": null,
           "lineup": [
             {
@@ -11238,7 +11238,7 @@
           "totalPoints": 61,
           "gwPoints": 0,
           "rank": 26,
-          "previousRank": 16,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": [
             {
@@ -11353,7 +11353,7 @@
           "totalPoints": 61,
           "gwPoints": 0,
           "rank": 27,
-          "previousRank": 17,
+          "previousRank": 27,
           "activeChip": null,
           "lineup": [
             {
@@ -11468,7 +11468,7 @@
           "totalPoints": 59,
           "gwPoints": 0,
           "rank": 28,
-          "previousRank": 57,
+          "previousRank": 28,
           "activeChip": null,
           "lineup": [
             {
@@ -11583,7 +11583,7 @@
           "totalPoints": 56,
           "gwPoints": 0,
           "rank": 29,
-          "previousRank": 18,
+          "previousRank": 29,
           "activeChip": null,
           "lineup": [
             {
@@ -11698,7 +11698,7 @@
           "totalPoints": 56,
           "gwPoints": 0,
           "rank": 30,
-          "previousRank": 19,
+          "previousRank": 30,
           "activeChip": null,
           "lineup": [
             {
@@ -11813,7 +11813,7 @@
           "totalPoints": 56,
           "gwPoints": 0,
           "rank": 31,
-          "previousRank": 58,
+          "previousRank": 31,
           "activeChip": null,
           "lineup": [
             {
@@ -11924,7 +11924,7 @@
           "totalPoints": 55,
           "gwPoints": 0,
           "rank": 32,
-          "previousRank": 20,
+          "previousRank": 32,
           "activeChip": null,
           "lineup": [
             {
@@ -12039,7 +12039,7 @@
           "totalPoints": 55,
           "gwPoints": 0,
           "rank": 33,
-          "previousRank": 21,
+          "previousRank": 33,
           "activeChip": null,
           "lineup": [
             {
@@ -12154,7 +12154,7 @@
           "totalPoints": 53,
           "gwPoints": 0,
           "rank": 34,
-          "previousRank": 22,
+          "previousRank": 34,
           "activeChip": null,
           "lineup": [
             {
@@ -12269,7 +12269,7 @@
           "totalPoints": 51,
           "gwPoints": 0,
           "rank": 35,
-          "previousRank": 23,
+          "previousRank": 35,
           "activeChip": null,
           "lineup": [
             {
@@ -12384,7 +12384,7 @@
           "totalPoints": 50,
           "gwPoints": 0,
           "rank": 36,
-          "previousRank": 24,
+          "previousRank": 36,
           "activeChip": null,
           "lineup": [
             {
@@ -12499,7 +12499,7 @@
           "totalPoints": 50,
           "gwPoints": 0,
           "rank": 37,
-          "previousRank": 25,
+          "previousRank": 37,
           "activeChip": null,
           "lineup": [
             {
@@ -12614,7 +12614,7 @@
           "totalPoints": 50,
           "gwPoints": 0,
           "rank": 38,
-          "previousRank": 26,
+          "previousRank": 38,
           "activeChip": null,
           "lineup": [
             {
@@ -12729,7 +12729,7 @@
           "totalPoints": 49,
           "gwPoints": 0,
           "rank": 39,
-          "previousRank": 27,
+          "previousRank": 39,
           "activeChip": null,
           "lineup": [
             {
@@ -12844,7 +12844,7 @@
           "totalPoints": 48,
           "gwPoints": 0,
           "rank": 40,
-          "previousRank": 28,
+          "previousRank": 40,
           "activeChip": null,
           "lineup": [
             {
@@ -12959,7 +12959,7 @@
           "totalPoints": 47,
           "gwPoints": 0,
           "rank": 41,
-          "previousRank": 29,
+          "previousRank": 41,
           "activeChip": null,
           "lineup": [
             {
@@ -13074,7 +13074,7 @@
           "totalPoints": 46,
           "gwPoints": 0,
           "rank": 42,
-          "previousRank": 30,
+          "previousRank": 42,
           "activeChip": null,
           "lineup": [
             {
@@ -13189,7 +13189,7 @@
           "totalPoints": 46,
           "gwPoints": 0,
           "rank": 43,
-          "previousRank": 31,
+          "previousRank": 43,
           "activeChip": null,
           "lineup": [
             {
@@ -13304,7 +13304,7 @@
           "totalPoints": 46,
           "gwPoints": 0,
           "rank": 44,
-          "previousRank": 32,
+          "previousRank": 44,
           "activeChip": null,
           "lineup": [
             {
@@ -13419,7 +13419,7 @@
           "totalPoints": 46,
           "gwPoints": 0,
           "rank": 45,
-          "previousRank": 33,
+          "previousRank": 45,
           "activeChip": null,
           "lineup": [
             {
@@ -13534,7 +13534,7 @@
           "totalPoints": 43,
           "gwPoints": 0,
           "rank": 46,
-          "previousRank": 34,
+          "previousRank": 46,
           "activeChip": null,
           "lineup": [
             {
@@ -13649,7 +13649,7 @@
           "totalPoints": 43,
           "gwPoints": 0,
           "rank": 47,
-          "previousRank": 35,
+          "previousRank": 47,
           "activeChip": null,
           "lineup": [
             {
@@ -13764,7 +13764,7 @@
           "totalPoints": 43,
           "gwPoints": 0,
           "rank": 48,
-          "previousRank": 36,
+          "previousRank": 48,
           "activeChip": null,
           "lineup": [
             {
@@ -13879,7 +13879,7 @@
           "totalPoints": 39,
           "gwPoints": 0,
           "rank": 49,
-          "previousRank": 37,
+          "previousRank": 49,
           "activeChip": null,
           "lineup": [
             {
@@ -13994,7 +13994,7 @@
           "totalPoints": 35,
           "gwPoints": 0,
           "rank": 50,
-          "previousRank": 38,
+          "previousRank": 50,
           "activeChip": null,
           "lineup": [
             {
@@ -14109,7 +14109,7 @@
           "totalPoints": 35,
           "gwPoints": 0,
           "rank": 51,
-          "previousRank": 39,
+          "previousRank": 51,
           "activeChip": null,
           "lineup": [
             {
@@ -14224,7 +14224,7 @@
           "totalPoints": 33,
           "gwPoints": 0,
           "rank": 52,
-          "previousRank": 40,
+          "previousRank": 52,
           "activeChip": null,
           "lineup": [
             {
@@ -14339,7 +14339,7 @@
           "totalPoints": 32,
           "gwPoints": 0,
           "rank": 53,
-          "previousRank": 59,
+          "previousRank": 53,
           "activeChip": null,
           "lineup": [
             {
@@ -14454,7 +14454,7 @@
           "totalPoints": 31,
           "gwPoints": 0,
           "rank": 54,
-          "previousRank": 41,
+          "previousRank": 54,
           "activeChip": null,
           "lineup": [
             {
@@ -14569,7 +14569,7 @@
           "totalPoints": 31,
           "gwPoints": 0,
           "rank": 55,
-          "previousRank": 42,
+          "previousRank": 55,
           "activeChip": null,
           "lineup": [
             {
@@ -14684,7 +14684,7 @@
           "totalPoints": 30,
           "gwPoints": 0,
           "rank": 56,
-          "previousRank": 60,
+          "previousRank": 56,
           "activeChip": null,
           "lineup": [
             {
@@ -14799,7 +14799,7 @@
           "totalPoints": 29,
           "gwPoints": 0,
           "rank": 57,
-          "previousRank": 43,
+          "previousRank": 57,
           "activeChip": null,
           "lineup": [
             {
@@ -14914,7 +14914,7 @@
           "totalPoints": 28,
           "gwPoints": 0,
           "rank": 58,
-          "previousRank": 44,
+          "previousRank": 58,
           "activeChip": null,
           "lineup": [
             {
@@ -15029,7 +15029,7 @@
           "totalPoints": 25,
           "gwPoints": 0,
           "rank": 59,
-          "previousRank": 45,
+          "previousRank": 59,
           "activeChip": null,
           "lineup": [
             {
@@ -15144,7 +15144,7 @@
           "totalPoints": 21,
           "gwPoints": 0,
           "rank": 60,
-          "previousRank": 46,
+          "previousRank": 60,
           "activeChip": null,
           "lineup": [
             {
@@ -15255,7 +15255,7 @@
           "totalPoints": 14,
           "gwPoints": 0,
           "rank": 61,
-          "previousRank": 47,
+          "previousRank": 61,
           "activeChip": null,
           "lineup": [
             {
@@ -15366,7 +15366,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 62,
-          "previousRank": 61,
+          "previousRank": 62,
           "activeChip": null,
           "lineup": [
             {
@@ -15481,7 +15481,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 63,
-          "previousRank": 62,
+          "previousRank": 63,
           "activeChip": null,
           "lineup": [
             {
@@ -15573,9 +15573,9 @@
               "points": 0
             },
             {
-              "playerId": "p_12_3_palelashvili",
-              "webName": "Palelashvili",
-              "clubId": "SCH_12_3",
+              "playerId": "p_9_4_keldishvili",
+              "webName": "Keldishvili",
+              "clubId": "SCH_9_4",
               "position": "FWD",
               "isStarter": false,
               "isCaptain": false,
@@ -15596,7 +15596,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 64,
-          "previousRank": 63,
+          "previousRank": 64,
           "activeChip": null,
           "lineup": [
             {
@@ -15700,7 +15700,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 65,
-          "previousRank": 64,
+          "previousRank": 65,
           "activeChip": null,
           "lineup": []
         },
@@ -15711,7 +15711,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 66,
-          "previousRank": 65,
+          "previousRank": 66,
           "activeChip": null,
           "lineup": []
         },
@@ -15722,7 +15722,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 67,
-          "previousRank": 66,
+          "previousRank": 67,
           "activeChip": null,
           "lineup": [],
           "grade": "10",
@@ -15737,7 +15737,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 68,
-          "previousRank": 67,
+          "previousRank": 68,
           "activeChip": null,
           "lineup": []
         },
@@ -15748,7 +15748,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 69,
-          "previousRank": 68,
+          "previousRank": 69,
           "activeChip": null,
           "lineup": [
             {
@@ -15797,7 +15797,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 70,
-          "previousRank": 69,
+          "previousRank": 70,
           "activeChip": null,
           "lineup": [
             {
@@ -15875,7 +15875,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 71,
-          "previousRank": 70,
+          "previousRank": 71,
           "activeChip": "triple_captain",
           "lineup": [
             {
@@ -15990,7 +15990,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 72,
-          "previousRank": 71,
+          "previousRank": 72,
           "activeChip": null,
           "lineup": [
             {
@@ -16105,7 +16105,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 73,
-          "previousRank": 72,
+          "previousRank": 73,
           "activeChip": null,
           "lineup": [],
           "grade": "9",
@@ -16120,7 +16120,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 74,
-          "previousRank": 73,
+          "previousRank": 74,
           "activeChip": "triple_captain",
           "lineup": [
             {
@@ -16235,7 +16235,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 75,
-          "previousRank": 74,
+          "previousRank": 75,
           "activeChip": null,
           "lineup": [
             {
@@ -16262,7 +16262,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 76,
-          "previousRank": 75,
+          "previousRank": 76,
           "activeChip": null,
           "lineup": [],
           "grade": "11",
@@ -16277,7 +16277,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 77,
-          "previousRank": 76,
+          "previousRank": 77,
           "activeChip": null,
           "lineup": []
         },
@@ -16288,7 +16288,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 78,
-          "previousRank": 77,
+          "previousRank": 78,
           "activeChip": "triple_captain",
           "lineup": [
             {
@@ -16403,7 +16403,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 79,
-          "previousRank": 78,
+          "previousRank": 79,
           "grade": "9",
           "parallel": "2",
           "realName": "ნიკა კუპრეიშვილი",
@@ -16418,7 +16418,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 80,
-          "previousRank": 79,
+          "previousRank": 80,
           "grade": "10",
           "parallel": "5",
           "realName": "Saba Datunashvili",
@@ -16433,7 +16433,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 81,
-          "previousRank": 80,
+          "previousRank": 81,
           "grade": "10",
           "parallel": "3",
           "realName": "Nikoloz Zurabiani",
@@ -16448,7 +16448,7 @@
           "totalPoints": 0,
           "gwPoints": 0,
           "rank": 82,
-          "previousRank": 81,
+          "previousRank": 82,
           "grade": "9",
           "parallel": "4",
           "realName": "Aleksandre Keldishvili",
@@ -27602,14 +27602,14 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_3_palelashvili",
+            "playerId": "p_9_4_keldishvili",
             "isStarter": false,
             "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 5,
+        "bank": 4.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
