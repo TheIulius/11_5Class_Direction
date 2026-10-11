@@ -6459,7 +6459,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -8445,17 +8445,6 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_4_tabidze",
-              "webName": "Tabidze",
-              "clubId": "SCH_12_4",
-              "position": "MID",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 2,
               "points": 0
             }
           ],
@@ -19717,16 +19706,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_12_4_tabidze",
-            "isStarter": false,
-            "benchOrder": 2,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 3,
+        "bank": 12,
         "freeTransfers": 3,
         "transfersMadeThisGW": 1,
         "activeChip": null,
