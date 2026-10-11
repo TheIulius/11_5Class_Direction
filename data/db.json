@@ -5374,7 +5374,7 @@
       "totalPoints": 24,
       "gwPoints": 24,
       "form": 5,
-      "selectedByPercent": 18,
+      "selectedByPercent": 19,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -15686,6 +15686,17 @@
               "isViceCaptain": false,
               "benchOrder": 3,
               "points": 0
+            },
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ],
           "grade": "12",
@@ -17870,9 +17881,16 @@
             "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_vashakmadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 11.5,
+        "bank": 2.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
