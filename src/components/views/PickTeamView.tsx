@@ -74,7 +74,6 @@ export const PickTeamView: React.FC = () => {
 
   const [activeSheetPlayerId, setActiveSheetPlayerId] = useState<string | null>(null);
   const [isPrimaryExpanded, setIsPrimaryExpanded] = useState(false);
-  const [isSecondaryExpanded, setIsSecondaryExpanded] = useState(false);
 
   const comp = validateSquadComposition(activeSquadPlayers, players, selectedGW);
   const layout = getFormationLayout(activeSquadPlayers, players, selectedGW);
@@ -91,7 +90,7 @@ export const PickTeamView: React.FC = () => {
           {/* Left: GW Selector Capsule + Inline Chip Selector */}
           <div className="flex items-center gap-2 min-w-0">
             {/* GW Selector Capsule */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 shadow-xs h-9 shrink-0">
+            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/70 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] backdrop-blur-md shadow-xs h-9 shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -100,7 +99,7 @@ export const PickTeamView: React.FC = () => {
                 }}
                 disabled={selectedGW <= 1}
                 aria-label="Previous Gameweek"
-                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+                className="p-1 rounded-lg hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
@@ -128,7 +127,7 @@ export const PickTeamView: React.FC = () => {
                 }}
                 disabled={selectedGW >= currentGW}
                 aria-label="Next Gameweek"
-                className="p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+                className="p-1 rounded-lg hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -144,7 +143,7 @@ export const PickTeamView: React.FC = () => {
           {/* Quick Score Capsule on Middle Column */}
           <div className="flex items-center gap-1.5 shrink-0">
             <span
-              className="px-2.5 py-1 rounded-xl text-xs font-black font-mono tabular-nums bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border border-slate-200 dark:border-white/10 shadow-2xs h-9 flex items-center"
+              className="px-2.5 py-1 rounded-xl text-xs font-black font-mono tabular-nums bg-slate-100 dark:bg-white/[0.04] text-slate-900 dark:text-white border border-slate-200/80 dark:border-white/10 shadow-2xs h-9 flex items-center"
               title="Gameweek Score"
             >
               {activeCalculation.totalPoints} PTS
@@ -204,7 +203,6 @@ export const PickTeamView: React.FC = () => {
               transition={{ duration: 0.2 }}
               onClick={() => {
                 setIsPrimaryExpanded(false);
-                setIsSecondaryExpanded(false);
               }}
               className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-35 pointer-events-auto"
             />
@@ -248,8 +246,6 @@ export const PickTeamView: React.FC = () => {
             readOnly={isPastGW}
             isPrimaryExpanded={isPrimaryExpanded}
             setIsPrimaryExpanded={setIsPrimaryExpanded}
-            isSecondaryExpanded={isSecondaryExpanded}
-            setIsSecondaryExpanded={setIsSecondaryExpanded}
           />
         </div>
       </section>

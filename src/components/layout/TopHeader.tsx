@@ -52,7 +52,7 @@ export const TopHeader: React.FC = () => {
   }, [deadline]);
 
   return (
-    <header className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800 select-none transition-colors">
+    <header className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-[#070b12]/95 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/10 select-none transition-colors">
       {/* Demo Mode Notice */}
       {isDemoMode && (
         <div className="w-full bg-amber-500/20 border-b border-amber-500/30 text-amber-200 px-3 py-1 text-[11px] flex items-center justify-between font-bold">
@@ -78,7 +78,7 @@ export const TopHeader: React.FC = () => {
             {/* Crest Logo */}
             <div
               onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
-              className="relative w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-1 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-all shadow-xs"
+              className="relative w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 p-1 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-all shadow-xs"
             >
               <img
                 src="/kcl-logo.png"
@@ -110,7 +110,7 @@ export const TopHeader: React.FC = () => {
           {/* Right: VAL & BANK Glass Capsules */}
           <div className="flex items-center gap-1.5 shrink-0">
             {/* VAL Capsule */}
-            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 min-w-[56px] text-center">
+            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 min-w-[56px] text-center">
               <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
                 VAL
               </span>
@@ -120,7 +120,7 @@ export const TopHeader: React.FC = () => {
             </div>
 
             {/* BANK Capsule */}
-            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 min-w-[56px] text-center">
+            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 min-w-[56px] text-center">
               <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
                 BANK
               </span>
@@ -133,7 +133,7 @@ export const TopHeader: React.FC = () => {
             <div className="flex flex-col gap-1 ml-0.5">
               <button
                 onClick={() => openRulesModal('rules')}
-                className="p-1 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-slate-950/60 dark:hover:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer relative"
+                className="p-1 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer relative"
                 title="Rules & Updates"
               >
                 <BookOpen className="w-3 h-3" />
@@ -143,7 +143,7 @@ export const TopHeader: React.FC = () => {
               </button>
               <button
                 onClick={toggleTheme}
-                className="p-1 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-slate-950/60 dark:hover:bg-slate-900/80 border border-slate-200/80 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+                className="p-1 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
                 title="Toggle Theme"
               >
                 {theme === 'dark' ? (
@@ -159,7 +159,7 @@ export const TopHeader: React.FC = () => {
         {/* Row 2: FT (Left) & DEADLINE (Right) Full-Width Split Pills */}
         <div className="grid grid-cols-2 gap-2 pt-0.5">
           {/* FT Capsule */}
-          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 text-center">
+          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
             <span className="text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
               FT
             </span>
@@ -169,7 +169,7 @@ export const TopHeader: React.FC = () => {
           </div>
 
           {/* DEADLINE Capsule */}
-          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 text-center">
+          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
             <span className="text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
               DEADLINE
             </span>

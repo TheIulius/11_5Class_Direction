@@ -92,7 +92,7 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
       ref={containerRef}
       layout
       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-      className="relative flex items-center h-9 bg-white/90 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full shadow-xs select-none"
+      className="relative flex items-center h-9 bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/[0.06] rounded-full shadow-xs select-none"
     >
       {!isExpanded ? (
         /* Collapsed Default & Active States */

@@ -264,7 +264,7 @@ export const StandingsView: React.FC = () => {
             );
           })
         ) : (
-          <div className="p-8 rounded-3xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400">
+          <div className="p-8 rounded-3xl bg-white dark:bg-[#0c1117] border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400">
             No managers found matching &ldquo;{searchQuery || (selectedGrade !== 'ALL' ? `Grade ${selectedGrade}${selectedSection !== 'ALL' ? `/${selectedSection}` : ''}` : 'filter')}&rdquo;.
           </div>
         )}

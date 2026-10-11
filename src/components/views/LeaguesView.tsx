@@ -111,7 +111,7 @@ export const LeaguesView: React.FC = () => {
         {/* ================================================================= */}
         <div className="lg:col-span-8 space-y-3">
           {/* Active League Header Banner */}
-          <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-white/[0.08] shadow-md flex flex-wrap items-center justify-between gap-3">
+          <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1117] border border-slate-200 dark:border-white/[0.08] shadow-md flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400/20 to-emerald-500/20 border border-amber-400/30 flex items-center justify-center">
                 {activeLeague?.isGlobal ? (
@@ -175,7 +175,7 @@ export const LeaguesView: React.FC = () => {
                     className={`group rounded-2xl p-3 sm:p-4 border transition-all cursor-pointer ${
                       isCurrentUser
                         ? 'bg-emerald-500/[0.07] dark:bg-emerald-500/[0.08] border-emerald-500/40 shadow-md'
-                        : 'bg-white dark:bg-[#0c1322]/90 hover:bg-slate-50 dark:hover:bg-[#111a2e] border-slate-200 dark:border-white/[0.07] shadow-xs'
+                        : 'bg-white dark:bg-[#0c1117]/90 hover:bg-slate-50 dark:hover:bg-[#111a2e] border-slate-200 dark:border-white/[0.07] shadow-xs'
                     }`}
                   >
                     {/* Top Row: Rank, Team & Manager Info, Points & Inspect Button */}
@@ -316,7 +316,7 @@ export const LeaguesView: React.FC = () => {
                 );
               })
             ) : (
-              <div className="p-8 rounded-3xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400">
+              <div className="p-8 rounded-3xl bg-white dark:bg-[#0c1117] border border-slate-200 dark:border-white/10 text-center text-xs text-slate-400">
                 No managers registered in this league yet.
               </div>
             )}
@@ -327,7 +327,7 @@ export const LeaguesView: React.FC = () => {
         {/* SIDE WINDOW (lg:col-span-4): PRIVATE MINI-LEAGUES HUB             */}
         {/* ================================================================= */}
         <div className="lg:col-span-4 space-y-3 lg:sticky lg:top-16">
-          <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-white/[0.08] shadow-md space-y-3">
+          <div className="p-4 rounded-3xl bg-white dark:bg-[#0c1117] border border-slate-200 dark:border-white/[0.08] shadow-md space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/[0.06]">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-amber-400" />

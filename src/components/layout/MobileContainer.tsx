@@ -27,7 +27,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
   const isDevMode = activeTab === 'dev' && isModerator;
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
+    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-[#070b12] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
       {/* Mobile-Only Ultra-Compact Header */}
       {!isDevMode && <TopHeader />}
 
@@ -50,7 +50,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
 
           {/* Minimal Watermark (non-team tabs & non-dev) */}
           {!isDevMode && activeTab !== 'team' && (
-            <footer className="pt-6 pb-6 text-center select-none space-y-1.5 border-t border-slate-200/80 dark:border-slate-800/80 mt-auto max-w-6xl mx-auto px-4">
+            <footer className="pt-6 pb-6 text-center select-none space-y-1.5 border-t border-slate-200/70 dark:border-white/5 mt-auto max-w-6xl mx-auto px-4">
               <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono tracking-wide">
                 © Komarovi Charity League • Sports Command Center
               </p>

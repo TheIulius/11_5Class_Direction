@@ -795,7 +795,7 @@ export const TransfersView: React.FC = () => {
           {/* RIGHT COLUMN: PLAYER MARKET (NOT SCROLLABLE - FULL DISPLAY)    */}
           {/* ------------------------------------------------------------- */}
           <div className="lg:col-span-7 space-y-4">
-            <div className="rounded-3xl bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-xl p-4 sm:p-6 space-y-4">
+            <div className="rounded-3xl bg-white/90 dark:bg-[#0c1117]/90 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-xl p-4 sm:p-6 space-y-4">
               {/* Header Title & Mode Toggle */}
               <div className="flex items-center justify-between flex-wrap gap-2 pb-1 border-b border-slate-200/60 dark:border-white/[0.06]">
                 <div className="flex items-center gap-2">

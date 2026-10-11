@@ -26,7 +26,7 @@ export const BottomNav: React.FC = () => {
 
   return (
     <div className="md:hidden fixed bottom-[max(0.6rem,env(safe-area-inset-bottom))] inset-x-3 max-w-md mx-auto z-40 select-none">
-      <nav className="w-full rounded-full bg-[#0d1420]/90 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] py-1 px-1.5 flex items-center justify-between">
+      <nav className="w-full rounded-full bg-[#070b12]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] py-1 px-1.5 flex items-center justify-between">
         {visibleTabs.map((tab) => {
           const isDev = tab.id === 'dev';
           const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;
