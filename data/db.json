@@ -1776,7 +1776,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 0,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -16140,6 +16140,17 @@
               "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_9_7_baxutashvili",
+              "webName": "Baxutashvili",
+              "clubId": "SCH_9_7",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ],
           "grade": "9",
@@ -27275,9 +27286,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": true
+          },
+          {
+            "playerId": "p_9_7_baxutashvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 36.5,
+        "bank": 30,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
