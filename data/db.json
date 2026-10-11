@@ -2657,7 +2657,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 25,
+      "selectedByPercent": 24,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9881,17 +9881,6 @@
               "webName": "Chakvetadze",
               "clubId": "SCH_10_1",
               "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_1_gogsadze",
-              "webName": "Gogsadze",
-              "clubId": "SCH_10_1",
-              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -26646,13 +26635,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_gogsadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_11_7_guniava",
             "isStarter": true,
             "benchOrder": 0,
@@ -26681,7 +26663,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 1.5,
+        "bank": 5.5,
         "freeTransfers": 2,
         "transfersMadeThisGW": 8,
         "activeChip": "wildcard",
