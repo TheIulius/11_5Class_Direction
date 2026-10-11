@@ -5889,7 +5889,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 4,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -14584,24 +14584,13 @@
               "points": 0
             },
             {
-              "playerId": "p_12_7_vadachkoria",
-              "webName": "Vadachkoria",
-              "clubId": "SCH_12_7",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_gogsadze",
               "webName": "Gogsadze",
               "clubId": "SCH_10_1",
               "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -20772,18 +20761,11 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_7_vadachkoria",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_10_1_gogsadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_10_1_chakvetadze",
@@ -20793,7 +20775,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 36.3,
+        "bank": 40.3,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "wildcard",
