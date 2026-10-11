@@ -1538,7 +1538,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 14,
+      "selectedByPercent": 13,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -14584,17 +14584,6 @@
               "points": 0
             },
             {
-              "playerId": "p_9_6_chigladze",
-              "webName": "Chigladze",
-              "clubId": "SCH_9_6",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_7_vadachkoria",
               "webName": "Vadachkoria",
               "clubId": "SCH_12_7",
@@ -14623,7 +14612,7 @@
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             }
@@ -20783,13 +20772,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_6_chigladze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_12_7_vadachkoria",
             "isStarter": false,
             "benchOrder": 1,
@@ -20808,10 +20790,10 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           }
         ],
-        "bank": 27.2,
+        "bank": 35,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "wildcard",
