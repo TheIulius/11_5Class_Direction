@@ -5,7 +5,7 @@ import { ChevronUp, Users, TrendingUp } from 'lucide-react';
 import { CLUBS } from '../../data/clubs';
 import { calculatePlayerPoints } from '../../engine/scoring';
 import { triggerHaptic } from '../../utils/haptics';
-import { motion, PanInfo } from 'framer-motion';
+import { motion, PanInfo, useDragControls } from 'framer-motion';
 
 interface SubstitutesDrawerProps {
   layout: any;
@@ -21,8 +21,8 @@ interface SubstitutesDrawerProps {
 
 // Physical height configuration for iOS-native peek & expand snap behavior
 const PRI_HEIGHT = 560; // Total physical height of the sliding hub (px)
-const PRI_PEEK_VISIBLE = 156; // Height of drag handle + header + 3 substitute jerseys (px)
-const PRI_PEEK_Y = PRI_HEIGHT - PRI_PEEK_VISIBLE; // Offset in resting peek state (~404px)
+const PRI_PEEK_VISIBLE = 148; // Height of drag handle + header + 3 substitute jerseys (px)
+const PRI_PEEK_Y = PRI_HEIGHT - PRI_PEEK_VISIBLE; // Offset in resting peek state (~412px)
 
 const SPRING_CONFIG = {
   type: 'spring' as const,
@@ -43,7 +43,6 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
   setIsPrimaryExpanded: setExternalPrimary,
 }) => {
   const {
-    isSquadLocked,
     setActiveTab,
     squad,
     fixtures,
@@ -54,6 +53,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
   const [internalPrimary, setInternalPrimary] = useState(false);
   const isPrimaryExpanded = externalPrimary ?? internalPrimary;
   const setIsPrimaryExpanded = setExternalPrimary ?? setInternalPrimary;
+  const dragControls = useDragControls();
 
   const togglePrimary = () => {
     triggerHaptic('light');
@@ -244,6 +244,8 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
       <div className="lg:hidden pointer-events-none">
         <motion.div
           drag="y"
+          dragControls={dragControls}
+          dragListener={!isPrimaryExpanded}
           dragConstraints={{ top: 0, bottom: PRI_PEEK_Y }}
           dragElastic={{ top: 0.05, bottom: 0.25 }}
           onDragEnd={handlePrimaryDragEnd}
@@ -254,9 +256,14 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
           style={{ willChange: 'transform' }}
           className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 w-full z-40 h-[560px] rounded-t-[28px] bg-[#0c1117]/95 dark:bg-[#070b12]/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden select-none pointer-events-auto"
         >
-          {/* Header & Drag Handle (Visible in Peek State) */}
+          {/* Header & Drag Handle (Always Fixed at Top of Drawer) */}
           <div
             onClick={togglePrimary}
+            onPointerDown={(e) => {
+              if (isPrimaryExpanded) {
+                dragControls.start(e);
+              }
+            }}
             className="w-full pt-2 pb-2 px-4 flex flex-col items-center cursor-grab active:cursor-grabbing touch-none select-none shrink-0"
             style={{ touchAction: 'none' }}
           >
@@ -287,9 +294,14 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
             </div>
           </div>
 
-          {/* Substitutes 3-Card Row (Always Visible in Resting Peek State) */}
-          <div className="px-3 pt-3 pb-2 shrink-0">
-            <div className="grid grid-cols-3 gap-2">
+          {/* Main Scrollable Drawer Wrapper (The ONLY scrollable element in the drawer) */}
+          <div
+            className={`flex-1 px-3 pt-2 pb-28 space-y-4 ${
+              isPrimaryExpanded ? 'overflow-y-auto overscroll-contain' : 'overflow-hidden'
+            }`}
+          >
+            {/* 1. Substitutes 3-Card Row */}
+            <div className="grid grid-cols-3 gap-2 pt-1">
               {benchSlots.map((order) => {
                 const sp = layout.bench.find((b: any) => b.benchOrder === order) || layout.bench[order - 1];
                 if (sp) {
@@ -333,11 +345,8 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                 );
               })}
             </div>
-          </div>
 
-          {/* Expanded Drawer Content: Scrollable Hub (Revealed when dragged up) */}
-          <div className="flex-1 px-3 pt-3 pb-28 space-y-3 overflow-y-auto overscroll-contain">
-            {/* GW History */}
+            {/* 2. GW History (Full Natural Height - No Internal Scrollbar) */}
             <div className="bg-zinc-900/50 rounded-2xl p-4 border border-white/5 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
