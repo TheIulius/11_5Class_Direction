@@ -6,6 +6,7 @@ import { ArrowLeftRight, Check, AlertCircle } from 'lucide-react';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { GameweekCalculationResult, calculatePlayerPoints, POSITION_CHANGED_PLAYERS } from '../../engine/scoring';
+import { triggerHaptic } from '../../utils/haptics';
 
 interface PlayerCardProps {
   playerId: string;
@@ -77,21 +78,27 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
     if (selectedPlayerForSwap) {
       if (isSwapSource) {
         // Cancel swap mode
+        triggerHaptic('light');
         setSelectedPlayerForSwap(null);
       } else if (isSwapTargetEligible) {
         // Execute swap!
         const result = substitutePlayers(selectedPlayerForSwap, playerId);
         if (!result.success) {
+          triggerHaptic('warning');
           alert(result.message || 'Cannot make this substitution');
+        } else {
+          triggerHaptic('success');
         }
       } else {
         // Pick new source
+        triggerHaptic('light');
         setSelectedPlayerForSwap(playerId);
       }
       return;
     }
 
     // Normal click: open player action sheet
+    triggerHaptic('light');
     onCardClick(playerId);
   };
 

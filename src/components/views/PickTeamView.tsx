@@ -588,7 +588,10 @@ export const PickTeamView: React.FC = () => {
                   <button
                     key={chip.id}
                     disabled={isPastGW || isUsedInSeason || isSquadLocked}
-                    onClick={() => activateChip(chip.id)}
+                    onClick={() => {
+                      triggerHaptic(isActiveInThisGW ? 'light' : 'medium');
+                      activateChip(chip.id);
+                    }}
                     className={`group relative overflow-hidden flex flex-col md:flex-row items-center md:justify-between p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold border transition-all ${
                       isActiveInThisGW
                         ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20'

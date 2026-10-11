@@ -108,7 +108,7 @@
       "totalPoints": 19,
       "gwPoints": 19,
       "form": 5,
-      "selectedByPercent": 16,
+      "selectedByPercent": 18,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -175,7 +175,7 @@
       "totalPoints": 19,
       "gwPoints": 19,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 5,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -238,7 +238,7 @@
       "totalPoints": 11,
       "gwPoints": 11,
       "form": 5,
-      "selectedByPercent": 8,
+      "selectedByPercent": 9,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -304,7 +304,7 @@
       "totalPoints": 7,
       "gwPoints": 7,
       "form": 5,
-      "selectedByPercent": 9,
+      "selectedByPercent": 10,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -1153,7 +1153,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 6,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2935,7 +2935,7 @@
       "totalPoints": 13,
       "gwPoints": 13,
       "form": 5,
-      "selectedByPercent": 9,
+      "selectedByPercent": 10,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4207,7 +4207,7 @@
       "totalPoints": 7,
       "gwPoints": 7,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4631,7 +4631,7 @@
       "totalPoints": 26,
       "gwPoints": 26,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 4,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5660,7 +5660,7 @@
       "totalPoints": 10,
       "gwPoints": 10,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 6,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -16167,26 +16167,115 @@
           "lineup": []
         },
         {
-          "id": "user_1790687565506",
-          "managerName": "Erekle",
-          "teamName": "Lobexebi",
-          "totalPoints": 0,
-          "gwPoints": 0,
-          "rank": 77,
-          "previousRank": 77,
-          "activeChip": null,
-          "lineup": []
-        },
-        {
           "id": "user_1790697681275",
           "managerName": "test",
           "teamName": "test",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 78,
-          "previousRank": 78,
-          "activeChip": null,
-          "lineup": [],
+          "rank": 77,
+          "previousRank": 77,
+          "activeChip": "triple_captain",
+          "lineup": [
+            {
+              "playerId": "p_zurashvili",
+              "webName": "Zurashvili",
+              "clubId": "SCH_11_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_giorguna",
+              "webName": "Giorguna",
+              "clubId": "SCH_11_1",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_custom_1790166342439",
+              "webName": "Samada",
+              "clubId": "SCH_11_5",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_chaga",
+              "webName": "Chaga",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_6_dzagania",
+              "webName": "Dzagania",
+              "clubId": "SCH_12_6",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_custom_1790259242808",
+              "webName": "Topuria",
+              "clubId": "SCH_11_3",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_4_kuwashvili",
+              "webName": "Kuwashvili",
+              "clubId": "SCH_9_4",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_1_barnovi",
+              "webName": "Barnovi",
+              "clubId": "SCH_12_1",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_3_kapanadze",
+              "webName": "S. Kapanadze",
+              "clubId": "SCH_10_3",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
+            }
+          ],
           "grade": "11",
           "parallel": "5",
           "realName": "test test",
@@ -16198,8 +16287,8 @@
           "teamName": "9-2",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 79,
-          "previousRank": 79,
+          "rank": 78,
+          "previousRank": 78,
           "grade": "9",
           "parallel": "2",
           "realName": "ნიკა კუპრეიშვილი",
@@ -16213,8 +16302,8 @@
           "teamName": "10/4",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 80,
-          "previousRank": 80,
+          "rank": 79,
+          "previousRank": 79,
           "grade": "10",
           "parallel": "5",
           "realName": "Saba Datunashvili",
@@ -16228,8 +16317,8 @@
           "teamName": "Nika madrid FC",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 81,
-          "previousRank": 81,
+          "rank": 80,
+          "previousRank": 80,
           "grade": "10",
           "parallel": "3",
           "realName": "Nikoloz Zurabiani",
@@ -16243,8 +16332,8 @@
           "teamName": "Bvb",
           "totalPoints": 0,
           "gwPoints": 0,
-          "rank": 82,
-          "previousRank": 82,
+          "rank": 81,
+          "previousRank": 81,
           "grade": "9",
           "parallel": "4",
           "realName": "Aleksandre Keldishvili",
@@ -16258,8 +16347,8 @@
           "teamName": "Kai bichebi",
           "totalPoints": -8,
           "gwPoints": 0,
-          "rank": 83,
-          "previousRank": 83,
+          "rank": 82,
+          "previousRank": 82,
           "activeChip": null,
           "lineup": [
             {
@@ -27550,34 +27639,6 @@
       "gwPoints": 0,
       "totalPoints": 0
     },
-    "user_1790687565506": {
-      "id": "user_1790687565506",
-      "managerName": "Erekle",
-      "teamName": "Lobexebi",
-      "squad": {
-        "teamName": "Lobexebi",
-        "managerName": "Erekle",
-        "players": [],
-        "bank": 55,
-        "freeTransfers": 1,
-        "transfersMadeThisGW": 0,
-        "activeChip": null,
-        "usedChips": {
-          "triple_captain": false,
-          "bench_boost": false,
-          "wildcard": false
-        },
-        "gameweekSquads": {},
-        "gameweekChips": {},
-        "gwTransferPenalties": {},
-        "accumulatedTransferPenalties": 0,
-        "startFreeTransfers": 1,
-        "remediationGranted": {}
-      },
-      "joinedAt": "2026-09-29T13:12:45.507Z",
-      "gwPoints": 0,
-      "totalPoints": 0
-    },
     "user_1790697681275": {
       "id": "user_1790697681275",
       "managerName": "test",
@@ -27585,11 +27646,75 @@
       "squad": {
         "teamName": "test",
         "managerName": "test",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_zurashvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_giorguna",
+            "isStarter": false,
+            "benchOrder": 1,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_custom_1790166342439",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_chaga",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
+          },
+          {
+            "playerId": "p_12_6_dzagania",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_custom_1790259242808",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_4_kuwashvili",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_1_barnovi",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_3_kapanadze",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 0,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
-        "activeChip": null,
+        "activeChip": "triple_captain",
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
@@ -27759,7 +27884,7 @@
       "parallel": "5",
       "realName": "Ilia Shinjiashvili",
       "showRealNamePublicly": true,
-      "token": "515196ae5003e24a112f37a886165c9a195638da40513b269b02c329c95aba78"
+      "token": "8000126de33658f3edc9177cb5f09fe00fa3b56c04444435ef4aa42f66613a8d"
     },
     "user_1790357898196": {
       "id": "user_1790357898196",
@@ -29093,20 +29218,6 @@
       "realName": "Alex Isak",
       "showRealNamePublicly": false
     },
-    "user_1790687565506": {
-      "id": "user_1790687565506",
-      "username": "rkl_01",
-      "email": "ereklebenidze123@gmail.com",
-      "passwordHash": "fc9ab7d616f792ce7b83f66c77e0ed8a0a871e58cd82d12b40bba8acba1baa111ea3d17669e102adc307c0aee95a0d52c14931ce59e18d261ba7f2590b457f51",
-      "salt": "f8dfc50da585fe3b19cfe39d1be6c2a7",
-      "managerName": "Erekle",
-      "teamName": "Lobexebi",
-      "token": "e5e89c8fe187671d8cb9c470ccaacfbb6b20605b7a8916aea832adc49a3d8b67",
-      "createdAt": "2026-09-29T13:12:45.507Z",
-      "role": "user",
-      "isAdmin": false,
-      "isApproved": false
-    },
     "user_1790697681275": {
       "id": "user_1790697681275",
       "username": "test",
@@ -29239,7 +29350,8 @@
     "user_1790502580519",
     "user_1790519882502",
     "user_1790705712207",
-    "user_1790613843101"
+    "user_1790613843101",
+    "user_1790687565506"
   ],
   "lineupVisibility": "auto",
   "pendingPhotos": []

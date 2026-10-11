@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
+import { triggerHaptic } from '../../utils/haptics';
 
 export interface ClassGridViewProps {
   players: Record<string, Player>;
@@ -510,6 +511,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
               <button
                 onClick={() => {
                   if (isIllegal) return;
+                  triggerHaptic('medium');
                   onSelectInPlayer(isSelectedInPlayer ? null : detailPlayer.id);
                   setDetailPlayerId(null);
                 }}
@@ -525,6 +527,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
             ) : (
               <button
                 onClick={() => {
+                  triggerHaptic('medium');
                   onBuyPlayer(detailPlayer.id);
                   setDetailPlayerId(null);
                 }}
@@ -633,7 +636,10 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                       return (
                         <div
                           key={p.id}
-                          onClick={() => setDetailPlayerId(p.id)}
+                          onClick={() => {
+                            triggerHaptic('light');
+                            setDetailPlayerId(p.id);
+                          }}
                           className={`w-full p-1 sm:p-2 rounded-xl border transition-all cursor-pointer flex flex-col items-center text-center group ${
                             isSelectedInPlayer
                               ? 'bg-emerald-500/20 border-emerald-500 shadow-xs'
@@ -776,6 +782,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
             onClick={() => {
               const idx = grades.indexOf(activeGrade);
               if (idx > 0) {
+                triggerHaptic('light');
                 setGradeWithDirection([grades[idx - 1], -1]);
                 setActiveClassId(null);
               }
@@ -797,6 +804,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
             onClick={() => {
               const idx = grades.indexOf(activeGrade);
               if (idx < grades.length - 1) {
+                triggerHaptic('light');
                 setGradeWithDirection([grades[idx + 1], 1]);
                 setActiveClassId(null);
               }
@@ -820,6 +828,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                 key={g}
                 onClick={() => {
                   if (g === activeGrade) return;
+                  triggerHaptic('light');
                   const dir = g > activeGrade ? 1 : -1;
                   setGradeWithDirection([g, dir]);
                   setActiveClassId(null);
@@ -913,7 +922,10 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
               return (
                 <div
                   key={club.id}
-                  onClick={() => setActiveClassId(club.id)}
+                  onClick={() => {
+                    triggerHaptic('light');
+                    setActiveClassId(club.id);
+                  }}
                   className="group p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-white/[0.02] hover:bg-sky-50/50 dark:hover:bg-white/[0.05] border border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/50 shadow-xs hover:shadow-md hover:shadow-sky-500/10 transition-all cursor-pointer"
                 >
                   {/* Class Title Header (e.g. 10/1) */}
@@ -955,6 +967,7 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                                   key={p.id}
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                    triggerHaptic('light');
                                     setDetailPlayerId(p.id);
                                   }}
                                   title={`${p.name} (${p.position}) - £${p.cost.toFixed(1)}m`}
