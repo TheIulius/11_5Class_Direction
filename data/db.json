@@ -5374,7 +5374,7 @@
       "totalPoints": 24,
       "gwPoints": 24,
       "form": 5,
-      "selectedByPercent": 20,
+      "selectedByPercent": 19,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9079,7 +9079,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -9105,17 +9105,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_3_vashakmadze",
-              "webName": "Vashakmadze",
-              "clubId": "SCH_12_3",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_7_kevlishvili",
               "webName": "Kevlishvili",
               "clubId": "SCH_12_7",
@@ -9134,7 +9123,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -16988,7 +16977,7 @@
           {
             "playerId": "p_qavtaradze",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -17007,13 +16996,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_3_vashakmadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_7_kevlishvili",
             "isStarter": true,
             "benchOrder": 0,
@@ -17023,7 +17005,7 @@
           {
             "playerId": "p_11_6_chaladze",
             "isStarter": false,
-            "benchOrder": 1,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -17042,7 +17024,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0.4,
+        "bank": 9.1,
         "freeTransfers": 0,
         "transfersMadeThisGW": 5,
         "activeChip": null,
