@@ -2996,7 +2996,7 @@
       "totalPoints": 4,
       "gwPoints": 4,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9067,17 +9067,6 @@
               "position": "GKP",
               "isStarter": true,
               "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_5_shakarishvili",
-              "webName": "Shakarishvili",
-              "clubId": "SCH_10_5",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -20238,13 +20227,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_5_shakarishvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_9_2_chalatashvili",
             "isStarter": true,
             "benchOrder": 0,
@@ -20294,7 +20276,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 1,
+        "bank": 7.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 3,
         "activeChip": null,
