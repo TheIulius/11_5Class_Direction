@@ -9,13 +9,20 @@ interface InlineChipSelectorProps {
   isPastGW?: boolean;
 }
 
-const CHIP_CONFIG: Record<ChipType, { label: string }> = {
-  triple_captain: { label: 'Triple Captain' },
-  bench_boost: { label: 'Bench Boost' },
-  wildcard: { label: 'Wildcard' },
+const CHIP_CONFIG: Record<ChipType, { label: string; icon: string }> = {
+  triple_captain: { label: 'Triple Captain', icon: '🏆' },
+  bench_boost: { label: 'Bench Boost', icon: '🛡️' },
+  wildcard: { label: 'Wildcard', icon: '🃏' },
 };
 
 const DEFAULT_ORDER: ChipType[] = ['triple_captain', 'bench_boost', 'wildcard'];
+
+// Authentic iOS spring physics from @ios-fluid-gesturesSKILL
+const SPRING_CONFIG = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 40,
+};
 
 export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
   selectedGW,
@@ -91,8 +98,9 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
     <motion.div
       ref={containerRef}
       layout
-      transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-      className="relative flex items-center h-9 bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/[0.06] rounded-full shadow-xs select-none"
+      transition={SPRING_CONFIG}
+      style={{ willChange: 'transform' }}
+      className="relative flex items-center h-9 bg-black border border-white/10 rounded-2xl shadow-xs select-none will-change-transform overflow-hidden"
     >
       {!isExpanded ? (
         /* Collapsed Default & Active States */
@@ -105,25 +113,33 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
             triggerHaptic('light');
             setIsExpanded(true);
           }}
-          className={`h-full px-3 flex items-center gap-1.5 rounded-full transition-all ${
+          transition={SPRING_CONFIG}
+          style={{ willChange: 'transform' }}
+          className={`h-full px-3.5 flex items-center gap-2 rounded-2xl transition-colors will-change-transform ${
             isPastGW ? 'cursor-default' : 'cursor-pointer active:scale-95'
           }`}
         >
-          <span
-            className={`text-xs font-bold whitespace-nowrap tracking-tight ${
-              activeChip
-                ? 'text-zinc-950 dark:text-white font-black'
-                : 'text-slate-600 dark:text-slate-300'
-            }`}
-          >
-            {activeChip ? CHIP_CONFIG[activeChip]?.label : 'Chips'}
+          <span className="text-xs font-bold whitespace-nowrap tracking-tight flex items-center gap-1.5">
+            {activeChip ? (
+              <>
+                <span className="text-xs shrink-0">{CHIP_CONFIG[activeChip]?.icon}</span>
+                <span className="text-white font-black">{CHIP_CONFIG[activeChip]?.label}</span>
+              </>
+            ) : (
+              <span className="text-zinc-400">Chips</span>
+            )}
           </span>
-          {/* iOS Vertical Pill Indicator */}
-          <span className="w-[2px] h-[14px] bg-slate-400/50 dark:bg-slate-500/50 rounded-full shrink-0" />
+          {/* iOS Vertical Separator */}
+          <span className="text-zinc-700 font-semibold text-xs select-none leading-none">|</span>
         </motion.button>
       ) : (
         /* Expanded Revealing All 3 Chips with Morphing Physics */
-        <motion.div layout className="flex items-center px-1.5 gap-0.5 sm:gap-1">
+        <motion.div
+          layout
+          transition={SPRING_CONFIG}
+          style={{ willChange: 'transform' }}
+          className="flex items-center p-1 gap-1.5 will-change-transform"
+        >
           {chipOrder.map((chipId, index) => {
             const isChosen = activeChip === chipId;
             const isUsed = Boolean(
@@ -144,23 +160,25 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
                   e.stopPropagation();
                   handleChipClick(chipId);
                 }}
-                transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-                className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1 active:scale-95 ${
+                transition={SPRING_CONFIG}
+                style={{ willChange: 'transform' }}
+                className={`rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 active:scale-95 will-change-transform ${
                   index === 0 && isChosen
-                    ? 'text-white bg-zinc-950 dark:text-zinc-950 dark:bg-white shadow-xs'
+                    ? 'px-4 py-1.5 bg-zinc-800 text-white border border-white/10 shadow-sm'
                     : isChosen
-                    ? 'text-zinc-950 dark:text-white font-black'
+                    ? 'px-3 py-1.5 bg-zinc-800/80 text-white border border-white/10'
                     : isDisabled
-                    ? 'text-slate-400/40 dark:text-slate-600 line-through cursor-not-allowed'
-                    : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer'
+                    ? 'px-2.5 py-1.5 text-zinc-600 line-through cursor-not-allowed'
+                    : 'px-2.5 py-1.5 text-zinc-500 hover:text-zinc-300 cursor-pointer'
                 }`}
               >
+                <span className="text-xs shrink-0">{CHIP_CONFIG[chipId].icon}</span>
                 <span>{CHIP_CONFIG[chipId].label}</span>
               </motion.button>
             );
           })}
 
-          {/* iOS Vertical Pill Separator / Collapse Button */}
+          {/* iOS Vertical Separator / Collapse Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -168,10 +186,10 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
               triggerHaptic('light');
               setIsExpanded(false);
             }}
-            className="h-full px-1.5 flex items-center justify-center cursor-pointer hover:opacity-80 active:scale-90 transition-all"
+            className="h-full px-2 flex items-center justify-center cursor-pointer hover:text-zinc-400 active:scale-90 transition-all text-zinc-700 font-semibold text-xs leading-none select-none"
             title="Collapse"
           >
-            <span className="w-[2px] h-[14px] bg-slate-400/50 dark:bg-slate-500/50 rounded-full shrink-0" />
+            <span>|</span>
           </button>
         </motion.div>
       )}

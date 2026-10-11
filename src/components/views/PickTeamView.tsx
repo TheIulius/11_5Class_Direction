@@ -90,7 +90,7 @@ export const PickTeamView: React.FC = () => {
           {/* Left: GW Selector Capsule + Inline Chip Selector */}
           <div className="flex items-center gap-2 min-w-0">
             {/* GW Selector Capsule */}
-            <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/70 dark:bg-white/[0.03] border border-slate-200/80 dark:border-white/[0.06] backdrop-blur-md shadow-xs h-9 shrink-0">
+            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black border border-white/10 shadow-xs h-9 shrink-0">
               <button
                 type="button"
                 onClick={() => {
@@ -99,23 +99,26 @@ export const PickTeamView: React.FC = () => {
                 }}
                 disabled={selectedGW <= 1}
                 aria-label="Previous Gameweek"
-                className="p-1 rounded-lg hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+                className="p-1 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
 
               <div className="flex items-center gap-1.5 px-1 min-w-0">
-                <span className="text-xs font-black uppercase tracking-tight text-slate-900 dark:text-white whitespace-nowrap">
+                <span className="text-xs font-black uppercase tracking-tight text-white whitespace-nowrap">
                   GW {selectedGW}
                 </span>
                 <span
-                  className={`text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded-full border ${
+                  className={`text-[8.5px] font-mono font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-1 ${
                     selectedGW === currentGW
-                      ? 'bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-zinc-200 border-slate-200 dark:border-white/10'
-                      : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5'
+                      ? 'bg-red-950/40 text-red-400 border-red-900/50'
+                      : 'bg-zinc-900 text-zinc-500 border-zinc-800'
                   }`}
                 >
-                  {selectedGW === currentGW ? 'LIVE' : 'ARCHIVE'}
+                  {selectedGW === currentGW && (
+                    <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse shrink-0" />
+                  )}
+                  <span>{selectedGW === currentGW ? 'LIVE' : 'ARCHIVE'}</span>
                 </span>
               </div>
 
@@ -127,7 +130,7 @@ export const PickTeamView: React.FC = () => {
                 }}
                 disabled={selectedGW >= currentGW}
                 aria-label="Next Gameweek"
-                className="p-1 rounded-lg hover:bg-slate-200/80 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+                className="p-1 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
               >
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
@@ -143,7 +146,7 @@ export const PickTeamView: React.FC = () => {
           {/* Quick Score Capsule on Middle Column */}
           <div className="flex items-center gap-1.5 shrink-0">
             <span
-              className="px-2.5 py-1 rounded-xl text-xs font-black font-mono tabular-nums bg-slate-100 dark:bg-white/[0.04] text-slate-900 dark:text-white border border-slate-200/80 dark:border-white/10 shadow-2xs h-9 flex items-center"
+              className="px-2.5 py-1 rounded-2xl text-xs font-black font-mono tabular-nums bg-black text-white border border-white/10 shadow-2xs h-9 flex items-center"
               title="Gameweek Score"
             >
               {activeCalculation.totalPoints} PTS
@@ -153,9 +156,9 @@ export const PickTeamView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedGW(currentGW)}
-                className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 text-[11px] font-bold transition-all cursor-pointer h-9"
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-2xl bg-black hover:bg-zinc-900 text-zinc-300 border border-white/10 text-[11px] font-bold transition-all cursor-pointer h-9 shadow-2xs"
               >
-                <Clock className="w-3 h-3" />
+                <Clock className="w-3 h-3 text-zinc-400" />
                 <span>Return to GW {currentGW}</span>
               </button>
             )}
