@@ -123,7 +123,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
   }, [activeSquadPlayers, singleCaptainId]);
 
   return (
-    <div className="relative w-full overflow-hidden select-none pb-2">
+    <div className="relative w-full flex-1 overflow-hidden select-none flex flex-col">
       {/* Swap Mode Notification Floating Bar */}
       {!readOnly && selectedPlayerForSwap && (
         <div className="sticky top-2 z-30 mx-2 sm:mx-4 my-1.5 bg-amber-400 text-slate-950 px-3.5 py-2 rounded-2xl shadow-xl flex items-center justify-between border border-amber-300 font-black text-xs ring-2 ring-amber-400/40 backdrop-blur-md">
@@ -213,7 +213,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
         </div>
 
         {/* Stadium Pitch Canvas with Dynamic Coordinates */}
-        <div className="relative z-10 w-full flex-1 min-h-[480px] sm:min-h-[520px] md:min-h-[580px] lg:min-h-[640px] my-1">
+        <div className="relative z-10 w-full flex-1 overflow-hidden my-0.5 sm:my-1">
           {/* Active Starters */}
           {layout.pitchPositions.map((pos) => {
             const sp = activeSquadPlayers.find((p) => p.playerId === pos.playerId);

@@ -27,12 +27,18 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
   const isDevMode = activeTab === 'dev' && isModerator;
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-[#070b12] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
+    <div
+      className={`${
+        activeTab === 'team'
+          ? 'h-[100dvh] w-full overflow-hidden overscroll-none'
+          : 'min-h-screen w-full'
+      } flex flex-col bg-slate-50 dark:bg-[#070b12] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200`}
+    >
       {/* Mobile-Only Ultra-Compact Header */}
       {!isDevMode && <TopHeader />}
 
       {/* Main Layout Container: Desktop Sidebar + View Canvas */}
-      <div className="w-full flex-1 flex min-h-screen">
+      <div className={`w-full flex-1 flex ${activeTab === 'team' ? 'h-full overflow-hidden' : 'min-h-screen'}`}>
         {/* Left Column (Desktop Fixed Sidebar) */}
         {!isDevMode && <DesktopSidebar />}
 
@@ -42,11 +48,11 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
             isDevMode
               ? 'p-0 pb-12'
               : activeTab === 'team'
-              ? 'pb-14 lg:pb-6 overflow-hidden lg:overflow-visible'
+              ? 'h-full overflow-hidden overscroll-none pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-6'
               : 'pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6'
           }`}
         >
-          <div className="w-full flex-1 min-w-0">{children}</div>
+          <div className={`w-full flex-1 min-w-0 ${activeTab === 'team' ? 'h-full flex flex-col overflow-hidden' : ''}`}>{children}</div>
 
           {/* Minimal Watermark (non-team tabs & non-dev) */}
           {!isDevMode && activeTab !== 'team' && (

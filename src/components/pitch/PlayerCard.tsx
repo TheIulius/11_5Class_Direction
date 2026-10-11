@@ -142,11 +142,6 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
             photoUrl={player.photoUrl}
             className="w-11 h-11 sm:w-12 sm:h-12 drop-shadow-md"
           />
-          {benchOrder && (
-            <span className="absolute -bottom-1 -right-1 font-mono text-[8px] font-bold px-1 rounded bg-black/80 text-zinc-300 border border-white/10">
-              #{benchOrder}
-            </span>
-          )}
         </div>
 
         {/* Player Web Name */}

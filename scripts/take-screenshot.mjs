@@ -78,11 +78,24 @@ async function main() {
     await send('Page.navigate', { url: 'http://localhost:5173' });
     await new Promise(r => setTimeout(r, 2000));
 
+    if (process.argv[4] === 'gw1') {
+      await send('Runtime.evaluate', {
+        expression: `
+          const prevBtn = Array.from(document.querySelectorAll('button')).find(b => b.getAttribute('aria-label') === 'Previous Gameweek');
+          if (prevBtn) prevBtn.click();
+        `
+      });
+      await new Promise(r => setTimeout(r, 600));
+    }
+
     if (process.argv[3] === 'expand') {
       await send('Runtime.evaluate', {
         expression: `
-          const handles = Array.from(document.querySelectorAll('div')).filter(d => d.style.touchAction === 'none' || d.textContent.includes('SUBSTITUTES'));
-          if (handles[0]) handles[0].click();
+          const subHeader = Array.from(document.querySelectorAll('span')).find(s => s.textContent.trim() === 'SUBSTITUTES');
+          if (subHeader) {
+            const clickTarget = subHeader.closest('[style*="touch-action"]') || subHeader.parentElement;
+            if (clickTarget) clickTarget.click();
+          }
         `
       });
       await new Promise(r => setTimeout(r, 800));
