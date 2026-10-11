@@ -15605,7 +15605,7 @@
               "clubId": "SCH_12_6",
               "position": "GKP",
               "isStarter": true,
-              "isCaptain": true,
+              "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -15638,7 +15638,7 @@
               "clubId": "SCH_12_6",
               "position": "MID",
               "isStarter": true,
-              "isCaptain": false,
+              "isCaptain": true,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -17830,7 +17830,7 @@
             "playerId": "p_12_6_dzagania",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": true,
+            "isCaptain": false,
             "isViceCaptain": false
           },
           {
@@ -17851,7 +17851,7 @@
             "playerId": "p_12_6_chachia",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
+            "isCaptain": true,
             "isViceCaptain": false
           },
           {
