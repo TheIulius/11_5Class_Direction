@@ -2270,7 +2270,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9918,6 +9918,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_7_guniava",
+              "webName": "Guniava",
+              "clubId": "SCH_11_7",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
               "points": 0
             }
           ],
@@ -26643,11 +26654,18 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_guniava",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 6.9,
+        "bank": 2.9,
         "freeTransfers": 2,
-        "transfersMadeThisGW": 7,
+        "transfersMadeThisGW": 8,
         "activeChip": "wildcard",
         "usedChips": {
           "triple_captain": true,
