@@ -3453,7 +3453,7 @@
       "totalPoints": 10,
       "gwPoints": 10,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9844,17 +9844,6 @@
               "points": 0
             },
             {
-              "playerId": "p_11_6_yarala",
-              "webName": "Yarala",
-              "clubId": "SCH_11_6",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_6_aptsiauri",
               "webName": "Aptsiauri",
               "clubId": "SCH_12_6",
@@ -9883,7 +9872,7 @@
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -26596,13 +26585,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_6_yarala",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
-          },
-          {
             "playerId": "p_12_6_aptsiauri",
             "isStarter": false,
             "benchOrder": 1,
@@ -26621,7 +26603,7 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_10_1_chakvetadze",
@@ -26645,7 +26627,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 10.1,
+        "bank": 18.9,
         "freeTransfers": 2,
         "transfersMadeThisGW": 8,
         "activeChip": "wildcard",
