@@ -12184,10 +12184,10 @@
               "webName": "Melikidze",
               "clubId": "SCH_10_7",
               "position": "MID",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -12217,10 +12217,10 @@
               "webName": "Dadu",
               "clubId": "SCH_11_1",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -17782,8 +17782,8 @@
           },
           {
             "playerId": "p_10_7_melikidze",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -17803,8 +17803,8 @@
           },
           {
             "playerId": "p_dadu",
-            "isStarter": false,
-            "benchOrder": 2,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
