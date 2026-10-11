@@ -5660,7 +5660,7 @@
       "totalPoints": 10,
       "gwPoints": 10,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 5,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -16381,9 +16381,31 @@
           "activeChip": "triple_captain",
           "lineup": [
             {
+              "playerId": "p_12_6_dzagania",
+              "webName": "Dzagania",
+              "clubId": "SCH_12_6",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
               "playerId": "p_zurashvili",
               "webName": "Zurashvili",
               "clubId": "SCH_11_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_custom_1790259242808",
+              "webName": "Topuria",
+              "clubId": "SCH_11_3",
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
@@ -16396,10 +16418,10 @@
               "webName": "Giorguna",
               "clubId": "SCH_11_1",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -16425,17 +16447,6 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790259242808",
-              "webName": "Topuria",
-              "clubId": "SCH_11_3",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_9_4_kuwashvili",
               "webName": "Kuwashvili",
               "clubId": "SCH_9_4",
@@ -16443,7 +16454,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -16451,10 +16462,10 @@
               "webName": "Barnovi",
               "clubId": "SCH_12_1",
               "position": "MID",
-              "isStarter": true,
-              "isCaptain": true,
+              "isStarter": false,
+              "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -27798,6 +27809,13 @@
         "managerName": "test",
         "players": [
           {
+            "playerId": "p_12_6_dzagania",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          },
+          {
             "playerId": "p_zurashvili",
             "isStarter": true,
             "benchOrder": 0,
@@ -27805,9 +27823,16 @@
             "isViceCaptain": false
           },
           {
+            "playerId": "p_custom_1790259242808",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
             "playerId": "p_giorguna",
-            "isStarter": false,
-            "benchOrder": 1,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -27826,24 +27851,17 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790259242808",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_9_4_kuwashvili",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_12_1_barnovi",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": true,
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
             "isViceCaptain": false
           },
           {
@@ -27854,7 +27872,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 5.5,
+        "bank": 0,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": "triple_captain",
