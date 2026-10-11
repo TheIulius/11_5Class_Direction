@@ -9421,10 +9421,10 @@
               "webName": "Qavtaradze",
               "clubId": "SCH_11_1",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -9487,10 +9487,10 @@
               "webName": "Tabatadze",
               "clubId": "SCH_12_4",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -16987,8 +16987,8 @@
           },
           {
             "playerId": "p_qavtaradze",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -17029,8 +17029,8 @@
           },
           {
             "playerId": "p_12_4_tabatadze",
-            "isStarter": false,
-            "benchOrder": 2,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
