@@ -16553,9 +16553,9 @@
           "gwPoints": 0,
           "rank": 83,
           "previousRank": 83,
-          "grade": "",
-          "parallel": "",
-          "realName": "",
+          "grade": "სხვა",
+          "parallel": "Megobari",
+          "realName": "გიო გაგუა",
           "showRealNamePublicly": true,
           "activeChip": null,
           "lineup": []
@@ -28031,9 +28031,9 @@
       "id": "user_1791747378752",
       "managerName": "Giorgi",
       "teamName": "Gagua",
-      "grade": "",
-      "parallel": "",
-      "realName": "",
+      "grade": "სხვა",
+      "parallel": "Megobari",
+      "realName": "გიო გაგუა",
       "showRealNamePublicly": true,
       "squad": {
         "teamName": "Gagua",
@@ -29513,9 +29513,9 @@
       "role": "user",
       "isAdmin": false,
       "isApproved": false,
-      "grade": "",
-      "parallel": "",
-      "realName": "",
+      "grade": "სხვა",
+      "parallel": "Megobari",
+      "realName": "გიო გაგუა",
       "showRealNamePublicly": true
     }
   },
