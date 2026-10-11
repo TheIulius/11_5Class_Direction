@@ -1790,7 +1790,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 0,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -16195,6 +16195,17 @@
               "isViceCaptain": false,
               "benchOrder": 1,
               "points": 0
+            },
+            {
+              "playerId": "p_9_7_broladze",
+              "webName": "Broladze",
+              "clubId": "SCH_9_7",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
             }
           ],
           "grade": "9",
@@ -27365,9 +27376,16 @@
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_7_broladze",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 7.6,
+        "bank": 3.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
