@@ -4,7 +4,7 @@
     <link rel="icon" type="image/png" href="/kcl-badge.png" />
     <link rel="apple-touch-icon" href="/kcl-logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#37003c" />
+    <meta name="theme-color" content="#090d16" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Komarovi Champions League</title>
@@ -17,10 +17,13 @@
           var saved = localStorage.getItem('fpl_theme');
           var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
           var theme = saved || (prefersDark ? 'dark' : 'light');
+          var metaTheme = document.querySelector('meta[name="theme-color"]');
           if (theme === 'dark') {
             document.documentElement.classList.add('dark');
+            if (metaTheme) metaTheme.setAttribute('content', '#090d16');
           } else {
             document.documentElement.classList.remove('dark');
+            if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
           }
         } catch (e) {}
       })();

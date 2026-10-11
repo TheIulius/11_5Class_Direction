@@ -26,6 +26,7 @@ import {
 import { canSwapPlayers, normalizeSquadLineup, isValidFormation, sanitizeCaptaincy } from '../engine/formations';
 import { calculateSquadTransfers } from '../engine/transferAccounting';
 import * as api from '../services/api';
+import { triggerHaptic } from '../utils/haptics';
 
 export const INITIAL_BUDGET = 55.0;
 
@@ -220,10 +221,13 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_THEME, theme);
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      if (metaTheme) metaTheme.setAttribute('content', '#090d16');
     } else {
       document.documentElement.classList.remove('dark');
+      if (metaTheme) metaTheme.setAttribute('content', '#ffffff');
     }
   }, [theme]);
 
@@ -353,7 +357,23 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? parseInt(saved, 10) : 1;
   });
 
-  const [activeTab, setActiveTab] = useState<TabType>('team');
+  const [activeTab, setActiveTabState] = useState<TabType>('team');
+
+  const setActiveTab = useCallback((tab: TabType) => {
+    triggerHaptic('light');
+    if (
+      typeof document !== 'undefined' &&
+      'startViewTransition' in document &&
+      typeof (document as any).startViewTransition === 'function' &&
+      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      (document as any).startViewTransition(() => {
+        setActiveTabState(tab);
+      });
+    } else {
+      setActiveTabState(tab);
+    }
+  }, []);
 
   // Moderator / Admin privilege system
   const isModerator = useMemo(() => {

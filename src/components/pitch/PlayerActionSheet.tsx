@@ -6,6 +6,7 @@ import { ArrowLeftRight, Crown, ShieldAlert, ArrowRight, X, Activity, Users, Che
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { suggestPlayerPhotoApi } from '../../services/api';
+import { triggerHaptic } from '../../utils/haptics';
 
 import { GameweekCalculationResult, calculatePlayerPoints } from '../../engine/scoring';
 
@@ -152,18 +153,21 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
 
   const handleStartSwap = () => {
     if (isSquadLocked) return;
+    triggerHaptic('light');
     setSelectedPlayerForSwap(playerId);
     onClose();
   };
 
   const handleMakeCaptain = () => {
     if (isSquadLocked) return;
+    triggerHaptic('success');
     setCaptain(playerId);
     onClose();
   };
 
   const handleMakeViceCaptain = () => {
     if (isSquadLocked) return;
+    triggerHaptic('medium');
     setViceCaptain(playerId);
     onClose();
   };

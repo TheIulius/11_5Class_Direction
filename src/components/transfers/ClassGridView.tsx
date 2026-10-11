@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Player, Position, Club, Squad } from '../../types/fpl';
 import { CLUBS } from '../../data/clubs';
 import { useFPL } from '../../context/FPLContext';
@@ -6,7 +6,7 @@ import { KitJersey } from '../pitch/KitJersey';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/PlayerPositionNotice';
 import { calculatePlayerPoints } from '../../engine/scoring';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ArrowLeft,
   Plus,
@@ -15,6 +15,7 @@ import {
   Clock,
   Activity,
   Camera,
+  Sparkles,
 } from 'lucide-react';
 
 export interface ClassGridViewProps {
@@ -48,14 +49,28 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
   validSquadCount,
   searchQuery = '',
   positionFilter = 'ALL',
+  affordableOnly = false,
 }) => {
-  const { fixtures, currentGW } = useFPL();
+  const { fixtures, currentGW, authUser } = useFPL();
 
-  const [activeGrade, setActiveGrade] = useState<number>(10);
+  // User's own grade (e.g. from authUser.grade '10' -> 10)
+  const userGrade = useMemo(() => {
+    if (authUser?.grade) {
+      const g = parseInt(authUser.grade, 10);
+      if (!isNaN(g)) return g;
+    }
+    return null;
+  }, [authUser?.grade]);
+
+  // Directional slide state: [activeGrade, direction (-1 for left, 1 for right)]
+  const [[activeGrade, direction], setGradeWithDirection] = useState<[number, number]>(() => {
+    if (userGrade && [9, 10, 11, 12].includes(userGrade)) return [userGrade, 0];
+    return [10, 0];
+  });
+
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
-
-  // Detailed Player Modal State (Last Matches & Upcoming Matches)
   const [detailPlayerId, setDetailPlayerId] = useState<string | null>(null);
+  const [spotlightPlayerId, setSpotlightPlayerId] = useState<string | null>(null);
 
   const squadPlayerIds = useMemo(() => new Set(squad.players.map((p) => p.playerId)), [squad.players]);
 
@@ -95,14 +110,75 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
     return [9, 10, 11, 12].filter((g) => getGradeClasses(g).length > 0);
   }, [classPlayersMap, clubs]);
 
-  // Auto-switch to first active grade if current selected grade has 0 teams
-  React.useEffect(() => {
+  // Auto-switch to valid grade if current selected grade has 0 teams
+  useEffect(() => {
     if (grades.length > 0 && !grades.includes(activeGrade)) {
-      setActiveGrade(grades[0]);
+      const nextGrade = userGrade && grades.includes(userGrade) ? userGrade : (grades.includes(10) ? 10 : grades[0]);
+      setGradeWithDirection([nextGrade, 0]);
     }
-  }, [grades, activeGrade]);
+  }, [grades, activeGrade, userGrade]);
 
   const maxAvailableSpend = outPlayer ? squad.bank + outPlayer.cost : squad.bank;
+
+  // Auto-jump to the matching grade on search & highlight/spotlight matching player
+  useEffect(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (q.length < 2) {
+      setSpotlightPlayerId(null);
+      return;
+    }
+
+    const matching = Object.values(players).filter((p) => {
+      const matchName = p.name.toLowerCase().includes(q);
+      const matchWeb = p.webName.toLowerCase().includes(q);
+      return matchName || matchWeb;
+    });
+
+    if (matching.length === 0) {
+      setSpotlightPlayerId(null);
+      return;
+    }
+
+    // Prioritize exact webName match, or first match
+    const targetPlayer =
+      matching.find((p) => p.webName.toLowerCase() === q || p.name.toLowerCase() === q) ||
+      matching[0];
+
+    const normClub = targetPlayer.clubId === 'SCH' ? 'SCH_11_5' : targetPlayer.clubId;
+    const matchGrade = normClub.match(/SCH_(\d+)_/);
+    if (matchGrade) {
+      const targetGrade = parseInt(matchGrade[1], 10);
+      if (grades.includes(targetGrade)) {
+        if (targetGrade !== activeGrade) {
+          const dir = targetGrade > activeGrade ? 1 : -1;
+          setGradeWithDirection([targetGrade, dir]);
+          setActiveClassId(null);
+        }
+        setSpotlightPlayerId(targetPlayer.id);
+      }
+    }
+  }, [searchQuery, players, grades, activeGrade]);
+
+  // Count matching players per grade for the "+X" badge
+  const getGradeMatchCount = useMemo(() => {
+    return (g: number) => {
+      const cls = getGradeClasses(g);
+      let count = 0;
+      cls.forEach((club) => {
+        const classPlayers = classPlayersMap[club.id] || [];
+        classPlayers.forEach((p) => {
+          if (positionFilter !== 'ALL' && p.position !== positionFilter) return;
+          if (affordableOnly && p.cost > maxAvailableSpend) return;
+          if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase().trim();
+            if (!p.name.toLowerCase().includes(q) && !p.webName.toLowerCase().includes(q)) return;
+          }
+          count++;
+        });
+      });
+      return count;
+    };
+  }, [classPlayersMap, positionFilter, searchQuery, affordableOnly, maxAvailableSpend]);
   const detailPlayer = detailPlayerId ? players[detailPlayerId] : null;
 
   // Compute last matches and upcoming matches for detailPlayer
@@ -659,112 +735,177 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
         </div>
 
         <div className="flex items-center gap-1">
-          {grades.map((g) => (
-            <button
-              key={g}
-              onClick={() => {
-                setActiveGrade(g);
-                setActiveClassId(null);
-              }}
-              className={`px-2.5 py-1 sm:px-3 sm:py-1 rounded-lg text-xs font-black uppercase transition-all ${
-                activeGrade === g
-                  ? 'bg-sky-500 text-white font-black shadow-xs dark:bg-emerald-500 dark:text-slate-950'
-                  : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              {g}th
-            </button>
-          ))}
+          {grades.map((g) => {
+            const isActive = activeGrade === g;
+            const isFilterActive = positionFilter !== 'ALL' || Boolean(searchQuery.trim()) || affordableOnly;
+            const matchCount = getGradeMatchCount(g);
+
+            return (
+              <button
+                key={g}
+                onClick={() => {
+                  if (g === activeGrade) return;
+                  const dir = g > activeGrade ? 1 : -1;
+                  setGradeWithDirection([g, dir]);
+                  setActiveClassId(null);
+                }}
+                className={`px-2.5 py-1 sm:px-3 sm:py-1 rounded-lg text-xs font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
+                  isActive
+                    ? 'bg-sky-500 text-white font-black shadow-xs dark:bg-emerald-500 dark:text-slate-950'
+                    : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <span>{g}th</span>
+                {isFilterActive && (
+                  <span
+                    className={`text-[9px] font-mono px-1 py-0.2 rounded font-black ${
+                      isActive
+                        ? 'bg-white/20 text-white dark:bg-black/20 dark:text-slate-950'
+                        : matchCount > 0
+                        ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                        : 'opacity-40 text-slate-400'
+                    }`}
+                  >
+                    {matchCount > 0 ? `+${matchCount}` : '0'}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Squished 2-Column Mobile / 3-Column Tablet & Desktop Grid */}
-      <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4">
-        {gradeClasses.map((club) => {
-          const classPlayers = classPlayersMap[club.id] || [];
-          const ownedInClass = squad.players.filter((sp) => {
-            const p = players[sp.playerId];
-            return p && (p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId) === club.id;
-          }).length;
+      {/* Animated Grade Roster Grid with Smooth Directional Sliding */}
+      <div className="relative z-10 overflow-hidden min-h-[360px]">
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.div
+            key={activeGrade}
+            custom={direction}
+            variants={{
+              enter: (dir: number) => ({
+                x: dir > 0 ? 80 : dir < 0 ? -80 : 0,
+                opacity: 0,
+              }),
+              center: {
+                x: 0,
+                opacity: 1,
+              },
+              exit: (dir: number) => ({
+                x: dir > 0 ? -80 : dir < 0 ? 80 : 0,
+                opacity: 0,
+              }),
+            }}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={{
+              type: 'spring',
+              stiffness: 340,
+              damping: 32,
+            }}
+            className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4"
+          >
+            {gradeClasses.map((club) => {
+              const classPlayers = classPlayersMap[club.id] || [];
+              const ownedInClass = squad.players.filter((sp) => {
+                const p = players[sp.playerId];
+                return p && (p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId) === club.id;
+              }).length;
 
-          return (
-            <div
-              key={club.id}
-              onClick={() => setActiveClassId(club.id)}
-              className="group p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-white/[0.02] hover:bg-sky-50/50 dark:hover:bg-white/[0.05] border border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/50 shadow-xs hover:shadow-md hover:shadow-sky-500/10 transition-all cursor-pointer"
-            >
-              {/* Class Title Header (e.g. 10/1) */}
-              <div className="flex items-baseline justify-between mb-1">
-                <h3 className="text-sm sm:text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-emerald-400 transition-colors leading-none">
-                  {club.shortName}
-                </h3>
-                <span className="text-[8.5px] sm:text-[10px] font-mono font-bold text-slate-400 group-hover:text-sky-500 dark:group-hover:text-emerald-400">
-                  {ownedInClass > 0 ? `${ownedInClass}/2` : `${classPlayers.length}p`}
-                </span>
-              </div>
+              return (
+                <div
+                  key={club.id}
+                  onClick={() => setActiveClassId(club.id)}
+                  className="group p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-white/[0.02] hover:bg-sky-50/50 dark:hover:bg-white/[0.05] border border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/50 shadow-xs hover:shadow-md hover:shadow-sky-500/10 transition-all cursor-pointer"
+                >
+                  {/* Class Title Header (e.g. 10/1) */}
+                  <div className="flex items-baseline justify-between mb-1">
+                    <h3 className="text-sm sm:text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-emerald-400 transition-colors leading-none">
+                      {club.shortName}
+                    </h3>
+                    <span className="text-[8.5px] sm:text-[10px] font-mono font-bold text-slate-400 group-hover:text-sky-500 dark:group-hover:text-emerald-400">
+                      {ownedInClass > 0 ? `${ownedInClass}/2` : `${classPlayers.length}p`}
+                    </span>
+                  </div>
 
-              {/* 4 Columns: GKP | DEF | MID | FWD separated by thin vertical lines */}
-              <div className="grid grid-cols-4 divide-x divide-slate-300 dark:divide-white/20">
-                {POSITIONS.map((pos) => {
-                  const posPlayers = classPlayers.filter((p) => p.position === pos);
+                  {/* 4 Columns: GKP | DEF | MID | FWD separated by thin vertical lines */}
+                  <div className="grid grid-cols-4 divide-x divide-slate-300 dark:divide-white/20">
+                    {POSITIONS.map((pos) => {
+                      const posPlayers = classPlayers.filter((p) => p.position === pos);
 
-                  return (
-                    <div key={pos} className="px-0.5 flex flex-col items-center min-h-[76px] sm:min-h-[95px]">
-                      {/* Position Column Header */}
-                      <span className="text-[7.5px] sm:text-[9px] font-black uppercase tracking-tighter text-slate-600 dark:text-slate-400 mb-1">
-                        {pos}
-                      </span>
+                      return (
+                        <div key={pos} className="px-0.5 flex flex-col items-center min-h-[76px] sm:min-h-[95px]">
+                          {/* Position Column Header */}
+                          <span className="text-[7.5px] sm:text-[9px] font-black uppercase tracking-tighter text-slate-600 dark:text-slate-400 mb-1">
+                            {pos}
+                          </span>
 
-                      {/* Tight Vertical Stack of Player Jerseys */}
-                      <div className="flex flex-col items-center gap-0.5 sm:gap-1 w-full">
-                        {posPlayers.map((p) => {
-                          const isOwned = squadPlayerIds.has(p.id);
-                          const matchesSearch = searchQuery.trim()
-                            ? p.webName.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
-                              p.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
-                            : true;
-                          const matchesPos = positionFilter === 'ALL' || p.position === positionFilter;
-                          const isDimmed = !matchesSearch || !matchesPos;
+                          {/* Tight Vertical Stack of Player Jerseys */}
+                          <div className="flex flex-col items-center gap-0.5 sm:gap-1 w-full">
+                            {posPlayers.map((p) => {
+                              const isOwned = squadPlayerIds.has(p.id);
+                              const isSpotlighted = spotlightPlayerId === p.id;
+                              const matchesSearch = searchQuery.trim()
+                                ? p.webName.toLowerCase().includes(searchQuery.toLowerCase().trim()) ||
+                                  p.name.toLowerCase().includes(searchQuery.toLowerCase().trim())
+                                : true;
+                              const matchesPos = positionFilter === 'ALL' || p.position === positionFilter;
+                              const isDimmed = !matchesSearch || !matchesPos;
 
-                          return (
-                            <div
-                              key={p.id}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDetailPlayerId(p.id);
-                              }}
-                              title={`${p.name} (${p.position}) - £${p.cost.toFixed(1)}m`}
-                              className={`relative flex flex-col items-center transition-transform hover:scale-110 ${
-                                isDimmed ? 'opacity-20 grayscale' : ''
-                              }`}
-                            >
-                              <div className="relative">
-                                <KitJersey
-                                  clubId={p.clubId}
-                                  position={p.position}
-                                  photoUrl={p.photoUrl}
-                                  className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow-xs"
-                                />
-                                {isOwned && (
-                                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[6px] font-black">
-                                    ✓
+                              return (
+                                <div
+                                  key={p.id}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDetailPlayerId(p.id);
+                                  }}
+                                  title={`${p.name} (${p.position}) - £${p.cost.toFixed(1)}m`}
+                                  className={`relative flex flex-col items-center transition-all ${
+                                    isSpotlighted
+                                      ? 'scale-125 z-20 ring-2 ring-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.7)] bg-amber-400/20 rounded-lg p-0.5 animate-pulse'
+                                      : 'hover:scale-110'
+                                  } ${isDimmed && !isSpotlighted ? 'opacity-20 grayscale' : ''}`}
+                                >
+                                  {isSpotlighted && (
+                                    <span className="absolute -top-3.5 bg-amber-400 text-slate-950 font-black text-[6.5px] uppercase tracking-wider px-1 rounded shadow-md z-30 animate-bounce">
+                                      ★ MATCH
+                                    </span>
+                                  )}
+                                  <div className="relative">
+                                    <KitJersey
+                                      clubId={p.clubId}
+                                      position={p.position}
+                                      photoUrl={p.photoUrl}
+                                      className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow-xs"
+                                    />
+                                    {isOwned && (
+                                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-[6px] font-black">
+                                        ✓
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span
+                                    className={`text-[7px] sm:text-[8px] truncate max-w-[36px] sm:max-w-[46px] leading-none ${
+                                      isSpotlighted
+                                        ? 'font-black text-amber-500 dark:text-amber-300'
+                                        : 'font-bold text-slate-700 dark:text-slate-300'
+                                    }`}
+                                  >
+                                    {p.webName}
                                   </span>
-                                )}
-                              </div>
-                              <span className="text-[7px] sm:text-[8px] font-bold text-slate-700 dark:text-slate-300 truncate max-w-[36px] sm:max-w-[46px] leading-none">
-                                {p.webName}
-                              </span>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );

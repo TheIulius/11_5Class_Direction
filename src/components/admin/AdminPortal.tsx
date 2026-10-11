@@ -474,11 +474,11 @@ export const AdminPortal: React.FC = () => {
 
       {/* 2. 5-STEP GAMEWEEK LIFECYCLE STEPPER */}
       <div className="max-w-5xl mx-auto px-3 sm:px-6 pt-4 pb-2">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-1 rounded-2xl bg-zinc-900 border border-white/10 text-xs select-none">
+        <div className="flex overflow-x-auto no-scrollbar sm:grid sm:grid-cols-3 lg:grid-cols-5 gap-1.5 p-1 rounded-2xl bg-zinc-900 border border-white/10 text-xs select-none snap-x">
           {/* Step 1: Setup Deadline */}
           <button
             onClick={() => setActiveStep(1)}
-            className={`p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
+            className={`min-w-[135px] sm:min-w-0 snap-start flex-1 p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
               activeStep === 1
                 ? 'bg-emerald-500 text-slate-950 shadow-md font-black'
                 : 'text-zinc-400 hover:text-white hover:bg-white/5'
@@ -494,7 +494,7 @@ export const AdminPortal: React.FC = () => {
           {/* Step 2: Lock Lineups */}
           <button
             onClick={() => setActiveStep(2)}
-            className={`p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
+            className={`min-w-[135px] sm:min-w-0 snap-start flex-1 p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
               activeStep === 2
                 ? 'bg-emerald-500 text-slate-950 shadow-md font-black'
                 : 'text-zinc-400 hover:text-white hover:bg-white/5'
@@ -510,7 +510,7 @@ export const AdminPortal: React.FC = () => {
           {/* Step 3: Live Matchday Console */}
           <button
             onClick={() => setActiveStep(3)}
-            className={`p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
+            className={`min-w-[135px] sm:min-w-0 snap-start flex-1 p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
               activeStep === 3
                 ? 'bg-emerald-500 text-slate-950 shadow-md font-black'
                 : 'text-zinc-400 hover:text-white hover:bg-white/5'
@@ -526,7 +526,7 @@ export const AdminPortal: React.FC = () => {
           {/* Step 4: Finalize & Advance */}
           <button
             onClick={() => setActiveStep(4)}
-            className={`p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
+            className={`min-w-[135px] sm:min-w-0 snap-start flex-1 p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
               activeStep === 4
                 ? 'bg-emerald-500 text-slate-950 shadow-md font-black'
                 : 'text-zinc-400 hover:text-white hover:bg-white/5'
@@ -542,7 +542,7 @@ export const AdminPortal: React.FC = () => {
           {/* Step 5: Undo Transfers (GW1 Rollback) */}
           <button
             onClick={() => setActiveStep(5)}
-            className={`p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
+            className={`min-w-[135px] sm:min-w-0 snap-start flex-1 p-2 rounded-xl flex items-center gap-2 font-bold transition-all ${
               activeStep === 5
                 ? 'bg-amber-400 text-slate-950 shadow-md font-black'
                 : 'text-zinc-400 hover:text-white hover:bg-white/5'

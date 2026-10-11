@@ -24,8 +24,8 @@ export const BottomNav: React.FC = () => {
   const visibleTabs = TABS.filter((tab) => tab.id !== 'dev' || isModerator || isReferee);
 
   return (
-    <nav className="md:hidden fixed bottom-1.5 left-2.5 right-2.5 z-40 max-w-[430px] mx-auto select-none">
-      <div className="flex items-center justify-around py-1 px-1 rounded-2xl bg-white/95 dark:bg-[#0a0f1a]/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/[0.10] shadow-[0_8px_32px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.6)]">
+    <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0a0f1a]/95 backdrop-blur-2xl border-t border-slate-200/90 dark:border-white/[0.08] shadow-[0_-8px_32px_rgba(15,23,42,0.06)] dark:shadow-[0_-8px_32px_rgba(0,0,0,0.6)] pt-1.5 pb-[max(0.5rem,env(safe-area-inset-bottom))] px-1 select-none">
+      <div className="flex items-center justify-around max-w-md mx-auto">
         {visibleTabs.map((tab) => {
           const isDev = tab.id === 'dev';
           const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;

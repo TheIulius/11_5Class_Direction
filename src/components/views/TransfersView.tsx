@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { validateSquadComposition, calculatePlayerPoints } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
+import { triggerHaptic } from '../../utils/haptics';
 import { ClassGridView } from '../transfers/ClassGridView';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
 import {
@@ -220,10 +221,12 @@ export const TransfersView: React.FC = () => {
 
     const res = buyPlayer(playerId);
     if (res.success) {
+      triggerHaptic('success');
       confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
       setTransferMessage({ type: 'success', text: res.message || `Added ${target.webName} to squad!` });
       setTimeout(() => setTransferMessage(null), 3000);
     } else {
+      triggerHaptic('warning');
       setTransferMessage({ type: 'error', text: res.message || 'Failed to buy player' });
       setTimeout(() => setTransferMessage(null), 3500);
     }
@@ -234,6 +237,7 @@ export const TransfersView: React.FC = () => {
     if (isSquadLocked || !outPlayerId || !inPlayerId) return;
     const res = transferPlayer(outPlayerId, inPlayerId);
     if (res.success) {
+      triggerHaptic('success');
       confetti({ particleCount: 50, spread: 65, origin: { y: 0.6 } });
       setTransferMessage({
         type: 'success',
@@ -243,6 +247,7 @@ export const TransfersView: React.FC = () => {
       setInPlayerId(null);
       setTimeout(() => setTransferMessage(null), 3500);
     } else {
+      triggerHaptic('warning');
       setTransferMessage({ type: 'error', text: res.message || 'Transfer failed' });
       setTimeout(() => setTransferMessage(null), 4000);
     }

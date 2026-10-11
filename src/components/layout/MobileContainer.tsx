@@ -26,12 +26,12 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
   const isDevMode = activeTab === 'dev' && isModerator;
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-gradient-to-b from-sky-50/40 via-slate-50 to-sky-50/20 dark:from-[#090d16] dark:via-[#090d16] dark:to-[#090d16] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
+    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
       {/* Top Header - decoupled in Dev Mode */}
       {!isDevMode && <TopHeader />}
 
       {/* Main Scrollable View Area */}
-      <main className={`flex-1 w-full ${isDevMode ? 'p-0 pb-10' : 'pb-20 md:pb-10'}`}>
+      <main className={`flex-1 w-full ${isDevMode ? 'p-0 pb-12' : 'pb-[calc(5.2rem+env(safe-area-inset-bottom))] md:pb-12'}`}>
         <div className={`w-full ${isDevMode ? 'max-w-7xl mx-auto px-1 sm:px-2' : 'max-w-6xl mx-auto px-2 sm:px-4 md:px-6'}`}>
           {children}
         </div>

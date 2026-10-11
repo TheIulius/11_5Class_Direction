@@ -186,27 +186,30 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
         )}
       </div>
 
-      {/* White Nameplate Badge with Class Shield */}
-      <div
-        className={`w-full text-center px-1 md:px-1.5 py-[1.5px] md:py-1 rounded-t text-[11px] md:text-xs font-bold tracking-tight truncate border-x border-t transition-colors flex items-center justify-center gap-1 ${
-          isSwapSource
-            ? 'bg-yellow-400 text-black border-yellow-500'
-            : isSwapTargetEligible
-            ? 'bg-[#00ff87] text-[#37003c] border-[#00ff87]'
-            : 'bg-white text-gray-900 border-white/40'
-        }`}
-      >
-        <ClassShieldBadge clubId={player.clubId} size="xs" className="w-3.5 h-4 flex-shrink-0" />
-        <span className="truncate">{player.webName}</span>
-      </div>
+      {/* Unified Compact Player Plate */}
+      <div className="w-full rounded-xl overflow-hidden shadow-md border border-black/40 backdrop-blur-xs flex flex-col transition-all">
+        {/* Nameplate Badge with Class Shield */}
+        <div
+          className={`w-full text-center px-1 py-0.5 text-[10.5px] sm:text-[11.5px] font-black tracking-tight truncate transition-colors flex items-center justify-center gap-1 ${
+            isSwapSource
+              ? 'bg-amber-400 text-slate-950 font-black'
+              : isSwapTargetEligible
+              ? 'bg-[#00ff87] text-[#37003c] font-black'
+              : 'bg-white text-slate-950'
+          }`}
+        >
+          <ClassShieldBadge clubId={player.clubId} size="xs" className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="truncate">{player.webName}</span>
+        </div>
 
-      {/* Value / Points Plate (Bottom half) - Price and Points side-by-side */}
-      <div
-        className="w-full text-center px-1 sm:px-1.5 py-1 sm:py-1.5 rounded-b text-[8.5px] sm:text-[9.5px] font-extrabold border-x border-b border-t border-slate-800/80 tracking-tight transition-colors bg-slate-900/95 text-slate-200 min-h-[25px] sm:min-h-[27px] flex items-center justify-center gap-0.5 sm:gap-1 shadow-xs"
-      >
-        <PlayerPriceBadge player={player} stacked={true} className="text-[8.5px] sm:text-[9px]" />
-        <span className="text-slate-500 font-normal text-[7.5px] select-none shrink-0">•</span>
-        <span className="font-mono text-emerald-400 font-bold shrink-0 leading-none">{pts}pts</span>
+        {/* Value & Points Bar */}
+        <div
+          className="w-full text-center px-1 py-0.5 text-[8.5px] sm:text-[9.5px] font-extrabold tracking-tight transition-colors bg-slate-950/95 text-slate-200 border-t border-white/10 flex items-center justify-center gap-1"
+        >
+          <PlayerPriceBadge player={player} stacked={true} className="text-[8.5px] sm:text-[9px]" />
+          <span className="text-slate-600 font-normal text-[7.5px] select-none shrink-0">•</span>
+          <span className="font-mono text-[#00ff87] font-black shrink-0 leading-none">{pts}pts</span>
+        </div>
       </div>
     </div>
   );

@@ -139,17 +139,20 @@ export const PitchView: React.FC<PitchViewProps> = ({
     <div className="relative w-full overflow-hidden select-none pb-2">
       {/* Swap Mode Notification Floating Bar */}
       {!readOnly && selectedPlayerForSwap && (
-        <div className="sticky top-0 z-30 bg-[#ffe600] text-black px-3 py-2 text-xs font-black flex items-center justify-between shadow-lg animate-bounce">
-          <span className="flex items-center gap-1.5 truncate">
-            <Sparkles className="w-3.5 h-3.5 text-purple-900" />
-            Select another player to swap with {players[selectedPlayerForSwap]?.webName}
+        <div className="sticky top-2 z-30 mx-2 sm:mx-4 my-1.5 bg-amber-400 text-slate-950 px-3.5 py-2 rounded-2xl shadow-xl flex items-center justify-between border border-amber-300 font-black text-xs ring-2 ring-amber-400/40 backdrop-blur-md">
+          <span className="flex items-center gap-2 truncate">
+            <span className="w-2 h-2 rounded-full bg-slate-950 animate-ping shrink-0" />
+            <Sparkles className="w-3.5 h-3.5 text-slate-900 shrink-0" />
+            <span className="truncate">
+              აირჩიეთ მეორე მოთამაშე {players[selectedPlayerForSwap]?.webName}-თან გასაცვლელად
+            </span>
           </span>
           <button
             onClick={() => setSelectedPlayerForSwap(null)}
-            className="p-1 hover:bg-black/10 rounded-full"
+            className="p-1 hover:bg-black/15 rounded-full transition-colors ml-2 shrink-0 cursor-pointer"
             title="Cancel substitution"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-slate-950" />
           </button>
         </div>
       )}

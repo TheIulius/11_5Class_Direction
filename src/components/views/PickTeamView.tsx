@@ -9,6 +9,7 @@ import { Zap, CheckCircle, Loader2, AlertCircle, ChevronDown, ChevronUp, Chevron
 import { validateSquadComposition, calculateGameweekSquadPoints } from '../../engine/scoring';
 import confetti from 'canvas-confetti';
 import { TripleCaptainIcon, BenchBoostIcon, WildcardIcon } from '../icons/ChipIcons';
+import { triggerHaptic } from '../../utils/haptics';
 
 export const PickTeamView: React.FC = () => {
   const {
@@ -129,6 +130,7 @@ export const PickTeamView: React.FC = () => {
     try {
       const res = await saveSquad(undefined, true);
       if (res.success) {
+        triggerHaptic('success');
         setSaveSuccess(true);
         confetti({
           particleCount: 50,
@@ -138,10 +140,12 @@ export const PickTeamView: React.FC = () => {
         });
         setTimeout(() => setSaveSuccess(false), 2500);
       } else {
+        triggerHaptic('warning');
         setErrorMessage(res.message || 'Failed to save lineup');
         setTimeout(() => setErrorMessage(null), 4000);
       }
     } catch (err: any) {
+      triggerHaptic('warning');
       setErrorMessage(err?.message || 'Failed to save lineup to database');
       setTimeout(() => setErrorMessage(null), 4000);
     } finally {
