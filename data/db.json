@@ -1374,7 +1374,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -16162,6 +16162,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_9_5_xaindrava",
+              "webName": "Xaindrava",
+              "clubId": "SCH_9_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ],
           "grade": "9",
@@ -27311,9 +27322,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_5_xaindrava",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 22,
+        "bank": 17,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
