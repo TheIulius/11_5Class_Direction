@@ -5439,7 +5439,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -15633,17 +15633,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_6_kupradze",
-              "webName": "Kupradze",
-              "clubId": "SCH_12_6",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_9_3_tvauri",
               "webName": "Tvauri",
               "clubId": "SCH_9_3",
@@ -17837,13 +17826,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_6_kupradze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_9_3_tvauri",
             "isStarter": true,
             "benchOrder": 0,
@@ -17872,7 +17854,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 3.3,
+        "bank": 10.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
