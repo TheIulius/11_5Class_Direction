@@ -5408,7 +5408,7 @@
       "totalPoints": 19,
       "gwPoints": 19,
       "form": 5,
-      "selectedByPercent": 10,
+      "selectedByPercent": 9,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9861,7 +9861,7 @@
               "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -9873,17 +9873,6 @@
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_6_chachia",
-              "webName": "Chachia",
-              "clubId": "SCH_12_6",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -26629,7 +26618,7 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_custom_1790503966985",
@@ -26637,13 +26626,6 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_12_6_chachia",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
           },
           {
             "playerId": "p_10_1_chakvetadze",
@@ -26681,7 +26663,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0.6,
+        "bank": 9.1,
         "freeTransfers": 2,
         "transfersMadeThisGW": 8,
         "activeChip": "wildcard",
