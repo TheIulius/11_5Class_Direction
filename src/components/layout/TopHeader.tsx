@@ -91,14 +91,20 @@ export const TopHeader: React.FC = () => {
               </button>
             </div>
 
-            <div className="flex items-center gap-1.5 mt-0.5">
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
               <span className="text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 shrink-0">
                 GW {currentGW}
               </span>
               <span className="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
-              <span className="truncate max-w-[140px] sm:max-w-[220px] md:max-w-[320px] text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <span className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-[320px] text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300">
                 {authUser?.teamName || squad.teamName}
               </span>
+              {squad.activeChip && (
+                <span className="px-1.5 py-0.2 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-500 dark:text-amber-300 border border-amber-400/30 flex items-center gap-0.5 shrink-0 shadow-xs">
+                  <Zap className="w-2.5 h-2.5 text-amber-400" />
+                  <span>{squad.activeChip.replace('_', ' ')}</span>
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -147,8 +153,8 @@ export const TopHeader: React.FC = () => {
               title="მატჩის კონსოლი (მსაჯი) / Matchday Referee Console"
               aria-label="Match Console"
             >
-              <Award className="w-3.5 h-3.5 flex-shrink-0" />
-              <span className="font-bold">Match Console</span>
+              <Award className="w-3.5 h-3.5 flex-shrink-0 text-amber-500 dark:text-amber-400" />
+              <span className="hidden sm:inline font-bold">Match Console</span>
             </button>
           )}
 
@@ -165,26 +171,6 @@ export const TopHeader: React.FC = () => {
               <Moon className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" />
             )}
           </button>
-
-          {/* Developer / Moderator / Referee Portal shortcut button (mobile only, ADMINS OR REFS) */}
-          {(isModerator || isReferee) && (
-            <button
-              onClick={() => setActiveTab('dev')}
-              className={`md:hidden p-1.5 rounded-full transition-all border ${
-                activeTab === 'dev'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-950 border-transparent font-bold'
-                  : 'bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-300 border-slate-200 dark:border-white/[0.09]'
-              }`}
-              title={isModerator ? 'Moderator Console' : 'Match Console'}
-              aria-label={isModerator ? 'Moderator Console' : 'Match Console'}
-            >
-              {isModerator ? (
-                <Shield className="w-4 h-4 text-amber-400" />
-              ) : (
-                <Award className="w-4 h-4 text-amber-400" />
-              )}
-            </button>
-          )}
         </div>
       </div>
 
@@ -218,47 +204,34 @@ export const TopHeader: React.FC = () => {
         </div>
       </nav>
 
-      {/* Gameweek Quick Metric Bar - hidden on Transfers tab to eliminate clutter and duplicate Bank */}
+      {/* Gameweek Quick Metric Bar - sleek frosted glass strip (hidden on mobile when on team tab to eliminate container duplication) */}
       {activeTab !== 'transfers' && (
-        <div className="w-full bg-gradient-to-r from-sky-50/70 via-white to-sky-50/70 dark:from-slate-900/60 dark:via-[#0c121e] dark:to-slate-900/60 border-t border-sky-100 dark:border-slate-800/60 py-1.5 md:py-2 text-center text-xs">
-          <div className="max-w-6xl mx-auto grid grid-cols-4 divide-x divide-sky-100 dark:divide-slate-800 px-1 md:px-6">
+        <div className={`w-full bg-slate-100/70 dark:bg-white/[0.02] backdrop-blur-md border-t border-slate-200/60 dark:border-white/5 py-1 text-center text-xs ${activeTab === 'team' ? 'hidden md:block' : ''}`}>
+          <div className="max-w-6xl mx-auto grid grid-cols-4 divide-x divide-slate-200/50 dark:divide-white/5 px-1 md:px-6">
             <div>
-              <span className="block text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">GW</span>
-              <span className="text-xs md:text-sm font-black font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
+              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">GW</span>
+              <span className="text-[11px] md:text-xs font-black font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
                 {calculationResult.totalPoints}
               </span>
             </div>
             <div>
-              <span className="block text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">Total</span>
-              <span className="text-xs md:text-sm font-black font-mono tabular-nums text-slate-900 dark:text-white">
+              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">Total</span>
+              <span className="text-[11px] md:text-xs font-black font-mono tabular-nums text-slate-900 dark:text-white">
                 {totalUserPoints}
               </span>
             </div>
             <div>
-              <span className="block text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">Rank</span>
-              <span className="text-xs md:text-sm font-black font-mono tabular-nums text-sky-600 dark:text-sky-400">
+              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">Rank</span>
+              <span className="text-[11px] md:text-xs font-black font-mono tabular-nums text-sky-600 dark:text-sky-400">
                 {overallRank}
               </span>
             </div>
             <div>
-              <span className="block text-[9px] md:text-[10px] text-slate-500 dark:text-slate-400 uppercase font-semibold">Bank</span>
-              <span className="text-xs md:text-sm font-bold font-mono tabular-nums text-slate-700 dark:text-slate-300">
+              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">Bank</span>
+              <span className="text-[11px] md:text-xs font-bold font-mono tabular-nums text-slate-700 dark:text-slate-300">
                 £{squad.bank.toFixed(1)}m
               </span>
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Chip active banner if any */}
-      {squad.activeChip && (
-        <div className="w-full bg-rose-600 text-white text-[11px] font-bold py-1">
-          <div className="max-w-6xl mx-auto px-3.5 md:px-6 flex items-center justify-between">
-            <span className="flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-emerald-300" />
-              CHIP: {squad.activeChip.replace('_', ' ').toUpperCase()}
-            </span>
-            <span className="text-[10px] bg-black/20 px-1.5 py-0.5 rounded">GW {currentGW}</span>
           </div>
         </div>
       )}

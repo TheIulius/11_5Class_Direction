@@ -28,7 +28,16 @@ export const PickTeamView: React.FC = () => {
     deadline,
     fixtures,
     calculationResult,
+    leagues,
+    currentManager,
+    authUser,
   } = useFPL();
+
+  const userLeagueMember = leagues?.flatMap((l) => l.members).find(
+    (m) => m.id === currentManager?.id || m.id === 'user' || (authUser && m.id === authUser.id)
+  );
+  const totalUserPoints = userLeagueMember ? userLeagueMember.totalPoints : (calculationResult.totalPoints || 0);
+  const overallRank = userLeagueMember ? `#${userLeagueMember.rank}` : null;
 
   const [selectedGW, setSelectedGW] = useState<number>(currentGW);
   useEffect(() => {
@@ -161,8 +170,8 @@ export const PickTeamView: React.FC = () => {
       {/* SECTION 1: UPPER CANVAS (Tactical Pitch & Quick Metrics) */}
       {/* ======================================================== */}
       <section className="flex flex-col space-y-2.5">
-        {/* Tournament Brand Header */}
-        <div className="flex flex-col items-center justify-center pt-1 pb-1">
+        {/* Tournament Brand Header - desktop only */}
+        <div className="hidden md:flex flex-col items-center justify-center pt-1 pb-1">
           <img
             src="/kcl-logo.png"
             alt="Komarovi Champions League"
@@ -178,9 +187,9 @@ export const PickTeamView: React.FC = () => {
           </div>
         </div>
 
-        {/* Trusted Referee Prompt Banner */}
+        {/* Trusted Referee Prompt Banner - desktop only (mobile has top header button & bottom nav Ref tab) */}
         {isReferee && (
-          <div className="p-3 md:p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs font-bold flex items-center justify-between shadow-xs">
+          <div className="hidden md:flex p-3 md:p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-200 text-xs font-bold items-center justify-between shadow-xs">
             <div className="flex items-center gap-2.5">
               <Award className="w-5 h-5 flex-shrink-0 text-amber-400" />
               <div>
@@ -250,72 +259,10 @@ export const PickTeamView: React.FC = () => {
           </div>
         )}
 
-        {/* Gameweek Navigation Strip with 2 Arrows and Caption */}
-        <div className="flex items-center justify-between p-2 sm:p-2.5 rounded-2xl bg-white/95 dark:bg-zinc-950/80 border border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-xs">
-          <button
-            type="button"
-            onClick={() => setSelectedGW((prev) => Math.max(1, prev - 1))}
-            disabled={selectedGW <= 1}
-            aria-label="Previous Gameweek"
-            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 active:scale-95 cursor-pointer disabled:pointer-events-none"
-          >
-            <ChevronLeft className="w-4 h-4" />
-            <span className="hidden sm:inline text-xs font-bold">GW {selectedGW - 1}</span>
-          </button>
-
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-2">
-              <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                Gameweek {selectedGW} Lineup
-              </span>
-              {selectedGW === currentGW ? (
-                <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                  Current
-                </span>
-              ) : (
-                <span className="text-[10px] font-mono font-black px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30">
-                  Archive
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 mt-0.5 text-[11px] font-mono">
-              <span className="font-extrabold text-amber-500">
-                {activeCalculation.totalPoints} PTS
-              </span>
-              {activeGWChip && (
-                <>
-                  <span className="text-slate-400">•</span>
-                  <span className="text-sky-500 font-bold uppercase">
-                    ⚡ {activeGWChip.replace('_', ' ')}
-                  </span>
-                </>
-              )}
-              {isPastGW && (
-                <>
-                  <span className="text-slate-400">•</span>
-                  <span className="text-slate-400 text-[10px]">Read-only</span>
-                </>
-              )}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setSelectedGW((prev) => Math.min(currentGW, prev + 1))}
-            disabled={selectedGW >= currentGW}
-            aria-label="Next Gameweek"
-            className="p-2 sm:px-3 sm:py-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-all flex items-center gap-1 active:scale-95 cursor-pointer disabled:pointer-events-none"
-          >
-            <span className="hidden sm:inline text-xs font-bold">GW {selectedGW + 1}</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
         {/* Mandatory Position Changes Banner for GW2 */}
         {!isPastGW && comp.hasPositionChangedPlayers && (
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-500/20 via-amber-500/15 to-rose-500/20 border-2 border-rose-500/50 shadow-md flex items-start gap-3 animate-pulse">
-            <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-base shrink-0 shadow-md mt-0.5">
+          <div className="p-3 sm:p-3.5 rounded-2xl sm:rounded-3xl bg-gradient-to-r from-rose-500/20 via-amber-500/15 to-rose-500/20 backdrop-blur-xl border border-rose-500/40 shadow-md flex items-start gap-2.5 animate-pulse">
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-md mt-0.5">
               !
             </div>
             <div className="flex-1 min-w-0">
@@ -323,7 +270,7 @@ export const PickTeamView: React.FC = () => {
                 <span className="text-xs font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">
                   სავალდებულო ტრანსფერი (GW2)
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-300 font-bold font-mono">
+                <span className="text-[9.5px] px-2 py-0.2 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-300 font-bold font-mono">
                   Mandatory Action
                 </span>
               </div>
@@ -334,11 +281,11 @@ export const PickTeamView: React.FC = () => {
                 </strong>
                 . გუნდის შესანახად აუცილებელია მათი ჩანაცვლება ტრანსფერით. თითოეულზე მოგეცათ +1 უფასო ტრანსფერი!
               </p>
-              <div className="mt-2.5 flex items-center gap-2">
+              <div className="mt-2 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveTab('transfers')}
-                  className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                  className="px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
                 >
                   <span>გადასვლა ტრანსფერებზე</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -348,103 +295,171 @@ export const PickTeamView: React.FC = () => {
           </div>
         )}
 
-        {/* Monospace Quick Metrics Bar */}
-        <div className="flex items-center justify-between flex-wrap gap-2 px-3 py-2 rounded-xl bg-white/95 dark:bg-zinc-950/80 border border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-xs">
-          <div className="flex items-center flex-wrap gap-2.5 sm:gap-4 text-xs font-mono">
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">VAL</span>
-              <span className="font-bold text-slate-800 dark:text-slate-100">£{teamValue.toFixed(1)}m</span>
+        {/* ======================================================== */}
+        {/* UNIFIED LIQUID GLASS LINEUP CENTER CARD                 */}
+        {/* ======================================================== */}
+        <div className="relative rounded-2xl sm:rounded-3xl bg-white/75 dark:bg-slate-900/40 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] ring-1 ring-inset ring-white/10 dark:ring-white/5 p-2 sm:p-3 overflow-hidden transition-all">
+          {/* Subtle Specular Top Rim */}
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 dark:via-white/20 to-transparent pointer-events-none" />
+
+          {/* Top Row: Stepper + Points & Chip Pills */}
+          <div className="flex items-center justify-between gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-1 sm:gap-1.5 min-w-0">
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setSelectedGW((prev) => Math.max(1, prev - 1));
+                }}
+                disabled={selectedGW <= 1}
+                aria-label="Previous Gameweek"
+                className="p-1 sm:p-1.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-20 disabled:pointer-events-none transition-all active:scale-95 cursor-pointer shadow-xs"
+              >
+                <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
+
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-xs sm:text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white truncate">
+                  GW {selectedGW} Lineup
+                </span>
+                {selectedGW === currentGW ? (
+                  <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
+                    Current
+                  </span>
+                ) : (
+                  <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30 shrink-0">
+                    Archive
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setSelectedGW((prev) => Math.min(currentGW, prev + 1));
+                }}
+                disabled={selectedGW >= currentGW}
+                aria-label="Next Gameweek"
+                className="p-1 sm:p-1.5 rounded-xl border border-slate-200/80 dark:border-white/10 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-20 disabled:pointer-events-none transition-all active:scale-95 cursor-pointer shadow-xs"
+              >
+                <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+              </button>
             </div>
-            <div className="h-3 w-[1px] bg-slate-200 dark:bg-white/15" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">BANK</span>
-              <span className="font-bold text-emerald-600 dark:text-emerald-400">£{squad.bank.toFixed(1)}m</span>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <span className="px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] sm:text-xs font-black font-mono bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shadow-xs" title="Gameweek Points">
+                {activeCalculation.totalPoints} PTS
+              </span>
+              {overallRank && (
+                <span className="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-mono font-bold bg-sky-500/15 text-sky-600 dark:text-sky-300 border border-sky-400/30 shadow-xs" title={`Rank: ${overallRank} (${totalUserPoints} total pts)`}>
+                  {overallRank}
+                </span>
+              )}
+              {activeGWChip && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-black uppercase bg-amber-500/15 text-amber-600 dark:text-amber-300 border border-amber-400/30 shadow-xs">
+                  <Zap className="w-3 h-3 text-amber-500 dark:text-amber-400" />
+                  <span className="hidden xs:inline">{activeGWChip.replace('_', ' ')}</span>
+                  <span className="xs:hidden">{activeGWChip === 'triple_captain' ? 'TC' : activeGWChip === 'bench_boost' ? 'BB' : 'WC'}</span>
+                </span>
+              )}
             </div>
-            <div className="h-3 w-[1px] bg-slate-200 dark:bg-white/15" />
-            <div className="flex items-center gap-1.5">
-              <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">FREE FT</span>
-              <span className="font-bold text-sky-600 dark:text-cyan-400">{freeTransfersRemaining}</span>
-            </div>
-            {deadline && (
-              <>
-                <div className="h-3 w-[1px] bg-slate-200 dark:bg-white/15" />
+          </div>
+
+          {/* Bottom Row: Liquid Glass Stats Capsule Chips */}
+          <div className="mt-2 pt-2 border-t border-slate-200/60 dark:border-white/10 flex items-center justify-between flex-wrap gap-1.5 text-xs font-mono">
+            <div className="flex items-center flex-wrap gap-1 sm:gap-1.5">
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100/80 dark:bg-white/5 border border-slate-200/60 dark:border-white/10">
+                <span className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">VAL</span>
+                <span className="font-bold text-slate-800 dark:text-slate-100 text-[11px]">£{teamValue.toFixed(1)}m</span>
+              </div>
+
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/10 border border-emerald-500/20">
+                <span className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">BANK</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-[11px]">£{squad.bank.toFixed(1)}m</span>
+              </div>
+
+              <div className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-sky-500/10 dark:bg-sky-500/10 border border-sky-500/20">
+                <span className="text-[9px] uppercase font-bold text-slate-500 dark:text-slate-400">FT</span>
+                <span className="font-bold text-sky-600 dark:text-cyan-400 text-[11px]">{freeTransfersRemaining}</span>
+              </div>
+
+              {deadline && (
                 <div
-                  className="flex items-center gap-1.5"
+                  className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 dark:bg-amber-500/10 border border-amber-500/20"
                   title={`Deadline: ${new Date(deadline.deadlineTime).toLocaleString()}`}
                 >
-                  <span className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">DEADLINE</span>
-                  <span
-                    className={`font-bold flex items-center gap-1 ${
-                      isSquadLocked ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'
-                    }`}
-                  >
-                    <Clock className="w-3 h-3 text-amber-500/90" />
-                    <span>{isSquadLocked ? 'Locked' : timeLeft}</span>
+                  <Clock className="w-2.5 h-2.5 text-amber-500 shrink-0" />
+                  <span className={`text-[10.5px] font-bold ${isSquadLocked ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                    {isSquadLocked ? 'Locked' : timeLeft}
                   </span>
                 </div>
-              </>
-            )}
-          </div>
-
-          {/* Squad Status Toggle */}
-          <button
-            onClick={() => setShowCompDetails((prev) => !prev)}
-            className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors flex items-center gap-1.5 ${
-              comp.isValid
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
-                : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'
-            }`}
-          >
-            {comp.isValid ? (
-              <>
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
-                <span>Lineup Ready</span>
-              </>
-            ) : (
-              <>
-                <AlertCircle className="w-3.5 h-3.5 text-rose-500" />
-                <span>Squad Incomplete ({validCount}/9)</span>
-              </>
-            )}
-            {showCompDetails ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
-          </button>
-        </div>
-
-        {/* Collapsible Squad Composition Matrix */}
-        {showCompDetails && (
-          <div className="p-3 rounded-xl bg-white/95 dark:bg-zinc-950/60 border border-slate-200/90 dark:border-white/10 shadow-xs animate-fade-in space-y-2">
-            <div className="grid grid-cols-4 gap-1.5 text-center">
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.gkCount === 1 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">GK</span>
-                <span className="font-mono font-black text-xs">{comp.gkCount}/1</span>
-              </div>
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.defCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">DEF</span>
-                <span className="font-mono font-black text-xs">{comp.defCount}/3</span>
-              </div>
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.midCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">MID</span>
-                <span className="font-mono font-black text-xs">{comp.midCount}/3</span>
-              </div>
-              <div className={`p-1.5 rounded-lg border text-xs ${comp.fwdCount === 2 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
-                <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">FWD</span>
-                <span className="font-mono font-black text-xs">{comp.fwdCount}/2</span>
-              </div>
+              )}
             </div>
 
-            {comp.exceededClubs && comp.exceededClubs.length > 0 && (
-              <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
-                <span>Max 2 players per class exceeded: {comp.exceededClubs.map((ec) => ec.clubId.replace('SCH_', '')).join(', ')}</span>
-                <button
-                  onClick={() => setActiveTab('transfers')}
-                  className="px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold"
-                >
-                  Adjust
-                </button>
-              </div>
-            )}
+            {/* Lineup Checklist Toggle */}
+            <button
+              onClick={() => {
+                triggerHaptic('light');
+                setShowCompDetails((prev) => !prev);
+              }}
+              className={`px-2 py-0.5 rounded-lg text-[11px] font-bold border transition-colors flex items-center gap-1 ml-auto cursor-pointer ${
+                comp.isValid
+                  ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400'
+                  : 'bg-rose-500/15 border-rose-500/30 text-rose-600 dark:text-rose-400'
+              }`}
+            >
+              {comp.isValid ? (
+                <>
+                  <CheckCircle className="w-3 h-3 text-emerald-500" />
+                  <span className="text-[10px] sm:text-[11px]">Lineup Ready</span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-3 h-3 text-rose-500" />
+                  <span className="text-[10px] sm:text-[11px]">Incomplete ({validCount}/9)</span>
+                </>
+              )}
+              {showCompDetails ? <ChevronUp className="w-3 h-3 ml-0.5" /> : <ChevronDown className="w-3 h-3 ml-0.5" />}
+            </button>
           </div>
-        )}
+
+          {/* Collapsible Squad Composition Matrix (Internal to the same card) */}
+          {showCompDetails && (
+            <div className="mt-2.5 pt-2.5 border-t border-slate-200/60 dark:border-white/10 animate-fade-in space-y-2">
+              <div className="grid grid-cols-4 gap-1.5 text-center">
+                <div className={`p-1.5 rounded-xl border text-xs ${comp.gkCount === 1 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                  <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">GK</span>
+                  <span className="font-mono font-black text-xs">{comp.gkCount}/1</span>
+                </div>
+                <div className={`p-1.5 rounded-xl border text-xs ${comp.defCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                  <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">DEF</span>
+                  <span className="font-mono font-black text-xs">{comp.defCount}/3</span>
+                </div>
+                <div className={`p-1.5 rounded-xl border text-xs ${comp.midCount === 3 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                  <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">MID</span>
+                  <span className="font-mono font-black text-xs">{comp.midCount}/3</span>
+                </div>
+                <div className={`p-1.5 rounded-xl border text-xs ${comp.fwdCount === 2 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400'}`}>
+                  <span className="text-[9px] uppercase font-bold block text-slate-500 dark:text-slate-400">FWD</span>
+                  <span className="font-mono font-black text-xs">{comp.fwdCount}/2</span>
+                </div>
+              </div>
+
+              {comp.exceededClubs && comp.exceededClubs.length > 0 && (
+                <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center justify-between">
+                  <span className="text-[11px]">Max 2 players per class: {comp.exceededClubs.map((ec) => ec.clubId.replace('SCH_', '')).join(', ')}</span>
+                  <button
+                    onClick={() => setActiveTab('transfers')}
+                    className="px-2 py-0.5 rounded-lg bg-rose-600 text-white text-[10px] font-bold"
+                  >
+                    Adjust
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Tactical Pitch Surface (Bench decoupled to Section 2) */}
         <PitchView
@@ -458,16 +473,19 @@ export const PickTeamView: React.FC = () => {
         />
       </section>
 
-      {/* Fine Dashed Divider between Sections */}
-      <div className="w-full border-b border-dashed border-slate-200 dark:border-white/15 my-4" />
+      {/* Fine Subtle Divider between Sections */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-slate-200 dark:via-white/10 to-transparent my-2 sm:my-3" />
 
       {/* ======================================================== */}
-      {/* SECTION 2: BOTTOM RIBBON (Unified Substitutes & Chips Dock) */}
+      {/* SECTION 2: BOTTOM RIBBON (Unified Liquid Glass Substitutes & Chips Dock) */}
       {/* ======================================================== */}
       <section className="flex flex-col space-y-3">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 rounded-2xl bg-white/95 dark:bg-zinc-950/90 border border-slate-200/90 dark:border-white/10 backdrop-blur-md shadow-lg shadow-sky-950/5">
+        <div className="relative rounded-2xl sm:rounded-3xl bg-white/75 dark:bg-slate-900/40 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] ring-1 ring-inset ring-white/10 dark:ring-white/5 p-3 sm:p-4 overflow-hidden transition-all grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
+          {/* Subtle Specular Top Rim */}
+          <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/40 dark:via-white/20 to-transparent pointer-events-none" />
+
           {/* Left Column: Substitutes (Strictly 3 Reserves) */}
-          <div className="md:col-span-7 flex flex-col justify-between md:border-r border-dashed border-slate-200 dark:border-white/15 md:pr-4">
+          <div className="md:col-span-7 flex flex-col justify-between md:border-r border-slate-200/80 dark:border-white/10 md:pr-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                 Substitutes ({layout.bench.length}/3)
@@ -485,7 +503,7 @@ export const PickTeamView: React.FC = () => {
                     <div key={sp.playerId} className="flex flex-col items-center">
                       {/* Priority Tag Header & Reorder Controls */}
                       <div className="w-full flex items-center justify-between mb-1 px-1">
-                        <span className={`text-[9px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded-md ${
+                        <span className={`text-[9px] font-black uppercase tracking-tight px-1.5 py-0.5 rounded-lg ${
                           order === 1
                             ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40'
                             : order === 2
@@ -504,7 +522,7 @@ export const PickTeamView: React.FC = () => {
                                   reorderBenchPlayer(sp.playerId, order - 1);
                                 }}
                                 title={`Promote to Sub ${order - 1}`}
-                                className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90"
+                                className="p-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90"
                               >
                                 <ArrowLeft className="w-3 h-3" />
                               </button>
@@ -516,7 +534,7 @@ export const PickTeamView: React.FC = () => {
                                   reorderBenchPlayer(sp.playerId, order + 1);
                                 }}
                                 title={`Demote to Sub ${order + 1}`}
-                                className="p-1 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90"
+                                className="p-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all active:scale-90"
                               >
                                 <ArrowRight className="w-3 h-3" />
                               </button>
@@ -547,8 +565,8 @@ export const PickTeamView: React.FC = () => {
                     onClick={() => {
                       if (!isPastGW) setActiveTab('transfers');
                     }}
-                    className={`flex flex-col items-center justify-center p-2 rounded-xl border border-dashed border-slate-300 dark:border-white/20 bg-slate-50 dark:bg-black/20 text-slate-500 dark:text-slate-400 transition-all min-h-[90px] ${
-                      isPastGW ? 'cursor-default opacity-50' : 'hover:border-sky-400 hover:bg-sky-50/50 cursor-pointer'
+                    className={`flex flex-col items-center justify-center p-2 rounded-2xl border border-dashed border-slate-300/80 dark:border-white/15 bg-slate-50/60 dark:bg-white/[0.03] text-slate-500 dark:text-slate-400 transition-all min-h-[90px] ${
+                      isPastGW ? 'cursor-default opacity-50' : 'hover:border-sky-400 hover:bg-sky-50/50 cursor-pointer active:scale-95'
                     }`}
                   >
                     <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Sub {order}</span>
@@ -560,7 +578,7 @@ export const PickTeamView: React.FC = () => {
           </div>
 
           {/* Right Column: Available Chips with Metallic Shine */}
-          <div className="md:col-span-5 flex flex-col justify-between pt-3 md:pt-0 border-t md:border-t-0 border-dashed border-slate-200 dark:border-white/15 md:pl-4">
+          <div className="md:col-span-5 flex flex-col justify-between pt-3 md:pt-0 border-t md:border-t-0 border-slate-200/80 dark:border-white/10 md:pl-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] md:text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-300 flex items-center gap-1.5">
                 <Zap className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
@@ -592,16 +610,16 @@ export const PickTeamView: React.FC = () => {
                       triggerHaptic(isActiveInThisGW ? 'light' : 'medium');
                       activateChip(chip.id);
                     }}
-                    className={`group relative overflow-hidden flex flex-col md:flex-row items-center md:justify-between p-2 md:px-3 md:py-2.5 rounded-xl text-xs font-bold border transition-all ${
+                    className={`group relative overflow-hidden flex flex-col md:flex-row items-center md:justify-between p-2 md:px-3 md:py-2.5 rounded-2xl text-xs font-bold border transition-all ${
                       isActiveInThisGW
-                        ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-white border-emerald-400 shadow-md shadow-emerald-500/20'
+                        ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-sky-500 text-white border-emerald-400/80 shadow-md shadow-emerald-500/20'
                         : isPastGW
                         ? 'bg-slate-100/60 dark:bg-black/20 text-slate-400 dark:text-slate-500 border-slate-200/60 dark:border-white/5 opacity-50 cursor-not-allowed'
                         : isUsedInSeason
                         ? 'bg-slate-100/80 dark:bg-black/40 text-slate-400 dark:text-slate-500 border-slate-200/80 dark:border-white/5 opacity-50 cursor-not-allowed'
                         : isSquadLocked
                         ? 'bg-slate-100 dark:bg-black/30 text-slate-400 dark:text-slate-500 border-slate-200/80 dark:border-white/5 opacity-60 cursor-not-allowed'
-                        : 'bg-slate-50/80 hover:bg-sky-50/70 text-slate-700 dark:bg-black/40 dark:hover:bg-black/60 dark:text-slate-200 border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/40 shadow-xs active:scale-98'
+                        : 'bg-white/60 hover:bg-sky-50/70 text-slate-700 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] dark:text-slate-200 border-slate-200/80 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/40 shadow-xs active:scale-98'
                     }`}
                   >
                     {/* Metallic sweep shine */}
@@ -626,7 +644,7 @@ export const PickTeamView: React.FC = () => {
 
         {/* Error notification if save fails or squad invalid */}
         {errorMessage && (
-          <div className="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
+          <div className="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400 text-xs font-bold flex items-center gap-2">
             <AlertCircle className="w-4 h-4 flex-shrink-0" />
             <span>{errorMessage}</span>
           </div>
@@ -637,7 +655,7 @@ export const PickTeamView: React.FC = () => {
           <button
             type="button"
             onClick={() => setSelectedGW(currentGW)}
-            className="w-full py-3.5 px-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg bg-sky-500 hover:bg-sky-400 active:scale-98 text-slate-950 cursor-pointer"
+            className="w-full py-3.5 px-5 rounded-2xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xl bg-gradient-to-r from-sky-500 to-cyan-500 hover:brightness-105 active:scale-98 text-slate-950 cursor-pointer border border-sky-400/40"
           >
             <Clock className="w-4 h-4" />
             <span>Viewing GW {selectedGW} Archive • Jump to Current GW {currentGW} →</span>
@@ -646,10 +664,12 @@ export const PickTeamView: React.FC = () => {
           <button
             onClick={handleSaveTeam}
             disabled={isSaving || !comp.isValid || isSquadLocked}
-            className={`w-full py-3.5 px-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-lg ${
-              !comp.isValid || isSquadLocked
-                ? 'bg-slate-200 text-slate-500 border border-slate-300/80 dark:bg-slate-800 dark:text-slate-500 dark:border-white/5 cursor-not-allowed shadow-none'
-                : 'bg-emerald-500 hover:bg-emerald-400 active:scale-98 text-slate-950 shadow-[0_0_20px_rgba(16,185,129,0.35)]'
+            className={`w-full py-3.5 px-5 rounded-2xl font-black text-xs md:text-sm uppercase tracking-wider transition-all flex items-center justify-center gap-2 shadow-xl ${
+              isSquadLocked
+                ? 'bg-slate-200 dark:bg-white/5 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-white/10 cursor-not-allowed shadow-none'
+                : !comp.isValid
+                ? 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30 cursor-not-allowed shadow-none'
+                : 'bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 hover:brightness-105 active:scale-98 text-slate-950 cursor-pointer shadow-emerald-500/25 border border-emerald-300/40'
             }`}
           >
             {isSaving ? (
