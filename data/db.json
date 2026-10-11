@@ -623,7 +623,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -928,7 +928,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 0,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -8821,128 +8821,13 @@
           "showRealNamePublicly": true
         },
         {
-          "id": "user_1790454858175",
-          "managerName": "Tato kopaleishvili",
-          "teamName": "12-7",
-          "totalPoints": 101,
-          "gwPoints": 0,
-          "rank": 5,
-          "previousRank": 5,
-          "activeChip": null,
-          "lineup": [
-            {
-              "playerId": "p_9_7_kostava",
-              "webName": "Kostava",
-              "clubId": "SCH_9_7",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_qavtaradze",
-              "webName": "Qavtaradze",
-              "clubId": "SCH_11_1",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 2,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_1_kirtadze",
-              "webName": "Kirtadze",
-              "clubId": "SCH_12_1",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_7_kopaleishvili",
-              "webName": "Kopaleishvili",
-              "clubId": "SCH_12_7",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_3_vashakmadze",
-              "webName": "Vashakmadze",
-              "clubId": "SCH_12_3",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_7_kevlishvili",
-              "webName": "Kevlishvili",
-              "clubId": "SCH_12_7",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_11_6_chaladze",
-              "webName": "Chaladze",
-              "clubId": "SCH_11_6",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_6_chachia",
-              "webName": "Chachia",
-              "clubId": "SCH_12_6",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_9_1_tsintskaladze",
-              "webName": "Tsintskaladze",
-              "clubId": "SCH_9_1",
-              "position": "FWD",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 3,
-              "points": 0
-            }
-          ],
-          "grade": "12",
-          "parallel": "7",
-          "realName": "Tato Kopaleishvili",
-          "showRealNamePublicly": true
-        },
-        {
           "id": "user_1790509284463",
           "managerName": "Dachi",
           "teamName": "Badribadri13",
           "totalPoints": 100,
           "gwPoints": 0,
-          "rank": 6,
-          "previousRank": 6,
+          "rank": 5,
+          "previousRank": 5,
           "activeChip": null,
           "lineup": [
             {
@@ -9056,8 +8941,8 @@
           "teamName": "FC badri",
           "totalPoints": 99,
           "gwPoints": 0,
-          "rank": 7,
-          "previousRank": 7,
+          "rank": 6,
+          "previousRank": 6,
           "activeChip": null,
           "lineup": [
             {
@@ -9163,6 +9048,121 @@
           "grade": "12",
           "parallel": "3",
           "realName": "მაგარი ტიპი",
+          "showRealNamePublicly": true
+        },
+        {
+          "id": "user_1790454858175",
+          "managerName": "Tato kopaleishvili",
+          "teamName": "12-7",
+          "totalPoints": 97,
+          "gwPoints": 0,
+          "rank": 7,
+          "previousRank": 7,
+          "activeChip": null,
+          "lineup": [
+            {
+              "playerId": "p_9_7_kostava",
+              "webName": "Kostava",
+              "clubId": "SCH_9_7",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_qavtaradze",
+              "webName": "Qavtaradze",
+              "clubId": "SCH_11_1",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_1_kirtadze",
+              "webName": "Kirtadze",
+              "clubId": "SCH_12_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_7_kopaleishvili",
+              "webName": "Kopaleishvili",
+              "clubId": "SCH_12_7",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_7_kevlishvili",
+              "webName": "Kevlishvili",
+              "clubId": "SCH_12_7",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_6_chaladze",
+              "webName": "Chaladze",
+              "clubId": "SCH_11_6",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_6_chachia",
+              "webName": "Chachia",
+              "clubId": "SCH_12_6",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_3_qardava",
+              "webName": "Qardava",
+              "clubId": "SCH_9_3",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
+            }
+          ],
+          "grade": "12",
+          "parallel": "7",
+          "realName": "Tato Kopaleishvili",
           "showRealNamePublicly": true
         },
         {
@@ -17035,7 +17035,7 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_1_tsintskaladze",
+            "playerId": "p_9_3_qardava",
             "isStarter": false,
             "benchOrder": 3,
             "isCaptain": false,
@@ -17044,7 +17044,7 @@
         ],
         "bank": 0.4,
         "freeTransfers": 0,
-        "transfersMadeThisGW": 4,
+        "transfersMadeThisGW": 5,
         "activeChip": null,
         "usedChips": {
           "triple_captain": true,
@@ -17123,9 +17123,9 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 4
+          "2": 8
         },
-        "accumulatedTransferPenalties": 4,
+        "accumulatedTransferPenalties": 8,
         "startFreeTransfers": 3,
         "remediationGranted": {
           "p_12_3_vashakmadze": true
@@ -17137,7 +17137,7 @@
       "realName": "Tato Kopaleishvili",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 101
+      "totalPoints": 97
     },
     "user_1790454882615": {
       "id": "user_1790454882615",
