@@ -24869,7 +24869,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0.1,
+        "bank": 0,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
