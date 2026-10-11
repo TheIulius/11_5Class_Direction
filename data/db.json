@@ -1598,7 +1598,7 @@
       "totalPoints": -4,
       "gwPoints": -4,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -16175,17 +16175,6 @@
               "points": 0
             },
             {
-              "playerId": "p_9_6_mzhavanadze",
-              "webName": "Mzhavanadze",
-              "clubId": "SCH_9_6",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_chakvetadze",
               "webName": "Chakvetadze",
               "clubId": "SCH_10_1",
@@ -27364,13 +27353,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_6_mzhavanadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_1_chakvetadze",
             "isStarter": false,
             "benchOrder": 1,
@@ -27385,7 +27367,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 3.6,
+        "bank": 8.8,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
