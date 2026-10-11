@@ -1720,7 +1720,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -5660,7 +5660,7 @@
       "totalPoints": 10,
       "gwPoints": 10,
       "form": 5,
-      "selectedByPercent": 6,
+      "selectedByPercent": 5,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -14595,28 +14595,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_6_dzagania",
-              "webName": "Dzagania",
-              "clubId": "SCH_12_6",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_9_6_qvaraia",
-              "webName": "Qvaraia",
-              "clubId": "SCH_9_6",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
               "playerId": "p_12_7_vadachkoria",
               "webName": "Vadachkoria",
               "clubId": "SCH_12_7",
@@ -14624,7 +14602,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -14635,7 +14613,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -20812,30 +20790,16 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_12_6_dzagania",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_9_6_qvaraia",
+            "playerId": "p_12_7_vadachkoria",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_7_vadachkoria",
-            "isStarter": false,
-            "benchOrder": 2,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_7_shekiladze",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -20847,7 +20811,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 17.7,
+        "bank": 27.2,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "wildcard",
