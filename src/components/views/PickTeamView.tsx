@@ -198,7 +198,7 @@ export const PickTeamView: React.FC = () => {
 
         {/* Mobile Backdrop Tap-to-Dismiss */}
         <AnimatePresence>
-          {(isPrimaryExpanded || isSecondaryExpanded) && (
+          {isPrimaryExpanded && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
