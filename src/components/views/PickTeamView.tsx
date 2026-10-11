@@ -114,7 +114,7 @@ export const PickTeamView: React.FC = () => {
       {/* ======================================================== */}
       {/* MIDDLE COLUMN: THE PITCH CANVAS (Visual Hero)            */}
       {/* ======================================================== */}
-      <section className="w-full min-w-0 flex-1 min-h-0 overflow-hidden flex flex-col justify-between px-0 sm:px-3 md:px-6 py-1 pb-[188px] lg:pb-4 lg:overflow-visible">
+      <section className="w-full min-w-0 flex-1 min-h-0 overflow-hidden flex flex-col justify-between px-0 sm:px-3 md:px-6 py-1 pb-[calc(240px+env(safe-area-inset-bottom,0px))] lg:pb-4 lg:overflow-visible">
         {/* Minimalist Tactical Gameweek Stepper Bar */}
         <div className="w-full max-w-4xl px-2 sm:px-0 flex items-center justify-between gap-2 mb-2">
           {/* Left: GW Selector Capsule */}

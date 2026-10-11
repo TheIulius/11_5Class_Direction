@@ -73,13 +73,13 @@ export function getFormationLayout(
 
   const pitchPositions: PlayerPitchPosition[] = [];
 
-  // 1. Goalkeeper Row (y: 11% - goal line / six yard box)
+  // 1. Goalkeeper Row (y: 12% - goal line / six yard box)
   gks.forEach((sp, idx) => {
     const xs = gks.length === 1 ? [50] : [35, 65];
     pitchPositions.push({
       playerId: sp.playerId,
       x: xs[idx] ?? 50,
-      y: 11,
+      y: 12,
       roleLabel: 'GK',
     });
   });
@@ -93,7 +93,7 @@ export function getFormationLayout(
     return [50];
   };
 
-  // 2. Defenders Row (y: 32% - defensive third)
+  // 2. Defenders Row (y: 33% - defensive third)
   const defXs = getRowXs(defs.length);
   defs.forEach((sp, idx) => {
     let roleLabel = 'DEF';
@@ -104,7 +104,7 @@ export function getFormationLayout(
     pitchPositions.push({
       playerId: sp.playerId,
       x: defXs[idx] ?? 50,
-      y: 32,
+      y: 33,
       roleLabel,
     });
   });
@@ -125,7 +125,7 @@ export function getFormationLayout(
     });
   });
 
-  // 4. Forwards Row (y: 77% - attacking penalty arc)
+  // 4. Forwards Row (y: 76% - attacking penalty arc)
   const fwdXs = fwds.length === 2 ? [30, 70] : getRowXs(fwds.length);
   fwds.forEach((sp, idx) => {
     let roleLabel = 'FWD';
@@ -135,7 +135,7 @@ export function getFormationLayout(
     pitchPositions.push({
       playerId: sp.playerId,
       x: fwdXs[idx] ?? 50,
-      y: 77,
+      y: 76,
       roleLabel,
     });
   });

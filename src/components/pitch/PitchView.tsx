@@ -74,10 +74,10 @@ export const PitchView: React.FC<PitchViewProps> = ({
     }
 
     if (layout.defs.length === 0) {
-      slots.push({ x: 30, y: 32, role: 'DEF' });
-      slots.push({ x: 70, y: 32, role: 'DEF' });
+      slots.push({ x: 30, y: 33, role: 'DEF' });
+      slots.push({ x: 70, y: 33, role: 'DEF' });
     } else if (layout.defs.length === 1 && starters.length < 5) {
-      slots.push({ x: 72, y: 32, role: 'DEF' });
+      slots.push({ x: 72, y: 33, role: 'DEF' });
     }
 
     if (layout.mids.length === 0) {
@@ -88,18 +88,18 @@ export const PitchView: React.FC<PitchViewProps> = ({
     }
 
     if (layout.fwds.length === 0 && starters.length + slots.length < 6) {
-      slots.push({ x: 50, y: 77, role: 'FWD' });
+      slots.push({ x: 50, y: 76, role: 'FWD' });
     }
 
     // Default template slots if starters is completely empty
     if (starters.length === 0) {
       return [
         { x: 50, y: 12, role: 'GK' },
-        { x: 30, y: 32, role: 'DEF' },
-        { x: 70, y: 32, role: 'DEF' },
+        { x: 30, y: 33, role: 'DEF' },
+        { x: 70, y: 33, role: 'DEF' },
         { x: 30, y: 54, role: 'MID' },
         { x: 70, y: 54, role: 'MID' },
-        { x: 50, y: 77, role: 'FWD' },
+        { x: 50, y: 76, role: 'FWD' },
       ];
     }
 
