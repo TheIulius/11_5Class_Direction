@@ -5374,7 +5374,7 @@
       "totalPoints": 24,
       "gwPoints": 24,
       "form": 5,
-      "selectedByPercent": 19,
+      "selectedByPercent": 18,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -15629,7 +15629,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -15673,7 +15673,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -15684,18 +15684,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_3_vashakmadze",
-              "webName": "Vashakmadze",
-              "clubId": "SCH_12_3",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 3,
               "points": 0
             }
           ],
@@ -17843,7 +17832,7 @@
           {
             "playerId": "p_9_3_tvauri",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -17871,26 +17860,19 @@
           {
             "playerId": "p_9_1_kikolashvili",
             "isStarter": false,
-            "benchOrder": 1,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_9_1_robakidze",
             "isStarter": false,
-            "benchOrder": 2,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_12_3_vashakmadze",
-            "isStarter": true,
-            "benchOrder": 0,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 2.8,
+        "bank": 11.5,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
