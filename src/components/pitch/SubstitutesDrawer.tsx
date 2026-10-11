@@ -48,6 +48,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
     squad,
     activateChip,
     teamValue,
+    freeTransfersRemaining,
   } = useFPL();
 
   const [internalPrimary, setInternalPrimary] = useState(false);
@@ -100,6 +101,8 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
               <span>Bank: <strong className="text-slate-700 dark:text-slate-300 font-bold">£{squad.bank.toFixed(1)}m</strong></span>
               <span className="text-slate-300 dark:text-white/15">•</span>
               <span>Val: <strong className="text-slate-700 dark:text-slate-300 font-bold">£{teamValue.toFixed(1)}m</strong></span>
+              <span className="text-slate-300 dark:text-white/15">•</span>
+              <span>FT: <strong className="text-slate-700 dark:text-slate-300 font-bold">{freeTransfersRemaining}</strong></span>
             </div>
             <span className="text-slate-300 dark:text-white/15">•</span>
             <span className="text-[10px] font-mono text-slate-400">
@@ -231,11 +234,13 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                 </span>
               </div>
 
-              {/* Really subtle Bank & Value Details */}
-              <div className="flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/5 text-[10px] font-mono text-slate-500 dark:text-slate-400">
+              {/* Really subtle Bank, Value & FT Details */}
+              <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.04] border border-slate-200/60 dark:border-white/5 text-[10px] font-mono text-slate-500 dark:text-slate-400">
                 <span>Bank <strong className="text-slate-700 dark:text-slate-300 font-bold">£{squad.bank.toFixed(1)}m</strong></span>
                 <span className="text-slate-300 dark:text-white/15">•</span>
                 <span>Val <strong className="text-slate-700 dark:text-slate-300 font-bold">£{teamValue.toFixed(1)}m</strong></span>
+                <span className="text-slate-300 dark:text-white/15">•</span>
+                <span>FT <strong className="text-slate-700 dark:text-slate-300 font-bold">{freeTransfersRemaining}</strong></span>
               </div>
 
               <div className="flex items-center gap-1 text-slate-400 text-xs shrink-0">

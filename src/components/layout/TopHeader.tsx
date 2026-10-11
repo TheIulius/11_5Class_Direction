@@ -16,40 +16,8 @@ export const TopHeader: React.FC = () => {
     toggleTheme,
     isDemoMode,
     exitDemoMode,
-    teamValue,
-    freeTransfersRemaining,
-    deadline,
+    calculationResult,
   } = useFPL();
-
-  const [timeLeft, setTimeLeft] = useState<string>('');
-
-  useEffect(() => {
-    if (!deadline) {
-      setTimeLeft('None');
-      return;
-    }
-    const updateCountdown = () => {
-      const diff = new Date(deadline.deadlineTime).getTime() - Date.now();
-      if (diff <= 0) {
-        setTimeLeft('Locked');
-        return;
-      }
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-      const mins = Math.floor((diff / (1000 * 60)) % 60);
-      if (days > 0) {
-        setTimeLeft(`${days}d ${hours}h`);
-      } else if (hours > 0) {
-        setTimeLeft(`${hours}h ${mins}m`);
-      } else {
-        const secs = Math.floor((diff / 1000) % 60);
-        setTimeLeft(`${mins}m ${secs}s`);
-      }
-    };
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-    return () => clearInterval(timer);
-  }, [deadline]);
 
   return (
     <header className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-[#070b12]/95 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/10 select-none transition-colors">
@@ -69,114 +37,79 @@ export const TopHeader: React.FC = () => {
         </div>
       )}
 
-      {/* Main Container */}
-      <div className="w-full px-3 pt-2.5 pb-2 space-y-2">
-        {/* Row 1: Manager Identity (Left) & Valuation Pills (Right) */}
-        <div className="flex items-center justify-between gap-2">
-          {/* Left: Crest + Identity + Lineup Status */}
-          <div className="flex items-center gap-2.5 min-w-0">
-            {/* Crest Logo */}
-            <div
-              onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
-              className="relative w-10 h-10 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 p-1 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-all shadow-xs"
-            >
-              <img
-                src="/kcl-logo.png"
-                alt="KCL"
-                className="w-full h-full object-contain"
-              />
-            </div>
-
-            {/* Text Hierarchy */}
-            <div className="min-w-0 flex flex-col">
-              <div className="flex items-center gap-1.5 leading-tight">
-                <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                  KCL
-                </span>
-                <span
-                  onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
-                  className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate cursor-pointer hover:text-slate-800 dark:hover:text-slate-200"
-                >
-                  @{authUser?.username || 'theiulius'}
-                </span>
-              </div>
-
-              <div className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[170px] sm:max-w-[220px] leading-tight mt-0.5">
-                GW {currentGW} · {authUser?.teamName || squad.teamName}
-              </div>
-            </div>
+      {/* Main Container: Single Compact Row */}
+      <div className="w-full px-3 py-2 flex items-center justify-between gap-2">
+        {/* Left: Crest + Identity + Lineup Status */}
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Crest Logo */}
+          <div
+            onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
+            className="relative w-9 h-9 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 p-1 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-all shadow-xs"
+          >
+            <img
+              src="/kcl-logo.png"
+              alt="KCL"
+              className="w-full h-full object-contain"
+            />
           </div>
 
-          {/* Right: VAL & BANK Glass Capsules */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {/* VAL Capsule */}
-            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 min-w-[56px] text-center">
-              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
-                VAL
+          {/* Text Hierarchy */}
+          <div className="min-w-0 flex flex-col justify-center">
+            <div className="flex items-center gap-1 leading-tight">
+              <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">
+                KCL
               </span>
-              <span className="text-xs sm:text-[13px] font-mono font-bold text-slate-900 dark:text-white tabular-nums leading-tight mt-1">
-                £{teamValue.toFixed(1)}m
+              <span
+                onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
+                className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate cursor-pointer hover:text-slate-800 dark:hover:text-slate-200"
+              >
+                @{authUser?.username || 'theiulius'}
               </span>
             </div>
 
-            {/* BANK Capsule */}
-            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 min-w-[56px] text-center">
-              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
-                BANK
-              </span>
-              <span className="text-xs sm:text-[13px] font-mono font-bold text-slate-900 dark:text-white tabular-nums leading-tight mt-1">
-                £{squad.bank.toFixed(1)}m
-              </span>
-            </div>
-
-            {/* Quick Action Utilities (Rules & Theme) */}
-            <div className="flex flex-col gap-1 ml-0.5">
-              <button
-                onClick={() => openRulesModal('rules')}
-                className="p-1 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer relative"
-                title="Rules & Updates"
-              >
-                <BookOpen className="w-3 h-3" />
-                {authUser?.id && !hasManagerSeenLatestUpdate(authUser.id) && (
-                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
-                )}
-              </button>
-              <button
-                onClick={toggleTheme}
-                className="p-1 rounded-lg bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
-                title="Toggle Theme"
-              >
-                {theme === 'dark' ? (
-                  <Sun className="w-3 h-3 text-amber-400" />
-                ) : (
-                  <Moon className="w-3 h-3 text-slate-600" />
-                )}
-              </button>
+            <div className="text-[10.5px] font-semibold text-slate-600 dark:text-slate-300 truncate max-w-[120px] sm:max-w-[160px] leading-tight mt-0.5">
+              GW {currentGW} · {authUser?.teamName || squad.teamName}
             </div>
           </div>
         </div>
 
-        {/* Row 2: FT (Left) & DEADLINE (Right) Full-Width Split Pills */}
-        <div className="grid grid-cols-2 gap-2 pt-0.5">
-          {/* FT Capsule */}
-          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
-            <span className="text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
-              FT
+        {/* Right: GW PTS Counter + Rules ('წესები') + Theme Toggle (All Horizontally Aligned) */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* GW PTS Capsule */}
+          <div className="flex flex-col items-center justify-center px-2 py-0.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 min-w-[50px] text-center">
+            <span className="text-[8px] font-mono font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider leading-none">
+              GW PTS
             </span>
-            <span className="text-sm sm:text-base font-mono font-black text-slate-900 dark:text-white tabular-nums leading-tight mt-1">
-              {freeTransfersRemaining}
+            <span className="text-xs sm:text-[13px] font-mono font-black text-slate-900 dark:text-white tabular-nums leading-tight mt-0.5">
+              {calculationResult?.totalPoints ?? 0}
             </span>
           </div>
 
-          {/* DEADLINE Capsule */}
-          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
-            <span className="text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
-              DEADLINE
-            </span>
-            <span className="text-xs sm:text-sm font-mono font-bold text-slate-900 dark:text-white tabular-nums leading-tight mt-1 truncate max-w-full">
-              {timeLeft || 'Locked'}
-            </span>
-          </div>
+          {/* Rules Button with "წესები (icon)" */}
+          <button
+            onClick={() => openRulesModal('rules')}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 text-xs font-bold text-slate-700 dark:text-slate-200 transition-all cursor-pointer active:scale-95 shadow-xs relative"
+            title="ტურნირის წესები & სიახლეები"
+          >
+            <span>წესები</span>
+            <BookOpen className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
+            {authUser?.id && !hasManagerSeenLatestUpdate(authUser.id) && (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            )}
+          </button>
+
+          {/* Theme Toggle Button */}
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-200 transition-all cursor-pointer active:scale-95 shadow-xs"
+            title="Toggle Theme"
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4 text-slate-600" />
+            )}
+          </button>
         </div>
       </div>
     </header>

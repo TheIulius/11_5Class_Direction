@@ -3,6 +3,7 @@ import { useFPL } from '../../context/FPLContext';
 import { getFormationLayout } from '../../engine/formations';
 import { PlayerCard } from './PlayerCard';
 import { PlayerActionSheet } from './PlayerActionSheet';
+import { InlineChipSelector } from './InlineChipSelector';
 import { X, Sparkles, Shield, UserPlus, Plus } from 'lucide-react';
 
 import { SquadPlayer } from '../../types/fpl';
@@ -188,13 +189,20 @@ export const PitchView: React.FC<PitchViewProps> = ({
           <path d="M calc(100% - 26px) calc(100% - 12px) A 14 14 0 0 1 calc(100% - 12px) calc(100% - 26px)" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
         </svg>
 
-        {/* Minimal Subtle Formation Pill */}
+        {/* Pitch Top Bar: Chip Selector (Upper Left) & Formation (Upper Right) */}
         <div className="relative pt-2 px-3 flex items-center justify-between z-10">
-          <div className="flex items-center gap-1.5">
+          {/* Upper Left: Horizontal Sliding Chip Selector */}
+          <InlineChipSelector
+            selectedGW={activeGW}
+            isPastGW={readOnly || (showPoints && isCurrentGWFinished)}
+          />
+
+          {/* Upper Right: Formation Pill */}
+          <div className="flex items-center gap-1.5 shrink-0">
             <span
               className={`text-[9.5px] font-mono font-bold uppercase px-2 py-0.5 rounded-full backdrop-blur-md border flex items-center gap-1 ${
                 layout.isValid
-                  ? 'bg-black/30 text-slate-300 border-white/10'
+                  ? 'bg-black/40 text-slate-300 border-white/10'
                   : 'bg-rose-950/40 text-rose-300 border-rose-500/30'
               }`}
             >
@@ -202,12 +210,6 @@ export const PitchView: React.FC<PitchViewProps> = ({
               {layout.isValid ? layout.formationString : 'Incomplete'}
             </span>
           </div>
-
-          {showPoints && (
-            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/15 tabular-nums">
-              {activeCalc.totalPoints} PTS
-            </span>
-          )}
         </div>
 
         {/* Stadium Pitch Canvas with Dynamic Coordinates */}

@@ -3,7 +3,6 @@ import { useFPL } from '../../context/FPLContext';
 import { PitchView } from '../pitch/PitchView';
 import { PlayerActionSheet } from '../pitch/PlayerActionSheet';
 import { SubstitutesDrawer } from '../pitch/SubstitutesDrawer';
-import { InlineChipSelector } from '../pitch/InlineChipSelector';
 import { ActionPanel } from '../layout/ActionPanel';
 import { getFormationLayout } from '../../engine/formations';
 import { validateSquadComposition, calculateGameweekSquadPoints } from '../../engine/scoring';
@@ -29,7 +28,38 @@ export const PickTeamView: React.FC = () => {
     setActiveTab,
     isSquadLocked,
     isDemoMode,
+    deadline,
   } = useFPL();
+
+  const [timeLeft, setTimeLeft] = useState<string>('');
+
+  useEffect(() => {
+    if (!deadline) {
+      setTimeLeft('None');
+      return;
+    }
+    const updateCountdown = () => {
+      const diff = new Date(deadline.deadlineTime).getTime() - Date.now();
+      if (diff <= 0) {
+        setTimeLeft('Locked');
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h`);
+      } else if (hours > 0) {
+        setTimeLeft(`${hours}h ${mins}m`);
+      } else {
+        const secs = Math.floor((diff / 1000) % 60);
+        setTimeLeft(`${mins}m ${secs}s`);
+      }
+    };
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [deadline]);
 
   const [selectedGW, setSelectedGW] = useState<number>(currentGW);
   useEffect(() => {
@@ -87,76 +117,73 @@ export const PickTeamView: React.FC = () => {
       <section className="w-full min-w-0 flex flex-col items-center px-0 sm:px-3 md:px-6 py-1 md:py-4 pb-0 lg:pb-4 overflow-hidden lg:overflow-visible">
         {/* Minimalist Tactical Gameweek Stepper Bar */}
         <div className="w-full max-w-4xl px-2 sm:px-0 flex items-center justify-between gap-2 mb-2">
-          {/* Left: GW Selector Capsule + Inline Chip Selector */}
-          <div className="flex items-center gap-2 min-w-0">
-            {/* GW Selector Capsule */}
-            <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black border border-white/10 shadow-xs h-9 shrink-0">
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setSelectedGW((prev) => Math.max(1, prev - 1));
-                }}
-                disabled={selectedGW <= 1}
-                aria-label="Previous Gameweek"
-                className="p-1 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </button>
+          {/* Left: GW Selector Capsule */}
+          <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-black border border-white/10 shadow-xs h-9 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setSelectedGW((prev) => Math.max(1, prev - 1));
+              }}
+              disabled={selectedGW <= 1}
+              aria-label="Previous Gameweek"
+              className="p-1 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
 
-              <div className="flex items-center gap-1.5 px-1 min-w-0">
-                <span className="text-xs font-black uppercase tracking-tight text-white whitespace-nowrap">
-                  GW {selectedGW}
-                </span>
-                <span
-                  className={`text-[8.5px] font-mono font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-1 ${
-                    selectedGW === currentGW
-                      ? 'bg-red-950/40 text-red-400 border-red-900/50'
-                      : 'bg-zinc-900 text-zinc-500 border-zinc-800'
-                  }`}
-                >
-                  {selectedGW === currentGW && (
-                    <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse shrink-0" />
-                  )}
-                  <span>{selectedGW === currentGW ? 'LIVE' : 'ARCHIVE'}</span>
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  triggerHaptic('light');
-                  setSelectedGW((prev) => Math.min(currentGW, prev + 1));
-                }}
-                disabled={selectedGW >= currentGW}
-                aria-label="Next Gameweek"
-                className="p-1 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+            <div className="flex items-center gap-1.5 px-1 min-w-0">
+              <span className="text-xs font-black uppercase tracking-tight text-white whitespace-nowrap">
+                GW {selectedGW}
+              </span>
+              <span
+                className={`text-[8.5px] font-mono font-bold px-1.5 py-0.5 rounded-full border flex items-center gap-1 ${
+                  selectedGW === currentGW
+                    ? 'bg-red-950/40 text-red-400 border-red-900/50'
+                    : 'bg-zinc-900 text-zinc-500 border-zinc-800'
+                }`}
               >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+                {selectedGW === currentGW && (
+                  <span className="w-1 h-1 rounded-full bg-red-500 animate-pulse shrink-0" />
+                )}
+                <span>{selectedGW === currentGW ? 'LIVE' : 'ARCHIVE'}</span>
+              </span>
             </div>
 
-            {/* Inline Chip Selector */}
-            <InlineChipSelector
-              selectedGW={selectedGW}
-              isPastGW={isPastGW}
-            />
+            <button
+              type="button"
+              onClick={() => {
+                triggerHaptic('light');
+                setSelectedGW((prev) => Math.min(currentGW, prev + 1));
+              }}
+              disabled={selectedGW >= currentGW}
+              aria-label="Next Gameweek"
+              className="p-1 rounded-xl hover:bg-zinc-800 text-zinc-400 hover:text-white disabled:opacity-20 disabled:pointer-events-none transition-all cursor-pointer"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
           </div>
 
-          {/* Quick Score Capsule on Middle Column */}
+          {/* Right: Gameweek Kickoff Deadline Capsule (Above right corner of pitch) */}
           <div className="flex items-center gap-1.5 shrink-0">
-            <span
-              className="px-2.5 py-1 rounded-2xl text-xs font-black font-mono tabular-nums bg-black text-white border border-white/10 shadow-2xs h-9 flex items-center"
-              title="Gameweek Score"
+            <div
+              className="px-2.5 py-1 rounded-2xl text-xs font-mono font-bold bg-black text-white border border-white/10 shadow-xs h-9 flex items-center gap-1.5"
+              title="Gameweek Kickoff Deadline"
             >
-              {activeCalculation.totalPoints} PTS
-            </span>
+              <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+              <span className="text-[10px] text-zinc-400 font-sans font-semibold uppercase tracking-wider">
+                Deadline:
+              </span>
+              <span className="text-xs font-mono font-bold text-white tabular-nums">
+                {timeLeft || 'Locked'}
+              </span>
+            </div>
 
             {isPastGW && (
               <button
                 type="button"
                 onClick={() => setSelectedGW(currentGW)}
-                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-2xl bg-black hover:bg-zinc-900 text-zinc-300 border border-white/10 text-[11px] font-bold transition-all cursor-pointer h-9 shadow-2xs"
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-2xl bg-black hover:bg-zinc-900 text-zinc-300 border border-white/10 text-[11px] font-bold transition-all cursor-pointer h-9 shadow-xs"
               >
                 <Clock className="w-3 h-3 text-zinc-400" />
                 <span>Return to GW {currentGW}</span>

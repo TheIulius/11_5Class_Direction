@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import { useFPL } from '../../context/FPLContext';
 import { ChipType } from '../../types/fpl';
 import { triggerHaptic } from '../../utils/haptics';
@@ -22,6 +22,7 @@ const SPRING_CONFIG = {
   type: 'spring' as const,
   stiffness: 400,
   damping: 40,
+  mass: 0.8,
 };
 
 export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
@@ -91,7 +92,23 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
     // 3. Smoothly collapse after physical spring animation
     setTimeout(() => {
       setIsExpanded(false);
-    }, 240);
+    }, 200);
+  };
+
+  // Horizontal drag gesture on the "|" line handle to expand or collapse
+  const handleDragEndCollapsed = (_: any, info: PanInfo) => {
+    if (isPastGW) return;
+    if (info.offset.x > 20 || info.velocity.x > 120) {
+      triggerHaptic('light');
+      setIsExpanded(true);
+    }
+  };
+
+  const handleDragEndExpanded = (_: any, info: PanInfo) => {
+    if (info.offset.x < -20 || info.velocity.x < -120) {
+      triggerHaptic('light');
+      setIsExpanded(false);
+    }
   };
 
   return (
@@ -100,45 +117,60 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
       layout
       transition={SPRING_CONFIG}
       style={{ willChange: 'transform' }}
-      className="relative flex items-center h-9 bg-black border border-white/10 rounded-2xl shadow-xs select-none will-change-transform overflow-hidden"
+      className="relative flex items-center h-7 sm:h-7.5 bg-black/60 dark:bg-black/75 backdrop-blur-md border border-white/10 rounded-xl shadow-xs select-none will-change-transform overflow-hidden"
     >
       {!isExpanded ? (
-        /* Collapsed Default & Active States */
-        <motion.button
-          layout
-          type="button"
-          disabled={isPastGW}
-          onClick={() => {
-            if (isPastGW) return;
-            triggerHaptic('light');
-            setIsExpanded(true);
-          }}
-          transition={SPRING_CONFIG}
-          style={{ willChange: 'transform' }}
-          className={`h-full px-3.5 flex items-center gap-2 rounded-2xl transition-colors will-change-transform ${
-            isPastGW ? 'cursor-default' : 'cursor-pointer active:scale-95'
-          }`}
-        >
-          <span className="text-xs font-bold whitespace-nowrap tracking-tight flex items-center gap-1.5">
-            {activeChip ? (
-              <>
-                <span className="text-xs shrink-0">{CHIP_CONFIG[activeChip]?.icon}</span>
-                <span className="text-white font-black">{CHIP_CONFIG[activeChip]?.label}</span>
-              </>
-            ) : (
-              <span className="text-zinc-400">Chips</span>
-            )}
-          </span>
-          {/* iOS Vertical Separator */}
-          <span className="text-zinc-700 font-semibold text-xs select-none leading-none">|</span>
-        </motion.button>
+        /* Collapsed State: [ Chip Icon + Name ] + [ Draggable "|" Handle ] */
+        <div className="h-full flex items-center">
+          <button
+            type="button"
+            disabled={isPastGW}
+            onClick={() => {
+              if (isPastGW) return;
+              triggerHaptic('light');
+              setIsExpanded(true);
+            }}
+            className={`h-full pl-2.5 pr-1 flex items-center gap-1.5 transition-colors ${
+              isPastGW ? 'cursor-default' : 'cursor-pointer active:scale-95'
+            }`}
+          >
+            <span className="text-[11px] font-bold whitespace-nowrap tracking-tight flex items-center gap-1">
+              {activeChip ? (
+                <>
+                  <span className="text-xs shrink-0">{CHIP_CONFIG[activeChip]?.icon}</span>
+                  <span className="text-white font-black">{CHIP_CONFIG[activeChip]?.label}</span>
+                </>
+              ) : (
+                <span className="text-zinc-400">Chips</span>
+              )}
+            </span>
+          </button>
+
+          {/* Draggable & Clickable iOS "|" Line Handle */}
+          <motion.div
+            drag={isPastGW ? false : 'x'}
+            dragConstraints={{ left: 0, right: 50 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEndCollapsed}
+            onClick={() => {
+              if (isPastGW) return;
+              triggerHaptic('light');
+              setIsExpanded(true);
+            }}
+            style={{ touchAction: 'none', willChange: 'transform' }}
+            className="h-full px-1.5 flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/5 transition-colors touch-none"
+            title="Drag or tap to expand chips"
+          >
+            <span className="w-[2.5px] h-3.5 rounded-full bg-zinc-500/80 group-hover:bg-zinc-300 pointer-events-none" />
+          </motion.div>
+        </div>
       ) : (
-        /* Expanded Revealing All 3 Chips with Morphing Physics */
+        /* Expanded State: All 3 Chips + Draggable "|" Handle to Collapse */
         <motion.div
           layout
           transition={SPRING_CONFIG}
           style={{ willChange: 'transform' }}
-          className="flex items-center p-1 gap-1.5 will-change-transform"
+          className="flex items-center px-1 gap-1 will-change-transform"
         >
           {chipOrder.map((chipId, index) => {
             const isChosen = activeChip === chipId;
@@ -162,35 +194,39 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
                 }}
                 transition={SPRING_CONFIG}
                 style={{ willChange: 'transform' }}
-                className={`rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 active:scale-95 will-change-transform ${
+                className={`rounded-lg text-[10.5px] font-bold transition-all whitespace-nowrap flex items-center gap-1 active:scale-95 will-change-transform ${
                   index === 0 && isChosen
-                    ? 'px-4 py-1.5 bg-zinc-800 text-white border border-white/10 shadow-sm'
+                    ? 'px-2.5 py-1 bg-zinc-800 text-white border border-white/10 shadow-xs'
                     : isChosen
-                    ? 'px-3 py-1.5 bg-zinc-800/80 text-white border border-white/10'
+                    ? 'px-2 py-1 bg-zinc-800/80 text-white border border-white/10'
                     : isDisabled
-                    ? 'px-2.5 py-1.5 text-zinc-600 line-through cursor-not-allowed'
-                    : 'px-2.5 py-1.5 text-zinc-500 hover:text-zinc-300 cursor-pointer'
+                    ? 'px-2 py-1 text-zinc-600 line-through cursor-not-allowed'
+                    : 'px-2 py-1 text-zinc-400 hover:text-zinc-200 cursor-pointer'
                 }`}
               >
-                <span className="text-xs shrink-0">{CHIP_CONFIG[chipId].icon}</span>
+                <span className="text-[11px] shrink-0">{CHIP_CONFIG[chipId].icon}</span>
                 <span>{CHIP_CONFIG[chipId].label}</span>
               </motion.button>
             );
           })}
 
-          {/* iOS Vertical Separator / Collapse Button */}
-          <button
-            type="button"
+          {/* Draggable & Clickable iOS "|" Line Handle to Collapse */}
+          <motion.div
+            drag="x"
+            dragConstraints={{ left: -50, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEndExpanded}
             onClick={(e) => {
               e.stopPropagation();
               triggerHaptic('light');
               setIsExpanded(false);
             }}
-            className="h-full px-2 flex items-center justify-center cursor-pointer hover:text-zinc-400 active:scale-90 transition-all text-zinc-700 font-semibold text-xs leading-none select-none"
-            title="Collapse"
+            style={{ touchAction: 'none', willChange: 'transform' }}
+            className="h-full px-1.5 flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/5 transition-colors touch-none"
+            title="Drag or tap to collapse chips"
           >
-            <span>|</span>
-          </button>
+            <span className="w-[2.5px] h-3.5 rounded-full bg-zinc-500/80 hover:bg-zinc-300 pointer-events-none" />
+          </motion.div>
         </motion.div>
       )}
     </motion.div>
