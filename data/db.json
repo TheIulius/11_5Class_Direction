@@ -928,7 +928,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -9136,17 +9136,6 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
-            },
-            {
-              "playerId": "p_9_3_qardava",
-              "webName": "Qardava",
-              "clubId": "SCH_9_3",
-              "position": "FWD",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 3,
-              "points": 0
             }
           ],
           "grade": "12",
@@ -17015,16 +17004,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_9_3_qardava",
-            "isStarter": false,
-            "benchOrder": 3,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 9.1,
+        "bank": 13.1,
         "freeTransfers": 0,
         "transfersMadeThisGW": 5,
         "activeChip": null,
