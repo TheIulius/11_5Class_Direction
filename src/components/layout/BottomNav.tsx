@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useRef, useTransition, useCallback } from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
 import { Shirt, ArrowLeftRight, Trophy, Calendar, Wrench, Shield, Users, Award } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, PanInfo } from 'framer-motion';
 import { triggerHaptic } from '../../utils/haptics';
 
 interface TabItem {
@@ -21,12 +21,65 @@ const TABS: TabItem[] = [
 
 export const BottomNav: React.FC = () => {
   const { activeTab, setActiveTab, isDevAuthenticated, isModerator, isReferee } = useFPL();
+  const [, startTransition] = useTransition();
+  const navRef = useRef<HTMLElement>(null);
 
   const visibleTabs = TABS.filter((tab) => tab.id !== 'dev' || isModerator || isReferee);
+  const activeIndex = visibleTabs.findIndex((tab) => tab.id === activeTab);
+
+  const handleTabChange = useCallback(
+    (tabId: TabType) => {
+      if (tabId === activeTab) return;
+      triggerHaptic('light');
+      startTransition(() => {
+        setActiveTab(tabId);
+      });
+    },
+    [activeTab, setActiveTab]
+  );
+
+  const handleDragEnd = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      const navEl = navRef.current;
+      const navWidth = navEl ? navEl.clientWidth : 320;
+      const tabWidth = navWidth / visibleTabs.length;
+      const stepCount = Math.round(info.offset.x / tabWidth);
+
+      // If user dragged past one or more full tab widths
+      if (Math.abs(stepCount) >= 1) {
+        const targetIdx = Math.max(0, Math.min(visibleTabs.length - 1, activeIndex + stepCount));
+        if (targetIdx !== activeIndex) {
+          triggerHaptic('light');
+          handleTabChange(visibleTabs[targetIdx].id);
+          return;
+        }
+      }
+
+      const threshold = 25;
+      const velocityThreshold = 200;
+
+      // Quick flick or threshold offset detection
+      if (info.offset.x > threshold || info.velocity.x > velocityThreshold) {
+        if (activeIndex < visibleTabs.length - 1) {
+          triggerHaptic('light');
+          handleTabChange(visibleTabs[activeIndex + 1].id);
+        }
+      } else if (info.offset.x < -threshold || info.velocity.x < -velocityThreshold) {
+        if (activeIndex > 0) {
+          triggerHaptic('light');
+          handleTabChange(visibleTabs[activeIndex - 1].id);
+        }
+      }
+    },
+    [activeIndex, visibleTabs, handleTabChange]
+  );
 
   return (
     <div className="md:hidden fixed bottom-[max(0.6rem,env(safe-area-inset-bottom))] inset-x-3 max-w-md mx-auto z-40 select-none">
-      <nav className="w-full rounded-full bg-[#070b12]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] py-1 px-1.5 flex items-center justify-between">
+      <nav
+        ref={navRef}
+        className="relative w-full rounded-full bg-[#070b12]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] py-1 px-1.5 flex items-center justify-between"
+      >
         {visibleTabs.map((tab) => {
           const isDev = tab.id === 'dev';
           const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;
@@ -36,24 +89,27 @@ export const BottomNav: React.FC = () => {
           return (
             <button
               key={tab.id}
-              onClick={() => {
-                triggerHaptic('light');
-                setActiveTab(tab.id);
-              }}
+              type="button"
+              onClick={() => handleTabChange(tab.id)}
               className={`relative flex-1 py-1.5 px-1 flex flex-col items-center justify-center transition-all group z-10 cursor-pointer ${
                 isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              {/* Active Pill Capsule Background */}
+              {/* Active Tab Highlight (Draggable iOS Dynamic Indicator) */}
               {isActive && (
                 <motion.div
-                  layoutId="activeDockPill"
-                  className="absolute inset-0 rounded-full bg-white/15 border border-white/20 shadow-xs -z-10"
-                  transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  layoutId="activeNavIndicator"
+                  drag="x"
+                  dragConstraints={navRef}
+                  dragElastic={0.15}
+                  dragSnapToOrigin={true}
+                  onDragEnd={handleDragEnd}
+                  className="absolute inset-0 rounded-full bg-white/15 border border-white/20 shadow-xs cursor-grab active:cursor-grabbing touch-none z-0 will-change-transform"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
 
-              <div className="relative flex items-center justify-center">
+              <div className="relative flex items-center justify-center pointer-events-none z-10">
                 <Icon
                   className={`w-4 h-4 transition-transform duration-200 ${
                     isActive ? 'scale-110 text-white' : 'text-slate-400 group-hover:text-slate-200'
@@ -65,7 +121,7 @@ export const BottomNav: React.FC = () => {
               </div>
 
               <span
-                className={`text-[9.5px] mt-0.5 tracking-tight truncate max-w-[50px] leading-tight transition-colors ${
+                className={`text-[9.5px] mt-0.5 tracking-tight truncate max-w-[50px] leading-tight transition-colors pointer-events-none z-10 ${
                   isActive ? 'font-bold text-white' : 'font-medium text-slate-400'
                 }`}
               >

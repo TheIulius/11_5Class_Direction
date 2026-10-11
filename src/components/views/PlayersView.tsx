@@ -74,6 +74,29 @@ export interface AggregatedClass {
   players: any[];
 }
 
+const staggerContainerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+    },
+  },
+};
+
+const staggerItemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 400,
+      damping: 30,
+    },
+  },
+};
+
 export const PlayersView: React.FC = () => {
   const {
     players,
@@ -102,6 +125,33 @@ export const PlayersView: React.FC = () => {
   const [expandedClassId, setExpandedClassId] = useState<string | null>(null);
   const [buyNotification, setBuyNotification] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
+  // Defer heavy list computation to ensure 0ms instantaneous route change
+  const [isReady, setIsReady] = useState(false);
+  const [renderedLimit, setRenderedLimit] = useState(30);
+
+  // Decouple route change from rendering: render empty page shell on frame 0
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true);
+    }, 15);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Progressively uncap list rendering in background after initial render settles
+  React.useEffect(() => {
+    if (isReady && renderedLimit < Object.keys(players).length) {
+      const timer = setTimeout(() => {
+        setRenderedLimit(Object.keys(players).length);
+      }, 250);
+      return () => clearTimeout(timer);
+    }
+  }, [isReady, renderedLimit, players]);
+
+  // Reset limit when search or filter criteria change
+  React.useEffect(() => {
+    setRenderedLimit(30);
+  }, [searchQuery, positionFilter, selectedGrade, selectedSection, sortBy, sortOrder]);
+
   // Auto-dismiss buy notifications
   React.useEffect(() => {
     if (!buyNotification) return;
@@ -118,6 +168,7 @@ export const PlayersView: React.FC = () => {
 
   // Compute aggregated stats for each player
   const enrichedPlayers = useMemo(() => {
+    if (!isReady) return [];
     return Object.values(players).map((p) => {
       let totalGoals = 0;
       let totalAssists = 0;
@@ -244,6 +295,7 @@ export const PlayersView: React.FC = () => {
 
   // Class Data Aggregation & Sorting
   const aggregatedClasses = useMemo(() => {
+    if (!isReady) return [];
     const allClubs = getSortedSchoolClubs(clubs);
     const normClubId = (id: string) => (id === 'SCH' ? 'SCH_11_5' : id);
 
@@ -844,25 +896,49 @@ export const PlayersView: React.FC = () => {
         {/* Content: Either Player Cards or Class Cards */}
         {viewMode === 'players' ? (
           /* Player Cards / List */
-          <div className="space-y-2">
-            {filteredAndSortedPlayers.length === 0 ? (
-              <div className="p-8 text-center rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-2">
-                <Users className="w-8 h-8 mx-auto text-slate-400 opacity-60" />
-                <p className="text-sm font-bold">No players found matching your filters</p>
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setPositionFilter('ALL');
-                    setSelectedGrade('ALL');
-                    setSelectedSection('ALL');
-                  }}
-                  className="px-3 py-1 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-xs font-bold"
+          !isReady ? (
+            <div className="space-y-2">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`player-skeleton-${i}`}
+                  className="p-3 rounded-2xl bg-white/40 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/5 h-[76px] animate-pulse flex items-center justify-between gap-3"
                 >
-                  Clear Filters
-                </button>
-              </div>
-            ) : (
-              filteredAndSortedPlayers.map((p, idx) => {
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-5 h-4 bg-slate-200 dark:bg-white/10 rounded" />
+                    <div className="w-11 h-11 rounded-2xl bg-slate-200 dark:bg-white/10 shrink-0" />
+                    <div className="space-y-2">
+                      <div className="w-28 h-3.5 bg-slate-200 dark:bg-white/10 rounded" />
+                      <div className="w-20 h-2.5 bg-slate-200 dark:bg-white/5 rounded" />
+                    </div>
+                  </div>
+                  <div className="w-14 h-6 bg-slate-200 dark:bg-white/10 rounded-lg shrink-0" />
+                </div>
+              ))}
+            </div>
+          ) : filteredAndSortedPlayers.length === 0 ? (
+            <div className="p-8 text-center rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-2">
+              <Users className="w-8 h-8 mx-auto text-slate-400 opacity-60" />
+              <p className="text-sm font-bold">No players found matching your filters</p>
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setPositionFilter('ALL');
+                  setSelectedGrade('ALL');
+                  setSelectedSection('ALL');
+                }}
+                className="px-3 py-1 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-xs font-bold"
+              >
+                Clear Filters
+              </button>
+            </div>
+          ) : (
+            <motion.div
+              variants={staggerContainerVariants}
+              initial="hidden"
+              animate="show"
+              className="space-y-2"
+            >
+              {filteredAndSortedPlayers.slice(0, renderedLimit).map((p, idx) => {
                 const club = clubs[p.clubId] || CLUBS[p.clubId];
                 const clubShort = club?.shortName || p.clubId.replace('SCH_', '').replace('_', '/');
                 const isOwnedByMe = squad.players.some((sp) => sp.playerId === p.id);
@@ -877,7 +953,11 @@ export const PlayersView: React.FC = () => {
                 const showRisingDividerAsc = sortBy === 'rising' && sortOrder === 'asc' && prevDiff < 0 && priceDiff > 0;
 
                 return (
-                  <React.Fragment key={p.id}>
+                  <motion.div
+                    key={p.id}
+                    variants={staggerItemVariants}
+                    className="will-change-transform"
+                  >
                   {(showRisingDivider || showRisingDividerAsc) && (
                     <div className="flex items-center gap-3 py-2">
                       <div className="flex-1 h-px bg-gradient-to-r from-emerald-500/60 to-emerald-500/10" />
@@ -1002,30 +1082,40 @@ export const PlayersView: React.FC = () => {
                       <ChevronRight className="w-4 h-4 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                     </div>
                   </div>
-                  </React.Fragment>
+                  </motion.div>
                 );
-              })
-            )}
-          </div>
+              })}
+            </motion.div>
+          )
         ) : (
           /* Classes Analysis Cards with 4-Column Position Board */
-          <div className="space-y-2">
-            {filteredAndSortedClasses.length === 0 ? (
-              <div className="p-8 text-center rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-2">
-                <Users className="w-8 h-8 mx-auto text-slate-400 opacity-60" />
-                <p className="text-sm font-bold">No classes found matching your filters</p>
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedGrade('ALL');
-                    setSelectedSection('ALL');
-                  }}
-                  className="px-3 py-1 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-xs font-bold"
-                >
-                  Clear Filters
-                </button>
-              </div>
-            ) : (
+          !isReady ? (
+            <div className="space-y-2">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={`class-skeleton-${i}`}
+                  className="p-4 rounded-2xl bg-white/40 dark:bg-white/[0.02] border border-slate-200/50 dark:border-white/5 h-[80px] animate-pulse"
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredAndSortedClasses.length === 0 ? (
+                <div className="p-8 text-center rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-2">
+                  <Users className="w-8 h-8 mx-auto text-slate-400 opacity-60" />
+                  <p className="text-sm font-bold">No classes found matching your filters</p>
+                  <button
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSelectedGrade('ALL');
+                      setSelectedSection('ALL');
+                    }}
+                    className="px-3 py-1 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-xs font-bold"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+              ) : (
               filteredAndSortedClasses.map((cls, idx) => {
                 const isExpanded = expandedClassId === cls.id;
 
@@ -1300,6 +1390,7 @@ export const PlayersView: React.FC = () => {
               })
             )}
           </div>
+          )
         )}
       </div>
 

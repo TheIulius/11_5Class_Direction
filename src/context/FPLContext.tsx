@@ -361,18 +361,7 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const setActiveTab = useCallback((tab: TabType) => {
     triggerHaptic('light');
-    if (
-      typeof document !== 'undefined' &&
-      'startViewTransition' in document &&
-      typeof (document as any).startViewTransition === 'function' &&
-      !window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    ) {
-      (document as any).startViewTransition(() => {
-        setActiveTabState(tab);
-      });
-    } else {
-      setActiveTabState(tab);
-    }
+    setActiveTabState(tab);
   }, []);
 
   // Moderator / Admin privilege system

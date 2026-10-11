@@ -108,7 +108,7 @@
       "totalPoints": 19,
       "gwPoints": 19,
       "form": 5,
-      "selectedByPercent": 20,
+      "selectedByPercent": 22,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -175,7 +175,7 @@
       "totalPoints": 19,
       "gwPoints": 19,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 4,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2270,7 +2270,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2657,7 +2657,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 25,
+      "selectedByPercent": 24,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2701,7 +2701,7 @@
       "totalPoints": 12,
       "gwPoints": 12,
       "form": 5,
-      "selectedByPercent": 24,
+      "selectedByPercent": 25,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -3422,7 +3422,7 @@
       "totalPoints": 12,
       "gwPoints": 12,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -3453,7 +3453,7 @@
       "totalPoints": 10,
       "gwPoints": 10,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4631,7 +4631,7 @@
       "totalPoints": 26,
       "gwPoints": 26,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 5,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5076,7 +5076,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 6,
+      "selectedByPercent": 8,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5374,7 +5374,7 @@
       "totalPoints": 24,
       "gwPoints": 24,
       "form": 5,
-      "selectedByPercent": 16,
+      "selectedByPercent": 18,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5408,7 +5408,7 @@
       "totalPoints": 19,
       "gwPoints": 19,
       "form": 5,
-      "selectedByPercent": 10,
+      "selectedByPercent": 9,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5721,7 +5721,7 @@
       "totalPoints": 21,
       "gwPoints": 21,
       "form": 5,
-      "selectedByPercent": 10,
+      "selectedByPercent": 11,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -8411,7 +8411,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -8422,7 +8422,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -8430,6 +8430,39 @@
               "webName": "Rati",
               "clubId": "SCH_11_5",
               "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_1_chakvetadze",
+              "webName": "Chakvetadze",
+              "clubId": "SCH_10_1",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_1_barnovi",
+              "webName": "Barnovi",
+              "clubId": "SCH_12_1",
+              "position": "MID",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -9811,24 +9844,13 @@
           "activeChip": "wildcard",
           "lineup": [
             {
-              "playerId": "p_rati",
-              "webName": "Rati",
-              "clubId": "SCH_11_5",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_11_6_yarala",
-              "webName": "Yarala",
-              "clubId": "SCH_11_6",
-              "position": "FWD",
+              "playerId": "p_12_3_bazadze",
+              "webName": "Bazadze",
+              "clubId": "SCH_12_3",
+              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -9840,40 +9862,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
-              "points": 0
-            },
-            {
-              "playerId": "p_custom_1790503966985",
-              "webName": "Kvaviashvili",
-              "clubId": "SCH_11_1",
-              "position": "MID",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
-              "playerId": "p_custom_1790166342439",
-              "webName": "Samada",
-              "clubId": "SCH_11_5",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_6_chachia",
-              "webName": "Chachia",
-              "clubId": "SCH_12_6",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -9888,13 +9877,68 @@
               "points": 0
             },
             {
-              "playerId": "p_10_1_gogsadze",
-              "webName": "Gogsadze",
-              "clubId": "SCH_10_1",
-              "position": "GKP",
+              "playerId": "p_custom_1790503966985",
+              "webName": "Kvaviashvili",
+              "clubId": "SCH_11_1",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_6_gardafxadze",
+              "webName": "Gardafxadze",
+              "clubId": "SCH_11_6",
+              "position": "MID",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_rati",
+              "webName": "Rati",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_7_guniava",
+              "webName": "Guniava",
+              "clubId": "SCH_11_7",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_7_kopaleishvili",
+              "webName": "Kopaleishvili",
+              "clubId": "SCH_12_7",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_chaga",
+              "webName": "Chaga",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             }
@@ -12098,7 +12142,7 @@
               "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -12109,7 +12153,7 @@
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -12140,10 +12184,10 @@
               "webName": "Melikidze",
               "clubId": "SCH_10_7",
               "position": "MID",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -12151,10 +12195,10 @@
               "webName": "Amiko",
               "clubId": "SCH_11_6",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -12173,10 +12217,10 @@
               "webName": "Dadu",
               "clubId": "SCH_11_1",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -12184,10 +12228,10 @@
               "webName": "Kirtadze",
               "clubId": "SCH_12_1",
               "position": "DEF",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             }
           ],
@@ -12934,10 +12978,10 @@
               "webName": "Melikidze",
               "clubId": "SCH_10_7",
               "position": "MID",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -12945,10 +12989,10 @@
               "webName": "Bulia",
               "clubId": "SCH_11_4",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -12978,10 +13022,10 @@
               "webName": "Kirtadze",
               "clubId": "SCH_12_1",
               "position": "DEF",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -12989,10 +13033,10 @@
               "webName": "Chaga",
               "clubId": "SCH_11_5",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 0,
               "points": 0
             }
           ],
@@ -17713,14 +17757,14 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_11_2_japaridze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_rati",
@@ -17738,15 +17782,15 @@
           },
           {
             "playerId": "p_10_7_melikidze",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_11_6_amiko",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -17759,20 +17803,20 @@
           },
           {
             "playerId": "p_dadu",
-            "isStarter": false,
-            "benchOrder": 2,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_12_1_kirtadze",
-            "isStarter": false,
-            "benchOrder": 1,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 1.3,
+        "bank": 1,
         "freeTransfers": 0,
         "transfersMadeThisGW": 2,
         "activeChip": null,
@@ -19671,14 +19715,14 @@
           {
             "playerId": "p_12_2_giguashvili",
             "isStarter": false,
-            "benchOrder": 1,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_12_7_vadachkoria",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -19688,11 +19732,32 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_vashakmadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_chakvetadze",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_1_barnovi",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 20.7,
-        "freeTransfers": 3,
-        "transfersMadeThisGW": 1,
+        "bank": 0.6,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 3,
         "activeChip": null,
         "usedChips": {
           "triple_captain": true,
@@ -24742,15 +24807,15 @@
           },
           {
             "playerId": "p_10_7_melikidze",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_11_4_bulia",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -24770,15 +24835,15 @@
           },
           {
             "playerId": "p_12_1_kirtadze",
-            "isStarter": false,
-            "benchOrder": 2,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_chaga",
-            "isStarter": false,
-            "benchOrder": 3,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
@@ -26553,44 +26618,16 @@
         "managerName": "NIKA",
         "players": [
           {
-            "playerId": "p_rati",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": true,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_11_6_yarala",
+            "playerId": "p_12_3_bazadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_12_6_aptsiauri",
             "isStarter": false,
-            "benchOrder": 2,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_custom_1790503966985",
-            "isStarter": false,
-            "benchOrder": 1,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_custom_1790166342439",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_12_6_chachia",
-            "isStarter": true,
-            "benchOrder": 0,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -26602,16 +26639,51 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_gogsadze",
+            "playerId": "p_custom_1790503966985",
+            "isStarter": false,
+            "benchOrder": 1,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_6_gardafxadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_rati",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_guniava",
+            "isStarter": false,
+            "benchOrder": 2,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_7_kopaleishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_chaga",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": true
           }
         ],
-        "bank": 6.9,
+        "bank": 0,
         "freeTransfers": 2,
-        "transfersMadeThisGW": 7,
+        "transfersMadeThisGW": 8,
         "activeChip": "wildcard",
         "usedChips": {
           "triple_captain": true,

@@ -88,7 +88,15 @@ async function main() {
       await new Promise(r => setTimeout(r, 600));
     }
 
-    if (process.argv[3] === 'expand') {
+    if (process.argv[3] === 'players') {
+      await send('Runtime.evaluate', {
+        expression: `
+          const playersBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes('Players'));
+          if (playersBtn) playersBtn.click();
+        `
+      });
+      await new Promise(r => setTimeout(r, 800));
+    } else if (process.argv[3] === 'expand') {
       await send('Runtime.evaluate', {
         expression: `
           const subHeader = Array.from(document.querySelectorAll('span')).find(s => s.textContent.trim() === 'SUBSTITUTES');
