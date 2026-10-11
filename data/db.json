@@ -5374,7 +5374,7 @@
       "totalPoints": 24,
       "gwPoints": 24,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -8422,7 +8422,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -8444,7 +8444,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -8452,17 +8452,6 @@
               "webName": "Barnovi",
               "clubId": "SCH_12_1",
               "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_3_vashakmadze",
-              "webName": "Vashakmadze",
-              "clubId": "SCH_12_3",
-              "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -19464,7 +19453,7 @@
           {
             "playerId": "p_12_7_vadachkoria",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -19478,7 +19467,7 @@
           {
             "playerId": "p_10_1_chakvetadze",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -19488,16 +19477,9 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_12_3_vashakmadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
           }
         ],
-        "bank": 0.6,
+        "bank": 9.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 3,
         "activeChip": null,
