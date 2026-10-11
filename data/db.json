@@ -5586,7 +5586,7 @@
       "totalPoints": 2,
       "gwPoints": 2,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -8404,17 +8404,6 @@
               "points": 0
             },
             {
-              "playerId": "p_12_6_gumberidze",
-              "webName": "Gumberidze",
-              "clubId": "SCH_12_6",
-              "position": "FWD",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
               "playerId": "p_12_2_giguashvili",
               "webName": "Giguashvili",
               "clubId": "SCH_12_2",
@@ -8422,7 +8411,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -8433,7 +8422,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -19680,23 +19669,16 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_12_6_gumberidze",
+            "playerId": "p_12_2_giguashvili",
             "isStarter": false,
             "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_2_giguashvili",
-            "isStarter": false,
-            "benchOrder": 2,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_7_vadachkoria",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -19708,7 +19690,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 16.2,
+        "bank": 20.7,
         "freeTransfers": 3,
         "transfersMadeThisGW": 1,
         "activeChip": null,
