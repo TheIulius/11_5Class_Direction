@@ -190,14 +190,14 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[480px] md:max-w-md bg-white dark:bg-slate-900 rounded-t-3xl md:rounded-3xl border-t md:border border-x border-slate-200 dark:border-slate-800 p-4 md:p-6 shadow-2xl animate-slide-up text-slate-900 dark:text-white safe-bottom max-h-[88vh] overflow-y-auto"
+        className="w-full max-w-[480px] md:max-w-md bg-white/95 dark:bg-[#0c141f]/95 backdrop-blur-2xl rounded-t-3xl md:rounded-3xl border-t md:border border-x border-slate-200/80 dark:border-white/10 p-4 md:p-6 shadow-2xl animate-slide-up text-slate-900 dark:text-white safe-bottom max-h-[88vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drag handle (mobile only) */}
-        <div className="w-12 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto mb-3 md:hidden" />
+        <div className="w-12 h-1 bg-slate-300 dark:bg-white/20 rounded-full mx-auto mb-3 md:hidden" />
 
         {/* Player Header */}
-        <div className="flex items-start justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-start justify-between pb-3 border-b border-slate-200/60 dark:border-white/10">
           <div className="flex items-center space-x-3">
             {player.photoUrl ? (
               <div className="flex flex-col items-center gap-1 shrink-0">
@@ -500,17 +500,17 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
 
         {/* Bench Priority Reordering Section (Only for Substitutes in active GW) */}
         {!readOnly && !isStarter && (
-          <div className="my-2.5 p-3 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 flex flex-col gap-2">
+          <div className="my-2.5 p-3 rounded-2xl bg-slate-100/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 flex flex-col gap-2">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Bench Substitute Priority
               </span>
               <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
                 benchOrder === 1
-                  ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30'
+                  ? 'bg-slate-900 text-white dark:bg-white dark:text-zinc-950 shadow-2xs'
                   : benchOrder === 2
-                  ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30'
-                  : 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                  ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30'
+                  : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
               }`}>
                 {benchOrder === 1 ? '1st Sub (Priority)' : benchOrder === 2 ? '2nd Sub' : '3rd Sub'}
               </span>
@@ -529,8 +529,8 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
                 }}
                 className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold flex items-center justify-center border transition-all ${
                   benchOrder === 1
-                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border-emerald-500/40 cursor-default'
-                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/10 active:scale-95'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent shadow-xs cursor-default'
+                    : 'bg-slate-100 dark:bg-white/[0.05] text-slate-800 dark:text-slate-200 border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 active:scale-95 cursor-pointer'
                 }`}
               >
                 <span>1st Sub</span>
@@ -543,8 +543,8 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
                 }}
                 className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold flex items-center justify-center border transition-all ${
                   benchOrder === 2
-                    ? 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border-sky-500/40 cursor-default'
-                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-sky-500/50 hover:bg-sky-500/10 active:scale-95'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent shadow-xs cursor-default'
+                    : 'bg-slate-100 dark:bg-white/[0.05] text-slate-800 dark:text-slate-200 border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 active:scale-95 cursor-pointer'
                 }`}
               >
                 <span>2nd Sub</span>
@@ -557,8 +557,8 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
                 }}
                 className={`py-2 px-1.5 rounded-xl text-[11px] font-extrabold flex items-center justify-center border transition-all ${
                   benchOrder === 3
-                    ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border-amber-500/40 cursor-default'
-                    : 'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-amber-500/50 hover:bg-amber-500/10 active:scale-95'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent shadow-xs cursor-default'
+                    : 'bg-slate-100 dark:bg-white/[0.05] text-slate-800 dark:text-slate-200 border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 active:scale-95 cursor-pointer'
                 }`}
               >
                 <span>3rd Sub</span>
@@ -657,10 +657,10 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
               <button
                 onClick={handleStartSwap}
                 disabled={isSquadLocked}
-                className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-2xl font-bold text-xs border transition-all ${
                   isSquadLocked
-                    ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
-                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                    ? 'opacity-40 cursor-not-allowed bg-slate-100/50 dark:bg-white/[0.02] border-transparent text-slate-400'
+                    : 'bg-slate-100/80 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] text-slate-800 dark:text-slate-200 border-slate-200/80 dark:border-white/10 shadow-2xs active:scale-[0.98] cursor-pointer'
                 }`}
               >
                 <ArrowLeftRight className="w-4 h-4 text-amber-500" />
@@ -671,10 +671,10 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
               <button
                 onClick={handleTransfer}
                 disabled={isSquadLocked}
-                className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-xl border transition-colors ${
+                className={`flex flex-col items-center justify-center py-1.5 px-3 rounded-2xl border transition-all ${
                   isSquadLocked
-                    ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
-                    : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                    ? 'opacity-40 cursor-not-allowed bg-slate-100/50 dark:bg-white/[0.02] border-transparent text-slate-400'
+                    : 'bg-slate-100/80 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] text-slate-800 dark:text-slate-200 border-slate-200/80 dark:border-white/10 shadow-2xs active:scale-[0.98] cursor-pointer'
                 }`}
               >
                 <div className="flex items-center space-x-1.5 font-bold text-xs">
@@ -684,9 +684,9 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
                 <span
                   className={`text-[9.5px] font-mono font-black mt-0.5 ${
                     isWildcard
-                      ? 'text-indigo-500'
+                      ? 'text-indigo-500 dark:text-indigo-400'
                       : hasFreeTransfer
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'text-slate-600 dark:text-slate-300'
                       : 'text-amber-600 dark:text-amber-400'
                   }`}
                 >
@@ -699,10 +699,10 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
                 <button
                   onClick={handleMakeCaptain}
                   disabled={isCaptain}
-                  className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                  className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-2xl font-bold text-xs border transition-all ${
                     isCaptain
-                      ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 cursor-default'
-                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-300 border-amber-500/30 cursor-default font-black shadow-2xs'
+                      : 'bg-slate-100/80 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] text-slate-800 dark:text-slate-200 border-slate-200/80 dark:border-white/10 shadow-2xs active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <Crown className="w-4 h-4 text-amber-500" />
@@ -715,12 +715,12 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
                 <button
                   onClick={handleMakeViceCaptain}
                   disabled={isViceCaptain || isCaptain}
-                  className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl font-bold text-xs border transition-colors ${
+                  className={`flex items-center justify-center space-x-2 py-2.5 px-3 rounded-2xl font-bold text-xs border transition-all ${
                     isViceCaptain
-                      ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30 cursor-default'
+                      ? 'bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/30 cursor-default font-black shadow-2xs'
                       : isCaptain
-                      ? 'opacity-40 cursor-not-allowed bg-slate-50 dark:bg-slate-800/40 border-transparent text-slate-400'
-                      : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border-slate-200 dark:border-slate-700'
+                      ? 'opacity-40 cursor-not-allowed bg-slate-100/50 dark:bg-white/[0.02] border-transparent text-slate-400'
+                      : 'bg-slate-100/80 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.1] text-slate-800 dark:text-slate-200 border-slate-200/80 dark:border-white/10 shadow-2xs active:scale-[0.98] cursor-pointer'
                   }`}
                 >
                   <ShieldAlert className="w-4 h-4 text-sky-500" />

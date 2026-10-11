@@ -105,20 +105,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4 text-slate-900 dark:text-slate-100"
+        className="w-full max-w-sm rounded-3xl bg-white/95 dark:bg-[#0c141f]/95 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 p-5 shadow-2xl space-y-4 text-slate-900 dark:text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/10">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300">
               <Lock className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">
               {authUser ? 'Profile' : 'Manager Account'}
             </h3>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full">
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -126,12 +126,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         {/* ALREADY LOGGED IN VIEW */}
         {authUser ? (
           <div className="space-y-4 py-2">
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 space-y-2 text-center">
-              <div className="w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center font-black text-lg">
+            <div className="p-3.5 rounded-2xl bg-slate-100/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 space-y-2 text-center">
+              <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-white/10 text-slate-900 dark:text-white mx-auto flex items-center justify-center font-black text-lg">
                 {(authUser.realName || authUser.managerName || authUser.username).charAt(0).toUpperCase()}
               </div>
               <div>
-                <p className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">@{authUser.username}</p>
+                <p className="text-xs font-mono font-bold text-slate-500 dark:text-slate-400">@{authUser.username}</p>
                 <h4 className="font-bold text-slate-900 dark:text-white text-base">{authUser.teamName}</h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
                   {authUser.realName ? authUser.realName : authUser.managerName}
@@ -154,7 +154,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 logoutUser();
                 onClose();
               }}
-              className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center justify-center gap-2 transition-colors"
+              className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 flex items-center justify-center gap-2 transition-colors cursor-pointer"
             >
               <LogOut className="w-4 h-4" />
               <span>Sign Out</span>
@@ -171,16 +171,16 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           /* LOGIN OR REGISTER FORM */
           <>
             {/* Tab Switcher */}
-            <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl text-xs font-bold border border-slate-200 dark:border-slate-800">
+            <div className="grid grid-cols-2 p-1 bg-slate-100/80 dark:bg-white/[0.04] rounded-2xl text-xs font-bold border border-slate-200/80 dark:border-white/10">
               <button
                 type="button"
                 onClick={() => {
                   setTab('login');
                   setErrorMessage('');
                 }}
-                className={`py-1.5 rounded-lg transition-all ${
+                className={`py-1.5 rounded-xl transition-all cursor-pointer ${
                   tab === 'login'
-                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-black'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-xs font-black'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -192,9 +192,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                   setTab('register');
                   setErrorMessage('');
                 }}
-                className={`py-1.5 rounded-lg transition-all ${
+                className={`py-1.5 rounded-xl transition-all cursor-pointer ${
                   tab === 'register'
-                    ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-black'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-xs font-black'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >

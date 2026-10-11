@@ -148,7 +148,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
       aria-modal="true"
       className="fixed inset-0 z-[120] flex items-center justify-center p-3 sm:p-4 bg-slate-950/85 backdrop-blur-md overflow-y-auto overscroll-contain animate-fadeIn"
     >
-      <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden my-auto text-slate-100 flex flex-col">
+      <div className="relative w-full max-w-lg bg-[#0c141f]/95 backdrop-blur-2xl border border-white/10 rounded-3xl shadow-2xl overflow-hidden my-auto text-slate-100 flex flex-col">
         {/* Decorative Top Accent Glow */}
         <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />
 
@@ -165,12 +165,12 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               transition={{ duration: 0.25 }}
               className="p-6 sm:p-8 text-center space-y-5"
             >
-              <div className="mx-auto w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-inner">
+              <div className="mx-auto w-16 h-16 rounded-3xl bg-white/10 border border-white/20 flex items-center justify-center text-white shadow-inner">
                 <CheckCircle2 className="w-9 h-9" />
               </div>
 
               <div className="space-y-2">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold font-mono">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-white border border-white/20 text-xs font-bold font-mono">
                   <Sparkles className="w-3.5 h-3.5" />
                   <span>მონაცემები შენახულია</span>
                 </span>
@@ -179,20 +179,20 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-300 max-w-sm mx-auto leading-relaxed">
                   Thanks for providing your details,{' '}
-                  <strong className="text-emerald-400 font-bold">{firstName}</strong>!
+                  <strong className="text-white font-bold">{firstName}</strong>!
                   თქვენი კლასი და პროფილი წარმატებით დაფიქსირდა.
                 </p>
               </div>
 
               {/* Profile Summary Card */}
-              <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 text-left space-y-2 text-xs">
+              <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/10 text-left space-y-2 text-xs">
                 <div className="flex items-center justify-between text-slate-400">
                   <span>სახელი & გვარი:</span>
                   <span className="font-bold text-white">{firstName} {lastName}</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-400">
                   <span>კლასი / პარალელი:</span>
-                  <span className="font-mono font-black text-emerald-400">
+                  <span className="font-mono font-black text-white">
                     {selectedGrade !== 'other' ? `${selectedGrade}/${selectedParallel}` : otherDetails}
                   </span>
                 </div>
@@ -201,8 +201,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   <span className="font-bold flex items-center gap-1 text-slate-200">
                     {showPublicly ? (
                       <>
-                        <Eye className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-emerald-400 font-semibold">საჯარო (ჩანს)</span>
+                        <Eye className="w-3.5 h-3.5 text-white" />
+                        <span className="text-white font-semibold">საჯარო (ჩანს)</span>
                       </>
                     ) : (
                       <>
@@ -237,12 +237,12 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
             >
               {/* Header */}
               <div className="flex items-start gap-3.5">
-                <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shrink-0">
+                <div className="p-3 rounded-2xl bg-white/10 text-white border border-white/20 shrink-0">
                   <GraduationCap className="w-6 h-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/20">
                       სავალდებულო • Mandatory
                     </span>
                   </div>
@@ -266,13 +266,13 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                 {/* 1. GRADE SELECTION (Simmilar pill input to Standings filter) */}
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
-                    <School className="w-3.5 h-3.5 text-emerald-400" />
+                    <School className="w-3.5 h-3.5 text-white/80" />
                     <span>რომელ კლასში ხართ? (Grade)</span>
                     <span className="text-rose-400 font-bold">*</span>
                   </label>
 
                   {/* Horizontal Sliding Pill Bar */}
-                  <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-950 border border-slate-800 shadow-inner">
+                  <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-950/70 border border-white/10 shadow-inner">
                     {GRADES.map((g) => {
                       const isActive = selectedGrade === g.id;
                       return (
@@ -282,14 +282,14 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                           onClick={() => handleGradeSelect(g.id)}
                           className={`relative flex-1 py-1.5 sm:py-2 px-1 rounded-xl text-xs font-bold transition-colors cursor-pointer select-none text-center ${
                             isActive
-                              ? 'text-slate-950 font-black'
+                              ? 'text-zinc-950 font-black'
                               : 'text-slate-400 hover:text-white'
                           }`}
                         >
                           {isActive && (
                             <motion.div
                               layoutId="activeGradeSelectPill"
-                              className="absolute inset-0 rounded-xl bg-emerald-400 shadow-md"
+                              className="absolute inset-0 rounded-xl bg-white shadow-md"
                               transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                             />
                           )}
@@ -305,19 +305,19 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
                       <span className="flex items-center gap-1.5">
-                        <Shield className="w-3.5 h-3.5 text-emerald-400" />
+                        <Shield className="w-3.5 h-3.5 text-white/80" />
                         <span>რომელი პარალელი? (Parallel / Section)</span>
                         <span className="text-rose-400 font-bold">*</span>
                       </span>
                       {selectedGrade && selectedParallel && (
-                        <span className="text-[11px] font-mono font-bold text-emerald-400">
+                        <span className="text-[11px] font-mono font-bold text-white">
                           {selectedGrade}/{selectedParallel} კლასი
                         </span>
                       )}
                     </label>
 
                     {/* 7 Circular/Rounded buttons (1-7) */}
-                    <div className="grid grid-cols-7 gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-slate-950 border border-slate-800">
+                    <div className="grid grid-cols-7 gap-1.5 sm:gap-2 p-1.5 rounded-2xl bg-slate-950/70 border border-white/10">
                       {PARALLELS.map((sec) => {
                         const isSecActive = selectedParallel === sec;
                         return (
@@ -327,8 +327,8 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                             onClick={() => setSelectedParallel(sec)}
                             className={`h-9 sm:h-10 rounded-xl text-xs sm:text-sm font-black font-mono flex items-center justify-center transition-all cursor-pointer ${
                               isSecActive
-                                ? 'bg-emerald-500 text-slate-950 shadow-md ring-2 ring-emerald-400/50 scale-[1.04]'
-                                : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800 hover:text-white'
+                                ? 'bg-white text-zinc-950 shadow-md ring-2 ring-white/30 scale-[1.04]'
+                                : 'bg-white/[0.04] text-slate-300 hover:bg-white/[0.08] border border-white/5 hover:text-white'
                             }`}
                           >
                             {sec}

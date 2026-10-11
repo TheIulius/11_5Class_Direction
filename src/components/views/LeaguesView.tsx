@@ -210,7 +210,7 @@ export const LeaguesView: React.FC = () => {
                               {member.teamName}
                             </span>
                             {isCurrentUser && (
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500 text-slate-950">
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-2xs">
                                 YOU
                               </span>
                             )}
@@ -352,7 +352,7 @@ export const LeaguesView: React.FC = () => {
                     setShowCreateForm(!showCreateForm);
                     setShowJoinForm(false);
                   }}
-                  className="px-2.5 py-1 rounded-lg text-[11px] font-black bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center gap-1 transition-colors"
+                  className="px-2.5 py-1 rounded-xl text-[11px] font-black bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 flex items-center gap-1 transition-colors cursor-pointer shadow-2xs"
                 >
                   <Plus className="w-3 h-3" />
                   <span>Create</span>
@@ -364,9 +364,9 @@ export const LeaguesView: React.FC = () => {
             {showCreateForm && (
               <form
                 onSubmit={handleCreate}
-                className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/80 border border-emerald-500/30 space-y-2"
+                className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 space-y-2"
               >
-                <label className="text-[10px] font-black uppercase text-emerald-400 block">
+                <label className="text-[10px] font-black uppercase text-slate-400 block">
                   New Private League Name
                 </label>
                 <input
@@ -381,13 +381,13 @@ export const LeaguesView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowCreateForm(false)}
-                    className="px-2.5 py-1 rounded-lg text-[11px] text-slate-400"
+                    className="px-2.5 py-1 rounded-lg text-[11px] text-slate-400 cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-3 py-1 rounded-lg bg-emerald-500 text-slate-950 text-[11px] font-black"
+                    className="px-3 py-1 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 text-[11px] font-black cursor-pointer shadow-2xs"
                   >
                     Create League
                   </button>

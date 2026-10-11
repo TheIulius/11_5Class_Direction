@@ -272,10 +272,10 @@ export const PitchView: React.FC<PitchViewProps> = ({
                 transform: 'translate(-50%, -50%)',
               }}
             >
-              <span className="text-[8px] md:text-[9px] font-black uppercase text-emerald-400 bg-black/60 px-1.5 py-0.5 rounded mb-1 tracking-wider border border-emerald-500/30 shadow-xs">
+              <span className="text-[8px] md:text-[9px] font-mono font-bold uppercase text-slate-200 bg-black/60 px-1.5 py-0.5 rounded-md mb-1 tracking-wider border border-white/10 shadow-xs">
                 {slot.role}
               </span>
-              <div className="w-14 h-16 sm:w-16 sm:h-20 rounded-xl border-2 border-dashed border-emerald-400/50 bg-black/30 backdrop-blur-xs flex flex-col items-center justify-center text-emerald-400 group-hover:border-emerald-300 group-hover:bg-emerald-500/10 group-hover:scale-105 transition-all shadow-inner animate-pulse">
+              <div className="w-14 h-16 sm:w-16 sm:h-20 rounded-2xl border-2 border-dashed border-white/25 bg-white/[0.04] backdrop-blur-xs flex flex-col items-center justify-center text-white/70 group-hover:border-white/40 group-hover:bg-white/[0.08] group-hover:scale-105 transition-all shadow-inner">
                 <Plus className="w-5 h-5 mb-0.5" />
                 <span className="text-[8px] font-black uppercase tracking-wider">Add</span>
               </div>
@@ -285,9 +285,9 @@ export const PitchView: React.FC<PitchViewProps> = ({
           {/* Prompt banner if zero starters */}
           {starters.length === 0 && (
             <div className="absolute inset-x-4 bottom-6 z-20 flex justify-center pointer-events-none">
-              <div className="bg-black/80 backdrop-blur-md border border-emerald-500/40 rounded-2xl p-4 text-center max-w-sm pointer-events-auto shadow-2xl">
+              <div className="bg-[#070b12]/90 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 text-center max-w-sm pointer-events-auto shadow-2xl">
                 <div className="flex items-center justify-center gap-2 mb-1">
-                  <UserPlus className="w-4 h-4 text-emerald-400" />
+                  <UserPlus className="w-4 h-4 text-white" />
                   <p className="text-xs font-black text-white uppercase tracking-wider">Starting Lineup Empty</p>
                 </div>
                 <p className="text-[11px] text-gray-300 mb-2.5">
@@ -295,7 +295,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
                 </p>
                 <button
                   onClick={() => setActiveTab('transfers')}
-                  className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-[#002812] font-black text-xs rounded-xl shadow-lg transition-transform active:scale-95"
+                  className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 font-black text-xs rounded-xl shadow-md transition-all active:scale-95 cursor-pointer"
                 >
                   Open Player Market
                 </button>

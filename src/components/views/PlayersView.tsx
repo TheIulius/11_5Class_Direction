@@ -700,7 +700,7 @@ export const PlayersView: React.FC = () => {
       {/* Main Container */}
       <div className="space-y-3.5">
         {/* Filters & Search Toolbar */}
-        <div className="p-4 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 space-y-3 shadow-xs">
+        <div className="p-4 rounded-3xl bg-white/80 dark:bg-zinc-950/40 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] space-y-3 shadow-xl">
           {/* Search Input */}
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -709,7 +709,7 @@ export const PlayersView: React.FC = () => {
               placeholder={viewMode === 'players' ? "Search player or class (e.g. 10/1)..." : "Search class (e.g. 10/1, 10)..."}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-emerald-500 transition-colors"
+              className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-slate-400 dark:focus:border-white/30 transition-colors text-slate-900 dark:text-white placeholder-slate-400"
             />
             {searchQuery && (
               <button
@@ -746,8 +746,8 @@ export const PlayersView: React.FC = () => {
                     onClick={() => setPositionFilter(pos)}
                     className={`px-3 py-1 rounded-xl text-xs font-black transition-all shrink-0 border ${
                       isActive
-                        ? 'bg-sky-500 text-white border-sky-500 shadow-xs dark:bg-white dark:text-slate-950 dark:border-white'
-                        : 'bg-slate-100 dark:bg-zinc-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-sky-300 dark:hover:border-white/20 hover:text-slate-900'
+                        ? 'bg-zinc-900 text-white border-zinc-700 shadow-xs dark:bg-white dark:text-zinc-950 dark:border-white'
+                        : 'bg-slate-100 dark:bg-white/[0.04] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 hover:text-slate-900 dark:hover:text-white'
                     }`}
                   >
                     {pos} ({count})
@@ -789,8 +789,8 @@ export const PlayersView: React.FC = () => {
                         }}
                         className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 border ${
                           isActive
-                            ? 'bg-sky-500/15 text-sky-700 dark:text-emerald-400 border-sky-500/40 dark:border-emerald-500/40 shadow-xs'
-                            : 'bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-slate-700'
+                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-zinc-700 dark:border-white shadow-xs'
+                            : 'bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20'
                         }`}
                       >
                         <span>{s.label}</span>
@@ -820,8 +820,8 @@ export const PlayersView: React.FC = () => {
                         }}
                         className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all shrink-0 flex items-center gap-1 border ${
                           isActive
-                            ? 'bg-sky-500/15 text-sky-700 dark:text-emerald-400 border-sky-500/40 dark:border-emerald-500/40 shadow-xs'
-                            : 'bg-slate-50 dark:bg-zinc-950/60 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-sky-300 dark:hover:border-slate-700'
+                            ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-zinc-700 dark:border-white shadow-xs'
+                            : 'bg-slate-50 dark:bg-white/[0.03] text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/20'
                         }`}
                       >
                         <span>{s.label}</span>
@@ -834,7 +834,7 @@ export const PlayersView: React.FC = () => {
             {/* Order direction toggle */}
             <button
               onClick={() => setSortOrder((prev) => (prev === 'desc' ? 'asc' : 'desc'))}
-              className="px-2 py-1 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0"
+              className="px-2 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-[11px] font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white shrink-0"
             >
               {sortOrder === 'desc' ? 'Highest First (↓)' : 'Lowest First (↑)'}
             </button>
@@ -856,7 +856,7 @@ export const PlayersView: React.FC = () => {
                     setSelectedGrade('ALL');
                     setSelectedSection('ALL');
                   }}
-                  className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold"
+                  className="px-3 py-1 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-xs font-bold"
                 >
                   Clear Filters
                 </button>
@@ -889,7 +889,7 @@ export const PlayersView: React.FC = () => {
                   )}
                   <div
                     onClick={() => setSelectedPlayerId(p.id)}
-                    className="group p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 hover:border-emerald-500/50 dark:hover:border-emerald-500/50 shadow-xs hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-3"
+                    className="group p-3 rounded-2xl bg-white/70 dark:bg-white/[0.03] hover:bg-white dark:hover:bg-white/[0.06] backdrop-blur-md border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-xs transition-all cursor-pointer flex items-center justify-between gap-3"
                   >
                     {/* Left: Rank & Avatar & Names */}
                     <div className="flex items-center gap-3 min-w-0">
@@ -1020,7 +1020,7 @@ export const PlayersView: React.FC = () => {
                     setSelectedGrade('ALL');
                     setSelectedSection('ALL');
                   }}
-                  className="px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold"
+                  className="px-3 py-1 rounded-xl bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 text-xs font-bold"
                 >
                   Clear Filters
                 </button>
@@ -1032,7 +1032,7 @@ export const PlayersView: React.FC = () => {
                 return (
                   <div
                     key={cls.id}
-                    className="rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 overflow-hidden shadow-xs hover:border-emerald-500/50 transition-all"
+                    className="rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 overflow-hidden shadow-xs hover:border-slate-300 dark:hover:border-white/20 transition-all"
                   >
                     {/* Collapsed Class Card UI */}
                     <div

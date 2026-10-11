@@ -835,8 +835,8 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                 }}
                 className={`px-2.5 py-1 sm:px-3 sm:py-1 rounded-lg text-xs font-black uppercase transition-all flex items-center gap-1.5 cursor-pointer ${
                   isActive
-                    ? 'bg-sky-500 text-white font-black shadow-xs dark:bg-emerald-500 dark:text-slate-950'
-                    : 'bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    ? 'bg-zinc-900 text-white font-black shadow-xs dark:bg-white dark:text-zinc-950'
+                    : 'bg-slate-100 dark:bg-white/[0.04] text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent dark:border-white/5'
                 }`}
               >
                 <span>{g}th</span>
@@ -926,14 +926,14 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
                     triggerHaptic('light');
                     setActiveClassId(club.id);
                   }}
-                  className="group p-2 sm:p-2.5 rounded-2xl bg-white dark:bg-white/[0.02] hover:bg-sky-50/50 dark:hover:bg-white/[0.05] border border-slate-200/90 dark:border-white/10 hover:border-sky-400/60 dark:hover:border-emerald-500/50 shadow-xs hover:shadow-md hover:shadow-sky-500/10 transition-all cursor-pointer"
+                  className="group p-2.5 sm:p-3 rounded-2xl bg-white/70 dark:bg-white/[0.03] hover:bg-white dark:hover:bg-white/[0.06] backdrop-blur-md border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 shadow-xs hover:shadow-md transition-all cursor-pointer"
                 >
                   {/* Class Title Header (e.g. 10/1) */}
                   <div className="flex items-baseline justify-between mb-1">
-                    <h3 className="text-sm sm:text-lg font-black tracking-tight text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-emerald-400 transition-colors leading-none">
+                    <h3 className="text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white group-hover:text-slate-900 dark:group-hover:text-white transition-colors leading-none">
                       {club.shortName}
                     </h3>
-                    <span className="text-[8.5px] sm:text-[10px] font-mono font-bold text-slate-400 group-hover:text-sky-500 dark:group-hover:text-emerald-400">
+                    <span className="text-[8.5px] sm:text-[10px] font-mono font-bold text-slate-400">
                       {ownedInClass > 0 ? `${ownedInClass}/2` : `${classPlayers.length}p`}
                     </span>
                   </div>

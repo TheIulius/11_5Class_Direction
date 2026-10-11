@@ -190,11 +190,11 @@ export const FixturesView: React.FC = () => {
   return (
     <div className="flex flex-col space-y-3 pb-24 md:pb-12 px-2 sm:px-4 md:px-6 pt-1 md:pt-3 select-none max-w-4xl lg:max-w-5xl mx-auto w-full transition-colors duration-200">
       {/* Gameweek Navigator Header */}
-      <div className="p-2.5 md:p-3.5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-xs flex items-center justify-between">
+      <div className="p-2.5 md:p-3.5 rounded-2xl bg-white/80 dark:bg-zinc-950/40 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-xl flex items-center justify-between">
         <button
           onClick={() => setSelectedGW((prev) => Math.max(1, prev - 1))}
           disabled={selectedGW <= 1}
-          className="p-1.5 md:p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-25 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+          className="p-1.5 md:p-2 rounded-xl bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 disabled:opacity-20 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
           title="Previous Gameweek"
         >
           <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
@@ -232,7 +232,7 @@ export const FixturesView: React.FC = () => {
             <div className="mt-3">
               <button
                 onClick={() => setActiveTab('dev')}
-                className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-xs transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 font-black text-xs shadow-xs transition-colors cursor-pointer"
               >
                 + Add Games in Dev Mode
               </button>
@@ -283,16 +283,16 @@ export const FixturesView: React.FC = () => {
             return (
               <div
                 key={fix.id}
-                className={`rounded-2xl bg-white dark:bg-slate-900 border transition-all duration-200 overflow-hidden shadow-xs ${
+                className={`rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border transition-all duration-200 overflow-hidden shadow-xs ${
                   isExpanded
-                    ? 'border-emerald-500/50 shadow-md ring-1 ring-emerald-500/30'
-                    : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    ? 'border-slate-400 dark:border-white/30 shadow-md ring-1 ring-white/10'
+                    : 'border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20'
                 }`}
               >
                 {/* Clickable Header Card */}
                 <div
                   onClick={() => toggleFixture(fix.id)}
-                  className="p-3 sm:p-4 cursor-pointer hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors"
+                  className="p-3 sm:p-4 cursor-pointer hover:bg-slate-50/70 dark:hover:bg-white/[0.02] transition-colors"
                 >
                   <div className="flex items-center justify-between gap-2">
                     {/* Home Team */}
@@ -302,7 +302,7 @@ export const FixturesView: React.FC = () => {
                           {homeDisplayName}
                         </span>
                         {isExpanded && (
-                          <span className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          <span className="text-[10px] font-mono font-bold text-slate-400">
                             ⚡ {homeData.totalPoints} pts
                           </span>
                         )}
@@ -318,7 +318,7 @@ export const FixturesView: React.FC = () => {
                     <div className="mx-2 sm:mx-4 min-w-[76px] sm:min-w-[90px] text-center flex flex-col items-center justify-center">
                       {fix.isFinished ? (
                         <div className="flex flex-col items-center">
-                          <div className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono font-black text-sm md:text-base text-emerald-600 dark:text-emerald-400 shadow-2xs">
+                          <div className="px-3 py-1 rounded-xl bg-slate-100 dark:bg-white/[0.08] border border-slate-200 dark:border-white/15 font-mono font-black text-sm md:text-base text-slate-900 dark:text-white shadow-2xs">
                             {fix.homeScore ?? 0} - {fix.awayScore ?? 0}
                           </div>
                           <span className="text-[8px] font-black text-slate-400 mt-0.5 uppercase tracking-wider">

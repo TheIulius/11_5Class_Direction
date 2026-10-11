@@ -285,7 +285,7 @@ export const UndoTransfersAdmin: React.FC = () => {
             onClick={() => setFilterType('zero_penalty')}
             className={`px-3 py-1 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               filterType === 'zero_penalty'
-                ? 'bg-emerald-500 text-zinc-950 font-black shadow-xs'
+                ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 font-black shadow-xs'
                 : 'bg-zinc-950 border border-white/5 text-emerald-400 hover:text-emerald-300'
             }`}
           >

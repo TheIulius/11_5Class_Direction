@@ -281,7 +281,7 @@ export const ManagersView: React.FC = () => {
       )}
 
       {/* Top Header Card */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-zinc-950/40 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-2xl bg-amber-500/15 text-amber-500 border border-amber-500/30">
             <Shield className="w-6 h-6" />
@@ -291,7 +291,7 @@ export const ManagersView: React.FC = () => {
               <h2 className="text-lg sm:text-xl font-black tracking-tight uppercase">
                 Managers Management
               </h2>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-400 border border-amber-500/30">
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/15 text-amber-500 dark:text-amber-300 border border-amber-500/30">
                 Admin Portal
               </span>
             </div>
@@ -304,7 +304,7 @@ export const ManagersView: React.FC = () => {
         <button
           onClick={loadData}
           disabled={isLoadingUsers}
-          className="px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 hover:bg-slate-200 dark:hover:bg-zinc-800 border border-slate-200 dark:border-white/10 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+          className="px-3.5 py-2 rounded-2xl bg-slate-100/80 dark:bg-white/[0.04] hover:bg-slate-200 dark:hover:bg-white/[0.08] border border-slate-200/80 dark:border-white/10 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isLoadingUsers ? 'animate-spin' : ''}`} />
           <span>Refresh</span>
@@ -313,33 +313,33 @@ export const ManagersView: React.FC = () => {
 
       {/* Metric Cards Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <div className="p-3.5 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 text-center">
+        <div className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 text-center">
           <span className="block text-[10px] uppercase font-bold text-slate-400">Total Registered</span>
-          <span className="text-lg sm:text-2xl font-black font-mono mt-0.5 text-slate-900 dark:text-white">
+          <span className="text-lg sm:text-2xl font-black font-mono tabular-nums mt-0.5 text-slate-900 dark:text-white">
             {totalCount}
           </span>
         </div>
-        <div className="p-3.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-950/30 border border-emerald-500/25 text-center">
-          <span className="block text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400">
+        <div className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 text-center">
+          <span className="block text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400">
             Approved (Paid)
           </span>
-          <span className="text-lg sm:text-2xl font-black font-mono mt-0.5 text-emerald-600 dark:text-emerald-400">
+          <span className="text-lg sm:text-2xl font-black font-mono tabular-nums mt-0.5 text-slate-900 dark:text-white">
             {approvedCount}
           </span>
         </div>
-        <div className="p-3.5 rounded-2xl bg-amber-500/10 dark:bg-amber-950/30 border border-amber-500/25 text-center">
-          <span className="block text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400">
+        <div className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 text-center">
+          <span className="block text-[10px] uppercase font-bold text-amber-500 dark:text-amber-400">
             Pending Approval
           </span>
-          <span className="text-lg sm:text-2xl font-black font-mono mt-0.5 text-amber-600 dark:text-amber-400">
+          <span className="text-lg sm:text-2xl font-black font-mono tabular-nums mt-0.5 text-amber-500 dark:text-amber-400">
             {pendingCount}
           </span>
         </div>
-        <div className="p-3.5 rounded-2xl bg-sky-500/10 dark:bg-sky-950/30 border border-sky-500/25 text-center">
-          <span className="block text-[10px] uppercase font-bold text-sky-600 dark:text-sky-400">
+        <div className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 text-center">
+          <span className="block text-[10px] uppercase font-bold text-sky-500 dark:text-sky-400">
             Pending Photos
           </span>
-          <span className="text-lg sm:text-2xl font-black font-mono mt-0.5 text-sky-600 dark:text-sky-400">
+          <span className="text-lg sm:text-2xl font-black font-mono tabular-nums mt-0.5 text-sky-500 dark:text-sky-400">
             {pendingPhotos.length}
           </span>
         </div>
@@ -349,20 +349,20 @@ export const ManagersView: React.FC = () => {
       {/* PENDING PLAYER PHOTOS APPROVAL QUEUE                                      */}
       {/* ========================================================================= */}
       {pendingPhotos.length > 0 && (
-        <div className="p-4 sm:p-5 rounded-3xl bg-zinc-900 border border-amber-500/30 shadow-lg space-y-3">
-          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+        <div className="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-zinc-950/40 backdrop-blur-2xl border border-amber-500/30 dark:border-amber-500/20 shadow-sm space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/10">
             <div className="flex items-center gap-2">
-              <Camera className="w-5 h-5 text-amber-400" />
-              <h3 className="font-black text-sm text-white">
+              <Camera className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+              <h3 className="font-black text-sm text-slate-900 dark:text-white">
                 Player Photos Awaiting Approval ({pendingPhotos.length})
               </h3>
             </div>
-            <span className="text-xs text-amber-300 font-bold bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30">
+            <span className="text-xs text-amber-600 dark:text-amber-300 font-bold bg-amber-500/15 px-2 py-0.5 rounded-full border border-amber-500/30">
               Needs Review
             </span>
           </div>
 
-          <p className="text-xs text-zinc-400">
+          <p className="text-xs text-slate-500 dark:text-zinc-400">
             Managers have uploaded profile pictures for players. Review and approve to make them live across the app.
           </p>
 
@@ -373,7 +373,7 @@ export const ManagersView: React.FC = () => {
               return (
                 <div
                   key={photo.id}
-                  className="p-3 rounded-2xl bg-zinc-950 border border-white/10 space-y-3 flex flex-col justify-between"
+                  className="p-3 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 space-y-3 flex flex-col justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <img
@@ -382,29 +382,29 @@ export const ManagersView: React.FC = () => {
                       className="w-16 h-16 rounded-2xl object-cover border-2 border-amber-500/50 shadow-md shrink-0"
                     />
                     <div className="min-w-0">
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
                         {targetPlayer?.position || 'PLAYER'}
                       </span>
-                      <h4 className="text-sm font-black text-white truncate mt-0.5">
+                      <h4 className="text-sm font-black text-slate-900 dark:text-white truncate mt-0.5">
                         {targetPlayer?.name || photo.playerId}
                       </h4>
-                      <p className="text-[10px] text-zinc-400 truncate">
-                        Uploaded by <strong className="text-zinc-200">{photo.suggestedBy}</strong>
+                      <p className="text-[10px] text-slate-500 dark:text-zinc-400 truncate">
+                        Uploaded by <strong className="text-slate-800 dark:text-zinc-200">{photo.suggestedBy}</strong>
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-200/60 dark:border-white/5">
                     <button
                       onClick={() => handleReviewPhoto(photo.id, true)}
-                      className="flex-1 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      className="flex-1 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 text-xs font-black transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <Check className="w-3.5 h-3.5" />
                       <span>Approve</span>
                     </button>
                     <button
                       onClick={() => handleReviewPhoto(photo.id, false)}
-                      className="py-1.5 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
+                      className="py-1.5 px-3 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 text-rose-600 dark:text-rose-300 border border-rose-500/30 text-xs font-bold transition-all flex items-center justify-center gap-1 cursor-pointer"
                     >
                       <X className="w-3.5 h-3.5" />
                       <span>Reject</span>
@@ -420,7 +420,7 @@ export const ManagersView: React.FC = () => {
       {/* ========================================================================= */}
       {/* REGISTERED MANAGERS LIST & APPROVALS                                      */}
       {/* ========================================================================= */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/10 shadow-xs space-y-4">
+      <div className="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-zinc-950/40 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-sm space-y-4">
         {/* Toolbar: Search and Filter Chips */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Search Box */}
@@ -431,7 +431,7 @@ export const ManagersView: React.FC = () => {
               placeholder="Search by manager name, team or @username..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-emerald-500 transition-colors"
+              className="w-full pl-9 pr-4 py-2 rounded-2xl bg-slate-100/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-slate-900 dark:focus:border-white/30 transition-colors"
             />
             {searchQuery && (
               <button
@@ -444,12 +444,12 @@ export const ManagersView: React.FC = () => {
           </div>
 
           {/* Filter Chips */}
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-950 p-1 rounded-2xl border border-slate-200 dark:border-white/10">
+          <div className="flex items-center gap-1 bg-slate-100/80 dark:bg-white/[0.04] p-1 rounded-2xl border border-slate-200/80 dark:border-white/10">
             <button
               onClick={() => setFilterMode('all')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
                 filterMode === 'all'
-                  ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-black'
+                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-xs font-black'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -474,7 +474,7 @@ export const ManagersView: React.FC = () => {
               onClick={() => setFilterMode('approved')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
                 filterMode === 'approved'
-                  ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-black'
+                  ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-xs font-black'
                   : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
@@ -484,7 +484,7 @@ export const ManagersView: React.FC = () => {
               onClick={() => setFilterMode('refs')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 filterMode === 'refs'
-                  ? 'bg-amber-500 text-slate-950 shadow-xs font-black'
+                  ? 'bg-amber-500/20 text-amber-500 dark:text-amber-300 border border-amber-500/30 shadow-xs font-black'
                   : 'text-amber-500 hover:text-amber-400'
               }`}
             >
@@ -495,7 +495,7 @@ export const ManagersView: React.FC = () => {
               onClick={() => setFilterMode('admins')}
               className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 filterMode === 'admins'
-                  ? 'bg-purple-600 text-white shadow-xs font-black'
+                  ? 'bg-purple-600/20 text-purple-400 border border-purple-500/30 shadow-xs font-black'
                   : 'text-purple-400 hover:text-purple-300'
               }`}
             >
@@ -508,7 +508,7 @@ export const ManagersView: React.FC = () => {
         {/* Manager Cards / Table */}
         <div className="space-y-2">
           {filteredUsers.length === 0 ? (
-            <div className="p-8 text-center rounded-2xl bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-white/5 space-y-1">
+            <div className="p-8 text-center rounded-2xl bg-white/60 dark:bg-white/[0.02] border border-slate-200/80 dark:border-white/5 space-y-1">
               <Users className="w-8 h-8 mx-auto text-slate-400 opacity-60" />
               <p className="text-sm font-bold">No managers found matching criteria</p>
             </div>
@@ -522,7 +522,7 @@ export const ManagersView: React.FC = () => {
               return (
                 <div
                   key={u.id}
-                  className="p-3 sm:p-4 rounded-2xl bg-slate-50 dark:bg-zinc-950 border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors"
+                  className="p-3 sm:p-4 rounded-2xl bg-white/70 dark:bg-white/[0.03] hover:bg-white dark:hover:bg-white/[0.06] backdrop-blur-md border border-slate-200/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors"
                 >
                   {/* Left: Manager Info */}
                   <div className="flex items-center gap-3 min-w-0">
@@ -576,7 +576,7 @@ export const ManagersView: React.FC = () => {
                     {/* View Squad Button */}
                     <button
                       onClick={() => setSelectedManagerIdForSquad(u.id)}
-                      className="px-2.5 py-1.5 rounded-xl bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 text-xs font-bold transition-all flex items-center gap-1 text-slate-700 dark:text-slate-200 cursor-pointer"
+                      className="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border border-slate-200/80 dark:border-white/10 text-xs font-bold transition-all flex items-center gap-1 text-slate-700 dark:text-slate-200 cursor-pointer"
                       title="Inspect manager's squad & lineup"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -586,7 +586,7 @@ export const ManagersView: React.FC = () => {
                     {/* Reset Password Button */}
                     <button
                       onClick={() => setResetUserTarget(u)}
-                      className="p-1.5 rounded-xl bg-slate-200 dark:bg-zinc-800 hover:bg-slate-300 dark:hover:bg-zinc-700 text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+                      className="p-1.5 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border border-slate-200/80 dark:border-white/10 text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
                       title="Reset Password"
                     >
                       <KeyRound className="w-3.5 h-3.5" />
@@ -613,7 +613,7 @@ export const ManagersView: React.FC = () => {
                           className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all flex items-center gap-1 cursor-pointer select-none ${
                             isUserAdmin
                               ? 'bg-purple-600 text-white shadow-md ring-2 ring-purple-400/50 hover:bg-purple-500'
-                              : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-purple-500/20 hover:text-purple-300'
+                              : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 hover:bg-purple-500/20 hover:text-purple-300'
                           }`}
                           title={isUserAdmin ? 'Revoke Admin privileges' : 'Grant Admin privileges'}
                         >
@@ -628,7 +628,7 @@ export const ManagersView: React.FC = () => {
                           className={`px-2 py-1 rounded-xl text-[11px] font-black transition-all flex items-center gap-1 cursor-pointer select-none ${
                             isRef
                               ? 'bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-400/50 hover:bg-amber-400'
-                              : 'bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-slate-300 hover:bg-amber-500/20 hover:text-amber-300'
+                              : 'bg-slate-100 dark:bg-white/[0.06] text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 hover:bg-amber-500/20 hover:text-amber-300'
                           }`}
                           title={isRef ? 'Revoke Referee role' : 'Make trusted Referee'}
                         >
@@ -668,13 +668,13 @@ export const ManagersView: React.FC = () => {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-3xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-white/15 p-5 space-y-4 shadow-2xl text-slate-900 dark:text-white"
+            className="w-full max-w-sm rounded-3xl bg-white/95 dark:bg-[#0c141f]/95 backdrop-blur-2xl border border-slate-200/80 dark:border-white/15 p-5 space-y-4 shadow-2xl text-slate-900 dark:text-white"
           >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-200/80 dark:border-white/10">
               <h3 className="font-black text-sm">
                 Reset Password for @{resetUserTarget.username}
               </h3>
-              <button onClick={() => setResetUserTarget(null)} className="text-slate-400 hover:text-white">
+              <button onClick={() => setResetUserTarget(null)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -689,7 +689,7 @@ export const ManagersView: React.FC = () => {
                   placeholder="Min 4 characters..."
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-3 py-2 mt-1 rounded-xl bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-emerald-500"
+                  className="w-full px-3 py-2 mt-1 rounded-xl bg-slate-100/80 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-xs font-semibold focus:outline-hidden focus:border-slate-900 dark:focus:border-white/30"
                 />
               </div>
 
@@ -697,14 +697,14 @@ export const ManagersView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setResetUserTarget(null)}
-                  className="flex-1 py-2 rounded-xl bg-slate-200 dark:bg-zinc-800 text-xs font-bold"
+                  className="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] border border-slate-200/80 dark:border-white/10 text-xs font-bold cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isResetting || newPassword.length < 4}
-                  className="flex-1 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-black disabled:opacity-50"
+                  className="flex-1 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 text-xs font-black disabled:opacity-50 cursor-pointer"
                 >
                   {isResetting ? 'Saving...' : 'Set Password'}
                 </button>

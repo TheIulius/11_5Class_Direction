@@ -40,19 +40,19 @@ export const ManagerModal: React.FC<ManagerModalProps> = ({ isOpen, onClose }) =
       onClick={onClose}
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-5 shadow-2xl space-y-4 text-slate-900 dark:text-slate-100"
+        className="w-full max-w-sm rounded-3xl bg-white/95 dark:bg-[#0c141f]/95 backdrop-blur-2xl border border-slate-200/80 dark:border-white/10 p-5 shadow-2xl space-y-4 text-slate-900 dark:text-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200/60 dark:border-white/10">
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300">
               <Users className="w-4 h-4" />
             </div>
             <h3 className="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">
               Managers
             </h3>
           </div>
-          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full">
+          <button onClick={onClose} className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-full cursor-pointer">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -76,17 +76,17 @@ export const ManagerModal: React.FC<ManagerModalProps> = ({ isOpen, onClose }) =
                       switchManager(m.id);
                       onClose();
                     }}
-                    className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-left transition-all ${
+                    className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-500 text-slate-900 dark:text-white font-bold'
-                        : 'bg-slate-50 dark:bg-slate-950/50 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent font-bold shadow-xs'
+                        : 'bg-slate-50 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08]'
                     }`}
                   >
                     <div>
                       <div className="text-xs font-bold text-slate-900 dark:text-white">{m.teamName}</div>
                       <div className="text-[10px] text-slate-400">{m.managerName}</div>
                     </div>
-                    {isActive && <Check className="w-4 h-4 text-emerald-500" />}
+                    {isActive && <Check className="w-4 h-4 text-emerald-400" />}
                   </button>
                 );
               })}
@@ -94,9 +94,9 @@ export const ManagerModal: React.FC<ManagerModalProps> = ({ isOpen, onClose }) =
 
             <button
               onClick={() => setIsCreating(true)}
-              className="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center gap-1.5 border border-slate-200 dark:border-slate-700 transition-colors"
+              className="w-full py-2.5 rounded-xl font-bold text-xs bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.1] text-slate-800 dark:text-slate-200 flex items-center justify-center gap-1.5 border border-slate-200/80 dark:border-white/10 transition-colors cursor-pointer"
             >
-              <Plus className="w-4 h-4 text-emerald-500" />
+              <Plus className="w-4 h-4" />
               <span>New Team</span>
             </button>
           </>

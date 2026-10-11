@@ -118,25 +118,25 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[460px] md:max-w-2xl h-full sm:h-[92vh] sm:max-h-[860px] bg-white dark:bg-slate-900 sm:rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-white"
+        className="w-full max-w-[460px] md:max-w-2xl h-full sm:h-[92vh] sm:max-h-[860px] bg-white/95 dark:bg-[#070b12]/95 backdrop-blur-2xl sm:rounded-3xl border border-slate-200/80 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden text-slate-900 dark:text-white"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Navigation Header */}
-        <div className="px-4 py-3 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between z-20">
+        <div className="px-4 py-3 bg-white/80 dark:bg-zinc-950/40 backdrop-blur-md border-b border-slate-200/80 dark:border-white/[0.08] flex items-center justify-between z-20">
           <button
             onClick={onClose}
-            className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors bg-white dark:bg-slate-800 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xs"
+            className="flex items-center gap-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-slate-900 dark:hover:text-white transition-colors bg-slate-100 dark:bg-white/[0.06] hover:bg-slate-200 dark:hover:bg-white/[0.1] px-2.5 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/10 shadow-xs cursor-pointer"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Standings</span>
           </button>
 
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 rounded-xl px-2 py-0.5">
+          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 rounded-xl px-2 py-0.5">
             <button
               type="button"
               disabled={selectedGW <= 1}
               onClick={() => setSelectedGW((prev) => Math.max(1, prev - 1))}
-              className="p-0.5 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
+              className="p-0.5 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 cursor-pointer"
             >
               <ChevronLeft className="w-3.5 h-3.5" />
             </button>
@@ -147,7 +147,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
               type="button"
               disabled={selectedGW >= currentGW}
               onClick={() => setSelectedGW((prev) => Math.min(currentGW, prev + 1))}
-              className="p-0.5 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30"
+              className="p-0.5 rounded text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 cursor-pointer"
             >
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
@@ -163,13 +163,13 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
 
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+            <Loader2 className="w-8 h-8 text-slate-400 animate-spin" />
             <p className="text-xs text-slate-400 font-medium">Loading squad...</p>
           </div>
         ) : shouldHideLineup ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-4">
             {managerData && (
-              <div className="p-4 w-full max-w-sm rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs mb-2">
+              <div className="p-4 w-full max-w-sm rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-xs mb-2">
                 <h3 className="text-base font-black text-slate-900 dark:text-white leading-tight">
                   {managerData.teamName}
                 </h3>
@@ -196,7 +196,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
         ) : managerData && calcResult ? (
           <div className="flex-1 overflow-y-auto overscroll-contain pb-8">
             {/* Manager Info & GW Points Card */}
-            <div className="p-3 mx-2 mt-2 rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div className="p-3.5 mx-2 mt-2 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10 shadow-xs">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-black text-slate-900 dark:text-white leading-tight">
@@ -207,12 +207,12 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                   </p>
                 </div>
 
-                <div className="text-right border-l border-slate-200 dark:border-slate-800 pl-3">
+                <div className="text-right border-l border-slate-200/80 dark:border-white/10 pl-3">
                   <span className="text-[9px] uppercase font-bold text-slate-400 block">
                     GW {selectedGW}
                   </span>
                   <div className="flex items-baseline justify-end gap-1">
-                    <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                    <span className="text-2xl font-black font-mono tabular-nums text-slate-900 dark:text-white">
                       {calcResult.totalPoints}
                     </span>
                     <span className="text-[10px] font-bold text-slate-400">PTS</span>
@@ -269,28 +269,40 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
               </div>
             )}
 
-            {/* Football Pitch */}
-            <div className="relative mx-2 my-2 rounded-2xl overflow-hidden shadow-xl border-2 border-emerald-800/60 bg-[#14642c]">
-              <div className="absolute inset-0 pitch-stripes pointer-events-none opacity-95" />
+            {/* Football Pitch Container with Matte Sage Natural Turf */}
+            <div
+              className="relative mx-2 my-2 rounded-2xl overflow-hidden border border-white/10 shadow-xl"
+              style={{
+                background: '#1b3022',
+              }}
+            >
+              {/* Faint Desaturated Center Watermark */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
+                <img
+                  src="/kcl-logo-transparent.png"
+                  alt="Komarovi Champions League"
+                  className="w-[200px] max-w-[60vw] opacity-[0.04] grayscale object-contain"
+                />
+              </div>
 
-              {/* Pitch White Chalk Lines (SVG) */}
+              {/* Pitch White Chalk Lines (SVG) with Ultra-Subtle 0.5px/1px Markings */}
               <svg
-                className="absolute inset-0 w-full h-full pointer-events-none stroke-white/40 fill-none"
+                className="absolute inset-0 w-full h-full pointer-events-none fill-none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <rect x="10" y="10" width="calc(100% - 20px)" height="calc(100% - 20px)" strokeWidth="1.5" rx="8" />
-                <line x1="10" y1="50%" x2="calc(100% - 10px)" y2="50%" strokeWidth="1.5" />
-                <circle cx="50%" cy="50%" r="48" strokeWidth="1.5" />
-                <rect x="25%" y="10" width="50%" height="70" strokeWidth="1.5" />
-                <rect x="25%" y="calc(100% - 80px)" width="50%" height="70" strokeWidth="1.5" />
+                <rect x="10" y="10" width="calc(100% - 20px)" height="calc(100% - 20px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" rx="10" />
+                <line x1="10" y1="50%" x2="calc(100% - 10px)" y2="50%" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+                <circle cx="50%" cy="50%" r="48" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+                <rect x="25%" y="10" width="50%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+                <rect x="25%" y="calc(100% - 80px)" width="50%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
               </svg>
 
               {/* Pitch Formation Header */}
               <div className="relative pt-2 px-3 flex items-center justify-between z-10">
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-black/40 text-gray-200 backdrop-blur-xs border border-white/10">
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded-full bg-black/40 text-gray-200 backdrop-blur-xs border border-white/10">
                   {layout.formationString}
                 </span>
-                <span className="text-[10px] text-gray-300 bg-black/40 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] text-gray-300 bg-black/40 px-2 py-0.5 rounded-full border border-white/5">
                   Tap player for stats
                 </span>
               </div>
@@ -384,7 +396,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
             </div>
 
             {/* Bench Area */}
-            <div className="mx-2 p-2.5 rounded-2xl bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800">
+            <div className="mx-2 p-2.5 rounded-2xl bg-white/70 dark:bg-white/[0.03] backdrop-blur-md border border-slate-200/80 dark:border-white/10">
               <span className="text-[10px] font-bold uppercase text-slate-400 block mb-2 tracking-wide">
                 Substitutes
               </span>
@@ -604,44 +616,44 @@ const OpponentPlayerCard: React.FC<{
   return (
     <div
       onClick={onClick}
-      className="flex flex-col items-center cursor-pointer transition-transform hover:scale-105 active:scale-95 select-none w-14 sm:w-16"
+      className="relative flex flex-col items-center justify-between w-[68px] sm:w-[78px] min-h-[86px] sm:min-h-[96px] p-1.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/10 shadow-lg cursor-pointer transition-all duration-200 select-none hover:scale-[1.03] active:scale-95"
     >
-      {/* Jersey + Badge */}
-      <div className="relative">
+      {/* Captain badge */}
+      {isCaptain && (
+        <span
+          className={`absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full flex items-center justify-center font-black text-[9px] text-white shadow-md border z-20 ${
+            isTripleCaptain ? 'bg-amber-400 text-slate-950 border-white ring-1 ring-amber-400' : 'bg-zinc-950 border-white/80'
+          }`}
+        >
+          {isTripleCaptain ? 'TC' : 'C'}
+        </span>
+      )}
+
+      {/* Vice-captain badge */}
+      {isViceCaptain && !isCaptain && (
+        <span className="absolute -top-1 -right-1 w-4.5 h-4.5 rounded-full bg-slate-300 text-slate-950 border border-slate-700 flex items-center justify-center font-black text-[9px] shadow-md z-20">
+          V
+        </span>
+      )}
+
+      {/* Position Label */}
+      <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-300/80 leading-none pt-0.5">
+        {player.position}
+      </span>
+
+      {/* Jersey */}
+      <div className="relative my-0.5 flex items-center justify-center">
         <KitJersey clubId={player.clubId} position={player.position} photoUrl={player.photoUrl} className="w-10 h-10 sm:w-11 sm:h-11 drop-shadow-md" />
-
-        {/* Captain badge */}
-        {isCaptain && (
-          <span
-            className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center font-black text-[9px] text-white shadow-md border z-20 ${
-              isTripleCaptain ? 'bg-rose-500 border-white ring-1 ring-amber-400' : 'bg-slate-900 border-amber-400'
-            }`}
-          >
-            C
-          </span>
-        )}
-
-        {/* Vice-captain badge */}
-        {isViceCaptain && !isCaptain && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-slate-800 border border-slate-400 flex items-center justify-center font-black text-[9px] text-white shadow-md">
-            V
-          </span>
-        )}
       </div>
 
-      {/* Name banner */}
-      <div className="w-full bg-slate-900/90 border border-slate-700/80 rounded-t text-center py-0.5 px-0.5 shadow-xs truncate mt-0.5">
-        <span className="text-[10px] font-extrabold text-white block truncate leading-tight">
+      {/* Bottom Name & Points */}
+      <div className="w-full flex flex-col items-center justify-center text-center pb-0.5">
+        <span className="text-[10px] sm:text-[11px] font-bold text-white tracking-tight truncate leading-tight max-w-full">
           {player.webName}
         </span>
-      </div>
-
-      {/* Points banner */}
-      <div className="w-full bg-slate-800 border-x border-b border-slate-700/80 rounded-b text-center py-0.5 shadow-xs flex items-center justify-center gap-1">
-        <span className="text-[10px] font-black text-emerald-400 leading-none">
-          {points}
-        </span>
-        <span className="text-[8px] text-slate-400 leading-none">pts</span>
+        <div className="text-[8.5px] font-mono text-slate-300/80 tabular-nums flex items-center justify-center gap-1 mt-0.5 leading-none">
+          <span className="font-bold text-white">{points}pts</span>
+        </div>
       </div>
     </div>
   );

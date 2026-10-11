@@ -105,7 +105,7 @@ export const StandingsView: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-2 sm:px-6 pt-3 pb-28 select-none">
       {/* Standings Header & Filters */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-white dark:bg-[#0c1322] border border-slate-200 dark:border-white/[0.08] shadow-md space-y-3 mb-3">
+      <div className="p-4 sm:p-5 rounded-3xl bg-white/80 dark:bg-zinc-950/40 backdrop-blur-2xl border border-slate-200/80 dark:border-white/[0.08] shadow-xl space-y-3 mb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center">
@@ -121,7 +121,7 @@ export const StandingsView: React.FC = () => {
             </div>
           </div>
 
-          <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-slate-200">
+          <span className="px-2.5 py-1 rounded-full text-xs font-mono font-bold bg-white/70 dark:bg-white/[0.06] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200">
             GW {currentGW} Live
           </span>
         </div>
@@ -134,7 +134,7 @@ export const StandingsView: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search manager or team..."
-            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-emerald-500/50 transition-colors"
+            className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/10 text-xs font-medium text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-slate-400 dark:focus:border-white/30 transition-colors"
           />
         </div>
 
@@ -185,8 +185,8 @@ export const StandingsView: React.FC = () => {
                 onClick={() => setInspectedManagerId(member.id)}
                 className={`p-3 sm:px-4 rounded-2xl border flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] group ${
                   isCurrentUser
-                    ? 'bg-emerald-500/[0.08] dark:bg-emerald-500/[0.09] border-emerald-500/40 shadow-xs'
-                    : 'bg-white dark:bg-[#0c1322] hover:bg-slate-50 dark:hover:bg-[#10192b] border-slate-200 dark:border-white/[0.06] shadow-xs'
+                    ? 'bg-white/15 dark:bg-white/10 border-white/30 shadow-md text-white'
+                    : 'bg-white/70 dark:bg-white/[0.03] hover:bg-white dark:hover:bg-white/[0.06] backdrop-blur-md border-slate-200/80 dark:border-white/[0.06] hover:border-slate-300 dark:hover:border-white/15 shadow-xs'
                 }`}
               >
                 {/* Left: Rank & Manager Info */}
