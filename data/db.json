@@ -2904,7 +2904,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 4,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -14595,17 +14595,6 @@
               "points": 0
             },
             {
-              "playerId": "p_custom_1790244156863",
-              "webName": "Atunashvili",
-              "clubId": "SCH_11_3",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_6_dzagania",
               "webName": "Dzagania",
               "clubId": "SCH_12_6",
@@ -20823,13 +20812,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_custom_1790244156863",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_6_dzagania",
             "isStarter": true,
             "benchOrder": 0,
@@ -20865,7 +20847,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 9.1,
+        "bank": 17.7,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "wildcard",
