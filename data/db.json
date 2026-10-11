@@ -26681,7 +26681,7 @@
             "isViceCaptain": true
           }
         ],
-        "bank": 0.5,
+        "bank": 0,
         "freeTransfers": 2,
         "transfersMadeThisGW": 8,
         "activeChip": "wildcard",
