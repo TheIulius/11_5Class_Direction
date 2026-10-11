@@ -6173,7 +6173,7 @@
       "totalPoints": -2,
       "gwPoints": -2,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -14595,17 +14595,6 @@
               "points": 0
             },
             {
-              "playerId": "p_10_7_shekiladze",
-              "webName": "Shekiladze",
-              "clubId": "SCH_10_7",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_10_1_gogsadze",
               "webName": "Gogsadze",
               "clubId": "SCH_10_1",
@@ -20790,13 +20779,6 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_10_7_shekiladze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_1_gogsadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -20811,7 +20793,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 32.3,
+        "bank": 36.3,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "wildcard",
