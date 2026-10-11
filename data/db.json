@@ -29425,8 +29425,7 @@
       "grade": "11",
       "parallel": "5",
       "realName": "test test",
-      "showRealNamePublicly": true,
-      "token": "4841495ff65fb0dd0f11c78ab702b73485df2696f5225787737da08d17fb221e"
+      "showRealNamePublicly": true
     },
     "user_1790749731921": {
       "id": "user_1790749731921",
