@@ -98,9 +98,8 @@ export default {
         display: ['Impact', 'Arial Black', 'Trebuchet MS', 'sans-serif'],
       },
       boxShadow: {
-        'glow-green': '0 0 15px rgba(0, 255, 135, 0.4)',
-        'glow-magenta': '0 0 15px rgba(233, 0, 82, 0.4)',
-        'glow-cyan': '0 0 15px rgba(4, 245, 255, 0.4)',
+        'subtle': '0 2px 8px rgba(0, 0, 0, 0.06)',
+        'panel': '0 8px 30px rgba(0, 0, 0, 0.12)',
       },
       animation: {
         'slide-up': 'slideUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
@@ -117,8 +116,8 @@ export default {
           '100%': { opacity: '1' },
         },
         pulseSub: {
-          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(0, 255, 135, 0.7)' },
-          '50%': { transform: 'scale(1.05)', boxShadow: '0 0 0 8px rgba(0, 255, 135, 0)' },
+          '0%, 100%': { transform: 'scale(1)', boxShadow: '0 0 0 0 rgba(255, 255, 255, 0.4)' },
+          '50%': { transform: 'scale(1.03)', boxShadow: '0 0 0 6px rgba(255, 255, 255, 0)' },
         }
       }
     },

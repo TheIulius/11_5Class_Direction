@@ -148,91 +148,77 @@ export const PitchView: React.FC<PitchViewProps> = ({
         </div>
       )}
 
-      {/* Football Pitch Container with Alternating Mowing Lawn Stripes */}
+      {/* Football Pitch Container with Matte Sage Natural Turf */}
       <div
-        className="relative mx-1 sm:mx-2 md:mx-auto my-2 rounded-2xl md:rounded-3xl overflow-hidden md:max-w-3xl lg:max-w-4xl border-2 border-[#125c27] shadow-2xl transition-all duration-300"
+        className="relative w-full my-0 sm:my-2 rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-xl transition-all duration-300"
         style={{
-          background: 'repeating-linear-gradient(180deg, #115e2a 0px, #115e2a 34px, #0e5023 34px, #0e5023 68px)',
+          background: '#1b3022',
         }}
       >
-        {/* Massive Etched Watermark Crest in Center Grass */}
+        {/* Faint Desaturated Center Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
           <img
             src="/kcl-logo-transparent.png"
             alt="Komarovi Champions League"
-            className="w-[260px] sm:w-[310px] md:w-[350px] max-w-[75vw] opacity-[0.14] filter drop-shadow contrast-125 object-contain"
+            className="w-[240px] sm:w-[280px] md:w-[320px] max-w-[70vw] opacity-[0.04] grayscale object-contain"
           />
         </div>
 
-        {/* Pitch White Chalk Lines (SVG) with Dash Pattern */}
+        {/* Pitch Chalk Lines (SVG) with Ultra-Subtle 0.5px/1px Markings */}
         <svg
-          className="absolute inset-0 w-full h-full pointer-events-none stroke-white/40 fill-none"
+          className="absolute inset-0 w-full h-full pointer-events-none fill-none"
           xmlns="http://www.w3.org/2000/svg"
-          style={{ filter: 'drop-shadow(0 0 1.5px rgba(255,255,255,0.25))' }}
         >
           {/* Outer Boundary Border */}
-          <rect x="12" y="12" width="calc(100% - 24px)" height="calc(100% - 24px)" strokeWidth="1.5" strokeDasharray="5 3" rx="10" />
+          <rect x="12" y="12" width="calc(100% - 24px)" height="calc(100% - 24px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" rx="14" />
 
           {/* Center Circle & Halfway Line */}
-          <line x1="12" y1="50%" x2="calc(100% - 12px)" y2="50%" strokeWidth="1.5" strokeDasharray="5 3" />
-          <circle cx="50%" cy="50%" r="50" strokeWidth="1.5" strokeDasharray="5 3" />
-          <circle cx="50%" cy="50%" r="3.5" fill="rgba(255,255,255,0.6)" />
+          <line x1="12" y1="50%" x2="calc(100% - 12px)" y2="50%" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <circle cx="50%" cy="50%" r="48" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <circle cx="50%" cy="50%" r="3" fill="rgba(255, 255, 255, 0.3)" />
 
           {/* Top Penalty Area (Goalkeeper Box) */}
-          <rect x="24%" y="12" width="52%" height="75" strokeWidth="1.5" strokeDasharray="5 3" />
-          <rect x="36%" y="12" width="28%" height="32" strokeWidth="1.5" strokeDasharray="5 3" />
-          <circle cx="50%" cy="58" r="2.5" fill="rgba(255,255,255,0.6)" />
-          <path d="M 40% 87 C 45% 102, 55% 102, 60% 87" strokeWidth="1.5" strokeDasharray="5 3" />
+          <rect x="24%" y="12" width="52%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <rect x="36%" y="12" width="28%" height="30" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <circle cx="50%" cy="54" r="2.5" fill="rgba(255, 255, 255, 0.3)" />
+          <path d="M 40% 82 C 45% 96, 55% 96, 60% 82" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
 
           {/* Bottom Penalty Area */}
-          <rect x="24%" y="calc(100% - 87px)" width="52%" height="75" strokeWidth="1.5" strokeDasharray="5 3" />
-          <rect x="36%" y="calc(100% - 44px)" width="28%" height="32" strokeWidth="1.5" strokeDasharray="5 3" />
-          <circle cx="50%" cy="calc(100% - 58px)" r="2.5" fill="rgba(255,255,255,0.6)" />
-          <path d="M 40% calc(100% - 87px) C 45% calc(100% - 102px), 55% calc(100% - 102px), 60% calc(100% - 87px)" strokeWidth="1.5" strokeDasharray="5 3" />
+          <rect x="24%" y="calc(100% - 82px)" width="52%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <rect x="36%" y="calc(100% - 42px)" width="28%" height="30" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <circle cx="50%" cy="calc(100% - 54px)" r="2.5" fill="rgba(255, 255, 255, 0.3)" />
+          <path d="M 40% calc(100% - 82px) C 45% calc(100% - 96px), 55% calc(100% - 96px), 60% calc(100% - 82px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
 
           {/* Corner Arcs */}
-          <path d="M 12 28 A 16 16 0 0 0 28 12" strokeWidth="1.5" strokeDasharray="5 3" />
-          <path d="M calc(100% - 28px) 12 A 16 16 0 0 0 calc(100% - 12px) 28" strokeWidth="1.5" strokeDasharray="5 3" />
-          <path d="M 12 calc(100% - 28px) A 16 16 0 0 1 28 calc(100% - 12px)" strokeWidth="1.5" strokeDasharray="5 3" />
-          <path d="M calc(100% - 28px) calc(100% - 12px) A 16 16 0 0 1 calc(100% - 12px) calc(100% - 28px)" strokeWidth="1.5" strokeDasharray="5 3" />
+          <path d="M 12 26 A 14 14 0 0 0 26 12" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <path d="M calc(100% - 26px) 12 A 14 14 0 0 0 calc(100% - 12px) 26" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <path d="M 12 calc(100% - 26px) A 14 14 0 0 1 26 calc(100% - 12px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <path d="M calc(100% - 26px) calc(100% - 12px) A 14 14 0 0 1 calc(100% - 12px) calc(100% - 26px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
         </svg>
 
-        {/* Formation Header Badge */}
-        <div className="relative pt-2.5 md:pt-3.5 px-3 md:px-5 flex items-center justify-between z-10">
-          <div className="flex items-center gap-2">
+        {/* Minimal Subtle Formation Pill */}
+        <div className="relative pt-2 px-3 flex items-center justify-between z-10">
+          <div className="flex items-center gap-1.5">
             <span
-              className={`text-[10px] md:text-xs font-black uppercase px-2.5 py-0.5 md:px-3 md:py-1 rounded-full backdrop-blur-xs border flex items-center gap-1.5 shadow-md ${
+              className={`text-[9.5px] font-mono font-bold uppercase px-2 py-0.5 rounded-full backdrop-blur-md border flex items-center gap-1 ${
                 layout.isValid
-                  ? 'bg-black/50 text-[#00ff87] border-[#00ff87]/30'
-                  : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
+                  ? 'bg-black/30 text-slate-300 border-white/10'
+                  : 'bg-rose-950/40 text-rose-300 border-rose-500/30'
               }`}
             >
-              <Shield className={`w-3 h-3 ${layout.isValid ? 'text-[#00ff87]' : 'text-amber-400'}`} />
-              {layout.isValid ? (
-                <>Formation: {layout.formationString}</>
-              ) : (
-                <>Starters: {layout.pitchPositions.length}/6 (Incomplete)</>
-              )}
+              <Shield className="w-2.5 h-2.5 opacity-70" />
+              {layout.isValid ? layout.formationString : 'Incomplete'}
             </span>
             {activeChip && (
-              <span className="text-[10px] md:text-xs font-black uppercase px-2.5 py-0.5 md:px-3 md:py-1 rounded-full backdrop-blur-xs border flex items-center gap-1.5 shadow-md bg-black/60 text-amber-300 border-amber-400/30">
-                <Zap className="w-3 h-3 text-amber-400" />
+              <span className="text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-full backdrop-blur-md border bg-black/30 text-amber-300 border-amber-400/20 flex items-center gap-1">
+                <Zap className="w-2.5 h-2.5 text-amber-400" />
                 {activeChip.replace('_', ' ')}
-              </span>
-            )}
-            {layout.isValid ? (
-              <span className="hidden sm:inline-block text-[9px] font-bold text-gray-300 uppercase tracking-wider bg-black/30 px-2 py-0.5 rounded-full border border-white/10">
-                1 GK • {layout.defs.length} DEF • {layout.mids.length} MID • {layout.fwds.length} FWD
-              </span>
-            ) : (
-              <span className="hidden sm:inline-block text-[9px] font-bold text-amber-300 uppercase tracking-wider bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-500/30">
-                {layout.gks.length === 0 ? 'Missing Goalkeeper • ' : ''}Needs 1 GK + 5 Outfielders
               </span>
             )}
           </div>
 
           {showPoints && (
-            <span className="text-[10px] md:text-xs font-extrabold px-2 py-0.5 md:px-3 md:py-1 rounded-full bg-[#00ff87] text-[#37003c] shadow-glow-green">
+            <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/10 text-white border border-white/15 tabular-nums">
               {activeCalc.totalPoints} PTS
             </span>
           )}

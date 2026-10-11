@@ -1,240 +1,238 @@
-import React from 'react';
-import { useFPL, TabType } from '../../context/FPLContext';
-import { Sparkles, Wrench, Shirt, ArrowLeftRight, Zap, Trophy, Calendar, Sun, Moon, Eye, Shield, BookOpen, Users, UserCheck, Award } from 'lucide-react';
-
-interface TabItem {
-  id: TabType;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-}
-
-const DESKTOP_TABS: TabItem[] = [
-  { id: 'team', label: 'Team', icon: Shirt },
-  { id: 'transfers', label: 'Transfers', icon: ArrowLeftRight },
-  { id: 'players', label: 'Players', icon: Users },
-  { id: 'standings', label: 'Standings', icon: Trophy },
-  { id: 'fixtures', label: 'Fixtures', icon: Calendar },
-  { id: 'dev', label: 'Dev Mode', icon: Wrench },
-];
-
+import React, { useState, useEffect, useMemo } from 'react';
+import { useFPL } from '../../context/FPLContext';
+import { BookOpen, Sun, Moon, Eye, Check, AlertCircle, ChevronDown } from 'lucide-react';
 import { hasManagerSeenLatestUpdate } from '../../data/updateNotes';
+import { validateSquadComposition } from '../../engine/scoring';
+import { triggerHaptic } from '../../utils/haptics';
 
 export const TopHeader: React.FC = () => {
   const {
     currentGW,
-    calculationResult,
     squad,
-    setActiveTab,
-    activeTab,
-    isDevAuthenticated,
-    isModerator,
-    isReferee,
+    players,
     authUser,
     setIsAuthModalOpen,
-    setIsRulesModalOpen,
     openRulesModal,
-    leagues,
-    currentManager,
     theme,
     toggleTheme,
     isDemoMode,
     exitDemoMode,
+    teamValue,
+    freeTransfersRemaining,
+    deadline,
   } = useFPL();
 
-  const userLeagueMember = leagues.flatMap((l) => l.members).find(
-    (m) => m.id === currentManager?.id || m.id === 'user' || (authUser && m.id === authUser.id)
-  );
-  const totalUserPoints = userLeagueMember ? userLeagueMember.totalPoints : (calculationResult.totalPoints || 0);
-  const overallRank = userLeagueMember ? `#${userLeagueMember.rank}` : '-';
+  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [showStatusDetails, setShowStatusDetails] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!deadline) {
+      setTimeLeft('None');
+      return;
+    }
+    const updateCountdown = () => {
+      const diff = new Date(deadline.deadlineTime).getTime() - Date.now();
+      if (diff <= 0) {
+        setTimeLeft('Locked');
+        return;
+      }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+      const mins = Math.floor((diff / (1000 * 60)) % 60);
+      if (days > 0) {
+        setTimeLeft(`${days}d ${hours}h`);
+      } else if (hours > 0) {
+        setTimeLeft(`${hours}h ${mins}m`);
+      } else {
+        const secs = Math.floor((diff / 1000) % 60);
+        setTimeLeft(`${mins}m ${secs}s`);
+      }
+    };
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+    return () => clearInterval(timer);
+  }, [deadline]);
+
+  const comp = useMemo(() => {
+    return validateSquadComposition(squad.players, players, currentGW);
+  }, [squad.players, players, currentGW]);
+
+  const isLineupReady = comp.isValid;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 dark:bg-[#0c121e]/95 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/80 shadow-xs select-none transition-colors duration-200">
-      {/* Demo Mode Sticky Caption Bar */}
+    <header className="lg:hidden sticky top-0 z-40 bg-[#070b12]/90 backdrop-blur-2xl border-b border-white/[0.08] select-none transition-colors">
+      {/* Demo Mode Notice */}
       {isDemoMode && (
-        <div className="w-full bg-amber-500/15 border-b border-amber-500/30 text-amber-200 px-3 py-1.5 text-xs flex items-center justify-between font-medium">
-          <div className="flex items-center gap-1.5 md:gap-2">
-            <Eye className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-            <span className="text-[11px] md:text-xs">
-              <strong className="text-amber-300 uppercase tracking-wide mr-1 font-black">Demo Mode:</strong>
-              Browsing locked sample squad. All mutations disabled.
-            </span>
+        <div className="w-full bg-amber-500/20 border-b border-amber-500/30 text-amber-200 px-3 py-1 text-[11px] flex items-center justify-between font-bold">
+          <div className="flex items-center gap-1.5">
+            <Eye className="w-3 h-3 text-amber-400 shrink-0" />
+            <span>Demo Mode (Sample Squad)</span>
           </div>
           <button
             onClick={exitDemoMode}
-            className="px-2.5 py-0.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 hover:text-white border border-amber-500/30 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shrink-0 ml-2"
+            className="text-[10px] bg-amber-500 text-slate-950 px-2 py-0.2 rounded font-black cursor-pointer"
           >
-            Sign In / Register
+            Sign In
           </button>
         </div>
       )}
 
-      {/* Top branding line */}
-      <div className="w-full max-w-6xl mx-auto px-3.5 md:px-6 pt-2.5 pb-2 flex items-center justify-between">
-        <div className="flex items-center space-x-2.5 md:space-x-3">
-          <img
-            src="/kcl-logo.png"
-            alt="KCL Logo"
-            className="w-9 h-9 md:w-10 md:h-10 rounded-xl object-contain shadow-xs flex-shrink-0 border border-slate-200 dark:border-white/10"
-          />
-          <div>
-            <div className="flex items-center space-x-1.5 md:space-x-2">
-              <h1 className="text-sm md:text-base font-black tracking-wider text-slate-900 dark:text-white uppercase font-display leading-tight">
-                KCL
-              </h1>
+      {/* Main Container */}
+      <div className="w-full px-3 pt-2.5 pb-2 space-y-2">
+        {/* Row 1: Manager Identity (Left) & Valuation Pills (Right) */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Left: Crest + Identity + Lineup Status */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            {/* Crest Logo */}
+            <div
+              onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
+              className="relative w-10 h-10 rounded-xl bg-[#131926] border border-white/10 p-1 flex items-center justify-center shrink-0 cursor-pointer active:scale-95 transition-all shadow-xs"
+            >
+              <img
+                src="/kcl-logo.png"
+                alt="KCL"
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Text Hierarchy */}
+            <div className="min-w-0 flex flex-col">
+              <div className="flex items-center gap-1.5 leading-tight">
+                <span className="text-xs font-black text-white uppercase tracking-wider">
+                  KCL
+                </span>
+                <span
+                  onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
+                  className="text-[11px] font-mono text-slate-400 truncate cursor-pointer hover:text-slate-200"
+                >
+                  @{authUser?.username || 'theiulius'}
+                </span>
+              </div>
+
+              <div className="text-[11px] font-semibold text-slate-300 truncate max-w-[170px] sm:max-w-[220px] leading-tight mt-0.5">
+                GW {currentGW} · {authUser?.teamName || squad.teamName}
+              </div>
+
+              {/* Status Pill Badge: ✓ Lineup Ready ⌄ */}
               <button
                 type="button"
-                onClick={() => (isDemoMode ? exitDemoMode() : setIsAuthModalOpen(true))}
-                className="text-[9px] md:text-[10px] font-mono font-bold bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.06] dark:hover:bg-white/[0.12] px-1.5 py-0.5 rounded text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/[0.10] hover:border-emerald-500/50 hover:text-emerald-500 dark:hover:text-emerald-400 transition-all cursor-pointer shrink-0"
-                title="Click to switch account"
-              >
-                {isDemoMode ? 'Demo' : authUser ? `@${authUser.username}` : 'Sign In'}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-              <span className="text-[10px] font-mono font-semibold text-slate-400 dark:text-slate-500 shrink-0">
-                GW {currentGW}
-              </span>
-              <span className="text-slate-300 dark:text-slate-700 text-[10px]">•</span>
-              <span className="truncate max-w-[120px] sm:max-w-[200px] md:max-w-[320px] text-[11px] md:text-xs font-semibold text-slate-700 dark:text-slate-300">
-                {authUser?.teamName || squad.teamName}
-              </span>
-              {squad.activeChip && (
-                <span className="px-1.5 py-0.2 rounded-full text-[8.5px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-500 dark:text-amber-300 border border-amber-400/30 flex items-center gap-0.5 shrink-0 shadow-xs">
-                  <Zap className="w-2.5 h-2.5 text-amber-400" />
-                  <span>{squad.activeChip.replace('_', ' ')}</span>
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-1.5 md:gap-2">
-          {/* Rules & Scoring System Modal Button */}
-          <button
-            onClick={() => openRulesModal('rules')}
-            className="px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 bg-slate-100 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/[0.09] cursor-pointer relative"
-            title="ტურნირის წესები და ქულები / Official Rules & Scoring"
-            aria-label="Tournament Rules"
-          >
-            <BookOpen className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-            <span className="font-bold text-[11px] sm:text-xs">წესები</span>
-            {authUser?.id && !hasManagerSeenLatestUpdate(authUser.id) && (
-              <span className="w-2 h-2 rounded-full bg-amber-400 ring-2 ring-slate-900 animate-pulse shrink-0" title="ახალი განახლება!" />
-            )}
-          </button>
-
-          {/* Dedicated Managers Portal Button (Admins Only) */}
-          {isModerator && (
-            <button
-              onClick={() => setActiveTab('managers')}
-              className={`p-1.5 md:px-3 md:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'managers'
-                  ? 'bg-amber-500 text-slate-950 border-amber-400 font-black shadow-xs'
-                  : 'bg-slate-100 dark:bg-white/[0.05] border-slate-200 dark:border-white/[0.09] text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/[0.09]'
-              }`}
-              title="მენეჯერების მართვა / Registered Managers & Approvals"
-              aria-label="Managers"
-            >
-              <UserCheck className={`w-3.5 h-3.5 flex-shrink-0 ${activeTab === 'managers' ? 'text-slate-950' : 'text-amber-500'}`} />
-              <span className="font-bold">managers</span>
-            </button>
-          )}
-
-          {/* Dedicated Match Console Button (Referees Only) */}
-          {isReferee && !isModerator && (
-            <button
-              onClick={() => setActiveTab('dev')}
-              className={`p-1.5 md:px-3 md:py-1.5 rounded-full text-xs font-semibold border transition-all flex items-center gap-1.5 cursor-pointer ${
-                activeTab === 'dev'
-                  ? 'bg-amber-500 text-slate-950 border-amber-400 font-black shadow-xs ring-2 ring-amber-400/50'
-                  : 'bg-amber-500/15 dark:bg-amber-500/15 border-amber-500/30 text-amber-500 dark:text-amber-400 hover:bg-amber-500/25'
-              }`}
-              title="მატჩის კონსოლი (მსაჯი) / Matchday Referee Console"
-              aria-label="Match Console"
-            >
-              <Award className="w-3.5 h-3.5 flex-shrink-0 text-amber-500 dark:text-amber-400" />
-              <span className="hidden sm:inline font-bold">Match Console</span>
-            </button>
-          )}
-
-          {/* Theme Toggle Button (Light / Dark) */}
-          <button
-            onClick={toggleTheme}
-            className="p-1.5 md:p-2 rounded-full text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 transition-colors"
-            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label="Toggle theme"
-          >
-            {theme === 'dark' ? (
-              <Sun className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-400" />
-            ) : (
-              <Moon className="w-3.5 h-3.5 md:w-4 md:h-4 text-slate-700" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Desktop Navigation Tabs Bar */}
-      <nav className="hidden md:flex items-center justify-center bg-white/80 dark:bg-[#070b12] border-t border-sky-100 dark:border-slate-800/80 select-none">
-        <div className="w-full max-w-6xl mx-auto flex items-center justify-center gap-1.5 px-6 py-1.5">
-          {DESKTOP_TABS.filter((tab) => tab.id !== 'dev' || isModerator || isReferee).map((tab) => {
-            const isDev = tab.id === 'dev';
-            const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;
-            const isActive = activeTab === tab.id;
-            const displayLabel = isDev ? (isModerator ? 'Mod Console' : 'Match Console') : tab.label;
-
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all border ${
-                  isActive
-                    ? 'bg-sky-500 text-white border-sky-400 font-bold shadow-md shadow-sky-500/25 dark:bg-white/[0.09] dark:text-white dark:border-white/[0.14]'
-                    : 'bg-transparent text-slate-600 dark:text-slate-400 border-transparent hover:bg-sky-50/70 hover:text-sky-700 dark:hover:bg-white/[0.04] dark:hover:text-slate-200'
+                onClick={() => {
+                  triggerHaptic('light');
+                  setShowStatusDetails((prev) => !prev);
+                }}
+                className={`inline-flex items-center gap-1 px-2 py-0.5 mt-1 rounded-full text-[9.5px] font-bold border transition-all cursor-pointer self-start ${
+                  isLineupReady
+                    ? 'bg-white/[0.04] hover:bg-white/[0.08] border-white/10 text-emerald-400'
+                    : 'bg-rose-500/10 hover:bg-rose-500/15 border-rose-500/30 text-rose-300'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? (isDev ? 'text-amber-300' : 'text-white') : 'text-slate-400'}`} />
-                <span>{displayLabel}</span>
-                {isDev && (isDevAuthenticated || isReferee) && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400/80" />
+                {isLineupReady ? (
+                  <Check className="w-2.5 h-2.5 text-emerald-400" />
+                ) : (
+                  <AlertCircle className="w-2.5 h-2.5 text-rose-400" />
                 )}
+                <span>{isLineupReady ? 'Lineup Ready' : `Incomplete (${squad.players.length}/9)`}</span>
+                <ChevronDown className="w-2.5 h-2.5 opacity-60 ml-0.5" />
               </button>
-            );
-          })}
-        </div>
-      </nav>
+            </div>
+          </div>
 
-      {/* Gameweek Quick Metric Bar - sleek frosted glass strip (hidden on mobile when on team tab to eliminate container duplication) */}
-      {activeTab !== 'transfers' && (
-        <div className={`w-full bg-slate-100/70 dark:bg-white/[0.02] backdrop-blur-md border-t border-slate-200/60 dark:border-white/5 py-1 text-center text-xs ${activeTab === 'team' ? 'hidden md:block' : ''}`}>
-          <div className="max-w-6xl mx-auto grid grid-cols-4 divide-x divide-slate-200/50 dark:divide-white/5 px-1 md:px-6">
-            <div>
-              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">GW</span>
-              <span className="text-[11px] md:text-xs font-black font-mono tabular-nums text-emerald-600 dark:text-emerald-400">
-                {calculationResult.totalPoints}
+          {/* Right: VAL & BANK Glass Capsules */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            {/* VAL Capsule */}
+            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10 min-w-[56px] text-center">
+              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
+                VAL
+              </span>
+              <span className="text-xs sm:text-[13px] font-mono font-bold text-white tabular-nums leading-tight mt-1">
+                £{teamValue.toFixed(1)}m
               </span>
             </div>
-            <div>
-              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">Total</span>
-              <span className="text-[11px] md:text-xs font-black font-mono tabular-nums text-slate-900 dark:text-white">
-                {totalUserPoints}
+
+            {/* BANK Capsule */}
+            <div className="flex flex-col items-center justify-center px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10 min-w-[56px] text-center">
+              <span className="text-[9px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
+                BANK
               </span>
-            </div>
-            <div>
-              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">Rank</span>
-              <span className="text-[11px] md:text-xs font-black font-mono tabular-nums text-sky-600 dark:text-sky-400">
-                {overallRank}
-              </span>
-            </div>
-            <div>
-              <span className="block text-[8px] md:text-[9px] text-slate-400 uppercase font-bold tracking-wider">Bank</span>
-              <span className="text-[11px] md:text-xs font-bold font-mono tabular-nums text-slate-700 dark:text-slate-300">
+              <span className="text-xs sm:text-[13px] font-mono font-bold text-white tabular-nums leading-tight mt-1">
                 £{squad.bank.toFixed(1)}m
               </span>
             </div>
+
+            {/* Quick Action Utilities (Rules & Theme) */}
+            <div className="flex flex-col gap-1 ml-0.5">
+              <button
+                onClick={() => openRulesModal('rules')}
+                className="p-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-400 hover:text-white transition-all cursor-pointer relative"
+                title="Rules & Updates"
+              >
+                <BookOpen className="w-3 h-3" />
+                {authUser?.id && !hasManagerSeenLatestUpdate(authUser.id) && (
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                )}
+              </button>
+              <button
+                onClick={toggleTheme}
+                className="p-1 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-400 hover:text-white transition-all cursor-pointer"
+                title="Toggle Theme"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-3 h-3 text-amber-400" />
+                ) : (
+                  <Moon className="w-3 h-3 text-slate-400" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Row 2: FT (Left) & DEADLINE (Right) Full-Width Split Pills */}
+        <div className="grid grid-cols-2 gap-2 pt-0.5">
+          {/* FT Capsule */}
+          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-white/[0.04] border border-white/10 text-center">
+            <span className="text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
+              FT
+            </span>
+            <span className="text-sm sm:text-base font-mono font-black text-white tabular-nums leading-tight mt-1">
+              {freeTransfersRemaining}
+            </span>
+          </div>
+
+          {/* DEADLINE Capsule */}
+          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-white/[0.04] border border-white/10 text-center">
+            <span className="text-[9.5px] font-mono font-bold text-slate-400 uppercase tracking-wider leading-none">
+              DEADLINE
+            </span>
+            <span className="text-xs sm:text-sm font-mono font-bold text-white tabular-nums leading-tight mt-1 truncate max-w-full">
+              {timeLeft || 'Locked'}
+            </span>
+          </div>
+        </div>
+
+        {/* Optional Dropdown Status Card for Lineup Validation */}
+        {showStatusDetails && (
+          <div className="p-3 rounded-xl bg-[#111722] border border-white/15 text-xs text-slate-200 space-y-1.5 shadow-xl animate-in slide-in-from-top-2 duration-150">
+            <div className="flex items-center justify-between pb-1 border-b border-white/10">
+              <span className="font-bold text-white">Lineup Validation Status</span>
+              <button
+                type="button"
+                onClick={() => setShowStatusDetails(false)}
+                className="text-[10px] text-slate-400 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+            <div className="text-[11px] space-y-0.5">
+              <p className={comp.isValid ? 'text-emerald-400 font-semibold' : 'text-rose-400 font-semibold'}>
+                {comp.isValid ? '✓ Full starting 6 and 3 substitutes registered' : `⚠️ ${comp.message}`}
+              </p>
+              <p className="text-slate-400 text-[10.5px]">
+                Rules: 1 GK, 3 DEF, 3 MID, 2 FWD total (6 starters + 3 bench reserves).
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </header>
   );
 };

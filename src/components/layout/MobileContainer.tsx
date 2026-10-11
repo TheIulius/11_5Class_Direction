@@ -1,5 +1,6 @@
 import React from 'react';
 import { TopHeader } from './TopHeader';
+import { DesktopSidebar } from './DesktopSidebar';
 import { BottomNav } from './BottomNav';
 import { ManagerModal } from './ManagerModal';
 import { AuthModal } from './AuthModal';
@@ -26,30 +27,37 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
   const isDevMode = activeTab === 'dev' && isModerator;
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-[#090d16] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
-      {/* Top Header - decoupled in Dev Mode */}
+    <div className="min-h-screen w-full flex flex-col bg-slate-50 dark:bg-[#070b12] text-slate-900 dark:text-slate-100 select-none transition-colors duration-200">
+      {/* Mobile-Only Ultra-Compact Header */}
       {!isDevMode && <TopHeader />}
 
-      {/* Main Scrollable View Area */}
-      <main className={`flex-1 w-full ${isDevMode ? 'p-0 pb-12' : 'pb-[calc(5.2rem+env(safe-area-inset-bottom))] md:pb-12'}`}>
-        <div className={`w-full ${isDevMode ? 'max-w-7xl mx-auto px-1 sm:px-2' : 'max-w-6xl mx-auto px-2 sm:px-4 md:px-6'}`}>
-          {children}
-        </div>
+      {/* Main Layout Container: Desktop Sidebar + View Canvas */}
+      <div className="w-full flex-1 flex min-h-screen">
+        {/* Left Column (Desktop Fixed Sidebar) */}
+        {!isDevMode && <DesktopSidebar />}
 
-        {/* School branding & creator watermark */}
-        {!isDevMode && (
-          <footer className="pt-8 pb-8 text-center select-none space-y-2 border-t border-slate-200 dark:border-white/5 mt-10 max-w-6xl mx-auto px-4">
-            <div className="flex items-center justify-center">
-              <img src="/kcl-logo.png" alt="KCL Logo" className="h-9 md:h-11 w-auto rounded-lg object-contain shadow-xs border border-slate-200 dark:border-white/10" />
-            </div>
-            <p className="text-[10px] md:text-xs text-slate-400 dark:text-slate-500 font-medium tracking-wide">
-              © Komarovi Charity League (KCL) • Created By Theiulius & Chaga
-            </p>
-          </footer>
-        )}
-      </main>
+        {/* View Canvas Area */}
+        <main
+          className={`flex-1 min-w-0 w-full flex flex-col ${
+            isDevMode
+              ? 'p-0 pb-12'
+              : 'pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6'
+          }`}
+        >
+          <div className="w-full flex-1 min-w-0">{children}</div>
 
-      {/* Fixed Bottom Navigation (Mobile Only) - hidden in Dev Mode */}
+          {/* Minimal Watermark (non-team tabs & non-dev) */}
+          {!isDevMode && activeTab !== 'team' && (
+            <footer className="pt-6 pb-6 text-center select-none space-y-1.5 border-t border-slate-200/70 dark:border-white/5 mt-auto max-w-6xl mx-auto px-4">
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 font-mono tracking-wide">
+                © Komarovi Charity League • Sports Command Center
+              </p>
+            </footer>
+          )}
+        </main>
+      </div>
+
+      {/* Fixed Bottom Navigation (Mobile Only) */}
       {!isDevMode && <BottomNav />}
 
       {/* Friend Manager Switcher / Join Modal */}

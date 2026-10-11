@@ -150,7 +150,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
     >
       <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700/80 rounded-3xl shadow-2xl overflow-hidden my-auto text-slate-100 flex flex-col">
         {/* Decorative Top Accent Glow */}
-        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-600" />
+        <div className="absolute top-0 left-0 right-0 h-1 bg-white/20" />
 
         <AnimatePresence mode="wait">
           {/* ========================================================
@@ -217,7 +217,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
               <button
                 type="button"
                 onClick={handleCompleteAndDismiss}
-                className="w-full py-3.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm tracking-wide transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-zinc-100 text-zinc-950 font-bold text-sm tracking-wide transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
               >
                 <span>თამაშზე გადასვლა</span>
                 <ArrowRight className="w-4 h-4" />
@@ -443,7 +443,7 @@ export const StudentProfileModal: React.FC<StudentProfileModalProps> = ({
                   <button
                     type="submit"
                     disabled={!isValid || loading}
-                    className="w-full py-3.5 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 disabled:pointer-events-none text-slate-950 font-black text-sm tracking-wide transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                    className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-zinc-100 disabled:opacity-30 disabled:pointer-events-none text-zinc-950 font-bold text-sm tracking-wide transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
                   >
                     {loading ? (
                       <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />

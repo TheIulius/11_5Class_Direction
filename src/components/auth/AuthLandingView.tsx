@@ -256,7 +256,7 @@ export const AuthLandingView: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md disabled:opacity-50 transition-all cursor-pointer font-black"
+                className="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-white hover:bg-zinc-100 text-zinc-950 shadow-sm disabled:opacity-40 transition-all cursor-pointer"
               >
                 {isLoading ? 'Signing In...' : 'Sign In'}
               </button>
@@ -494,7 +494,7 @@ export const AuthLandingView: React.FC = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-md disabled:opacity-50 transition-all mt-1 font-black cursor-pointer"
+                className="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-white hover:bg-zinc-100 text-zinc-950 shadow-sm disabled:opacity-40 transition-all mt-1 cursor-pointer"
               >
                 {isLoading ? 'Creating...' : 'Register & Create Team'}
               </button>

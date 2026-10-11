@@ -409,7 +409,7 @@ export const TransfersView: React.FC = () => {
                         ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed shadow-none'
                         : (squad.freeTransfers ?? 0) === 0 && squad.activeChip !== 'wildcard'
                         ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
-                        : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-emerald-500/25'
+                        : 'bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 shadow-sm'
                     }`}
                   >
                     <span>Confirm</span>
@@ -613,7 +613,7 @@ export const TransfersView: React.FC = () => {
                       ? 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed shadow-none'
                       : (squad.freeTransfers ?? 0) === 0 && squad.activeChip !== 'wildcard'
                       ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
-                      : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-emerald-500/25'
+                      : 'bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 shadow-sm'
                   }`}
                 >
                   <span>დადასტურება</span>
@@ -704,7 +704,7 @@ export const TransfersView: React.FC = () => {
             </div>
 
             {/* Tactical Pitch with 9 squad slots (Collapsible on mobile, always visible on lg+) */}
-            <div className={`${mobileShowPitch ? 'block' : 'hidden lg:block'} relative rounded-3xl bg-gradient-to-b from-emerald-600 via-emerald-700 to-emerald-800 dark:from-emerald-950/40 dark:via-[#09111c] dark:to-emerald-950/30 border border-emerald-500/40 dark:border-white/[0.08] shadow-lg shadow-emerald-950/15 p-2.5 sm:p-5 overflow-hidden`}>
+            <div className={`${mobileShowPitch ? 'block' : 'hidden lg:block'} relative rounded-3xl bg-[#125828] dark:bg-[#0c2e17] border border-[#1b6b33]/60 dark:border-white/10 shadow-lg p-2.5 sm:p-5 overflow-hidden`}>
               {/* Subtle Turf Pitch Markings & Komarovi Champions League Watermark */}
               <div className="absolute inset-0 pointer-events-none opacity-20">
                 <div className="absolute top-0 left-1/4 right-1/4 h-10 border-b border-x border-white/40 rounded-b-xl" />

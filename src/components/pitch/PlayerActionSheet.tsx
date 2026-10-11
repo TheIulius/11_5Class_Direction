@@ -638,10 +638,10 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
                 <button
                   type="button"
                   onClick={handleProceedTransfer}
-                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer hover:scale-[1.02] active:scale-[0.98] ${
+                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] ${
                     !hasFreeTransfer && !isWildcard
-                      ? 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/25'
-                      : 'bg-emerald-500 hover:bg-emerald-600 text-slate-950 shadow-emerald-500/25'
+                      ? 'bg-rose-500 hover:bg-rose-600 text-white'
+                      : 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950'
                   }`}
                 >
                   <span>გადასვლა →</span>

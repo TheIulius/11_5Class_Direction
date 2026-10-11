@@ -2,9 +2,7 @@ import React from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from './KitJersey';
 import { canSwapPlayers } from '../../engine/formations';
-import { ArrowLeftRight, Check, AlertCircle } from 'lucide-react';
-import { ClassShieldBadge } from '../common/ClassShieldBadge';
-import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
+import { ArrowLeftRight, Check } from 'lucide-react';
 import { GameweekCalculationResult, calculatePlayerPoints, POSITION_CHANGED_PLAYERS } from '../../engine/scoring';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -28,7 +26,6 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   isCaptain,
   isViceCaptain,
   onCardClick,
-  showPoints = false,
   customCalculation,
   selectedGW,
   readOnly = false,
@@ -108,65 +105,121 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   const isDimmedDuringSwap =
     !readOnly && selectedPlayerForSwap && !isSwapSource && !isSwapTargetEligible;
 
-  const sourceSp = selectedPlayerForSwap ? squad.players.find((p) => p.playerId === selectedPlayerForSwap) : null;
-  const isBenchToBench = sourceSp && !sourceSp.isStarter && !isStarter;
+  // On Bench View (inside Drawer / tactical dock)
+  if (!isStarter) {
+    return (
+      <div
+        onClick={handleClick}
+        className={`w-full relative flex flex-col items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition-all cursor-pointer active:scale-95 select-none ${
+          isSwapSource
+            ? 'ring-2 ring-amber-400 bg-amber-500/10'
+            : isSwapTargetEligible
+            ? 'ring-2 ring-white/80 bg-white/10'
+            : isPositionChanged
+            ? 'ring-2 ring-rose-500'
+            : isDimmedDuringSwap
+            ? 'opacity-35'
+            : ''
+        }`}
+      >
+        {/* Swap Indicator */}
+        {isSwapSource && (
+          <div className="absolute -top-2.5 bg-amber-400 text-slate-950 text-[8.5px] font-black px-2 py-0.2 rounded-full shadow-md z-30">
+            SWAP
+          </div>
+        )}
+        {isSwapTargetEligible && (
+          <div className="absolute -top-2.5 bg-white text-zinc-950 text-[8.5px] font-black px-2 py-0.2 rounded-full shadow-md z-30">
+            TAP HERE
+          </div>
+        )}
 
+        {/* Kit Jersey */}
+        <div className="relative my-1">
+          <KitJersey
+            clubId={player.clubId}
+            position={player.position}
+            photoUrl={player.photoUrl}
+            className="w-11 h-11 sm:w-12 sm:h-12 drop-shadow-md"
+          />
+          {benchOrder && (
+            <span className="absolute -bottom-1 -right-1 font-mono text-[8px] font-bold px-1 rounded bg-black/80 text-zinc-300 border border-white/10">
+              #{benchOrder}
+            </span>
+          )}
+        </div>
+
+        {/* Player Web Name */}
+        <span className="text-[11px] font-bold text-white tracking-tight truncate max-w-full text-center mt-1">
+          {player.webName}
+        </span>
+      </div>
+    );
+  }
+
+  // Pitch Starter View: Ultra-Glass Rounded Capsule
   return (
     <div
       onClick={handleClick}
-      title={isPositionChanged ? `${player.name}: პოზიცია შეიცვალა (${positionChange?.oldPosition} → ${positionChange?.newPosition}). აუცილებელია ტრანსფერი!` : 'tip: you can add photos to players now!'}
-      className={`relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 select-none group min-w-[72px] max-w-[82px] sm:max-w-[88px] md:max-w-[96px] ${
+      className={`relative flex flex-col items-center justify-between w-[74px] sm:w-[84px] md:w-[94px] min-h-[92px] sm:min-h-[102px] p-1.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/10 shadow-lg cursor-pointer transition-all duration-200 select-none ${
         isSwapSource
-          ? 'scale-110 z-30 ring-2 ring-yellow-400 rounded-lg shadow-xl'
+          ? 'scale-105 ring-2 ring-amber-400 bg-amber-500/15 z-30 shadow-xl'
           : isSwapTargetEligible
-          ? 'scale-105 z-20 ring-2 ring-[#00ff87] rounded-lg animate-pulse-sub shadow-glow-green'
+          ? 'scale-105 ring-2 ring-white/90 bg-white/15 z-20 shadow-xl'
           : isPositionChanged
-          ? 'ring-2 ring-rose-500 shadow-lg shadow-rose-500/40 rounded-xl hover:scale-105 active:scale-95'
+          ? 'ring-2 ring-rose-500 shadow-rose-500/20'
           : isDimmedDuringSwap
-          ? 'opacity-40 grayscale-[30%] hover:opacity-70'
-          : 'hover:scale-105 active:scale-95'
+          ? 'opacity-35 grayscale-[20%]'
+          : 'hover:scale-[1.03] active:scale-95'
       }`}
     >
-      {/* Position Change Notice Badge */}
+      {/* Position Change Alert */}
       {isPositionChanged && (
         <div
-          className="absolute -top-3.5 -left-1.5 bg-gradient-to-br from-rose-500 to-red-600 text-white font-black text-[11px] md:text-[12px] rounded-full w-5 h-5 md:w-5.5 md:h-5.5 flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-lg shadow-rose-500/60 z-30 animate-bounce"
-          title={`${player.name}: პოზიცია შეიცვალა (${positionChange?.oldPosition} → ${positionChange?.newPosition}). აუცილებელია ტრანსფერი! (+1 FT დამატებულია)`}
+          className="absolute -top-2 -left-2 bg-rose-600 text-white font-black text-[10px] rounded-full w-4.5 h-4.5 flex items-center justify-center border border-white shadow-md z-30"
+          title={`${player.name}: პოზიცია შეიცვალა. აუცილებელია ტრანსფერი!`}
         >
           !
         </div>
       )}
-      {/* Swap Status Overlay Pill */}
+
+      {/* Swap Status Floating Pill */}
       {isSwapSource && (
-        <div className="absolute -top-3.5 bg-yellow-400 text-black text-[9px] md:text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg border border-black flex items-center gap-1 z-30 animate-bounce">
-          <ArrowLeftRight className="w-2.5 h-2.5 md:w-3 md:h-3" />
+        <div className="absolute -top-3 bg-amber-400 text-slate-950 text-[8.5px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 z-30">
+          <ArrowLeftRight className="w-2.5 h-2.5" />
           <span>SWAP</span>
         </div>
       )}
-
       {isSwapTargetEligible && (
-        <div className="absolute -top-3.5 bg-[#00ff87] text-[#37003c] text-[8px] md:text-[9px] font-black px-2 py-0.5 rounded-full shadow-lg border border-[#37003c] flex items-center gap-1 z-30 animate-bounce">
-          <Check className="w-2.5 h-2.5 md:w-3 md:h-3" />
-          <span>{isBenchToBench ? 'SWAP ORDER' : 'TAP HERE'}</span>
+        <div className="absolute -top-3 bg-white text-zinc-950 text-[8.5px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 z-30">
+          <Check className="w-2.5 h-2.5" />
+          <span>SELECT</span>
         </div>
       )}
 
-      {/* Jersey Container with Captain & Vice Captain Badges */}
-      <div className="relative flex items-center justify-center my-0.5">
+      {/* Top: Position Label */}
+      <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-slate-300/80 leading-none pt-0.5">
+        {player.position}
+      </span>
+
+      {/* Center: Kit Jersey */}
+      <div className="relative my-0.5 flex items-center justify-center">
         <KitJersey
           clubId={player.clubId}
           position={player.position}
           photoUrl={player.photoUrl}
-          className="w-10 h-10 sm:w-11 sm:h-11 md:w-13 md:h-13"
+          className="w-10 h-10 sm:w-11 sm:h-11 md:w-12 md:h-12 drop-shadow-md"
         />
 
         {/* Captaincy Badges */}
         {isCaptain && (
           <div
-            className={`absolute -top-1 -right-2 text-white font-black text-[9px] md:text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center border shadow-md z-20 ${
-              isTripleCap ? 'bg-gradient-to-r from-[#ffe600] to-[#ff9900] text-black border-white' : 'bg-[#111] text-white border-white'
+            className={`absolute -top-1 -right-2 font-black text-[8.5px] sm:text-[9px] rounded-full w-4.5 h-4.5 flex items-center justify-center border shadow-md z-20 ${
+              isTripleCap
+                ? 'bg-amber-400 text-slate-950 border-white'
+                : 'bg-zinc-950 text-white border-white/80'
             }`}
-            title={isTripleCap ? 'Triple Captain' : 'Captain (2x)'}
+            title={isTripleCap ? 'Triple Captain' : 'Captain'}
           >
             {isTripleCap ? 'TC' : 'C'}
           </div>
@@ -174,69 +227,40 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
 
         {isViceCaptain && !isCaptain && (
           <div
-            className="absolute -top-1 -right-2 bg-gray-300 text-black font-black text-[9px] md:text-[10px] rounded-full w-4 h-4 md:w-5 md:h-5 flex items-center justify-center border border-black shadow-md z-20"
+            className="absolute -top-1 -right-2 bg-slate-300 text-slate-950 font-black text-[8.5px] sm:text-[9px] rounded-full w-4.5 h-4.5 flex items-center justify-center border border-slate-700 shadow-md z-20"
             title="Vice Captain"
           >
             V
           </div>
         )}
 
-        {/* Bench Order indicator if on bench (Sub 1, Sub 2, Sub 3) */}
-        {!isStarter && (
-          <div className={`absolute -bottom-1 -right-1 font-black text-[8px] md:text-[9px] rounded px-1.5 py-0.5 border shadow-sm z-20 ${
-            benchOrder === 1
-              ? 'bg-black/95 text-emerald-400 border-emerald-500/50'
-              : benchOrder === 2
-              ? 'bg-black/95 text-sky-400 border-sky-500/50'
-              : 'bg-black/95 text-amber-400 border-amber-500/50'
-          }`}>
-            Sub {benchOrder}
-          </div>
-        )}
-
-        {/* Auto-Sub Arrows */}
+        {/* Auto-Sub Flags */}
         {isAutoSubIn && (
-          <span className="absolute -top-1 -left-2 bg-green-500 text-white font-bold text-[8px] md:text-[9px] px-1 rounded-full">
+          <span className="absolute -top-1 -left-2 bg-emerald-600 text-white font-bold text-[8px] px-1 rounded-full">
             IN
           </span>
         )}
         {isAutoSubOut && (
-          <span className="absolute -top-1 -left-2 bg-red-500 text-white font-bold text-[8px] md:text-[9px] px-1 rounded-full">
+          <span className="absolute -top-1 -left-2 bg-rose-600 text-white font-bold text-[8px] px-1 rounded-full">
             OUT
           </span>
         )}
       </div>
 
-      {/* Unified Compact Player Plate */}
-      <div className="w-full rounded-xl overflow-hidden shadow-md border border-black/40 backdrop-blur-xs flex flex-col transition-all">
-        {/* Nameplate Badge with Class Shield */}
-        <div
-          className={`w-full text-center px-1 py-0.5 text-[10.5px] sm:text-[11.5px] font-black tracking-tight truncate transition-colors flex items-center justify-center gap-1 ${
-            isSwapSource
-              ? 'bg-amber-400 text-slate-950 font-black'
-              : isSwapTargetEligible
-              ? 'bg-[#00ff87] text-[#37003c] font-black'
-              : isPositionChanged
-              ? 'bg-rose-600 text-white font-black'
-              : 'bg-white text-slate-950'
-          }`}
-        >
-          <ClassShieldBadge clubId={player.clubId} size="xs" className="w-3.5 h-3.5 flex-shrink-0" />
-          <span className="truncate">{player.webName}</span>
-          {isPositionChanged && (
-            <span className="text-[8.5px] font-black bg-white text-rose-600 px-1 rounded-[3px] leading-none shrink-0 shadow-xs" title="პოზიცია შეიცვალა!">
-              !
-            </span>
-          )}
+      {/* Bottom Info: Player Name + Price/Points */}
+      <div className="w-full flex flex-col items-center justify-center text-center pb-0.5">
+        {/* Name with subtle class accent dot */}
+        <div className="flex items-center justify-center gap-1 max-w-full">
+          <span className="text-[10.5px] sm:text-[11.5px] font-bold text-white tracking-tight truncate leading-tight">
+            {player.webName}
+          </span>
         </div>
 
-        {/* Value & Points Bar */}
-        <div
-          className="w-full text-center px-1 py-0.5 text-[8.5px] sm:text-[9.5px] font-extrabold tracking-tight transition-colors bg-slate-950/95 text-slate-200 border-t border-white/10 flex items-center justify-center gap-1"
-        >
-          <PlayerPriceBadge player={player} stacked={true} className="text-[8.5px] sm:text-[9px]" />
-          <span className="text-slate-600 font-normal text-[7.5px] select-none shrink-0">•</span>
-          <span className="font-mono text-[#00ff87] font-black shrink-0 leading-none">{pts}pts</span>
+        {/* Price & Points Side-by-Side (tabular monospace) */}
+        <div className="text-[8.5px] sm:text-[9px] font-mono text-slate-300/80 tabular-nums flex items-center justify-center gap-1.5 mt-0.5 leading-none">
+          <span>£{player.cost.toFixed(1)}m</span>
+          <span className="opacity-40">•</span>
+          <span className="font-bold text-white">{pts}pts</span>
         </div>
       </div>
     </div>

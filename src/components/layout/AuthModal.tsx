@@ -247,7 +247,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs disabled:opacity-50 transition-all"
+                  className="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 shadow-sm disabled:opacity-50 transition-all cursor-pointer"
                 >
                   {isLoading ? 'Signing In...' : 'Sign In'}
                 </button>
@@ -420,7 +420,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs disabled:opacity-50 transition-all mt-1"
+                  className="w-full py-3 rounded-xl font-bold text-xs uppercase tracking-wider bg-zinc-950 hover:bg-zinc-800 text-white dark:bg-white dark:hover:bg-zinc-100 dark:text-zinc-950 shadow-sm disabled:opacity-50 transition-all mt-1 cursor-pointer"
                 >
                   {isLoading ? 'Creating...' : 'Register'}
                 </button>
