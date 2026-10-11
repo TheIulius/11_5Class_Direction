@@ -269,32 +269,29 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
               </div>
             )}
 
-            {/* Football Pitch Container with Matte Sage Natural Turf */}
+            {/* Football Pitch Container with Rich Forest Green Natural Turf */}
             <div
-              className="relative mx-2 my-2 rounded-2xl overflow-hidden border border-white/10 shadow-xl"
-              style={{
-                background: '#1b3022',
-              }}
+              className="relative mx-2 my-2 rounded-2xl overflow-hidden border border-emerald-950/20 dark:border-white/10 shadow-xl bg-gradient-to-b from-[#225732] via-[#1b4b2a] to-[#153e22] dark:from-[#143d22] dark:via-[#10331b] dark:to-[#0c2815]"
             >
               {/* Faint Desaturated Center Watermark */}
               <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
                 <img
                   src="/kcl-logo-transparent.png"
                   alt="Komarovi Champions League"
-                  className="w-[200px] max-w-[60vw] opacity-[0.04] grayscale object-contain"
+                  className="w-[200px] max-w-[60vw] opacity-[0.06] grayscale object-contain"
                 />
               </div>
 
-              {/* Pitch White Chalk Lines (SVG) with Ultra-Subtle 0.5px/1px Markings */}
+              {/* Pitch White Chalk Lines (SVG) with Crisp Forest Pitch Markings */}
               <svg
                 className="absolute inset-0 w-full h-full pointer-events-none fill-none"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <rect x="10" y="10" width="calc(100% - 20px)" height="calc(100% - 20px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" rx="10" />
-                <line x1="10" y1="50%" x2="calc(100% - 10px)" y2="50%" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-                <circle cx="50%" cy="50%" r="48" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-                <rect x="25%" y="10" width="50%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-                <rect x="25%" y="calc(100% - 80px)" width="50%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+                <rect x="10" y="10" width="calc(100% - 20px)" height="calc(100% - 20px)" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" rx="10" />
+                <line x1="10" y1="50%" x2="calc(100% - 10px)" y2="50%" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+                <circle cx="50%" cy="50%" r="48" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+                <rect x="25%" y="10" width="50%" height="70" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+                <rect x="25%" y="calc(100% - 80px)" width="50%" height="70" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
               </svg>
 
               {/* Pitch Formation Header */}

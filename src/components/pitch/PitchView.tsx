@@ -148,52 +148,49 @@ export const PitchView: React.FC<PitchViewProps> = ({
         </div>
       )}
 
-      {/* Football Pitch Container with Matte Sage Natural Turf */}
+      {/* Football Pitch Container with Rich Forest Green Natural Turf */}
       <div
-        className="relative w-full my-0 sm:my-2 rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-xl transition-all duration-300"
-        style={{
-          background: '#1b3022',
-        }}
+        className="relative w-full my-0 sm:my-2 rounded-2xl md:rounded-3xl overflow-hidden border border-emerald-950/20 dark:border-white/10 shadow-xl transition-all duration-300 bg-gradient-to-b from-[#225732] via-[#1b4b2a] to-[#153e22] dark:from-[#143d22] dark:via-[#10331b] dark:to-[#0c2815]"
       >
         {/* Faint Desaturated Center Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
           <img
             src="/kcl-logo-transparent.png"
             alt="Komarovi Champions League"
-            className="w-[240px] sm:w-[280px] md:w-[320px] max-w-[70vw] opacity-[0.04] grayscale object-contain"
+            className="w-[240px] sm:w-[280px] md:w-[320px] max-w-[70vw] opacity-[0.06] grayscale object-contain"
           />
         </div>
 
-        {/* Pitch Chalk Lines (SVG) with Ultra-Subtle 0.5px/1px Markings */}
+        {/* Pitch Chalk Lines (SVG) with Crisp Forest Pitch Markings */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none fill-none"
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Outer Boundary Border */}
-          <rect x="12" y="12" width="calc(100% - 24px)" height="calc(100% - 24px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" rx="14" />
+          <rect x="12" y="12" width="calc(100% - 24px)" height="calc(100% - 24px)" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" rx="14" />
 
           {/* Center Circle & Halfway Line */}
-          <line x1="12" y1="50%" x2="calc(100% - 12px)" y2="50%" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <circle cx="50%" cy="50%" r="48" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <circle cx="50%" cy="50%" r="3" fill="rgba(255, 255, 255, 0.3)" />
+          <line x1="12" y1="50%" x2="calc(100% - 12px)" y2="50%" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <circle cx="50%" cy="50%" r="48" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <circle cx="50%" cy="50%" r="3" fill="rgba(255, 255, 255, 0.35)" />
 
           {/* Top Penalty Area (Goalkeeper Box) */}
-          <rect x="24%" y="12" width="52%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <rect x="36%" y="12" width="28%" height="30" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <circle cx="50%" cy="54" r="2.5" fill="rgba(255, 255, 255, 0.3)" />
-          <path d="M 40% 82 C 45% 96, 55% 96, 60% 82" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <rect x="24%" y="12" width="52%" height="70" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <rect x="36%" y="12" width="28%" height="30" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <circle cx="50%" cy="54" r="2.5" fill="rgba(255, 255, 255, 0.35)" />
+          <path d="M 40% 82 C 45% 96, 55% 96, 60% 82" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
 
           {/* Bottom Penalty Area */}
-          <rect x="24%" y="calc(100% - 82px)" width="52%" height="70" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <rect x="36%" y="calc(100% - 42px)" width="28%" height="30" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <circle cx="50%" cy="calc(100% - 54px)" r="2.5" fill="rgba(255, 255, 255, 0.3)" />
-          <path d="M 40% calc(100% - 82px) C 45% calc(100% - 96px), 55% calc(100% - 96px), 60% calc(100% - 82px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <rect x="24%" y="calc(100% - 82px)" width="52%" height="70" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <rect x="36%" y="calc(100% - 42px)" width="28%" height="30" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <circle cx="50%" cy="calc(100% - 54px)" r="2.5" fill="rgba(255, 255, 255, 0.35)" />
+          <path d="M 40% calc(100% - 82px) C 45% calc(100% - 96px), 55% calc(100% - 96px), 60% calc(100% - 82px)" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
 
           {/* Corner Arcs */}
-          <path d="M 12 26 A 14 14 0 0 0 26 12" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <path d="M calc(100% - 26px) 12 A 14 14 0 0 0 calc(100% - 12px) 26" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <path d="M 12 calc(100% - 26px) A 14 14 0 0 1 26 calc(100% - 12px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
-          <path d="M calc(100% - 26px) calc(100% - 12px) A 14 14 0 0 1 calc(100% - 12px) calc(100% - 26px)" stroke="rgba(255, 255, 255, 0.14)" strokeWidth="1" />
+          <path d="M 12 26 A 14 14 0 0 0 26 12" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <path d="M calc(100% - 26px) 12 A 14 14 0 0 0 calc(100% - 12px) 26" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <path d="M 12 calc(100% - 26px) A 14 14 0 0 1 26 calc(100% - 12px)" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
+          <path d="M calc(100% - 26px) calc(100% - 12px) A 14 14 0 0 1 calc(100% - 12px) calc(100% - 26px)" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
         </svg>
 
         {/* Minimal Subtle Formation Pill */}

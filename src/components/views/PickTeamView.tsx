@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { triggerHaptic } from '../../utils/haptics';
 import confetti from 'canvas-confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const PickTeamView: React.FC = () => {
   const {
@@ -78,6 +79,8 @@ export const PickTeamView: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPrimaryExpanded, setIsPrimaryExpanded] = useState(false);
+  const [isSecondaryExpanded, setIsSecondaryExpanded] = useState(false);
 
   const comp = validateSquadComposition(activeSquadPlayers, players, selectedGW);
   const layout = getFormationLayout(activeSquadPlayers, players, selectedGW);
@@ -122,7 +125,7 @@ export const PickTeamView: React.FC = () => {
       {/* ======================================================== */}
       {/* MIDDLE COLUMN: THE PITCH CANVAS (Visual Hero)            */}
       {/* ======================================================== */}
-      <section className="w-full min-w-0 flex flex-col items-center px-0 sm:px-3 md:px-6 py-2 md:py-4">
+      <section className="w-full min-w-0 flex flex-col items-center px-0 sm:px-3 md:px-6 py-2 md:py-4 pb-44 lg:pb-4">
         {/* Minimalist Tactical Gameweek Stepper Bar */}
         <div className="w-full max-w-4xl px-2 sm:px-0 flex items-center justify-between gap-2 mb-2">
           {/* GW Selector Capsule */}
@@ -222,10 +225,35 @@ export const PickTeamView: React.FC = () => {
           </div>
         )}
 
+        {/* Mobile Backdrop Tap-to-Dismiss */}
+        <AnimatePresence>
+          {(isPrimaryExpanded || isSecondaryExpanded) && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => {
+                setIsPrimaryExpanded(false);
+                setIsSecondaryExpanded(false);
+              }}
+              className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-xs z-35 pointer-events-auto"
+            />
+          )}
+        </AnimatePresence>
+
         {/* ======================================================== */}
-        {/* TACTICAL PITCH CANVAS (Full Edge-to-Edge Hero)           */}
+        {/* TACTICAL PITCH CANVAS (Full Edge-to-Edge Hero with Depth) */}
         {/* ======================================================== */}
-        <div className="w-full max-w-4xl flex flex-col items-center">
+        <motion.div
+          animate={{
+            scale: isPrimaryExpanded ? 0.96 : 1,
+            opacity: isPrimaryExpanded ? 0.6 : 1,
+          }}
+          transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
+          style={{ willChange: 'transform' }}
+          className="w-full max-w-4xl flex flex-col items-center origin-top transition-none"
+        >
           <PitchView
             showPoints={isPastGW}
             renderBench={false}
@@ -235,7 +263,7 @@ export const PickTeamView: React.FC = () => {
             selectedGW={selectedGW}
             readOnly={isPastGW}
           />
-        </div>
+        </motion.div>
 
         {/* ======================================================== */}
         {/* SUBSTITUTES: Desktop Tactical Dock & Mobile Bottom Sheet */}
@@ -249,6 +277,10 @@ export const PickTeamView: React.FC = () => {
             activeCalculation={activeCalculation}
             selectedGW={selectedGW}
             readOnly={isPastGW}
+            isPrimaryExpanded={isPrimaryExpanded}
+            setIsPrimaryExpanded={setIsPrimaryExpanded}
+            isSecondaryExpanded={isSecondaryExpanded}
+            setIsSecondaryExpanded={setIsSecondaryExpanded}
           />
         </div>
 

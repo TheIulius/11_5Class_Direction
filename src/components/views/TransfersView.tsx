@@ -705,8 +705,7 @@ export const TransfersView: React.FC = () => {
 
             {/* Tactical Pitch with 9 squad slots (Collapsible on mobile, always visible on lg+) */}
             <div
-              className={`${mobileShowPitch ? 'block' : 'hidden lg:block'} relative rounded-3xl border border-white/10 shadow-xl p-2.5 sm:p-5 overflow-hidden transition-all`}
-              style={{ background: '#1b3022' }}
+              className={`${mobileShowPitch ? 'block' : 'hidden lg:block'} relative rounded-3xl border border-emerald-950/20 dark:border-white/10 shadow-xl p-2.5 sm:p-5 overflow-hidden transition-all bg-gradient-to-b from-[#225732] via-[#1b4b2a] to-[#153e22] dark:from-[#143d22] dark:via-[#10331b] dark:to-[#0c2815]`}
             >
               {/* Subtle Chalk Pitch Markings (0.5px white lines) */}
               <div className="absolute inset-0 pointer-events-none opacity-25">
