@@ -38,7 +38,7 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
       {!isDevMode && <TopHeader />}
 
       {/* Main Layout Container: Desktop Sidebar + View Canvas */}
-      <div className={`w-full flex-1 min-h-0 flex ${activeTab === 'team' ? 'overflow-hidden lg:overflow-visible' : 'min-h-screen'}`}>
+      <div className={`w-full flex-1 flex ${activeTab === 'team' ? 'min-h-0 overflow-hidden lg:overflow-visible' : ''}`}>
         {/* Left Column (Desktop Fixed Sidebar) */}
         {!isDevMode && <DesktopSidebar />}
 
@@ -49,10 +49,10 @@ export const MobileContainer: React.FC<MobileContainerProps> = ({ children }) =>
               ? 'p-0 pb-12'
               : activeTab === 'team'
               ? 'overflow-hidden overscroll-none pb-0 lg:overflow-visible lg:pb-6'
-              : 'overflow-y-auto pb-[calc(4.5rem+env(safe-area-inset-bottom))] lg:pb-6'
+              : 'pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-8'
           }`}
         >
-          <div className={`w-full flex-1 min-h-0 flex flex-col ${activeTab === 'team' ? 'overflow-hidden lg:overflow-visible' : ''}`}>{children}</div>
+          <div className={`w-full flex-1 flex flex-col ${activeTab === 'team' ? 'min-h-0 overflow-hidden lg:overflow-visible' : ''}`}>{children}</div>
 
           {/* Minimal Watermark (non-team tabs & non-dev) */}
           {!isDevMode && activeTab !== 'team' && (

@@ -100,10 +100,10 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
     if (isPastGW || isSquadLocked) return;
 
     const isAlreadyUsed = Boolean(
-      squad.usedChips?.[chipId] ||
-      (squad.gameweekChips &&
-        Object.values(squad.gameweekChips).includes(chipId) &&
-        squad.gameweekChips[selectedGW] !== chipId)
+      squad.gameweekChips &&
+        Object.entries(squad.gameweekChips).some(
+          ([gwStr, c]) => Number(gwStr) < selectedGW && c === chipId
+        )
     );
     if (isAlreadyUsed) {
       triggerHaptic('warning');
@@ -216,10 +216,10 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
             const isChosen = activeChip === chipId;
             const theme = CHIP_THEMES[chipId];
             const isUsed = Boolean(
-              squad.usedChips?.[chipId] ||
-              (squad.gameweekChips &&
-                Object.values(squad.gameweekChips).includes(chipId) &&
-                squad.gameweekChips[selectedGW] !== chipId)
+              squad.gameweekChips &&
+                Object.entries(squad.gameweekChips).some(
+                  ([gwStr, c]) => Number(gwStr) < selectedGW && c === chipId
+                )
             );
             const isDisabled = isPastGW || isSquadLocked || isUsed;
 

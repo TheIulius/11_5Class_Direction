@@ -1354,12 +1354,21 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activateChip = (chip: ChipType): boolean => {
     const isAlreadyUsed = Boolean(
       squad.usedChips?.[chip] ||
-      (squad.gameweekChips && Object.values(squad.gameweekChips).includes(chip))
+      (squad.gameweekChips &&
+        Object.entries(squad.gameweekChips).some(
+          ([gwStr, c]) => Number(gwStr) < currentGW && c === chip
+        ))
     );
     if (isSquadLocked || isAlreadyUsed) return false;
     const newActive = squad.activeChip === chip ? null : chip;
     lastSquadEditTimeRef.current = Date.now();
-    const updatedSquad = { ...squad, activeChip: newActive };
+    const updatedGwChips = { ...(squad.gameweekChips || {}) };
+    if (newActive) {
+      updatedGwChips[currentGW] = newActive;
+    } else {
+      delete updatedGwChips[currentGW];
+    }
+    const updatedSquad = { ...squad, activeChip: newActive, gameweekChips: updatedGwChips };
     setSquad(updatedSquad);
     localStorage.setItem(STORAGE_KEY_SQUAD, JSON.stringify(updatedSquad));
     const activeId = authUser?.id || currentManagerId;
@@ -1421,18 +1430,16 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updatedUsedChips = { ...(squad.usedChips || { triple_captain: false, bench_boost: false, wildcard: false }) };
     let currentActiveChip = squad.activeChip;
 
-    if (isCurrentGWFinished || isSquadLocked) {
+    // Snapshot current GW only if not finished and deadline passed
+    if (!isCurrentGWFinished && isSquadLocked) {
       if (!gwSnapshots[currentGWKey] && squad.players.length === 9) {
         gwSnapshots[currentGWKey] = [...squad.players];
-        gwChips[currentGWKey] = squad.activeChip || null;
+        gwChips[currentGWKey] = currentActiveChip || null;
       }
     }
 
-    // Lock finished gameweek chip permanently
-    if (isCurrentGWFinished && currentActiveChip) {
+    if (currentActiveChip) {
       gwChips[currentGWKey] = currentActiveChip;
-      updatedUsedChips[currentActiveChip] = true;
-      currentActiveChip = null;
     }
 
     const transResult = calculateSquadTransfers(

@@ -17,6 +17,32 @@ import { UpdateNotesModal } from './components/common/UpdateNotesModal';
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, authUser, isModerator, isReferee, openRulesModal } = useFPL();
 
+  React.useEffect(() => {
+    if (activeTab === 'team') {
+      document.documentElement.classList.add('overflow-hidden', 'h-[100dvh]', 'overscroll-none');
+      document.body.classList.add('overflow-hidden', 'h-[100dvh]', 'overscroll-none');
+      const rootEl = document.getElementById('root');
+      if (rootEl) {
+        rootEl.classList.add('overflow-hidden', 'h-[100dvh]');
+      }
+    } else {
+      document.documentElement.classList.remove('overflow-hidden', 'h-[100dvh]', 'overscroll-none');
+      document.body.classList.remove('overflow-hidden', 'h-[100dvh]', 'overscroll-none');
+      const rootEl = document.getElementById('root');
+      if (rootEl) {
+        rootEl.classList.remove('overflow-hidden', 'h-[100dvh]');
+      }
+    }
+    return () => {
+      document.documentElement.classList.remove('overflow-hidden', 'h-[100dvh]', 'overscroll-none');
+      document.body.classList.remove('overflow-hidden', 'h-[100dvh]', 'overscroll-none');
+      const rootEl = document.getElementById('root');
+      if (rootEl) {
+        rootEl.classList.remove('overflow-hidden', 'h-[100dvh]');
+      }
+    };
+  }, [activeTab]);
+
   if (!authUser) {
     return <AuthLandingView />;
   }

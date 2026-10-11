@@ -1020,21 +1020,12 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
     }
 
     const currentGWKey = data.currentGW || 1;
-    const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === currentGWKey);
-    const isCurrentGWFinished = gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished));
-    if (isCurrentGWFinished) {
-      if (!manager.squad.gameweekSquads) manager.squad.gameweekSquads = {};
-      if (!manager.squad.gameweekChips) manager.squad.gameweekChips = {};
-      if (!manager.squad.gameweekSquads[currentGWKey] && manager.squad.players?.length === 9) {
-        manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(manager.squad.players));
-        manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip || null;
-      }
-      if (manager.squad.activeChip) {
-        if (!manager.squad.usedChips) manager.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
-        manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip;
-        manager.squad.usedChips[manager.squad.activeChip] = true;
-        manager.squad.activeChip = null;
-      }
+    if (!manager.squad.gameweekSquads) manager.squad.gameweekSquads = {};
+    if (!manager.squad.gameweekChips) manager.squad.gameweekChips = {};
+
+    // Keep activeChip aligned with current gameweek without absorbing it into finished gameweeks
+    if (manager.squad.activeChip) {
+      manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip;
     }
 
     manager.squad.players = sanitizedPlayers;
@@ -1136,18 +1127,28 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
     }
   }
 
-  // Strict one-use per season rule: check usedChips and any past gameweek in gameweekChips
+  const currentGWKey = data.currentGW || 1;
+
+  // Strict one-use per season rule: check usedChips and any past completed gameweek in gameweekChips
   const isAlreadyUsed = Boolean(
-    manager.squad.usedChips[normalizedChip] ||
-    Object.values(manager.squad.gameweekChips || {}).some((c) => c === normalizedChip)
+    (manager.squad.usedChips && manager.squad.usedChips[normalizedChip]) ||
+    Object.entries(manager.squad.gameweekChips || {}).some(
+      ([gwStr, c]) => Number(gwStr) < currentGWKey && c === normalizedChip
+    )
   );
 
   if (normalizedChip && isAlreadyUsed) {
     manager.squad.usedChips[normalizedChip] = true;
-    return res.status(400).json({ error: 'Chip already used. Each chip can only be used once per season.' });
+    return res.status(400).json({ error: 'Chip already used in a previous gameweek. Each chip can only be used once per season.' });
   }
 
-  manager.squad.activeChip = manager.squad.activeChip === normalizedChip ? null : normalizedChip;
+  const newActive = manager.squad.activeChip === normalizedChip ? null : normalizedChip;
+  manager.squad.activeChip = newActive;
+  if (newActive) {
+    manager.squad.gameweekChips[currentGWKey] = newActive;
+  } else {
+    delete manager.squad.gameweekChips[currentGWKey];
+  }
   updateManagerTransferAccounting(manager, data);
   recalculateAllManagersLeaguePoints(data);
   db.save();
@@ -1241,19 +1242,20 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
   const gwFixtures = (data.fixtures || []).filter((f: any) => Number(f.gameweek) === currentGWKey);
   const isCurrentGWFinished = gwFixtures.length > 0 && gwFixtures.every((f: any) => Boolean(f.isFinished));
 
-  if (isCurrentGWFinished || (data.deadline && new Date() >= new Date(data.deadline.deadlineTime))) {
+  if (!manager.squad.gameweekSquads) manager.squad.gameweekSquads = {};
+  if (!manager.squad.gameweekChips) manager.squad.gameweekChips = {};
+
+  // If deadline has passed for the ongoing gameweek, preserve snapshot
+  if (!isCurrentGWFinished && (data.deadline && new Date() >= new Date(data.deadline.deadlineTime))) {
     if (!manager.squad.gameweekSquads[currentGWKey] && manager.squad.players?.length === 9) {
       manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(manager.squad.players));
       manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip || null;
     }
   }
 
-  // If the gameweek is finished, any chip played in it is permanently consumed and locked
-  if (isCurrentGWFinished && manager.squad.activeChip) {
-    if (!manager.squad.usedChips) manager.squad.usedChips = { triple_captain: false, bench_boost: false, wildcard: false };
+  // Keep activeChip aligned for current active gameweek
+  if (manager.squad.activeChip) {
     manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip;
-    manager.squad.usedChips[manager.squad.activeChip] = true;
-    manager.squad.activeChip = null;
   }
 
   manager.squad.bank = newBank;
@@ -2054,11 +2056,14 @@ export function syncAllFinishedFixturesStats(data: DatabaseSchema): boolean {
         changed = true;
       }
 
-      // Any chip in gameweekChips must be permanently locked in usedChips
-      for (const chipName of Object.values(m.squad.gameweekChips)) {
-        if (chipName && !m.squad.usedChips[chipName]) {
-          m.squad.usedChips[chipName] = true;
-          changed = true;
+      // Only chips from PAST/COMPLETED gameweeks must be permanently locked in usedChips
+      for (const [gwStr, chipName] of Object.entries(m.squad.gameweekChips)) {
+        const gwNum = Number(gwStr);
+        if (chipName && gwNum < maxGW) {
+          if (!m.squad.usedChips[chipName]) {
+            m.squad.usedChips[chipName] = true;
+            changed = true;
+          }
         }
       }
 
@@ -3810,6 +3815,22 @@ export function applyPositionChangesAndRemediation(data: any): boolean {
         console.log(`[Remediation] Removed ${illegals.length} illegal player(s) from ${manager.managerName} (${manager.teamName}), refunded £${refund}m to bank (new bank: £${manager.squad.bank}m)`);
         modified = true;
       }
+    }
+  }
+
+  // 4. Ensure Nikoloz Kirtadze (user_1790456870935) has TC active for GW2 and not locked in GW1
+  const kirtadze = data.managers?.['user_1790456870935'];
+  if (kirtadze?.squad) {
+    if (kirtadze.squad.gameweekChips?.[1] === 'triple_captain' || kirtadze.squad.gameweekChips?.['1'] === 'triple_captain') {
+      delete kirtadze.squad.gameweekChips[1];
+      delete kirtadze.squad.gameweekChips['1'];
+      kirtadze.squad.activeChip = 'triple_captain';
+      kirtadze.squad.gameweekChips = kirtadze.squad.gameweekChips || {};
+      kirtadze.squad.gameweekChips[2] = 'triple_captain';
+      kirtadze.squad.usedChips = kirtadze.squad.usedChips || { triple_captain: false, bench_boost: false, wildcard: false };
+      kirtadze.squad.usedChips.triple_captain = false;
+      modified = true;
+      console.log('[Remediation] Corrected Nikoloz Kirtadze TC: disabled in GW1 and activated for GW2.');
     }
   }
 

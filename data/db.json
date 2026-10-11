@@ -2996,7 +2996,7 @@
       "totalPoints": 4,
       "gwPoints": 4,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5138,7 +5138,7 @@
       "totalPoints": 15,
       "gwPoints": 15,
       "form": 5,
-      "selectedByPercent": 8,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5374,7 +5374,7 @@
       "totalPoints": 24,
       "gwPoints": 24,
       "form": 5,
-      "selectedByPercent": 18,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -8364,11 +8364,11 @@
           "id": "user_1790456870935",
           "managerName": "Nika",
           "teamName": "Upamaldini Fc",
-          "totalPoints": 137,
+          "totalPoints": 117,
           "gwPoints": 0,
           "rank": 1,
           "previousRank": 1,
-          "activeChip": null,
+          "activeChip": "triple_captain",
           "lineup": [
             {
               "playerId": "p_10_1_gogsadze",
@@ -19482,9 +19482,9 @@
         "bank": 9.3,
         "freeTransfers": 1,
         "transfersMadeThisGW": 3,
-        "activeChip": null,
+        "activeChip": "triple_captain",
         "usedChips": {
-          "triple_captain": true,
+          "triple_captain": false,
           "bench_boost": false,
           "wildcard": false
         },
@@ -19556,7 +19556,7 @@
           ]
         },
         "gameweekChips": {
-          "1": "triple_captain"
+          "2": "triple_captain"
         },
         "gwTransferPenalties": {
           "1": 0,
@@ -19575,7 +19575,7 @@
       "realName": "Nikoloz Kirtadze",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 137
+      "totalPoints": 117
     },
     "user_1790457033332": {
       "id": "user_1790457033332",
