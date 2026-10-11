@@ -10668,7 +10668,7 @@
           "gwPoints": 0,
           "rank": 21,
           "previousRank": 21,
-          "activeChip": "triple_captain",
+          "activeChip": null,
           "lineup": [
             {
               "playerId": "p_12_6_dzagania",
@@ -16535,7 +16535,7 @@
         "bank": 1.1,
         "freeTransfers": 0,
         "transfersMadeThisGW": 2,
-        "activeChip": "triple_captain",
+        "activeChip": null,
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
