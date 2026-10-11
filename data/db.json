@@ -2239,7 +2239,7 @@
       "totalPoints": 7,
       "gwPoints": 7,
       "form": 5,
-      "selectedByPercent": 27,
+      "selectedByPercent": 28,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -16118,7 +16118,19 @@
           "rank": 73,
           "previousRank": 73,
           "activeChip": null,
-          "lineup": [],
+          "lineup": [
+            {
+              "playerId": "p_custom_1790194618189",
+              "webName": "Tsiskara",
+              "clubId": "SCH_11_5",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ],
           "grade": "9",
           "parallel": "7",
           "realName": "Avtandil Kostava",
@@ -27238,8 +27250,16 @@
       "squad": {
         "teamName": "9/7",
         "managerName": "Avtandili",
-        "players": [],
-        "bank": 55,
+        "players": [
+          {
+            "playerId": "p_custom_1790194618189",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          }
+        ],
+        "bank": 45.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": null,
