@@ -1690,7 +1690,7 @@
       "totalPoints": -1,
       "gwPoints": -1,
       "form": 5,
-      "selectedByPercent": 8,
+      "selectedByPercent": 9,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -14604,6 +14604,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_9_6_sanikidze",
+              "webName": "Sanikidze",
+              "clubId": "SCH_9_6",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ],
           "grade": "9",
@@ -20773,9 +20784,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_9_6_sanikidze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 40.3,
+        "bank": 36.3,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "wildcard",
