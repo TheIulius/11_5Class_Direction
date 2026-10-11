@@ -24,7 +24,7 @@ const AppContent: React.FC = () => {
   const isAccountApproved = authUser.isAdmin || Boolean(authUser.isApproved);
 
   return (
-    <div className={`relative ${activeTab === 'team' ? 'h-[100dvh] w-full overflow-hidden overscroll-none' : 'min-h-screen w-full'}`}>
+    <div className={`relative ${activeTab === 'team' ? 'h-[100dvh] lg:h-auto lg:min-h-screen w-full overflow-hidden lg:overflow-visible overscroll-none' : 'min-h-screen w-full'}`}>
       {!isAccountApproved ? (
         <PendingApprovalOverlay />
       ) : (

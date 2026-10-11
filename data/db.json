@@ -28052,7 +28052,8 @@
         "gwTransferPenalties": {},
         "accumulatedTransferPenalties": 0,
         "gameweekSquads": {},
-        "gameweekChips": {}
+        "gameweekChips": {},
+        "remediationGranted": {}
       },
       "joinedAt": "2026-10-11T19:36:18.754Z",
       "gwPoints": 0,

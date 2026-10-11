@@ -249,7 +249,7 @@ export const PickTeamView: React.FC = () => {
           }}
           transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
           style={{ willChange: 'transform' }}
-          className="w-full max-w-4xl flex-1 min-h-0 flex flex-col items-center justify-center origin-top transition-none overflow-hidden"
+          className="w-full max-w-4xl flex-1 min-h-0 lg:min-h-[580px] lg:h-[580px] xl:h-[640px] flex flex-col items-center justify-center origin-top transition-none overflow-hidden"
         >
           <PitchView
             showPoints={isPastGW}

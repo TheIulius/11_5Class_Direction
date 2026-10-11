@@ -1,7 +1,7 @@
-import React, { useRef, useState, useTransition, useCallback } from 'react';
+import React, { useRef, useCallback } from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
 import { Shirt, ArrowLeftRight, Trophy, Calendar, Wrench, Shield, Users, Award } from 'lucide-react';
-import { motion, PanInfo, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { triggerHaptic } from '../../utils/haptics';
 
 interface TabItem {
@@ -21,34 +21,22 @@ const TABS: TabItem[] = [
 
 export const BottomNav: React.FC = () => {
   const { activeTab, setActiveTab, isDevAuthenticated, isModerator, isReferee } = useFPL();
-  const [, startTransition] = useTransition();
   const navRef = useRef<HTMLElement>(null);
   const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const activeTabRef = useRef(activeTab);
+  activeTabRef.current = activeTab;
+  const isPointerDownRef = useRef(false);
 
   const visibleTabs = TABS.filter((tab) => tab.id !== 'dev' || isModerator || isReferee);
-  const activeIndex = visibleTabs.findIndex((tab) => tab.id === activeTab);
-
-  // Dynamic Island Elastic Stretch: Motion values tied to pan offset
-  const panOffset = useMotionValue(0);
-  const [originX, setOriginX] = useState<'0% 50%' | '100% 50%' | '50% 50%'>('50% 50%');
-
-  // Stretch width organically when pulled (scaleX from 1.0 up to ~1.2)
-  const rawScaleX = useTransform(panOffset, [-60, 0, 60], [1.2, 1, 1.2]);
-  const springScaleX = useSpring(rawScaleX, {
-    stiffness: 500,
-    damping: 30,
-    mass: 0.5,
-  });
 
   const handleTabChange = useCallback(
     (tabId: TabType) => {
-      if (tabId === activeTab) return;
+      if (tabId === activeTabRef.current) return;
+      activeTabRef.current = tabId;
       triggerHaptic('light');
-      startTransition(() => {
-        setActiveTab(tabId);
-      });
+      setActiveTab(tabId);
     },
-    [activeTab, setActiveTab]
+    [setActiveTab]
   );
 
   // Real-time tab hit detection: instantly triggers the millisecond finger crosses boundary
@@ -59,38 +47,19 @@ export const BottomNav: React.FC = () => {
         if (el) {
           const rect = el.getBoundingClientRect();
           if (clientX >= rect.left && clientX <= rect.right) {
-            if (visibleTabs[i].id !== activeTab) {
-              handleTabChange(visibleTabs[i].id);
+            const targetId = visibleTabs[i].id;
+            if (targetId !== activeTabRef.current) {
+              activeTabRef.current = targetId;
+              triggerHaptic('light');
+              setActiveTab(targetId);
             }
             break;
           }
         }
       }
     },
-    [visibleTabs, activeTab, handleTabChange]
+    [visibleTabs, setActiveTab]
   );
-
-  const handlePan = useCallback(
-    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-      // 1. Instant tab boundary check
-      checkTabAtX(info.point.x);
-
-      // 2. Dynamic Island stretch & origin anchoring
-      panOffset.set(info.offset.x);
-      if (info.delta.x > 0.5) {
-        setOriginX('0% 50%'); // Anchor left, stretch right
-      } else if (info.delta.x < -0.5) {
-        setOriginX('100% 50%'); // Anchor right, stretch left
-      }
-    },
-    [checkTabAtX, panOffset]
-  );
-
-  const handlePanEnd = useCallback(() => {
-    // Snap organically back to normal width with tight spring
-    panOffset.set(0);
-    setOriginX('50% 50%');
-  }, [panOffset]);
 
   const handleTouchMove = useCallback(
     (e: React.TouchEvent<HTMLElement>) => {
@@ -102,23 +71,36 @@ export const BottomNav: React.FC = () => {
     [checkTabAtX]
   );
 
-  // Dynamic corner radius for active highlight to match outer rounded-2xl
-  const getIndicatorCornerRadius = (idx: number) => {
-    if (idx === 0) return 'rounded-l-[14px] rounded-r-lg';
-    if (idx === visibleTabs.length - 1) return 'rounded-r-[14px] rounded-l-lg';
-    return 'rounded-xl';
-  };
+  const handlePointerDown = useCallback((e: React.PointerEvent<HTMLElement>) => {
+    if (e.pointerType === 'mouse' && e.button === 0) {
+      isPointerDownRef.current = true;
+    }
+  }, []);
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLElement>) => {
+      if (isPointerDownRef.current && e.buttons === 1) {
+        checkTabAtX(e.clientX);
+      }
+    },
+    [checkTabAtX]
+  );
+
+  const handlePointerUp = useCallback(() => {
+    isPointerDownRef.current = false;
+  }, []);
 
   return (
     <div className="md:hidden fixed bottom-[max(0.6rem,env(safe-area-inset-bottom))] inset-x-3 max-w-md mx-auto z-40 select-none">
-      <motion.nav
+      <nav
         ref={navRef}
-        onPan={handlePan}
-        onPanEnd={handlePanEnd}
         onTouchMove={handleTouchMove}
-        onTouchEnd={handlePanEnd}
-        style={{ touchAction: 'none' }}
-        className="relative w-full rounded-2xl bg-[#070b12]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-1.5 flex items-center justify-between overflow-hidden touch-none"
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerLeave={handlePointerUp}
+        style={{ touchAction: 'pan-y' }}
+        className="relative w-full rounded-2xl bg-[#070b12]/95 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] p-1.5 flex items-center justify-between overflow-hidden"
       >
         {visibleTabs.map((tab, idx) => {
           const isDev = tab.id === 'dev';
@@ -134,28 +116,22 @@ export const BottomNav: React.FC = () => {
               }}
               type="button"
               onClick={() => handleTabChange(tab.id)}
-              className={`relative flex-1 py-1.5 px-1 flex flex-col items-center justify-center transition-all group z-10 cursor-pointer ${
+              className={`relative flex-1 py-1.5 px-1 flex flex-col items-center justify-center transition-colors group z-10 cursor-pointer ${
                 isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              {/* Active Tab Highlight: Dynamic Island Organic Spring Morph */}
+              {/* Active Tab Highlight: Snappy 60fps Morph with uniform rounded-xl corners */}
               {isActive && (
                 <motion.div
                   layoutId="activeNavIndicator"
-                  style={{
-                    scaleX: springScaleX,
-                    transformOrigin: originX,
-                    willChange: 'transform',
-                  }}
                   transition={{
                     type: 'spring',
-                    stiffness: 500,
-                    damping: 30,
-                    mass: 0.5,
+                    stiffness: 450,
+                    damping: 32,
+                    mass: 0.6,
                   }}
-                  className={`absolute inset-0 bg-white/15 border border-white/20 shadow-xs pointer-events-none z-0 ${getIndicatorCornerRadius(
-                    idx
-                  )}`}
+                  style={{ willChange: 'transform' }}
+                  className="absolute inset-0 bg-white/15 border border-white/20 shadow-xs pointer-events-none z-0 rounded-xl"
                 />
               )}
 
@@ -180,7 +156,7 @@ export const BottomNav: React.FC = () => {
             </button>
           );
         })}
-      </motion.nav>
+      </nav>
     </div>
   );
 };
