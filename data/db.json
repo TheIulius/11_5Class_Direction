@@ -9859,10 +9859,10 @@
               "webName": "Aptsiauri",
               "clubId": "SCH_12_6",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
+              "isViceCaptain": false,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -9936,10 +9936,10 @@
               "webName": "Chaga",
               "clubId": "SCH_11_5",
               "position": "FWD",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 3,
+              "isViceCaptain": true,
+              "benchOrder": 0,
               "points": 0
             }
           ],
@@ -26626,10 +26626,10 @@
           },
           {
             "playerId": "p_12_6_aptsiauri",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 3,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_10_1_chakvetadze",
@@ -26675,10 +26675,10 @@
           },
           {
             "playerId": "p_chaga",
-            "isStarter": false,
-            "benchOrder": 3,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           }
         ],
         "bank": 0.5,
