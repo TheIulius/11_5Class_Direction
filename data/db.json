@@ -9496,7 +9496,7 @@
           "gwPoints": 0,
           "rank": 11,
           "previousRank": 11,
-          "activeChip": "triple_captain",
+          "activeChip": null,
           "lineup": [
             {
               "playerId": "p_custom_1790166332280",
@@ -19589,7 +19589,7 @@
         "bank": 0.1,
         "freeTransfers": 0,
         "transfersMadeThisGW": 5,
-        "activeChip": "triple_captain",
+        "activeChip": null,
         "usedChips": {
           "triple_captain": false,
           "bench_boost": false,
