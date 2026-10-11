@@ -5076,7 +5076,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 8,
+      "selectedByPercent": 6,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -9844,17 +9844,6 @@
           "activeChip": "wildcard",
           "lineup": [
             {
-              "playerId": "p_12_3_bazadze",
-              "webName": "Bazadze",
-              "clubId": "SCH_12_3",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_rati",
               "webName": "Rati",
               "clubId": "SCH_11_5",
@@ -9884,7 +9873,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -9895,7 +9884,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -26618,13 +26607,6 @@
         "managerName": "NIKA",
         "players": [
           {
-            "playerId": "p_12_3_bazadze",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
@@ -26641,14 +26623,14 @@
           {
             "playerId": "p_10_1_kubecia",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_12_6_aptsiauri",
             "isStarter": false,
-            "benchOrder": 1,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -26681,7 +26663,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0,
+        "bank": 5,
         "freeTransfers": 2,
         "transfersMadeThisGW": 7,
         "activeChip": "wildcard",
