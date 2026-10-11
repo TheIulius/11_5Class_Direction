@@ -8482,7 +8482,7 @@
           "totalPoints": 104,
           "gwPoints": 0,
           "rank": 2,
-          "previousRank": 3,
+          "previousRank": 2,
           "activeChip": null,
           "lineup": [
             {
@@ -8597,7 +8597,7 @@
           "totalPoints": 103,
           "gwPoints": 0,
           "rank": 3,
-          "previousRank": 4,
+          "previousRank": 3,
           "activeChip": null,
           "lineup": [
             {
@@ -8712,7 +8712,7 @@
           "totalPoints": 103,
           "gwPoints": 0,
           "rank": 4,
-          "previousRank": 5,
+          "previousRank": 4,
           "activeChip": null,
           "lineup": [
             {
@@ -8827,7 +8827,7 @@
           "totalPoints": 100,
           "gwPoints": 0,
           "rank": 5,
-          "previousRank": 6,
+          "previousRank": 5,
           "activeChip": null,
           "lineup": [
             {
@@ -8942,7 +8942,7 @@
           "totalPoints": 99,
           "gwPoints": 0,
           "rank": 6,
-          "previousRank": 7,
+          "previousRank": 6,
           "activeChip": null,
           "lineup": [
             {
@@ -9057,7 +9057,7 @@
           "totalPoints": 96,
           "gwPoints": 0,
           "rank": 7,
-          "previousRank": 8,
+          "previousRank": 7,
           "activeChip": null,
           "lineup": [
             {
@@ -9172,7 +9172,7 @@
           "totalPoints": 95,
           "gwPoints": 0,
           "rank": 8,
-          "previousRank": 9,
+          "previousRank": 8,
           "activeChip": null,
           "lineup": [
             {
@@ -9287,7 +9287,7 @@
           "totalPoints": 95,
           "gwPoints": 0,
           "rank": 9,
-          "previousRank": 10,
+          "previousRank": 9,
           "activeChip": null,
           "lineup": [
             {
@@ -9402,7 +9402,7 @@
           "totalPoints": 93,
           "gwPoints": 0,
           "rank": 10,
-          "previousRank": 2,
+          "previousRank": 10,
           "activeChip": null,
           "lineup": [
             {
