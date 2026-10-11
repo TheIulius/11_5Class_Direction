@@ -2748,7 +2748,7 @@
       "totalPoints": 5,
       "gwPoints": 5,
       "form": 5,
-      "selectedByPercent": 25,
+      "selectedByPercent": 24,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -12952,17 +12952,6 @@
               "points": 0
             },
             {
-              "playerId": "p_10_1_chikovani",
-              "webName": "Chikovani",
-              "clubId": "SCH_10_1",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_zurashvili",
               "webName": "Zurashvili",
               "clubId": "SCH_11_1",
@@ -12992,7 +12981,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -13014,7 +13003,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -13025,7 +13014,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -24792,13 +24781,6 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_1_chikovani",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_zurashvili",
             "isStarter": true,
             "benchOrder": 0,
@@ -24815,7 +24797,7 @@
           {
             "playerId": "p_10_7_melikidze",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -24829,14 +24811,14 @@
           {
             "playerId": "p_11_4_bulia",
             "isStarter": false,
-            "benchOrder": 1,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_11_7_sujashvili",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -24848,7 +24830,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0,
+        "bank": 6.7,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "triple_captain",
