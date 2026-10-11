@@ -8408,10 +8408,10 @@
               "webName": "Giguashvili",
               "clubId": "SCH_12_2",
               "position": "DEF",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -8463,10 +8463,10 @@
               "webName": "Barnovi",
               "clubId": "SCH_12_1",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 0,
               "points": 0
             }
           ],
@@ -19714,8 +19714,8 @@
           },
           {
             "playerId": "p_12_2_giguashvili",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -19749,8 +19749,8 @@
           },
           {
             "playerId": "p_12_1_barnovi",
-            "isStarter": false,
-            "benchOrder": 3,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
