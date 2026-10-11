@@ -16544,6 +16544,21 @@
           "showRealNamePublicly": true,
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1791747378752",
+          "managerName": "Giorgi",
+          "teamName": "Gagua",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 83,
+          "previousRank": 83,
+          "grade": "",
+          "parallel": "",
+          "realName": "",
+          "showRealNamePublicly": true,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -28011,6 +28026,37 @@
       "joinedAt": "2026-10-01T17:47:13.818Z",
       "gwPoints": 0,
       "totalPoints": 0
+    },
+    "user_1791747378752": {
+      "id": "user_1791747378752",
+      "managerName": "Giorgi",
+      "teamName": "Gagua",
+      "grade": "",
+      "parallel": "",
+      "realName": "",
+      "showRealNamePublicly": true,
+      "squad": {
+        "teamName": "Gagua",
+        "managerName": "Giorgi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        },
+        "startFreeTransfers": 1,
+        "gwTransferPenalties": {},
+        "accumulatedTransferPenalties": 0,
+        "gameweekSquads": {},
+        "gameweekChips": {}
+      },
+      "joinedAt": "2026-10-11T19:36:18.754Z",
+      "gwPoints": 0,
+      "totalPoints": 0
     }
   },
   "users": {
@@ -29452,6 +29498,24 @@
       "grade": "9",
       "parallel": "4",
       "realName": "Aleksandre Keldishvili",
+      "showRealNamePublicly": true
+    },
+    "user_1791747378752": {
+      "id": "user_1791747378752",
+      "username": "giogagua",
+      "email": "giogagua961@gmail.com",
+      "passwordHash": "fe08e48349725332b22db54166b39e2f7ab43d8d65ab255f7e08865209ce65cc4015a5a61a527ac05fafb65390a79495a8eb52daa35aef3cf540285f1df0fc3b",
+      "salt": "d08fc4f529fec8ff4617b37e917704fb",
+      "managerName": "Giorgi",
+      "teamName": "Gagua",
+      "token": "ac5f9182f579715304598cf2ad3682adf764cb244031339f35f54d46aacb35af",
+      "createdAt": "2026-10-11T19:36:18.754Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": false,
+      "grade": "",
+      "parallel": "",
+      "realName": "",
       "showRealNamePublicly": true
     }
   },
