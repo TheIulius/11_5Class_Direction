@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Player, Position, Club, Squad } from '../../types/fpl';
 import { CLUBS } from '../../data/clubs';
 import { useFPL } from '../../context/FPLContext';
@@ -16,6 +16,8 @@ import {
   Activity,
   Camera,
   Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 export interface ClassGridViewProps {
@@ -70,7 +72,6 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
 
   const [activeClassId, setActiveClassId] = useState<string | null>(null);
   const [detailPlayerId, setDetailPlayerId] = useState<string | null>(null);
-  const [spotlightPlayerId, setSpotlightPlayerId] = useState<string | null>(null);
 
   const squadPlayerIds = useMemo(() => new Set(squad.players.map((p) => p.playerId)), [squad.players]);
 
@@ -120,13 +121,21 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
 
   const maxAvailableSpend = outPlayer ? squad.bank + outPlayer.cost : squad.bank;
 
-  // Auto-jump to the matching grade on search & highlight/spotlight matching player
+  // Auto-jump to matching grade ONLY when the search query itself changes
+  const lastAutoJumpQueryRef = useRef<string>('');
+
   useEffect(() => {
     const q = searchQuery.toLowerCase().trim();
     if (q.length < 2) {
-      setSpotlightPlayerId(null);
+      lastAutoJumpQueryRef.current = q;
       return;
     }
+
+    // Only attempt auto-jump if the query text itself has changed
+    if (q === lastAutoJumpQueryRef.current) {
+      return;
+    }
+    lastAutoJumpQueryRef.current = q;
 
     const matching = Object.values(players).filter((p) => {
       const matchName = p.name.toLowerCase().includes(q);
@@ -134,30 +143,62 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
       return matchName || matchWeb;
     });
 
-    if (matching.length === 0) {
-      setSpotlightPlayerId(null);
+    if (matching.length === 0) return;
+
+    // Collect all grades that contain at least one matching player
+    const matchingGradesSet = new Set<number>();
+    matching.forEach((p) => {
+      const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+      const matchGrade = normClub.match(/SCH_(\d+)_/);
+      if (matchGrade) {
+        const gr = parseInt(matchGrade[1], 10);
+        if (grades.includes(gr)) matchingGradesSet.add(gr);
+      }
+    });
+
+    // If current activeGrade already contains matches, DO NOT jump away!
+    if (matchingGradesSet.has(activeGrade)) {
       return;
     }
 
-    // Prioritize exact webName match, or first match
-    const targetPlayer =
-      matching.find((p) => p.webName.toLowerCase() === q || p.name.toLowerCase() === q) ||
-      matching[0];
-
-    const normClub = targetPlayer.clubId === 'SCH' ? 'SCH_11_5' : targetPlayer.clubId;
-    const matchGrade = normClub.match(/SCH_(\d+)_/);
-    if (matchGrade) {
-      const targetGrade = parseInt(matchGrade[1], 10);
-      if (grades.includes(targetGrade)) {
-        if (targetGrade !== activeGrade) {
-          const dir = targetGrade > activeGrade ? 1 : -1;
-          setGradeWithDirection([targetGrade, dir]);
-          setActiveClassId(null);
-        }
-        setSpotlightPlayerId(targetPlayer.id);
-      }
+    // If activeGrade doesn't have matches, jump to the matching grade (prioritizing exact player match)
+    if (matchingGradesSet.size > 0) {
+      const targetPlayer =
+        matching.find((p) => p.webName.toLowerCase() === q || p.name.toLowerCase() === q) ||
+        matching[0];
+      const normClub = targetPlayer.clubId === 'SCH' ? 'SCH_11_5' : targetPlayer.clubId;
+      const matchGrade = normClub.match(/SCH_(\d+)_/);
+      const targetGrade =
+        matchGrade && grades.includes(parseInt(matchGrade[1], 10))
+          ? parseInt(matchGrade[1], 10)
+          : Array.from(matchingGradesSet)[0];
+      const dir = targetGrade > activeGrade ? 1 : -1;
+      setGradeWithDirection([targetGrade, dir]);
+      setActiveClassId(null);
     }
   }, [searchQuery, players, grades, activeGrade]);
+
+  // Spotlight matching player in the CURRENTLY ACTIVE grade
+  const spotlightPlayerId = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (q.length < 2) return null;
+
+    const currentGradeMatches = Object.values(players).filter((p) => {
+      const normClub = p.clubId === 'SCH' ? 'SCH_11_5' : p.clubId;
+      const matchGrade = normClub.match(/SCH_(\d+)_/);
+      if (!matchGrade || parseInt(matchGrade[1], 10) !== activeGrade) return false;
+      return p.name.toLowerCase().includes(q) || p.webName.toLowerCase().includes(q);
+    });
+
+    if (currentGradeMatches.length === 0) return null;
+
+    // Prioritize exact match, then first match in this active grade
+    const targetPlayer =
+      currentGradeMatches.find((p) => p.webName.toLowerCase() === q || p.name.toLowerCase() === q) ||
+      currentGradeMatches[0];
+
+    return targetPlayer.id;
+  }, [searchQuery, players, activeGrade]);
 
   // Count matching players per grade for the "+X" badge
   const getGradeMatchCount = useMemo(() => {
@@ -728,10 +769,44 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
 
       {/* Compact Top Grade Header & Switcher */}
       <div className="relative z-10 flex items-center justify-between flex-wrap gap-2 border-b border-slate-300 dark:border-white/15 pb-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <button
+            type="button"
+            disabled={grades.indexOf(activeGrade) <= 0}
+            onClick={() => {
+              const idx = grades.indexOf(activeGrade);
+              if (idx > 0) {
+                setGradeWithDirection([grades[idx - 1], -1]);
+                setActiveClassId(null);
+              }
+            }}
+            className="p-1 sm:p-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-20 disabled:pointer-events-none transition-all active:scale-95 cursor-pointer"
+            aria-label="Previous Grade"
+            title="Previous Grade"
+          >
+            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
+
           <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white uppercase leading-none">
             {getGradeTitle(activeGrade)}
           </h1>
+
+          <button
+            type="button"
+            disabled={grades.indexOf(activeGrade) >= grades.length - 1}
+            onClick={() => {
+              const idx = grades.indexOf(activeGrade);
+              if (idx < grades.length - 1) {
+                setGradeWithDirection([grades[idx + 1], 1]);
+                setActiveClassId(null);
+              }
+            }}
+            className="p-1 sm:p-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200 disabled:opacity-20 disabled:pointer-events-none transition-all active:scale-95 cursor-pointer"
+            aria-label="Next Grade"
+            title="Next Grade"
+          >
+            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
+          </button>
         </div>
 
         <div className="flex items-center gap-1">
@@ -775,12 +850,35 @@ export const ClassGridView: React.FC<ClassGridViewProps> = ({
         </div>
       </div>
 
-      {/* Animated Grade Roster Grid with Smooth Directional Sliding */}
-      <div className="relative z-10 overflow-hidden min-h-[360px]">
+      {/* Animated Grade Roster Grid with Smooth Directional Sliding & Touch Swipe */}
+      <div className="relative z-10 overflow-hidden min-h-[360px] touch-pan-y">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={activeGrade}
             custom={direction}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.15}
+            onDragEnd={(_e, { offset, velocity }) => {
+              const swipe = offset.x;
+              if (swipe < -40 || velocity.x < -300) {
+                // Swiped left -> next grade
+                const currentIndex = grades.indexOf(activeGrade);
+                if (currentIndex < grades.length - 1) {
+                  const nextGrade = grades[currentIndex + 1];
+                  setGradeWithDirection([nextGrade, 1]);
+                  setActiveClassId(null);
+                }
+              } else if (swipe > 40 || velocity.x > 300) {
+                // Swiped right -> prev grade
+                const currentIndex = grades.indexOf(activeGrade);
+                if (currentIndex > 0) {
+                  const prevGrade = grades[currentIndex - 1];
+                  setGradeWithDirection([prevGrade, -1]);
+                  setActiveClassId(null);
+                }
+              }
+            }}
             variants={{
               enter: (dir: number) => ({
                 x: dir > 0 ? 80 : dir < 0 ? -80 : 0,
