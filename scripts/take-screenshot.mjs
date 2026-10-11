@@ -24,7 +24,7 @@ async function main() {
     '--window-size=390,844'
   ]);
 
-  await new Promise(r => setTimeout(r, 1000));
+  await new Promise(r => setTimeout(r, 1800));
 
   try {
     const listRes = await fetch('http://127.0.0.1:9222/json/list');
@@ -77,6 +77,16 @@ async function main() {
     // Reload page to pick up auth
     await send('Page.navigate', { url: 'http://localhost:5173' });
     await new Promise(r => setTimeout(r, 2000));
+
+    if (process.argv[3] === 'expand') {
+      await send('Runtime.evaluate', {
+        expression: `
+          const handles = Array.from(document.querySelectorAll('div')).filter(d => d.style.touchAction === 'none' || d.textContent.includes('SUBSTITUTES'));
+          if (handles[0]) handles[0].click();
+        `
+      });
+      await new Promise(r => setTimeout(r, 800));
+    }
 
     // Capture screenshot
     const res = await send('Page.captureScreenshot', { format: 'png' });

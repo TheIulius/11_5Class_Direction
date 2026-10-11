@@ -17,7 +17,13 @@ export const TopHeader: React.FC = () => {
     isDemoMode,
     exitDemoMode,
     calculationResult,
+    leagues,
   } = useFPL();
+
+  const userLeagueMember = leagues
+    .find((l) => l.isGlobal)
+    ?.members.find((m) => m.id === authUser?.id);
+  const totalUserPoints = userLeagueMember ? userLeagueMember.totalPoints : (calculationResult?.totalPoints || 0);
 
   return (
     <header className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-[#070b12]/95 backdrop-blur-2xl border-b border-slate-200/80 dark:border-white/10 select-none transition-colors">
@@ -73,18 +79,8 @@ export const TopHeader: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: GW PTS Counter + Rules ('წესები') + Theme Toggle (All Horizontally Aligned) */}
+        {/* Right: Rules ('წესები') + Theme Toggle */}
         <div className="flex items-center gap-1.5 shrink-0">
-          {/* GW PTS Capsule */}
-          <div className="flex flex-col items-center justify-center px-2 py-0.5 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 min-w-[50px] text-center">
-            <span className="text-[8px] font-mono font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider leading-none">
-              GW PTS
-            </span>
-            <span className="text-xs sm:text-[13px] font-mono font-black text-slate-900 dark:text-white tabular-nums leading-tight mt-0.5">
-              {calculationResult?.totalPoints ?? 0}
-            </span>
-          </div>
-
           {/* Rules Button with "წესები (icon)" */}
           <button
             onClick={() => openRulesModal('rules')}
@@ -110,6 +106,31 @@ export const TopHeader: React.FC = () => {
               <Moon className="w-4 h-4 text-slate-600" />
             )}
           </button>
+        </div>
+      </div>
+
+      {/* Row 2: GW PTS (Left) & TOTAL (Right) Split Boxes */}
+      <div className="px-3 pb-2 pt-0">
+        <div className="grid grid-cols-2 gap-2">
+          {/* GW PTS Capsule */}
+          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
+            <span className="text-[9.5px] font-mono font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider leading-none">
+              GW PTS
+            </span>
+            <span className="text-sm sm:text-base font-mono font-black text-slate-900 dark:text-white tabular-nums leading-tight mt-1">
+              {calculationResult?.totalPoints ?? 0}
+            </span>
+          </div>
+
+          {/* TOTAL Points Capsule */}
+          <div className="flex flex-col items-center justify-center py-1.5 px-3 rounded-xl bg-slate-50 dark:bg-white/[0.04] border border-slate-200/80 dark:border-white/10 text-center">
+            <span className="text-[9.5px] font-mono font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider leading-none">
+              TOTAL
+            </span>
+            <span className="text-sm sm:text-base font-mono font-black text-slate-900 dark:text-white tabular-nums leading-tight mt-1">
+              {totalUserPoints}
+            </span>
+          </div>
         </div>
       </div>
     </header>

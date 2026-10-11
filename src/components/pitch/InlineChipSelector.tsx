@@ -15,6 +15,33 @@ const CHIP_CONFIG: Record<ChipType, { label: string; icon: string }> = {
   wildcard: { label: 'Wildcard', icon: '🃏' },
 };
 
+const CHIP_THEMES: Record<ChipType, { border: string; bg: string; text: string; glow: string; handle: string; badge: string }> = {
+  triple_captain: {
+    border: 'border-amber-400/70 dark:border-amber-400/80',
+    bg: 'bg-gradient-to-r from-amber-950/90 via-black/85 to-amber-950/90',
+    text: 'text-amber-300',
+    glow: 'shadow-[0_0_18px_rgba(251,191,36,0.35)]',
+    handle: 'bg-amber-400',
+    badge: 'bg-amber-500/25 border-amber-400/50 text-amber-200',
+  },
+  bench_boost: {
+    border: 'border-emerald-400/70 dark:border-emerald-400/80',
+    bg: 'bg-gradient-to-r from-emerald-950/90 via-black/85 to-emerald-950/90',
+    text: 'text-emerald-300',
+    glow: 'shadow-[0_0_18px_rgba(52,211,153,0.35)]',
+    handle: 'bg-emerald-400',
+    badge: 'bg-emerald-500/25 border-emerald-400/50 text-emerald-200',
+  },
+  wildcard: {
+    border: 'border-purple-400/70 dark:border-purple-400/80',
+    bg: 'bg-gradient-to-r from-purple-950/90 via-black/85 to-purple-950/90',
+    text: 'text-purple-300',
+    glow: 'shadow-[0_0_18px_rgba(192,132,252,0.35)]',
+    handle: 'bg-purple-400',
+    badge: 'bg-purple-500/25 border-purple-400/50 text-purple-200',
+  },
+};
+
 const DEFAULT_ORDER: ChipType[] = ['triple_captain', 'bench_boost', 'wildcard'];
 
 // Authentic iOS spring physics from @ios-fluid-gesturesSKILL
@@ -36,6 +63,8 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
   const activeChip: ChipType | null = isPastGW
     ? squad.gameweekChips?.[selectedGW] || null
     : squad.activeChip;
+
+  const currentTheme = activeChip ? CHIP_THEMES[activeChip] : null;
 
   const [chipOrder, setChipOrder] = useState<ChipType[]>(() => {
     if (activeChip) {
@@ -98,14 +127,14 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
   // Horizontal drag gesture on the "|" line handle to expand or collapse
   const handleDragEndCollapsed = (_: any, info: PanInfo) => {
     if (isPastGW) return;
-    if (info.offset.x > 20 || info.velocity.x > 120) {
+    if (info.offset.x > 20 || info.velocity.x > 100) {
       triggerHaptic('light');
       setIsExpanded(true);
     }
   };
 
   const handleDragEndExpanded = (_: any, info: PanInfo) => {
-    if (info.offset.x < -20 || info.velocity.x < -120) {
+    if (info.offset.x < -20 || info.velocity.x < -100) {
       triggerHaptic('light');
       setIsExpanded(false);
     }
@@ -117,7 +146,11 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
       layout
       transition={SPRING_CONFIG}
       style={{ willChange: 'transform' }}
-      className="relative flex items-center h-7 sm:h-7.5 bg-black/60 dark:bg-black/75 backdrop-blur-md border border-white/10 rounded-xl shadow-xs select-none will-change-transform overflow-hidden"
+      className={`relative flex items-center h-8.5 sm:h-9 backdrop-blur-md rounded-2xl shadow-xs select-none will-change-transform overflow-hidden border transition-all duration-300 ${
+        currentTheme
+          ? `${currentTheme.bg} ${currentTheme.border} ${currentTheme.glow}`
+          : 'bg-black/70 border-white/15 text-white'
+      }`}
     >
       {!isExpanded ? (
         /* Collapsed State: [ Chip Icon + Name ] + [ Draggable "|" Handle ] */
@@ -130,15 +163,18 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
               triggerHaptic('light');
               setIsExpanded(true);
             }}
-            className={`h-full pl-2.5 pr-1 flex items-center gap-1.5 transition-colors ${
+            className={`h-full pl-3 pr-1.5 flex items-center gap-2 transition-colors ${
               isPastGW ? 'cursor-default' : 'cursor-pointer active:scale-95'
             }`}
           >
-            <span className="text-[11px] font-bold whitespace-nowrap tracking-tight flex items-center gap-1">
+            <span className="text-xs sm:text-[12.5px] font-bold whitespace-nowrap tracking-tight flex items-center gap-1.5">
               {activeChip ? (
                 <>
-                  <span className="text-xs shrink-0">{CHIP_CONFIG[activeChip]?.icon}</span>
-                  <span className="text-white font-black">{CHIP_CONFIG[activeChip]?.label}</span>
+                  <span className="text-sm shrink-0">{CHIP_CONFIG[activeChip]?.icon}</span>
+                  <span className={`font-black ${currentTheme?.text || 'text-white'}`}>
+                    {CHIP_CONFIG[activeChip]?.label}
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse ml-0.5" />
                 </>
               ) : (
                 <span className="text-zinc-400">Chips</span>
@@ -146,10 +182,10 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
             </span>
           </button>
 
-          {/* Draggable & Clickable iOS "|" Line Handle */}
+          {/* Draggable & Clickable iOS "|" Line Handle (Larger touch area) */}
           <motion.div
             drag={isPastGW ? false : 'x'}
-            dragConstraints={{ left: 0, right: 50 }}
+            dragConstraints={{ left: 0, right: 60 }}
             dragElastic={0.2}
             onDragEnd={handleDragEndCollapsed}
             onClick={() => {
@@ -158,10 +194,14 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
               setIsExpanded(true);
             }}
             style={{ touchAction: 'none', willChange: 'transform' }}
-            className="h-full px-1.5 flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/5 transition-colors touch-none"
-            title="Drag or tap to expand chips"
+            className="h-full px-2 sm:px-2.5 flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/10 transition-colors touch-none"
+            title="Drag right or tap to expand chips"
           >
-            <span className="w-[2.5px] h-3.5 rounded-full bg-zinc-500/80 group-hover:bg-zinc-300 pointer-events-none" />
+            <span
+              className={`w-[3px] h-4.5 rounded-full transition-colors pointer-events-none ${
+                currentTheme?.handle || 'bg-zinc-400/80 group-hover:bg-zinc-200'
+              }`}
+            />
           </motion.div>
         </div>
       ) : (
@@ -170,10 +210,11 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
           layout
           transition={SPRING_CONFIG}
           style={{ willChange: 'transform' }}
-          className="flex items-center px-1 gap-1 will-change-transform"
+          className="flex items-center px-1.5 gap-1.5 will-change-transform"
         >
           {chipOrder.map((chipId, index) => {
             const isChosen = activeChip === chipId;
+            const theme = CHIP_THEMES[chipId];
             const isUsed = Boolean(
               squad.usedChips?.[chipId] ||
               (squad.gameweekChips &&
@@ -194,17 +235,17 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
                 }}
                 transition={SPRING_CONFIG}
                 style={{ willChange: 'transform' }}
-                className={`rounded-lg text-[10.5px] font-bold transition-all whitespace-nowrap flex items-center gap-1 active:scale-95 will-change-transform ${
+                className={`rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 active:scale-95 will-change-transform ${
                   index === 0 && isChosen
-                    ? 'px-2.5 py-1 bg-zinc-800 text-white border border-white/10 shadow-xs'
+                    ? `px-3 py-1.5 ${theme.bg} ${theme.border} ${theme.text} border shadow-xs`
                     : isChosen
-                    ? 'px-2 py-1 bg-zinc-800/80 text-white border border-white/10'
+                    ? `px-2.5 py-1.5 ${theme.bg} ${theme.border} ${theme.text} border`
                     : isDisabled
-                    ? 'px-2 py-1 text-zinc-600 line-through cursor-not-allowed'
-                    : 'px-2 py-1 text-zinc-400 hover:text-zinc-200 cursor-pointer'
+                    ? 'px-2.5 py-1.5 text-zinc-600 line-through cursor-not-allowed'
+                    : 'px-2.5 py-1.5 text-zinc-400 hover:text-zinc-200 cursor-pointer hover:bg-white/5'
                 }`}
               >
-                <span className="text-[11px] shrink-0">{CHIP_CONFIG[chipId].icon}</span>
+                <span className="text-xs shrink-0">{CHIP_CONFIG[chipId].icon}</span>
                 <span>{CHIP_CONFIG[chipId].label}</span>
               </motion.button>
             );
@@ -213,7 +254,7 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
           {/* Draggable & Clickable iOS "|" Line Handle to Collapse */}
           <motion.div
             drag="x"
-            dragConstraints={{ left: -50, right: 0 }}
+            dragConstraints={{ left: -60, right: 0 }}
             dragElastic={0.2}
             onDragEnd={handleDragEndExpanded}
             onClick={(e) => {
@@ -222,10 +263,14 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
               setIsExpanded(false);
             }}
             style={{ touchAction: 'none', willChange: 'transform' }}
-            className="h-full px-1.5 flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/5 transition-colors touch-none"
-            title="Drag or tap to collapse chips"
+            className="h-full px-2 sm:px-2.5 flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/10 transition-colors touch-none"
+            title="Drag left or tap to collapse chips"
           >
-            <span className="w-[2.5px] h-3.5 rounded-full bg-zinc-500/80 hover:bg-zinc-300 pointer-events-none" />
+            <span
+              className={`w-[3px] h-4.5 rounded-full pointer-events-none ${
+                currentTheme?.handle || 'bg-zinc-400 hover:bg-zinc-200'
+              }`}
+            />
           </motion.div>
         </motion.div>
       )}

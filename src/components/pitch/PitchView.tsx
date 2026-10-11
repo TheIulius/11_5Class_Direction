@@ -146,7 +146,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
 
       {/* Football Pitch Container with Rich Forest Green Natural Turf */}
       <div
-        className="relative w-full my-0 sm:my-2 rounded-2xl md:rounded-3xl overflow-hidden border border-emerald-950/20 dark:border-white/10 shadow-xl transition-all duration-300 bg-gradient-to-b from-[#225732] via-[#1b4b2a] to-[#153e22] dark:from-[#143d22] dark:via-[#10331b] dark:to-[#0c2815]"
+        className="relative w-full flex-1 my-0 sm:my-1 rounded-2xl md:rounded-3xl overflow-hidden border border-emerald-950/20 dark:border-white/10 shadow-xl transition-all duration-300 bg-gradient-to-b from-[#225732] via-[#1b4b2a] to-[#153e22] dark:from-[#143d22] dark:via-[#10331b] dark:to-[#0c2815] flex flex-col justify-between"
       >
         {/* Faint Desaturated Center Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none overflow-hidden">
@@ -213,7 +213,7 @@ export const PitchView: React.FC<PitchViewProps> = ({
         </div>
 
         {/* Stadium Pitch Canvas with Dynamic Coordinates */}
-        <div className="relative z-10 w-full min-h-[440px] sm:min-h-[480px] md:min-h-[560px] lg:min-h-[620px] my-1">
+        <div className="relative z-10 w-full flex-1 min-h-[480px] sm:min-h-[520px] md:min-h-[580px] lg:min-h-[640px] my-1">
           {/* Active Starters */}
           {layout.pitchPositions.map((pos) => {
             const sp = activeSquadPlayers.find((p) => p.playerId === pos.playerId);

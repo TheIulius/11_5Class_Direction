@@ -1,9 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { PlayerCard } from './PlayerCard';
 import { useFPL } from '../../context/FPLContext';
-import { ArrowLeft, ArrowRight, ChevronUp, Users } from 'lucide-react';
-import { TripleCaptainIcon, BenchBoostIcon, WildcardIcon } from '../icons/ChipIcons';
-import { ChipType } from '../../types/fpl';
+import {
+  ArrowLeft,
+  ArrowRight,
+  ChevronUp,
+  Users,
+  Calendar,
+  Clock,
+  Zap,
+  Activity,
+  Award,
+  Sparkles,
+  Shield,
+  TrendingUp,
+} from 'lucide-react';
+import { KitJersey } from './KitJersey';
+import { CLUBS } from '../../data/clubs';
 import { triggerHaptic } from '../../utils/haptics';
 import { motion, PanInfo } from 'framer-motion';
 
@@ -19,9 +32,10 @@ interface SubstitutesDrawerProps {
   setIsPrimaryExpanded?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const PRI_HEIGHT = 400; // Fixed physical height of primary sheet (px)
-const PRI_HEADER = 52;  // Visible header height in peek state (px)
-const PRI_PEEK_Y = PRI_HEIGHT - PRI_HEADER; // ~348px offset in peek state
+// Physical height configuration for iOS-native peek & expand snap behavior
+const PRI_HEIGHT = 560; // Total physical height of the sliding hub (px)
+const PRI_PEEK_VISIBLE = 182; // Height of drag handle + header + 3 substitute jerseys (px)
+const PRI_PEEK_Y = PRI_HEIGHT - PRI_PEEK_VISIBLE; // Offset in resting peek state (~378px)
 
 const SPRING_CONFIG = {
   type: 'spring' as const,
@@ -46,26 +60,16 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
     reorderBenchPlayer,
     setActiveTab,
     squad,
-    activateChip,
     teamValue,
     freeTransfersRemaining,
+    fixtures,
+    players,
+    currentGW,
   } = useFPL();
 
   const [internalPrimary, setInternalPrimary] = useState(false);
   const isPrimaryExpanded = externalPrimary ?? internalPrimary;
   const setIsPrimaryExpanded = setExternalPrimary ?? setInternalPrimary;
-
-  const chips: { id: ChipType; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-    { id: 'triple_captain', label: 'TRIPLE CAPTAIN', icon: TripleCaptainIcon },
-    { id: 'bench_boost', label: 'BENCH BOOST', icon: BenchBoostIcon },
-    { id: 'wildcard', label: 'WILDCARD', icon: WildcardIcon },
-  ];
-
-  const handleChipClick = (chipId: ChipType) => {
-    if (readOnly || isSquadLocked) return;
-    triggerHaptic('medium');
-    activateChip(chipId);
-  };
 
   const togglePrimary = () => {
     triggerHaptic('light');
@@ -73,14 +77,164 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
   };
 
   const handlePrimaryDragEnd = (_: any, info: PanInfo) => {
-    if (info.velocity.y < -250 || info.offset.y < -50) {
+    if (info.velocity.y < -200 || info.offset.y < -40) {
       triggerHaptic('light');
       setIsPrimaryExpanded(true);
-    } else if (info.velocity.y > 250 || info.offset.y > 50) {
+    } else if (info.velocity.y > 200 || info.offset.y > 40) {
       triggerHaptic('light');
       setIsPrimaryExpanded(false);
     }
   };
+
+  // Squad player IDs
+  const allSquadPlayerIds = useMemo(() => {
+    return squad.players.map((p) => p.playerId);
+  }, [squad.players]);
+
+  // a) "Next Impact Fixture": The very next upcoming match involving a squad player
+  const nextImpactFixture = useMemo(() => {
+    if (!fixtures || fixtures.length === 0) return null;
+
+    const upcoming = [...fixtures]
+      .filter((f) => !f.isFinished)
+      .sort((a, b) => {
+        if (a.gameweek !== b.gameweek) return a.gameweek - b.gameweek;
+        const timeA = new Date(a.kickoffTime || a.date || 0).getTime();
+        const timeB = new Date(b.kickoffTime || b.date || 0).getTime();
+        return timeA - timeB;
+      });
+
+    for (const fix of upcoming) {
+      const homeClub = fix.homeClubId;
+      const awayClub = fix.awayClubId;
+      const involved = allSquadPlayerIds
+        .map((id) => players[id])
+        .filter((p) => p && (p.clubId === homeClub || p.clubId === awayClub));
+
+      if (involved.length > 0) {
+        return {
+          fixture: fix,
+          involvedPlayers: involved,
+        };
+      }
+    }
+
+    if (upcoming.length > 0) {
+      return {
+        fixture: upcoming[0],
+        involvedPlayers: [],
+      };
+    }
+    return null;
+  }, [fixtures, allSquadPlayerIds, players]);
+
+  // b) "Gameweek Points History": Detailed breakdown feed of points earned this round
+  const pointsHistory = useMemo(() => {
+    const logs: {
+      playerId: string;
+      playerName: string;
+      clubId: string;
+      position: string;
+      detail: string;
+      pts: number;
+      isCaptain?: boolean;
+    }[] = [];
+
+    const breakdown = activeCalculation?.playerPointsBreakdown || {};
+
+    squad.players.forEach((sp) => {
+      const p = players[sp.playerId];
+      if (!p) return;
+      const stats = p.gwStats?.[selectedGW];
+      const isCaptain = sp.isCaptain;
+
+      if (!stats) return;
+
+      if (stats.goals > 0) {
+        const mult = isCaptain ? (activeCalculation?.isTripleCaptain ? 3 : 2) : 1;
+        const ptsVal = stats.goals * (p.position === 'FWD' ? 4 : p.position === 'MID' ? 5 : 6) * mult;
+        logs.push({
+          playerId: p.id,
+          playerName: p.webName,
+          clubId: p.clubId,
+          position: p.position,
+          detail: `${stats.goals} ${stats.goals === 1 ? 'Goal' : 'Goals'}${mult > 1 ? ` (${mult}x)` : ''}`,
+          pts: ptsVal,
+          isCaptain,
+        });
+      }
+      if (stats.assists > 0) {
+        const mult = isCaptain ? (activeCalculation?.isTripleCaptain ? 3 : 2) : 1;
+        logs.push({
+          playerId: p.id,
+          playerName: p.webName,
+          clubId: p.clubId,
+          position: p.position,
+          detail: `${stats.assists} ${stats.assists === 1 ? 'Assist' : 'Assists'}${mult > 1 ? ` (${mult}x)` : ''}`,
+          pts: stats.assists * 3 * mult,
+          isCaptain,
+        });
+      }
+      if (stats.cleanSheet) {
+        const mult = isCaptain ? (activeCalculation?.isTripleCaptain ? 3 : 2) : 1;
+        logs.push({
+          playerId: p.id,
+          playerName: p.webName,
+          clubId: p.clubId,
+          position: p.position,
+          detail: `Clean Sheet${mult > 1 ? ` (${mult}x)` : ''}`,
+          pts: 4 * mult,
+          isCaptain,
+        });
+      }
+      if (stats.isMVP) {
+        logs.push({
+          playerId: p.id,
+          playerName: p.webName,
+          clubId: p.clubId,
+          position: p.position,
+          detail: `Match MVP Bonus`,
+          pts: 3,
+          isCaptain,
+        });
+      }
+      if (stats.yellowCards > 0) {
+        logs.push({
+          playerId: p.id,
+          playerName: p.webName,
+          clubId: p.clubId,
+          position: p.position,
+          detail: `Yellow Card`,
+          pts: -1 * stats.yellowCards,
+          isCaptain,
+        });
+      }
+      if (stats.redCards > 0) {
+        logs.push({
+          playerId: p.id,
+          playerName: p.webName,
+          clubId: p.clubId,
+          position: p.position,
+          detail: `Red Card`,
+          pts: -3 * stats.redCards,
+          isCaptain,
+        });
+      }
+      if (stats.minutes > 0) {
+        logs.push({
+          playerId: p.id,
+          playerName: p.webName,
+          clubId: p.clubId,
+          position: p.position,
+          detail: `Played ${stats.minutes} mins`,
+          pts: stats.minutes >= 30 ? 2 : 1,
+          isCaptain,
+        });
+      }
+    });
+
+    return logs;
+  }, [activeCalculation, squad.players, players, selectedGW]);
 
   return (
     <>
@@ -197,7 +351,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* 2. MOBILE VIEW: iOS Hardware-Accelerated Sliding Sheet    */}
+      {/* 2. MOBILE VIEW: iOS Hardware-Accelerated Sliding Hub      */}
       {/* ======================================================== */}
       <div className="lg:hidden pointer-events-none">
         <motion.div
@@ -210,15 +364,15 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
           }}
           transition={SPRING_CONFIG}
           style={{ willChange: 'transform' }}
-          className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 w-full z-40 h-[400px] rounded-t-[28px] bg-[#0c1117]/95 dark:bg-[#070b12]/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden select-none pointer-events-auto"
+          className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] inset-x-0 w-full z-40 h-[560px] rounded-t-[28px] bg-[#0c1117]/95 dark:bg-[#070b12]/95 backdrop-blur-2xl border-t border-slate-200/80 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden select-none pointer-events-auto"
         >
-          {/* Header Handle Bar with touch-action: none */}
+          {/* Header & Drag Handle (Visible in Peek State) */}
           <div
             onClick={togglePrimary}
-            className="w-full pt-2 pb-1.5 px-4 flex flex-col items-center cursor-grab active:cursor-grabbing touch-none select-none"
+            className="w-full pt-2 pb-1.5 px-4 flex flex-col items-center cursor-grab active:cursor-grabbing touch-none select-none shrink-0"
             style={{ touchAction: 'none' }}
           >
-            {/* iOS Drag Handle Capsule */}
+            {/* iOS Drag Handle Pill */}
             <div
               className="w-12 h-1 rounded-full bg-slate-300/60 dark:bg-white/25 mx-auto mb-2 pointer-events-none touch-none"
               style={{ touchAction: 'none' }}
@@ -254,9 +408,8 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
             </div>
           </div>
 
-          {/* Fixed Height Content for Primary Tier (Zero Layout Reflow / Stretch) */}
-          <div className="flex-1 px-3 pb-3 pt-1 space-y-3 overflow-y-auto overscroll-contain">
-            {/* Substitutes 3-Card Row */}
+          {/* Substitutes 3-Card Row (Always Visible in Resting Peek State) */}
+          <div className="px-3 pt-1 pb-2 shrink-0">
             <div className="grid grid-cols-3 gap-2">
               {benchSlots.map((order) => {
                 const sp = layout.bench.find((b: any) => b.benchOrder === order) || layout.bench[order - 1];
@@ -279,11 +432,11 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                             {order > 1 && (
                               <button
                                 onClick={(e) => {
-                                   e.stopPropagation();
-                                   triggerHaptic('light');
-                                   reorderBenchPlayer(sp.playerId, order - 1);
+                                  e.stopPropagation();
+                                  triggerHaptic('light');
+                                  reorderBenchPlayer(sp.playerId, order - 1);
                                 }}
-                                title={`Promote`}
+                                title="Promote"
                                 className="p-0.5 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 transition-all active:scale-90 cursor-pointer"
                               >
                                 <ArrowLeft className="w-2.5 h-2.5" />
@@ -296,7 +449,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                                   triggerHaptic('light');
                                   reorderBenchPlayer(sp.playerId, order + 1);
                                 }}
-                                title={`Demote`}
+                                title="Demote"
                                 className="p-0.5 rounded bg-slate-200/80 hover:bg-slate-300 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 transition-all active:scale-90 cursor-pointer"
                               >
                                 <ArrowRight className="w-2.5 h-2.5" />
@@ -336,47 +489,144 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                 );
               })}
             </div>
+          </div>
 
-            {/* Available Chips Section */}
-            <div className="pt-2 border-t border-slate-200/80 dark:border-white/5 space-y-2">
-              <div className="flex items-center justify-between px-0.5 text-slate-400">
-                <span className="text-[9.5px] font-mono font-bold uppercase tracking-wider text-slate-400">
-                  AVAILABLE CHIPS
+          {/* Expanded Drawer Content: The Matchday Hub (Revealed when dragged up) */}
+          <div className="flex-1 px-3 pt-2 pb-6 space-y-3 overflow-y-auto overscroll-contain">
+            {/* Section A: Next Impact Fixture */}
+            <div className="bg-zinc-900/50 rounded-xl p-4 border border-white/5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-sky-400" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                    Next Impact Fixture
+                  </span>
+                </div>
+                {nextImpactFixture && (
+                  <span className="text-[9.5px] font-mono font-bold px-2 py-0.5 rounded-full bg-sky-950/40 text-sky-300 border border-sky-800/40">
+                    GW {nextImpactFixture.fixture.gameweek}
+                  </span>
+                )}
+              </div>
+
+              {nextImpactFixture ? (
+                <div className="space-y-2.5">
+                  {/* Matchup Header */}
+                  <div className="flex items-center justify-between bg-black/40 rounded-lg p-2.5 border border-white/5">
+                    {/* Home Club */}
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0"
+                        style={{ backgroundColor: CLUBS[nextImpactFixture.fixture.homeClubId]?.primaryColor || '#0ea5e9' }}
+                      />
+                      <span className="text-xs font-bold text-white">
+                        {CLUBS[nextImpactFixture.fixture.homeClubId]?.name || nextImpactFixture.fixture.homeClubId}
+                      </span>
+                    </div>
+
+                    <span className="text-[11px] font-mono font-bold text-zinc-500 px-1">VS</span>
+
+                    {/* Away Club */}
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white">
+                        {CLUBS[nextImpactFixture.fixture.awayClubId]?.name || nextImpactFixture.fixture.awayClubId}
+                      </span>
+                      <div
+                        className="w-3.5 h-3.5 rounded-full border border-white/20 shrink-0"
+                        style={{ backgroundColor: CLUBS[nextImpactFixture.fixture.awayClubId]?.primaryColor || '#ec4899' }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Kickoff & Venue Details */}
+                  <div className="flex items-center justify-between text-[10.5px] text-zinc-400 px-1 font-mono">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-zinc-500" />
+                      {nextImpactFixture.fixture.date || 'Kickoff'}{' '}
+                      {nextImpactFixture.fixture.kickoffTime ? `• ${nextImpactFixture.fixture.kickoffTime}` : ''}
+                    </span>
+                    <span className="text-zinc-500">
+                      {nextImpactFixture.fixture.venue === 'one_price' ? '🏢 One Price' : '🏟️ Parki Stadium'}
+                    </span>
+                  </div>
+
+                  {/* Impacted Players Badge */}
+                  {nextImpactFixture.involvedPlayers.length > 0 && (
+                    <div className="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center gap-1.5">
+                      <Zap className="w-3 h-3 text-sky-400 shrink-0" />
+                      <span className="text-[10px] text-sky-200 font-bold truncate">
+                        Impacts:{' '}
+                        {nextImpactFixture.involvedPlayers.map((p) => p.webName).join(' & ')}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-3 text-xs text-zinc-500">
+                  No upcoming scheduled fixtures found.
+                </div>
+              )}
+            </div>
+
+            {/* Section B: Gameweek Points History */}
+            <div className="bg-zinc-900/50 rounded-xl p-4 border border-white/5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-300">
+                    Gameweek Points History
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-black text-emerald-400">
+                  {activeCalculation?.totalPoints ?? 0} PTS TOTAL
                 </span>
               </div>
 
-              <div className="grid grid-cols-3 gap-1.5">
-                {chips.map((chip) => {
-                  const Icon = chip.icon;
-                  const isActive = squad.activeChip === chip.id;
-                  const isUsed = Boolean(
-                    squad.usedChips?.[chip.id] ||
-                    (squad.gameweekChips && Object.values(squad.gameweekChips).includes(chip.id))
-                  );
-                  const isDisabled = isSquadLocked || isUsed || readOnly;
-
-                  return (
-                    <button
-                      key={chip.id}
-                      type="button"
-                      disabled={isDisabled}
-                      onClick={() => handleChipClick(chip.id)}
-                      className={`py-2 px-1.5 rounded-xl border flex flex-col items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95 cursor-pointer select-none ${
-                        isActive
-                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent shadow-sm'
-                          : isDisabled
-                          ? 'bg-slate-100/60 dark:bg-white/[0.01] border-slate-200/50 dark:border-white/5 text-slate-400 dark:text-slate-600 opacity-40 cursor-not-allowed'
-                          : 'bg-slate-50 hover:bg-slate-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08] border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-white'
-                      }`}
+              {pointsHistory.length > 0 ? (
+                <div className="space-y-1.5 divide-y divide-white/5">
+                  {pointsHistory.map((item, idx) => (
+                    <div
+                      key={`${item.playerId}-${item.detail}-${idx}`}
+                      className="pt-1.5 first:pt-0 flex items-center justify-between text-xs"
                     >
-                      <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-amber-400 dark:text-amber-500' : 'text-slate-400 dark:text-slate-300'}`} />
-                      <span className="text-[9px] font-black uppercase tracking-tight text-center leading-tight truncate w-full">
-                        {chip.label}
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className="w-2 h-2 rounded-full shrink-0"
+                          style={{ backgroundColor: CLUBS[item.clubId]?.primaryColor || '#64748b' }}
+                        />
+                        <span className="font-bold text-white truncate">
+                          {item.playerName}
+                          {item.isCaptain && (
+                            <span className="ml-1 text-[9px] font-mono font-bold text-amber-400">
+                              (C)
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-zinc-500 text-[11px] truncate">
+                          • {item.detail}
+                        </span>
+                      </div>
+
+                      <span
+                        className={`font-mono font-black shrink-0 ${
+                          item.pts > 0 ? 'text-emerald-400' : 'text-rose-400'
+                        }`}
+                      >
+                        {item.pts > 0 ? `+${item.pts}` : item.pts} pts
                       </span>
-                    </button>
-                  );
-                })}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-3 px-2 rounded-lg bg-black/30 border border-white/5 text-center space-y-1">
+                  <div className="text-[11px] font-semibold text-zinc-300">
+                    Gameweek {selectedGW} live scoring pending kickoff
+                  </div>
+                  <div className="text-[10px] text-zinc-500">
+                    Match performance logs and bonus events will update here in real-time as fixtures kick off.
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </motion.div>

@@ -114,7 +114,7 @@ export const PickTeamView: React.FC = () => {
       {/* ======================================================== */}
       {/* MIDDLE COLUMN: THE PITCH CANVAS (Visual Hero)            */}
       {/* ======================================================== */}
-      <section className="w-full min-w-0 flex flex-col items-center px-0 sm:px-3 md:px-6 py-1 md:py-4 pb-0 lg:pb-4 overflow-hidden lg:overflow-visible">
+      <section className="w-full min-w-0 flex-1 overflow-hidden flex flex-col justify-center px-0 sm:px-3 md:px-6 py-1 md:py-2 pb-0 lg:pb-4 lg:overflow-visible">
         {/* Minimalist Tactical Gameweek Stepper Bar */}
         <div className="w-full max-w-4xl px-2 sm:px-0 flex items-center justify-between gap-2 mb-2">
           {/* Left: GW Selector Capsule */}
@@ -249,7 +249,7 @@ export const PickTeamView: React.FC = () => {
           }}
           transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
           style={{ willChange: 'transform' }}
-          className="w-full max-w-4xl flex flex-col items-center origin-top transition-none"
+          className="w-full max-w-4xl flex-1 flex flex-col items-center justify-center origin-top transition-none"
         >
           <PitchView
             showPoints={isPastGW}
