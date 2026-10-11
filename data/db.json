@@ -74,7 +74,7 @@
       "totalPoints": 16,
       "gwPoints": 16,
       "form": 5,
-      "selectedByPercent": 38,
+      "selectedByPercent": 39,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -14626,6 +14626,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_rati",
+              "webName": "Rati",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ],
           "grade": "9",
@@ -20809,9 +20820,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_rati",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 29.2,
+        "bank": 19.8,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": "wildcard",
