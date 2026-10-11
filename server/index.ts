@@ -3503,6 +3503,18 @@ app.post('/api/admin/manager/reset-to-gw1', (req: Request, res: Response) => {
   });
 });
 
+// 11k. Developer Admin: Remediate Illegal Players (Refund and remove from all managers)
+app.post('/api/admin/remediate-illegal-players', (req: Request, res: Response) => {
+  const data = db.getData();
+  const modified = applyPositionChangesAndRemediation(data);
+  if (modified) {
+    recalculateAllManagersLeaguePoints(data);
+    db.save('Remediate illegal players: removed position-changed players and refunded bank');
+    scheduleAutoSyncToGitHub('Remediated illegal players and refunded bank to all managers', true);
+  }
+  res.json({ success: true, modified, message: 'Illegal players remediated and bank refunded successfully.' });
+});
+
 // 12. Create / Join / Delete Mini-League
 app.post('/api/league/create', (req: Request, res: Response) => {
   const { name, managerId } = req.body;
@@ -3745,6 +3757,57 @@ export function applyPositionChangesAndRemediation(data: any): boolean {
       if (grantedForThisManager > 0) {
         manager.squad.startFreeTransfers = (manager.squad.startFreeTransfers ?? 2) + grantedForThisManager;
         updateManagerTransferAccounting(manager, data);
+        modified = true;
+      }
+    }
+  }
+
+  // 3. Manually refund and remove illegal position-changed players from manager squads for GW2
+  const ILLEGAL_IDS = new Set(['p_10_5_shakarishvili', 'p_12_3_vashakmadze', 'p_12_3_palelashvili']);
+  if (data.managers) {
+    for (const manager of Object.values(data.managers) as any[]) {
+      if (!manager.squad || !Array.isArray(manager.squad.players)) continue;
+      const illegals = manager.squad.players.filter((sp: any) => ILLEGAL_IDS.has(sp.playerId));
+      if (illegals.length > 0) {
+        let refund = 0;
+        for (const ip of illegals) {
+          const cost = data.players?.[ip.playerId]?.cost || (ip.playerId === 'p_10_5_shakarishvili' ? 6.3 : ip.playerId === 'p_12_3_vashakmadze' ? 8.7 : 7.5);
+          refund += cost;
+        }
+        refund = Math.round(refund * 10) / 10;
+        manager.squad.bank = Math.round(((manager.squad.bank || 0) + refund) * 10) / 10;
+        manager.squad.players = manager.squad.players.filter((sp: any) => !ILLEGAL_IDS.has(sp.playerId));
+
+        // Sanitize captaincy on remaining starters
+        const starters = manager.squad.players.filter((sp: any) => sp.isStarter);
+        let cap = starters.find((sp: any) => sp.isCaptain);
+        let vc = starters.find((sp: any) => sp.isViceCaptain && sp !== cap);
+
+        if (!cap && starters.length > 0) {
+          starters[0].isCaptain = true;
+          starters[0].isViceCaptain = false;
+          cap = starters[0];
+        }
+
+        if (!vc && starters.length > 1) {
+          const next = starters.find((sp: any) => sp !== cap);
+          if (next) {
+            next.isViceCaptain = true;
+            vc = next;
+          }
+        }
+
+        // Re-index bench orders
+        let benchIndex = 1;
+        manager.squad.players.forEach((sp: any) => {
+          if (!sp.isStarter) {
+            sp.benchOrder = benchIndex++;
+          } else {
+            sp.benchOrder = 0;
+          }
+        });
+
+        console.log(`[Remediation] Removed ${illegals.length} illegal player(s) from ${manager.managerName} (${manager.teamName}), refunded £${refund}m to bank (new bank: £${manager.squad.bank}m)`);
         modified = true;
       }
     }
