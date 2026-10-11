@@ -92,7 +92,7 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
       ref={containerRef}
       layout
       transition={{ type: 'spring', stiffness: 350, damping: 30 }}
-      className="relative flex items-center h-9 bg-white/90 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-slate-700/50 rounded-full shadow-xs select-none"
+      className="relative flex items-center h-9 bg-white/90 dark:bg-slate-900/60 backdrop-blur-md border border-slate-200 dark:border-white/10 rounded-full shadow-xs select-none"
     >
       {!isExpanded ? (
         /* Collapsed Default & Active States */
@@ -112,7 +112,7 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
           <span
             className={`text-xs font-bold whitespace-nowrap tracking-tight ${
               activeChip
-                ? 'text-blue-600 dark:text-sky-400'
+                ? 'text-zinc-950 dark:text-white font-black'
                 : 'text-slate-600 dark:text-slate-300'
             }`}
           >
@@ -147,9 +147,9 @@ export const InlineChipSelector: React.FC<InlineChipSelectorProps> = ({
                 transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                 className={`px-2.5 py-1 rounded-full text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1 active:scale-95 ${
                   index === 0 && isChosen
-                    ? 'text-blue-600 dark:text-sky-400 bg-blue-50 dark:bg-sky-500/10'
+                    ? 'text-white bg-zinc-950 dark:text-zinc-950 dark:bg-white shadow-xs'
                     : isChosen
-                    ? 'text-blue-600 dark:text-sky-400'
+                    ? 'text-zinc-950 dark:text-white font-black'
                     : isDisabled
                     ? 'text-slate-400/40 dark:text-slate-600 line-through cursor-not-allowed'
                     : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white cursor-pointer'

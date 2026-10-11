@@ -26,7 +26,7 @@ export const BottomNav: React.FC = () => {
 
   return (
     <div className="md:hidden fixed bottom-[max(0.6rem,env(safe-area-inset-bottom))] inset-x-3 max-w-md mx-auto z-40 select-none">
-      <nav className="w-full rounded-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-slate-200 dark:border-slate-800 shadow-[0_8px_32px_rgba(0,0,0,0.15)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] py-1 px-1.5 flex items-center justify-between">
+      <nav className="w-full rounded-full bg-[#0d1420]/90 backdrop-blur-2xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)] py-1 px-1.5 flex items-center justify-between">
         {visibleTabs.map((tab) => {
           const isDev = tab.id === 'dev';
           const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;
@@ -41,14 +41,14 @@ export const BottomNav: React.FC = () => {
                 setActiveTab(tab.id);
               }}
               className={`relative flex-1 py-1.5 px-1 flex flex-col items-center justify-center transition-all group z-10 cursor-pointer ${
-                isActive ? 'text-blue-600 dark:text-sky-400' : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
+                isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {/* Active Pill Capsule Background */}
               {isActive && (
                 <motion.div
                   layoutId="activeDockPill"
-                  className="absolute inset-0 rounded-full bg-blue-50 dark:bg-sky-500/15 border border-blue-200 dark:border-sky-500/30 shadow-xs -z-10"
+                  className="absolute inset-0 rounded-full bg-white/15 border border-white/20 shadow-xs -z-10"
                   transition={{ type: 'spring', stiffness: 450, damping: 32 }}
                 />
               )}
@@ -56,7 +56,7 @@ export const BottomNav: React.FC = () => {
               <div className="relative flex items-center justify-center">
                 <Icon
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    isActive ? 'scale-110 text-blue-600 dark:text-sky-400' : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-600 dark:group-hover:text-slate-200'
+                    isActive ? 'scale-110 text-white' : 'text-slate-400 group-hover:text-slate-200'
                   }`}
                 />
                 {isDev && (isDevAuthenticated || isReferee) && (
@@ -66,7 +66,7 @@ export const BottomNav: React.FC = () => {
 
               <span
                 className={`text-[9.5px] mt-0.5 tracking-tight truncate max-w-[50px] leading-tight transition-colors ${
-                  isActive ? 'font-bold text-blue-600 dark:text-sky-400' : 'font-medium text-slate-500 dark:text-slate-400'
+                  isActive ? 'font-bold text-white' : 'font-medium text-slate-400'
                 }`}
               >
                 {displayLabel}

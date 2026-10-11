@@ -110,11 +110,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
     return (
       <div
         onClick={handleClick}
-        className={`w-full relative flex flex-col items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 hover:border-blue-200 dark:hover:border-sky-500/30 hover:shadow-[0_0_15px_rgba(14,165,233,0.15)] transition-all cursor-pointer active:scale-95 select-none ${
+        className={`w-full relative flex flex-col items-center justify-between p-2.5 rounded-2xl bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 transition-all cursor-pointer active:scale-95 select-none ${
           isSwapSource
             ? 'ring-2 ring-amber-400 bg-amber-500/10'
             : isSwapTargetEligible
-            ? 'ring-2 ring-blue-400 dark:ring-sky-400 bg-blue-500/10 dark:bg-sky-500/15'
+            ? 'ring-2 ring-white/80 bg-white/10'
             : isPositionChanged
             ? 'ring-2 ring-rose-500'
             : isDimmedDuringSwap
@@ -129,7 +129,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
           </div>
         )}
         {isSwapTargetEligible && (
-          <div className="absolute -top-2.5 bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 text-[8.5px] font-black px-2 py-0.2 rounded-full shadow-md z-30">
+          <div className="absolute -top-2.5 bg-white text-zinc-950 text-[8.5px] font-black px-2 py-0.2 rounded-full shadow-md z-30">
             TAP HERE
           </div>
         )}
@@ -143,7 +143,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
             className="w-11 h-11 sm:w-12 sm:h-12 drop-shadow-md"
           />
           {benchOrder && (
-            <span className="absolute -bottom-1 -right-1 font-mono text-[8px] font-bold px-1 rounded bg-slate-950/80 text-slate-300 border border-white/10">
+            <span className="absolute -bottom-1 -right-1 font-mono text-[8px] font-bold px-1 rounded bg-black/80 text-zinc-300 border border-white/10">
               #{benchOrder}
             </span>
           )}
@@ -161,11 +161,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div
       onClick={handleClick}
-      className={`relative flex flex-col items-center justify-between w-[74px] sm:w-[84px] md:w-[94px] min-h-[92px] sm:min-h-[102px] p-1.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/10 hover:border-blue-200 dark:hover:border-sky-500/30 hover:shadow-[0_0_15px_rgba(14,165,233,0.15)] shadow-lg cursor-pointer transition-all duration-200 select-none ${
+      className={`relative flex flex-col items-center justify-between w-[74px] sm:w-[84px] md:w-[94px] min-h-[92px] sm:min-h-[102px] p-1.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] backdrop-blur-md border border-white/10 shadow-lg cursor-pointer transition-all duration-200 select-none ${
         isSwapSource
           ? 'scale-105 ring-2 ring-amber-400 bg-amber-500/15 z-30 shadow-xl'
           : isSwapTargetEligible
-          ? 'scale-105 ring-2 ring-blue-400 dark:ring-sky-400 bg-blue-500/15 dark:bg-sky-500/20 z-20 shadow-xl'
+          ? 'scale-105 ring-2 ring-white/90 bg-white/15 z-20 shadow-xl'
           : isPositionChanged
           ? 'ring-2 ring-rose-500 shadow-rose-500/20'
           : isDimmedDuringSwap
@@ -191,7 +191,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
         </div>
       )}
       {isSwapTargetEligible && (
-        <div className="absolute -top-3 bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 text-[8.5px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 z-30">
+        <div className="absolute -top-3 bg-white text-zinc-950 text-[8.5px] font-black px-2 py-0.5 rounded-full shadow-md flex items-center gap-1 z-30">
           <Check className="w-2.5 h-2.5" />
           <span>SELECT</span>
         </div>
@@ -217,7 +217,7 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
             className={`absolute -top-1 -right-2 font-black text-[8.5px] sm:text-[9px] rounded-full w-4.5 h-4.5 flex items-center justify-center border shadow-md z-20 ${
               isTripleCap
                 ? 'bg-amber-400 text-slate-950 border-white'
-                : 'bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 border-white/90'
+                : 'bg-zinc-950 text-white border-white/80'
             }`}
             title={isTripleCap ? 'Triple Captain' : 'Captain'}
           >

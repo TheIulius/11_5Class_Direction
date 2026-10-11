@@ -148,7 +148,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                     <span
                       className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 rounded-md border ${
                         order === 1
-                          ? 'bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 border-blue-600 dark:border-sky-400'
+                          ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-zinc-700 dark:border-white/20'
                           : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700'
                       }`}
                     >
@@ -366,7 +366,7 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                         <span
                           className={`text-[8.5px] font-mono font-bold uppercase px-1.5 py-0.2 rounded border ${
                             order === 1
-                              ? 'bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 border-blue-500 dark:border-sky-400'
+                              ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-zinc-700 dark:border-white/20'
                               : 'bg-white/10 text-slate-300 border-white/10'
                           }`}
                         >
@@ -462,13 +462,13 @@ export const SubstitutesDrawer: React.FC<SubstitutesDrawerProps> = ({
                       onClick={() => handleChipClick(chip.id)}
                       className={`py-2 px-1.5 rounded-xl border flex flex-col items-center justify-center gap-1 text-xs font-bold transition-all active:scale-95 cursor-pointer select-none ${
                         isActive
-                          ? 'bg-blue-600 border-blue-500 text-white dark:bg-sky-500 dark:border-sky-400 dark:text-slate-950 shadow-sm ring-1 ring-blue-400 dark:ring-sky-400'
+                          ? 'bg-white/15 border-white/30 text-white shadow-sm ring-1 ring-white/20'
                           : isDisabled
                           ? 'bg-white/[0.01] border-white/5 text-slate-600 opacity-40 cursor-not-allowed'
-                          : 'bg-white/[0.04] hover:bg-white/[0.08] hover:border-blue-200/50 dark:hover:border-sky-500/20 border-white/10 text-white'
+                          : 'bg-white/[0.04] hover:bg-white/[0.08] border-white/10 text-white'
                       }`}
                     >
-                      <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white dark:text-slate-950' : 'text-slate-300'}`} />
+                      <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-amber-400' : 'text-slate-300'}`} />
                       <span className="text-[9px] font-black uppercase tracking-tight text-center leading-tight truncate w-full">
                         {chip.label}
                       </span>

@@ -102,12 +102,12 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
       </div>
 
       {/* Gameweek Performance Card */}
-      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-blue-200 dark:hover:border-sky-500/20 shadow-xs space-y-3 transition-colors">
+      <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 shadow-xs space-y-3 transition-colors">
         <div className="flex items-center justify-between">
           <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">
             Matchday Points
           </span>
-          <span className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-black tabular-nums bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 shadow-2xs">
+          <span className="px-2.5 py-0.5 rounded-lg text-xs font-mono font-black tabular-nums bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 shadow-2xs">
             {activeCalculation.totalPoints} PTS
           </span>
         </div>
@@ -174,7 +174,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
 
       {/* Warnings & Mod/Referee Alerts */}
       {isReferee && (
-        <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 dark:border-sky-500/20 text-amber-300 text-xs font-bold space-y-2 hover:shadow-[0_0_15px_rgba(14,165,233,0.15)] transition-all">
+        <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 dark:border-amber-500/20 text-amber-300 text-xs font-bold space-y-2 transition-all">
           <div className="flex items-center gap-2">
             <Award className="w-4 h-4 text-amber-400 shrink-0" />
             <span className="font-black text-amber-300 uppercase tracking-wide">
@@ -230,7 +230,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
       )}
 
       {/* Squad Composition Checklist (1 GK, 3 DEF, 3 MID, 2 FWD) */}
-      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-blue-200 dark:hover:border-sky-500/20 shadow-xs space-y-2.5 transition-colors">
+      <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 shadow-xs space-y-2.5 transition-colors">
         <div className="flex items-center justify-between">
           <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider">
             Squad Composition
@@ -291,7 +291,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
       </div>
 
       {/* Available Chips Dock */}
-      <div className="p-3.5 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-blue-200 dark:hover:border-sky-500/20 shadow-xs space-y-2.5 transition-colors">
+      <div className="p-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-slate-200/80 dark:border-white/5 shadow-xs space-y-2.5 transition-colors">
         <div className="flex items-center justify-between">
           <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500 tracking-wider flex items-center gap-1.5">
             <Zap className="w-3.5 h-3.5 text-amber-500" />
@@ -299,7 +299,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
           </span>
           {((isPastGW && activeGWChip) ||
             (!isPastGW && squad.activeChip && !squad.usedChips?.[squad.activeChip])) && (
-            <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950">
+            <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-950">
               Active
             </span>
           )}
@@ -326,17 +326,17 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 }}
                 className={`w-full group relative overflow-hidden flex items-center justify-between p-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
                   isActiveInThisGW
-                    ? 'bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 border-blue-600 dark:border-sky-400 shadow-sm'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent shadow-sm'
                     : isPastGW || isUsedInSeason || isSquadLocked
                     ? 'bg-slate-100/60 dark:bg-slate-950/40 text-slate-400 dark:text-slate-500 border-slate-200/50 dark:border-slate-800 opacity-50 cursor-not-allowed'
-                    : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-950/60 dark:hover:bg-slate-900/80 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-800 hover:border-blue-200 dark:hover:border-sky-500/30 hover:shadow-[0_0_15px_rgba(14,165,233,0.15)]'
+                    : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-950/60 dark:hover:bg-slate-900/80 text-slate-700 dark:text-slate-200 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-white/20'
                 }`}
               >
                 <div className="flex items-center gap-2">
                   <div
                     className={`p-1 rounded-lg ${
                       isActiveInThisGW
-                        ? 'bg-white/20 text-white dark:bg-slate-950/20 dark:text-slate-950'
+                        ? 'bg-white/20 text-white dark:bg-zinc-950/20 dark:text-zinc-950'
                         : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'
                     }`}
                   >
@@ -347,7 +347,7 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
                 <span
                   className={`text-[9px] font-mono font-bold ${
                     isActiveInThisGW
-                      ? 'text-white dark:text-slate-950'
+                      ? 'text-white dark:text-zinc-950'
                       : isUsedInSeason
                       ? 'text-rose-500 dark:text-rose-400'
                       : 'text-slate-400'
@@ -361,19 +361,35 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         </div>
       </div>
 
-      {/* Return to current GW button when viewing historical GWs */}
-      {isPastGW && (
-        <div className="pt-2">
+      {/* Primary Action Button (Pure Solid White) */}
+      <div className="pt-2">
+        {isPastGW ? (
           <button
             type="button"
             onClick={() => setSelectedGW(currentGW)}
-            className="w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400 dark:text-slate-950 cursor-pointer shadow-md active:scale-[0.98]"
+            className="w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 bg-slate-900 text-white dark:bg-white dark:text-zinc-950 cursor-pointer shadow-md active:scale-[0.98]"
           >
             <Clock className="w-4 h-4" />
             <span>Return to Current GW {currentGW}</span>
           </button>
-        </div>
-      )}
+        ) : (
+          <button
+            onClick={() => {
+              triggerHaptic('success');
+            }}
+            disabled={isSquadLocked || !comp.isValid}
+            className={`w-full py-3.5 px-4 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md active:scale-[0.98] ${
+              isSquadLocked
+                ? 'bg-slate-200 dark:bg-white/5 text-slate-400 cursor-not-allowed shadow-none'
+                : !comp.isValid
+                ? 'bg-rose-500/15 text-rose-500 border border-rose-500/30 cursor-not-allowed shadow-none'
+                : 'bg-white text-black hover:bg-slate-200 font-bold border border-transparent'
+            }`}
+          >
+            <span>Save Team Lineup</span>
+          </button>
+        )}
+      </div>
     </aside>
   );
 };

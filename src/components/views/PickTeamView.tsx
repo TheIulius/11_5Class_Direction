@@ -112,8 +112,8 @@ export const PickTeamView: React.FC = () => {
                 <span
                   className={`text-[8.5px] font-mono font-bold px-1.5 py-0.2 rounded-full border ${
                     selectedGW === currentGW
-                      ? 'bg-blue-50 text-blue-600 dark:bg-sky-500/15 dark:text-sky-300 border-blue-200 dark:border-sky-500/30'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                      ? 'bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-zinc-200 border-slate-200 dark:border-white/10'
+                      : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/5'
                   }`}
                 >
                   {selectedGW === currentGW ? 'LIVE' : 'ARCHIVE'}
@@ -144,7 +144,7 @@ export const PickTeamView: React.FC = () => {
           {/* Quick Score Capsule on Middle Column */}
           <div className="flex items-center gap-1.5 shrink-0">
             <span
-              className="px-2.5 py-1 rounded-xl text-xs font-black font-mono tabular-nums bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 border border-blue-600 dark:border-sky-400 shadow-2xs h-9 flex items-center"
+              className="px-2.5 py-1 rounded-xl text-xs font-black font-mono tabular-nums bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border border-slate-200 dark:border-white/10 shadow-2xs h-9 flex items-center"
               title="Gameweek Score"
             >
               {activeCalculation.totalPoints} PTS
@@ -154,7 +154,7 @@ export const PickTeamView: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setSelectedGW(currentGW)}
-                className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-sky-500/15 dark:hover:bg-sky-500/25 text-blue-600 dark:text-sky-300 border border-blue-200 dark:border-sky-500/30 text-[11px] font-bold transition-all cursor-pointer h-9"
+                className="hidden sm:flex items-center gap-1 px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-white/10 text-[11px] font-bold transition-all cursor-pointer h-9"
               >
                 <Clock className="w-3 h-3" />
                 <span>Return to GW {currentGW}</span>

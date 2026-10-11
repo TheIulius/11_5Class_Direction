@@ -78,7 +78,7 @@ export const ManagerModal: React.FC<ManagerModalProps> = ({ isOpen, onClose }) =
                     }}
                     className={`w-full p-2.5 rounded-xl border flex items-center justify-between text-left transition-all cursor-pointer ${
                       isActive
-                        ? 'bg-blue-600 text-white dark:bg-sky-500 dark:text-slate-950 border-transparent font-bold shadow-xs'
+                        ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-950 border-transparent font-bold shadow-xs'
                         : 'bg-slate-50 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/[0.06] text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.08]'
                     }`}
                   >
@@ -86,7 +86,7 @@ export const ManagerModal: React.FC<ManagerModalProps> = ({ isOpen, onClose }) =
                       <div className="text-xs font-bold text-slate-900 dark:text-white">{m.teamName}</div>
                       <div className="text-[10px] text-slate-400">{m.managerName}</div>
                     </div>
-                    {isActive && <Check className="w-4 h-4 text-white dark:text-slate-950" />}
+                    {isActive && <Check className="w-4 h-4 text-emerald-400" />}
                   </button>
                 );
               })}
