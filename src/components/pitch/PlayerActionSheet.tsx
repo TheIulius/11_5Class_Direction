@@ -8,7 +8,7 @@ import { PlayerPositionBadge, PlayerPositionOverrideNotice } from '../common/Pla
 import { suggestPlayerPhotoApi } from '../../services/api';
 import { triggerHaptic } from '../../utils/haptics';
 
-import { GameweekCalculationResult, calculatePlayerPoints } from '../../engine/scoring';
+import { GameweekCalculationResult, calculatePlayerPoints, POSITION_CHANGED_PLAYERS } from '../../engine/scoring';
 
 interface PlayerActionSheetProps {
   playerId: string | null;
@@ -250,6 +250,59 @@ export const PlayerActionSheet: React.FC<PlayerActionSheetProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {/* Position Change Remediation Notice */}
+        {(() => {
+          const positionChange = POSITION_CHANGED_PLAYERS[player.id];
+          if (!positionChange) return null;
+          return (
+            <div className="my-2.5 p-3.5 rounded-2xl bg-gradient-to-br from-rose-500/15 via-rose-500/10 to-amber-500/15 border-2 border-rose-500/40 text-slate-900 dark:text-slate-100 shadow-md space-y-2.5">
+              <div className="flex items-start gap-2.5">
+                <div className="w-7 h-7 rounded-full bg-rose-600 text-white flex items-center justify-center font-black text-sm shrink-0 shadow-sm mt-0.5 animate-pulse">
+                  !
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-black text-xs uppercase tracking-wide text-rose-600 dark:text-rose-400">
+                      პოზიციის სავალდებულო ცვლილება (GW2)
+                    </span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-600 dark:text-rose-300 font-mono font-bold">
+                      Required Action
+                    </span>
+                  </div>
+                  <div className="text-xs font-extrabold text-slate-800 dark:text-slate-200 mt-0.5">
+                    {player.name}: <span className="line-through text-slate-400">{positionChange.oldPosition}</span> → <strong className="text-rose-600 dark:text-rose-400">{positionChange.newPosition}</strong>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-[11.5px] text-slate-700 dark:text-slate-300 leading-snug">
+                {positionChange.noteGeo}
+              </p>
+
+              <div className="pt-2 border-t border-rose-500/20 flex items-center justify-between gap-2">
+                <div className="text-[10.5px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                  <span>+1 უფასო ტრანსფერი დამატებულია</span>
+                </div>
+                {!readOnly && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTransferOutPlayerId(player.id);
+                      setActiveTab('transfers');
+                      onClose();
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+                  >
+                    <span>ჩანაცვლება</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Position Override Notice (if effectively FWD) */}
         <PlayerPositionOverrideNotice playerId={player.id} position={player.position} className="my-2.5" />

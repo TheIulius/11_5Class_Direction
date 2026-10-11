@@ -22,13 +22,62 @@ import { Player, PlayerStats, Position, SquadPlayer, ChipType } from '../types/f
  *  One Price Stadium: goals and MVP reduced by 1 point, assists reduced by 2 points (+1 pt).
  */
 /**
- * Temporary position overrides for scoring calculation (e.g. before official role change in GW2).
- * The player remains registered/displayed under their current squad position so managers' squads don't break,
- * but their scoring rules (goals, clean sheets, conceded goals) match the overridden position.
+ * Official position changes for GW2 remediation:
+ * - Luka Shakarishvili: GKP -> DEF
+ * - Gega Vashakmadze: MID -> FWD
+ * - Badri Palelashvili: DEF -> FWD
+ *
+ * Managers owning these players must transfer them out before saving their GW2 team.
+ * Each affected player grants +1 Free Transfer to the manager.
  */
+export interface PositionChangeInfo {
+  id: string;
+  name: string;
+  oldPosition: Position;
+  newPosition: Position;
+  effectiveGW: number;
+  freeTransfersGranted: number;
+  noteGeo: string;
+  noteEng: string;
+}
+
+export const POSITION_CHANGED_PLAYERS: Record<string, PositionChangeInfo> = {
+  p_10_5_shakarishvili: {
+    id: 'p_10_5_shakarishvili',
+    name: 'Luka Shakarishvili',
+    oldPosition: 'GKP',
+    newPosition: 'DEF',
+    effectiveGW: 2,
+    freeTransfersGranted: 1,
+    noteGeo: 'ლუკა შაქარიშვილს შეეცვალა პოზიცია: მეკარე (GKP) → მცველი (DEF). GW2-ისთვის აუცილებელია მისი შემადგენლობიდან გაყვანა (ტრანსფერი). მოგეცათ +1 უფასო ტრანსფერი.',
+    noteEng: 'Luka Shakarishvili position changed: GKP → DEF. Mandatory to transfer out for GW2. +1 Free Transfer granted.',
+  },
+  p_12_3_vashakmadze: {
+    id: 'p_12_3_vashakmadze',
+    name: 'Gega Vashakmadze',
+    oldPosition: 'MID',
+    newPosition: 'FWD',
+    effectiveGW: 2,
+    freeTransfersGranted: 1,
+    noteGeo: 'გეგა ვაშაყმაძეს შეეცვალა პოზიცია: ნახევარმცველი (MID) → თავდამსხმელი (FWD). GW2-ისთვის აუცილებელია მისი შემადგენლობიდან გაყვანა (ტრანსფერი). მოგეცათ +1 უფასო ტრანსფერი.',
+    noteEng: 'Gega Vashakmadze position changed: MID → FWD. Mandatory to transfer out for GW2. +1 Free Transfer granted.',
+  },
+  p_12_3_palelashvili: {
+    id: 'p_12_3_palelashvili',
+    name: 'Badri Palelashvili',
+    oldPosition: 'DEF',
+    newPosition: 'FWD',
+    effectiveGW: 2,
+    freeTransfersGranted: 1,
+    noteGeo: 'ბადრი პალელაშვილს შეეცვალა პოზიცია: მცველი (DEF) → თავდამსხმელი (FWD). GW2-ისთვის აუცილებელია მისი შემადგენლობიდან გაყვანა (ტრანსფერი). მოგეცათ +1 უფასო ტრანსფერი.',
+    noteEng: 'Badri Palelashvili position changed: DEF → FWD. Mandatory to transfer out for GW2. +1 Free Transfer granted.',
+  },
+};
+
 export const SCORING_POSITION_OVERRIDES: Record<string, Position> = {
   p_12_3_palelashvili: 'FWD',
   p_12_3_vashakmadze: 'FWD',
+  p_10_5_shakarishvili: 'DEF',
 };
 
 export function getEffectiveScoringPosition(
@@ -172,6 +221,8 @@ export interface SquadCompositionValidation {
   totalCount: number;
   clubCounts?: Record<string, number>;
   exceededClubs?: { clubId: string; count: number }[];
+  positionChangedPlayers?: PositionChangeInfo[];
+  hasPositionChangedPlayers?: boolean;
   message?: string;
 }
 
@@ -182,6 +233,7 @@ export interface SquadCompositionValidation {
  * - Exactly 3 Midfielders
  * - Exactly 2 Forwards
  * - Maximum 2 players from the same class (e.g. 11/1, 9/2)
+ * - Zero players who have undergone mandatory position change for GW2 (must be transferred out)
  * (Total: 9 players). A team cannot play without these exact rules.
  */
 export function validateSquadComposition(
@@ -193,8 +245,12 @@ export function validateSquadComposition(
   let midCount = 0;
   let fwdCount = 0;
   const clubCounts: Record<string, number> = {};
+  const affectedPlayers: PositionChangeInfo[] = [];
 
   for (const sp of squadPlayers) {
+    if (POSITION_CHANGED_PLAYERS[sp.playerId]) {
+      affectedPlayers.push(POSITION_CHANGED_PLAYERS[sp.playerId]);
+    }
     const p = allPlayers[sp.playerId];
     if (!p) continue;
     if (p.position === 'GKP') gkCount++;
@@ -216,10 +272,14 @@ export function validateSquadComposition(
   const totalCount = gkCount + defCount + midCount + fwdCount;
   const isPosValid = gkCount === 1 && defCount === 3 && midCount === 3 && fwdCount === 2;
   const isClubValid = exceededClubs.length === 0;
-  const isValid = isPosValid && isClubValid;
+  const hasPositionChangedPlayers = affectedPlayers.length > 0;
+  const isValid = isPosValid && isClubValid && !hasPositionChangedPlayers;
 
   let message: string | undefined;
-  if (!isPosValid) {
+  if (hasPositionChangedPlayers) {
+    const names = affectedPlayers.map((p) => `${p.name} (${p.oldPosition} → ${p.newPosition})`).join(', ');
+    message = `სავალდებულო ცვლილება (GW2): თქვენს გუნდშია მოთამაშე(ები), რომელთაც შეეცვალათ პოზიცია (${names}). აუცილებელია მათი ჩანაცვლება ტრანსფერით (+1 უფასო ტრანსფერი დამატებულია).`;
+  } else if (!isPosValid) {
     const parts: string[] = [];
     if (gkCount !== 1) parts.push(`${gkCount}/1 GK`);
     if (defCount !== 3) parts.push(`${defCount}/3 Defenders (mcveli)`);
@@ -242,6 +302,8 @@ export function validateSquadComposition(
     totalCount,
     clubCounts,
     exceededClubs,
+    positionChangedPlayers: affectedPlayers,
+    hasPositionChangedPlayers,
     message,
   };
 }

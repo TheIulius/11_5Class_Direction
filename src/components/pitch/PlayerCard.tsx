@@ -2,10 +2,10 @@ import React from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from './KitJersey';
 import { canSwapPlayers } from '../../engine/formations';
-import { ArrowLeftRight, Check } from 'lucide-react';
+import { ArrowLeftRight, Check, AlertCircle } from 'lucide-react';
 import { ClassShieldBadge } from '../common/ClassShieldBadge';
 import { PlayerPriceBadge } from '../common/PlayerPriceBadge';
-import { GameweekCalculationResult, calculatePlayerPoints } from '../../engine/scoring';
+import { GameweekCalculationResult, calculatePlayerPoints, POSITION_CHANGED_PLAYERS } from '../../engine/scoring';
 
 interface PlayerCardProps {
   playerId: string;
@@ -95,6 +95,9 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
     onCardClick(playerId);
   };
 
+  const positionChange = POSITION_CHANGED_PLAYERS[playerId];
+  const isPositionChanged = Boolean(positionChange);
+
   const isDimmedDuringSwap =
     !readOnly && selectedPlayerForSwap && !isSwapSource && !isSwapTargetEligible;
 
@@ -104,17 +107,28 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
   return (
     <div
       onClick={handleClick}
-      title="tip: you can add photos to players now!"
+      title={isPositionChanged ? `${player.name}: პოზიცია შეიცვალა (${positionChange?.oldPosition} → ${positionChange?.newPosition}). აუცილებელია ტრანსფერი!` : 'tip: you can add photos to players now!'}
       className={`relative flex flex-col items-center justify-center cursor-pointer transition-all duration-300 select-none group min-w-[72px] max-w-[82px] sm:max-w-[88px] md:max-w-[96px] ${
         isSwapSource
           ? 'scale-110 z-30 ring-2 ring-yellow-400 rounded-lg shadow-xl'
           : isSwapTargetEligible
           ? 'scale-105 z-20 ring-2 ring-[#00ff87] rounded-lg animate-pulse-sub shadow-glow-green'
+          : isPositionChanged
+          ? 'ring-2 ring-rose-500 shadow-lg shadow-rose-500/40 rounded-xl hover:scale-105 active:scale-95'
           : isDimmedDuringSwap
           ? 'opacity-40 grayscale-[30%] hover:opacity-70'
           : 'hover:scale-105 active:scale-95'
       }`}
     >
+      {/* Position Change Notice Badge */}
+      {isPositionChanged && (
+        <div
+          className="absolute -top-3.5 -left-1.5 bg-gradient-to-br from-rose-500 to-red-600 text-white font-black text-[11px] md:text-[12px] rounded-full w-5 h-5 md:w-5.5 md:h-5.5 flex items-center justify-center border-2 border-white dark:border-slate-900 shadow-lg shadow-rose-500/60 z-30 animate-bounce"
+          title={`${player.name}: პოზიცია შეიცვალა (${positionChange?.oldPosition} → ${positionChange?.newPosition}). აუცილებელია ტრანსფერი! (+1 FT დამატებულია)`}
+        >
+          !
+        </div>
+      )}
       {/* Swap Status Overlay Pill */}
       {isSwapSource && (
         <div className="absolute -top-3.5 bg-yellow-400 text-black text-[9px] md:text-[10px] font-black px-2 py-0.5 rounded-full shadow-lg border border-black flex items-center gap-1 z-30 animate-bounce">
@@ -195,11 +209,18 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
               ? 'bg-amber-400 text-slate-950 font-black'
               : isSwapTargetEligible
               ? 'bg-[#00ff87] text-[#37003c] font-black'
+              : isPositionChanged
+              ? 'bg-rose-600 text-white font-black'
               : 'bg-white text-slate-950'
           }`}
         >
           <ClassShieldBadge clubId={player.clubId} size="xs" className="w-3.5 h-3.5 flex-shrink-0" />
           <span className="truncate">{player.webName}</span>
+          {isPositionChanged && (
+            <span className="text-[8.5px] font-black bg-white text-rose-600 px-1 rounded-[3px] leading-none shrink-0 shadow-xs" title="პოზიცია შეიცვალა!">
+              !
+            </span>
+          )}
         </div>
 
         {/* Value & Points Bar */}

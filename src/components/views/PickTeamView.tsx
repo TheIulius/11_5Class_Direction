@@ -312,6 +312,42 @@ export const PickTeamView: React.FC = () => {
           </button>
         </div>
 
+        {/* Mandatory Position Changes Banner for GW2 */}
+        {!isPastGW && comp.hasPositionChangedPlayers && (
+          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-rose-500/20 via-amber-500/15 to-rose-500/20 border-2 border-rose-500/50 shadow-md flex items-start gap-3 animate-pulse">
+            <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-base shrink-0 shadow-md mt-0.5">
+              !
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-black uppercase tracking-wider text-rose-600 dark:text-rose-400">
+                  სავალდებულო ტრანსფერი (GW2)
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-600 dark:text-rose-300 font-bold font-mono">
+                  Mandatory Action
+                </span>
+              </div>
+              <p className="text-xs text-slate-800 dark:text-slate-200 mt-1 leading-relaxed">
+                თქვენს გუნდშია მოთამაშე(ები), რომელთაც ოფიციალურად შეეცვალათ პოზიცია:{' '}
+                <strong className="text-rose-600 dark:text-rose-400 font-black">
+                  {comp.positionChangedPlayers?.map((p) => `${p.name} (${p.oldPosition} → ${p.newPosition})`).join(', ')}
+                </strong>
+                . გუნდის შესანახად აუცილებელია მათი ჩანაცვლება ტრანსფერით. თითოეულზე მოგეცათ +1 უფასო ტრანსფერი!
+              </p>
+              <div className="mt-2.5 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('transfers')}
+                  className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-black shadow-md flex items-center gap-1.5 transition-all active:scale-95 cursor-pointer"
+                >
+                  <span>გადასვლა ტრანსფერებზე</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Monospace Quick Metrics Bar */}
         <div className="flex items-center justify-between flex-wrap gap-2 px-3 py-2 rounded-xl bg-white/95 dark:bg-zinc-950/80 border border-slate-200/90 dark:border-white/10 shadow-xs backdrop-blur-xs">
           <div className="flex items-center flex-wrap gap-2.5 sm:gap-4 text-xs font-mono">
@@ -620,6 +656,8 @@ export const PickTeamView: React.FC = () => {
               </>
             ) : isSquadLocked ? (
               <span>Lineups Locked for GW {currentGW}</span>
+            ) : comp.hasPositionChangedPlayers ? (
+              <span>⚠️ სავალდებულოა ტრანსფერი ({comp.positionChangedPlayers?.[0]?.name?.split(' ')[0]})</span>
             ) : saveSuccess ? (
               <>
                 <CheckCircle className="w-4 h-4" />

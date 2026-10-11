@@ -16,7 +16,7 @@ interface ManagerSquadModalProps {
 }
 
 export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId, onClose }) => {
-  const { players, currentGW, playerOwnership, isLineupsVisible, authUser, fixtures, isCurrentGWFinished } = useFPL();
+  const { players, currentGW, playerOwnership, isLineupsVisible, authUser, fixtures, isCurrentGWFinished, isModerator } = useFPL();
   const [loading, setLoading] = useState(true);
   const [selectedGW, setSelectedGW] = useState<number>(currentGW);
   const [managerData, setManagerData] = useState<{
@@ -81,7 +81,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   if (!managerId) return null;
 
   const isSelf = Boolean(authUser?.id && managerId === authUser.id);
-  const shouldHideLineup = (!isSelf && !isLineupsVisible) || isLineupHidden;
+  const shouldHideLineup = !isModerator && ((!isSelf && !isLineupsVisible) || isLineupHidden);
 
   const activeGwSquad = (managerData?.squad.gameweekSquads && managerData?.squad.gameweekSquads[selectedGW])
     ? managerData.squad.gameweekSquads[selectedGW]
@@ -153,6 +153,13 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
             </button>
           </div>
         </div>
+
+        {/* Admin Access Indicator if Lineups are Private to Others */}
+        {isModerator && !isSelf && !isLineupsVisible && (
+          <div className="mx-4 mt-2 px-3 py-1.5 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-600 dark:text-purple-300 text-[11px] font-bold flex items-center justify-center gap-1.5 shadow-xs">
+            <span>🛡️ ადმინისტრატორის წვდომა: შემადგენლობა ხილვადია მხოლოდ თქვენთვის</span>
+          </div>
+        )}
 
         {loading ? (
           <div className="flex-1 flex flex-col items-center justify-center space-y-3">

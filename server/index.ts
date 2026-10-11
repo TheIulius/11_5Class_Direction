@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema } from './db';
-import { calculateGameweekSquadPoints, calculatePlayerPoints } from '../src/engine/scoring';
+import { calculateGameweekSquadPoints, calculatePlayerPoints, POSITION_CHANGED_PLAYERS } from '../src/engine/scoring';
 import { applyTransferAccountingToManager } from '../src/engine/transferAccounting';
 import { DEFAULT_SQUAD_PLAYER_IDS } from '../src/data/seedPlayers';
 import { CLUBS } from '../src/data/clubs';
@@ -162,10 +162,19 @@ app.get('/api/state', (req: Request, res: Response) => {
   const publicLineupsVisible = isLineupsVisibleForPublic(data);
   const lineupVisibilityMode = data.lineupVisibility || 'auto';
 
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const usernameHeader = req.headers['x-auth-username']
+    ? decodeURIComponent(req.headers['x-auth-username'] as string).trim().toLowerCase()
+    : ((req.headers['x-username'] as string)?.trim().toLowerCase() || null);
+  const requestingUser = token ? Object.values(data.users || {}).find((u: any) => u.token === token) : null;
   const queriedUser = managerId ? data.users?.[managerId] : null;
-  const isApproved = queriedUser ? (isUserAdmin(queriedUser.username) || Boolean(queriedUser.isApproved)) : false;
+  const activeUser = requestingUser || queriedUser;
+  const isApproved = activeUser ? (isUserAdmin(activeUser.username) || Boolean(activeUser.isApproved)) : false;
+  const isAdmin = (activeUser ? (isUserAdmin(activeUser.username) || activeUser.role === 'admin' || Boolean(activeUser.isAdmin)) : false)
+    || (usernameHeader ? isUserAdmin(usernameHeader) : false);
 
-  const sanitizedLeagues = publicLineupsVisible
+  const sanitizedLeagues = (publicLineupsVisible || isAdmin)
     ? data.leagues
     : (data.leagues || []).map((l: any) => ({
         ...l,
@@ -239,13 +248,17 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
   // Check if viewing other manager lineups is allowed
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const usernameHeader = req.headers['x-auth-username']
+    ? decodeURIComponent(req.headers['x-auth-username'] as string).trim().toLowerCase()
+    : ((req.headers['x-username'] as string)?.trim().toLowerCase() || null);
   const requestingUser = token ? Object.values(data.users || {}).find((u: any) => u.token === token) : null;
-  const isAdmin = requestingUser ? (isUserAdmin(requestingUser.username) || requestingUser.role === 'admin') : false;
+  const isAdmin = (requestingUser ? (isUserAdmin(requestingUser.username) || requestingUser.role === 'admin' || Boolean(requestingUser.isAdmin)) : false)
+    || (usernameHeader ? isUserAdmin(usernameHeader) : false);
   const isSelf = requestingUser ? requestingUser.id === managerId : false;
 
   const publicVisible = isLineupsVisibleForPublic(data);
 
-  if (!isSelf && !publicVisible) {
+  if (!isSelf && !publicVisible && !isAdmin) {
     return res.json({
       success: true,
       manager: {
@@ -947,6 +960,18 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
     if (req.body.validateComplete && !isComplete) {
       return res.status(400).json({
         error: `Cannot play! Squad must have exactly 1 GK, 3 Defenders (mcveli), 3 Midfielders, and 2 Forwards. (Current: ${gkCount} GK, ${defCount} DEF, ${midCount} MID, ${fwdCount} FWD)`,
+      });
+    }
+
+    // Mandatory position change check: prevent finalizing team with changed players
+    const hasPositionChanged = players.some((sp: any) => POSITION_CHANGED_PLAYERS[sp.playerId]);
+    if (req.body.validateComplete && hasPositionChanged) {
+      const changedNames = players
+        .filter((sp: any) => POSITION_CHANGED_PLAYERS[sp.playerId])
+        .map((sp: any) => `${data.players[sp.playerId]?.name || sp.playerId} (${POSITION_CHANGED_PLAYERS[sp.playerId].oldPosition} → ${POSITION_CHANGED_PLAYERS[sp.playerId].newPosition})`)
+        .join(', ');
+      return res.status(400).json({
+        error: `სავალდებულო ცვლილება (GW2): თქვენს გუნდშია მოთამაშე(ები), რომელთაც შეეცვალათ პოზიცია (${changedNames}). გუნდის დასადასტურებლად აუცილებელია მათი ჩანაცვლება ტრანსფერით (+1 უფასო ტრანსფერი დამატებულია).`,
       });
     }
 
@@ -3684,6 +3709,50 @@ app.use((req: Request, res: Response) => {
   res.sendFile(path.join(clientDist, 'index.html'));
 });
 
+export function applyPositionChangesAndRemediation(data: any): boolean {
+  let modified = false;
+
+  // 1. Ensure player positions match new official roles
+  if (data.players) {
+    if (data.players['p_10_5_shakarishvili'] && data.players['p_10_5_shakarishvili'].position !== 'DEF') {
+      data.players['p_10_5_shakarishvili'].position = 'DEF';
+      modified = true;
+    }
+    if (data.players['p_12_3_vashakmadze'] && data.players['p_12_3_vashakmadze'].position !== 'FWD') {
+      data.players['p_12_3_vashakmadze'].position = 'FWD';
+      modified = true;
+    }
+    if (data.players['p_12_3_palelashvili'] && data.players['p_12_3_palelashvili'].position !== 'FWD') {
+      data.players['p_12_3_palelashvili'].position = 'FWD';
+      modified = true;
+    }
+  }
+
+  // 2. Grant remediation +1 Free Transfer per affected player owned
+  if (data.managers) {
+    for (const manager of Object.values(data.managers) as any[]) {
+      if (!manager.squad || !Array.isArray(manager.squad.players)) continue;
+      manager.squad.remediationGranted = manager.squad.remediationGranted || {};
+
+      let grantedForThisManager = 0;
+      for (const sp of manager.squad.players) {
+        if (POSITION_CHANGED_PLAYERS[sp.playerId] && !manager.squad.remediationGranted[sp.playerId]) {
+          manager.squad.remediationGranted[sp.playerId] = true;
+          grantedForThisManager += 1;
+        }
+      }
+
+      if (grantedForThisManager > 0) {
+        manager.squad.startFreeTransfers = (manager.squad.startFreeTransfers ?? 2) + grantedForThisManager;
+        updateManagerTransferAccounting(manager, data);
+        modified = true;
+      }
+    }
+  }
+
+  return modified;
+}
+
 // Startup initialization: load latest database from GitHub data branch
 async function startServer() {
   console.log('[Startup] Syncing latest database from data branch before accepting traffic...');
@@ -3701,10 +3770,11 @@ async function startServer() {
   // Ensure all finished fixtures have their player stats and manager points fully calculated
   try {
     const data = db.getData();
+    applyPositionChangesAndRemediation(data);
     const statsSynced = syncAllFinishedFixturesStats(data);
     recalculateAllManagersLeaguePoints(data);
     db.saveSilent();
-    console.log('[Startup] Verified and synced player stats and manager points from all finished match fixtures.');
+    console.log('[Startup] Verified and synced player stats, positions, and manager points.');
   } catch (e) {
     console.warn('[Startup] Error auto-syncing finished fixtures stats:', e);
   }

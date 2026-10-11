@@ -21,7 +21,7 @@ import { ManagerSquadModal } from '../leagues/ManagerSquadModal';
 import { KitJersey } from '../pitch/KitJersey';
 
 export const LeaguesView: React.FC = () => {
-  const { leagues, createLeague, joinLeague, deleteLeague, currentManager, authUser, currentGW, isLineupsVisible } = useFPL();
+  const { leagues, createLeague, joinLeague, deleteLeague, currentManager, authUser, currentGW, isLineupsVisible, isModerator } = useFPL();
 
   const globalLeague = leagues.find((l) => l.isGlobal) || leagues[0];
   const privateLeagues = leagues.filter((l) => !l.isGlobal);
@@ -154,7 +154,7 @@ export const LeaguesView: React.FC = () => {
                 const prevRank = member.previousRank || rank;
                 const rankDiff = prevRank - rank;
                 const isCurrentUser = member.id === currentUserId;
-                const canViewLineup = isCurrentUser || isLineupsVisible;
+                const canViewLineup = isCurrentUser || isLineupsVisible || isModerator;
                 const lineup: any[] = canViewLineup && Array.isArray(member.lineup) ? member.lineup : [];
                 const starters = lineup.filter((p) => p.isStarter);
                 const bench = lineup.filter((p) => !p.isStarter);
