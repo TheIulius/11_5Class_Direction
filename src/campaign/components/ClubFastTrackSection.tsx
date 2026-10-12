@@ -132,7 +132,7 @@ export const ClubFastTrackSection: React.FC = () => {
                 <span>{club.category}</span>
                 <span className="text-emerald-400">აქტიური</span>
               </div>
-              <div className="font-semibold text-white truncate">{club.name}</div>
+              <div className="font-semibold text-white leading-snug">{club.name}</div>
               <div className="text-[#b8b5a8] text-[11px] font-mono">{club.room}</div>
             </div>
           ))}
@@ -172,9 +172,9 @@ export const ClubFastTrackSection: React.FC = () => {
                   <span>ID:</span>
                   <span className="text-white font-medium">{activeCharter.charterId}</span>
                 </div>
-                <div className="flex justify-between text-[#a8a495]">
+                <div className="flex justify-between gap-2 text-[#a8a495]">
                   <span>კლუბი:</span>
-                  <span className="text-white font-medium truncate max-w-[180px]">
+                  <span className="text-white font-medium text-right">
                     {activeCharter.name}
                   </span>
                 </div>

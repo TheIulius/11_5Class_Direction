@@ -178,6 +178,8 @@ export const RealCalendarView: React.FC = () => {
     }
   };
 
+  const [selectedDate, setSelectedDate] = useState<string>('2026-10-13');
+
   // Helper to check if event falls on given date string (supports intervals)
   const isEventOnDate = (evt: CalendarEvent, dateStr: string) => {
     if (evt.endDate) {
@@ -186,15 +188,31 @@ export const RealCalendarView: React.FC = () => {
     return evt.date === dateStr;
   };
 
+  // Concise mobile badge text so narrow phone calendar cells show a readable word instead of "ბი..."
+  const getMobileShortLabel = (evt: CalendarEvent): string => {
+    if (evt.title.includes('მათემატიკ')) return 'მათემ.';
+    if (evt.title.includes('ბიოლოგია')) return 'ბიოლ.';
+    if (evt.title.includes('რუსული')) return 'რუსული';
+    if (evt.title.includes('Hacktober')) return 'ჰაკათონი';
+    if (evt.title.includes('გვანცა')) return 'გვანცა';
+    if (evt.title.includes('ლუკა')) return 'ლუკა';
+    return evt.title.split(' ')[0].slice(0, 7);
+  };
+
+  const selectedDateEvents = useMemo(
+    () => filteredEvents.filter(e => isEventOnDate(e, selectedDate)),
+    [filteredEvents, selectedDate]
+  );
+
   return (
-    <div className="space-y-6 max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
+    <div className="space-y-5 sm:space-y-6 max-w-5xl mx-auto px-2.5 sm:px-6 py-4 sm:py-8">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80">
+          <div className="text-[11px] sm:text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80">
             ინტერაქტიული კალენდარი &bull; 11/5 DIRECTION
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
+          <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
             სასკოლო &amp; აკადემიური კალენდარი
           </h1>
           <p className="text-xs sm:text-sm text-[#b8b5a8] mt-1">
@@ -203,7 +221,7 @@ export const RealCalendarView: React.FC = () => {
         </div>
 
         {/* Month Navigation Controls */}
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-[#161722]/80 border border-[#f5f2eb]/15 backdrop-blur-xl self-start sm:self-end">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#161722]/80 border border-[#f5f2eb]/15 backdrop-blur-xl self-start sm:self-end">
           <button
             onClick={handlePrevMonth}
             className="p-1.5 rounded-lg text-[#e8e5d8] hover:bg-white/10 transition-colors cursor-pointer"
@@ -212,7 +230,7 @@ export const RealCalendarView: React.FC = () => {
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <span className="px-3 py-1 text-xs font-semibold font-mono text-[#fcfbf7] whitespace-nowrap min-w-[130px] text-center">
+          <span className="px-2.5 sm:px-3 py-1 text-xs font-semibold font-mono text-[#fcfbf7] whitespace-nowrap min-w-[120px] sm:min-w-[130px] text-center">
             {GEORGIAN_MONTHS[month]} {year}
           </span>
 
@@ -226,7 +244,7 @@ export const RealCalendarView: React.FC = () => {
 
           <button
             onClick={handleResetToOctober}
-            className="ml-1 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-[#f5f2eb]/10 hover:bg-[#f5f2eb]/20 text-[#fcfbf7] transition-colors cursor-pointer"
+            className="ml-0.5 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-[#f5f2eb]/10 hover:bg-[#f5f2eb]/20 text-[#fcfbf7] transition-colors cursor-pointer"
           >
             მიმდინარე
           </button>
@@ -234,7 +252,7 @@ export const RealCalendarView: React.FC = () => {
       </div>
 
       {/* DUAL-LEVEL HIERARCHICAL BAR: CATEGORIES (LARGE) + FILTERS (COLORED) */}
-      <div className="rounded-2xl bg-[#141520]/85 border border-[#f5f2eb]/12 backdrop-blur-2xl p-3 sm:p-4 space-y-3.5 shadow-xl">
+      <div className="rounded-2xl bg-[#141520]/85 border border-[#f5f2eb]/12 backdrop-blur-2xl p-2.5 sm:p-4 space-y-3 shadow-xl">
         {/* ROW 1: REAL CATEGORIES (უფრო დიდი ზომა და ნაკლები კატეგორია) */}
         <div>
           <div className="flex items-center gap-1.5 mb-2 text-[11px] font-mono text-[#a8a495] uppercase tracking-wider">
@@ -242,10 +260,10 @@ export const RealCalendarView: React.FC = () => {
             <span>კატეგორიები:</span>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => handleSelectMainCategory('ყველა')}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
                 selectedMainCategory === 'ყველა'
                   ? 'bg-[#f5f2eb] text-[#0c0d12] shadow-md scale-102'
                   : 'text-[#d4d1c5] hover:text-white bg-[#191a27] border border-white/5 hover:bg-white/5'
@@ -260,7 +278,7 @@ export const RealCalendarView: React.FC = () => {
                 <button
                   key={cat.id}
                   onClick={() => handleSelectMainCategory(cat.id)}
-                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
                     isSelected
                       ? 'bg-[#f5f2eb] text-[#0c0d12] shadow-md scale-102 font-bold'
                       : 'bg-[#181a28]/70 text-[#c2bfae] hover:text-white border border-[#f5f2eb]/10 hover:bg-white/5'
@@ -275,7 +293,7 @@ export const RealCalendarView: React.FC = () => {
         </div>
 
         {/* DIVIDER */}
-        <div className="border-t border-white/5 pt-2" />
+        <div className="border-t border-white/5 pt-1.5" />
 
         {/* ROW 2: FILTERS (ფილტრები — შემაჯამებელი წითლად, ჩემპიონატები, და ა.შ.) */}
         <div>
@@ -289,10 +307,10 @@ export const RealCalendarView: React.FC = () => {
             </span>
           </div>
 
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
               onClick={() => handleSelectFilter('ყველა')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                 selectedFilter === 'ყველა'
                   ? 'bg-[#f5f2eb]/90 text-[#0c0d12] shadow-sm'
                   : 'text-[#c2bfae] hover:text-white bg-white/5 border border-white/5'
@@ -307,7 +325,7 @@ export const RealCalendarView: React.FC = () => {
                 <button
                   key={flt.id}
                   onClick={() => handleSelectFilter(flt.id)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer border ${
+                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer border ${
                     isSelected
                       ? `${flt.bgClass} ${flt.textClass} ${flt.borderClass} font-bold shadow-sm ring-1 ring-white/20`
                       : 'bg-[#191b29]/60 border-[#f5f2eb]/10 text-[#bab6a5] hover:text-white'
@@ -323,18 +341,18 @@ export const RealCalendarView: React.FC = () => {
       </div>
 
       {/* CALENDAR GRID */}
-      <div className="rounded-2xl sm:rounded-3xl bg-[#12131d]/75 border border-[#f5f2eb]/10 backdrop-blur-2xl p-3 sm:p-5 shadow-2xl overflow-hidden">
+      <div className="rounded-2xl sm:rounded-3xl bg-[#12131d]/75 border border-[#f5f2eb]/10 backdrop-blur-2xl p-1.5 sm:p-5 shadow-2xl overflow-hidden">
         {/* Weekday Labels */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-2 mb-1.5 sm:mb-2 text-center">
           {WEEKDAYS.map(day => (
-            <div key={day} className="text-[11px] sm:text-xs font-mono font-semibold text-[#a8a495] py-1">
+            <div key={day} className="text-[10px] sm:text-xs font-mono font-semibold text-[#a8a495] py-1">
               {day}
             </div>
           ))}
         </div>
 
         {/* Days Matrix */}
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-2">
           {calendarGrid.map((cell, idx) => {
             const dayIntervalEvents = filteredEvents.filter(
               e => e.category === 'ჩემპიონატები' && Boolean(e.endDate) && isEventOnDate(e, cell.dateString)
@@ -343,26 +361,37 @@ export const RealCalendarView: React.FC = () => {
               e => e.category !== 'ჩემპიონატები' && isEventOnDate(e, cell.dateString)
             );
             const totalDayCount = dayIntervalEvents.length + daySingleEvents.length;
-            const isToday = cell.dateString === '2026-10-13'; // current demo date Oct 13
+            const isToday = cell.dateString === '2026-10-13';
+            const isSelectedDay = cell.dateString === selectedDate;
             const isRowStart = idx % 7 === 0;
             const isRowEnd = idx % 7 === 6;
 
             return (
               <div
                 key={idx}
-                className={`min-h-[92px] sm:min-h-[118px] p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border transition-all flex flex-col relative ${
+                onClick={() => {
+                  soundEffects.click();
+                  setSelectedDate(cell.dateString);
+                }}
+                className={`min-h-[68px] sm:min-h-[118px] p-1 sm:p-2 rounded-lg sm:rounded-2xl border transition-all flex flex-col relative cursor-pointer ${
                   cell.isCurrentMonth
                     ? 'bg-[#171825]/50 hover:bg-[#1f2133]/60 border-[#f5f2eb]/10'
                     : 'bg-[#0f1018]/30 border-white/5 opacity-40'
-                } ${isToday ? 'ring-1 ring-[#f5f2eb]/50 bg-[#222436]/60' : ''}`}
+                } ${
+                  isSelectedDay
+                    ? 'ring-2 ring-[#f5f2eb]/70 bg-[#222436]/75'
+                    : isToday
+                    ? 'ring-1 ring-[#f5f2eb]/40 bg-[#222436]/50'
+                    : ''
+                }`}
               >
                 {/* Day Header */}
-                <div className="flex items-center justify-between h-5 shrink-0">
+                <div className="flex items-center justify-between h-4 sm:h-5 shrink-0">
                   <span
-                    className={`text-xs font-mono font-medium ${
+                    className={`text-[10px] sm:text-xs font-mono font-medium ${
                       cell.isCurrentMonth
                         ? isToday
-                          ? 'text-white font-bold bg-[#f5f2eb]/20 px-1.5 py-0.2 rounded-md'
+                          ? 'text-white font-bold bg-[#f5f2eb]/20 px-1 sm:px-1.5 py-0.2 rounded'
                           : 'text-[#dedacb]'
                         : 'text-zinc-600'
                     }`}
@@ -371,7 +400,7 @@ export const RealCalendarView: React.FC = () => {
                   </span>
 
                   {totalDayCount > 0 && (
-                    <span className="text-[10px] font-mono text-[#dedacb]/60 hidden sm:inline">
+                    <span className="text-[9px] sm:text-[10px] font-mono text-[#dedacb]/60 hidden sm:inline">
                       {totalDayCount}
                     </span>
                   )}
@@ -383,16 +412,16 @@ export const RealCalendarView: React.FC = () => {
                   const isEnd = cell.dateString === evt.endDate;
 
                   const leftPos = isStart
-                    ? 'left-1.5 rounded-l-full'
+                    ? 'left-1 sm:left-1.5 rounded-l-full'
                     : isRowStart
-                    ? 'left-1 rounded-l-full'
-                    : '-left-[3px] sm:-left-[5px]';
+                    ? 'left-0.5 sm:left-1 rounded-l-full'
+                    : '-left-[2px] sm:-left-[5px]';
 
                   const rightPos = isEnd
-                    ? 'right-1.5 rounded-r-full'
+                    ? 'right-1 sm:right-1.5 rounded-r-full'
                     : isRowEnd
-                    ? 'right-1 rounded-r-full'
-                    : '-right-[3px] sm:-right-[5px]';
+                    ? 'right-0.5 sm:right-1 rounded-r-full'
+                    : '-right-[2px] sm:-right-[5px]';
 
                   return (
                     <React.Fragment key={`interval-${evt.id}-${cell.dateString}`}>
@@ -400,10 +429,11 @@ export const RealCalendarView: React.FC = () => {
                         onClick={e => {
                           e.stopPropagation();
                           soundEffects.click();
+                          setSelectedDate(cell.dateString);
                           setActiveEvent(evt);
                         }}
                         title={`${evt.title} (${evt.date} — ${evt.endDate})`}
-                        className={`absolute top-[25px] h-[3px] bg-[#345440]/85 hover:bg-[#487358] transition-colors cursor-pointer z-20 ${leftPos} ${rightPos}`}
+                        className={`absolute top-[20px] sm:top-[25px] h-[3px] bg-[#345440]/85 hover:bg-[#487358] transition-colors cursor-pointer z-20 ${leftPos} ${rightPos}`}
                       />
                       {isStart && (
                         <div
@@ -412,7 +442,7 @@ export const RealCalendarView: React.FC = () => {
                             soundEffects.click();
                             setActiveEvent(evt);
                           }}
-                          className="absolute top-[31px] left-1.5 right-1.5 text-[9px] font-mono text-[#7c9987] truncate cursor-pointer hover:text-[#9cbba7] transition-colors"
+                          className="hidden sm:block absolute top-[31px] left-1.5 right-1.5 text-[9px] font-mono text-[#7c9987] truncate cursor-pointer hover:text-[#9cbba7] transition-colors"
                         >
                           პინგ-პონგი
                         </div>
@@ -422,38 +452,47 @@ export const RealCalendarView: React.FC = () => {
                 })}
 
                 {/* Single-day Event indicators / chips inside cell */}
-                <div className="space-y-1 mt-3 flex-1 overflow-hidden">
+                <div className="space-y-0.5 sm:space-y-1 mt-2 sm:mt-3 flex-1 overflow-hidden">
                   {daySingleEvents.slice(0, 2).map(evt => {
                     const fltMeta = CALENDAR_FILTERS.find(c => c.id === evt.category);
 
                     return (
                       <button
                         key={evt.id}
-                        onClick={() => {
+                        onClick={e => {
+                          e.stopPropagation();
                           soundEffects.click();
+                          setSelectedDate(cell.dateString);
                           setActiveEvent(evt);
                         }}
-                        className={`w-full text-left px-1.5 py-0.5 rounded-md text-[10px] sm:text-[11px] truncate font-medium border transition-all cursor-pointer block ${
+                        className={`w-full text-center sm:text-left px-0.5 sm:px-1.5 py-0.5 rounded text-[8.5px] sm:text-[11px] leading-[1.15] sm:leading-normal font-semibold sm:font-medium border transition-all cursor-pointer block ${
                           fltMeta
                             ? `${fltMeta.bgClass} ${fltMeta.textClass} ${fltMeta.borderClass}`
                             : 'bg-white/10 text-white'
                         }`}
                         title={`${evt.title} ${evt.teacher ? `(${evt.teacher})` : ''}`}
                       >
-                        {evt.title}
+                        <span className="sm:hidden block overflow-hidden whitespace-nowrap">
+                          {getMobileShortLabel(evt)}
+                        </span>
+                        <span className="hidden sm:block truncate">
+                          {evt.title}
+                        </span>
                       </button>
                     );
                   })}
 
                   {daySingleEvents.length > 2 && (
                     <button
-                      onClick={() => {
+                      onClick={e => {
+                        e.stopPropagation();
                         soundEffects.click();
+                        setSelectedDate(cell.dateString);
                         setActiveEvent(daySingleEvents[0]);
                       }}
-                      className="text-[10px] font-mono text-[#dedacb]/80 hover:text-white px-1 block truncate cursor-pointer"
+                      className="text-[8.5px] sm:text-[10px] font-mono text-[#dedacb]/80 hover:text-white px-0.5 sm:px-1 block cursor-pointer"
                     >
-                      +{daySingleEvents.length - 2} მეტი
+                      +{daySingleEvents.length - 2}
                     </button>
                   )}
                 </div>
@@ -463,8 +502,69 @@ export const RealCalendarView: React.FC = () => {
         </div>
       </div>
 
+      {/* SELECTED DAY FULL READABLE PANEL (ESPECIALLY HELPFUL ON MOBILE) */}
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#161724]/80 border border-[#f5f2eb]/15 backdrop-blur-2xl space-y-2.5 shadow-lg">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-[#fcfbf7]" />
+            <h3 className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
+              არჩეული თარიღი: {selectedDate}
+            </h3>
+          </div>
+          <span className="text-[11px] font-mono text-[#a8a495]">
+            {selectedDateEvents.length} მოვლენა
+          </span>
+        </div>
+
+        {selectedDateEvents.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {selectedDateEvents.map(evt => {
+              const fltMeta = CALENDAR_FILTERS.find(c => c.id === evt.category);
+              return (
+                <div
+                  key={`sel-${evt.id}`}
+                  onClick={() => {
+                    soundEffects.click();
+                    setActiveEvent(evt);
+                  }}
+                  className="p-3 rounded-xl bg-[#1a1c2d]/80 hover:bg-[#222438]/90 border border-[#f5f2eb]/12 transition-all cursor-pointer flex items-start justify-between gap-2.5"
+                >
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${fltMeta?.bgClass} ${fltMeta?.textClass} ${fltMeta?.borderClass}`}
+                      >
+                        {evt.category}
+                      </span>
+                      {evt.teacher && (
+                        <span className="text-[11px] font-mono text-[#dedacb]">
+                          • {evt.teacher}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7] leading-snug">
+                      {evt.title}
+                    </h4>
+                    <p className="text-[11px] text-[#b8b5a8] leading-relaxed">
+                      {evt.description}
+                    </p>
+                  </div>
+                  <span className="text-[10px] font-mono text-[#e6e2d3] shrink-0 px-2 py-1 rounded-lg bg-white/5 border border-white/10">
+                    AI &rarr;
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-xs text-[#a8a495] py-1">
+            ამ დღეს დაგეგმილი შემაჯამებელი ან აქტივობა არ არის. დააჭირეთ კალენდარში მონიშნულ ნებისმიერ დღეს დეტალების სანახავად.
+          </p>
+        )}
+      </div>
+
       {/* QUICK UPCOMING LIST BELOW GRID */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-[#12131d]/60 border border-[#f5f2eb]/10 backdrop-blur-xl">
+      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#12131d]/60 border border-[#f5f2eb]/10 backdrop-blur-xl">
         <h3 className="text-sm font-semibold text-[#fcfbf7] mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-[#e6e2d3]" />
@@ -487,8 +587,8 @@ export const RealCalendarView: React.FC = () => {
                 }}
                 className="p-3 rounded-xl bg-[#171825]/60 hover:bg-[#1e2030]/70 border border-[#f5f2eb]/10 transition-colors cursor-pointer flex items-start justify-between gap-3"
               >
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[11px] font-mono text-[#a8a495]">
                       {evt.endDate ? `${evt.date} - ${evt.endDate}` : evt.date}
                     </span>
@@ -501,8 +601,8 @@ export const RealCalendarView: React.FC = () => {
                       </span>
                     )}
                   </div>
-                  <h4 className="text-xs font-semibold text-white truncate">{evt.title}</h4>
-                  <p className="text-[11px] text-[#b8b5a8] truncate mt-0.5">{evt.description}</p>
+                  <h4 className="text-xs sm:text-sm font-semibold text-white leading-snug">{evt.title}</h4>
+                  <p className="text-[11px] text-[#b8b5a8] line-clamp-2 leading-relaxed">{evt.description}</p>
                 </div>
                 <span className="text-[10px] text-[#e6e2d3] font-mono shrink-0 underline">
                   დეტალები &rarr;

@@ -143,6 +143,11 @@
 }
 
 /* Subtle translucent white/cream chips in Light Mode */
+.campaign-light .bg-black\/40,
+.campaign-light .bg-black\/20 {
+  background-color: rgba(232, 225, 209, 0.72) !important;
+}
+
 .campaign-light .bg-white\/5,
 .campaign-light [class*="bg-[#f5f2eb]/10"],
 .campaign-light [class*="bg-[#f5f2eb]/[0.05]"] {
