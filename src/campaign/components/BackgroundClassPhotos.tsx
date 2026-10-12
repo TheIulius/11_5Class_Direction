@@ -43,30 +43,19 @@ export const BackgroundClassPhotos: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
   const { scrollY } = useScroll();
 
-  // Multi-layer spring-smoothed scroll values for buttery parallax inertia
-  const smoothScrollDeep = useSpring(scrollY, {
-    stiffness: 55,
-    damping: 24,
-    mass: 0.75,
-    restDelta: 0.1
-  });
-  const smoothScrollMid = useSpring(scrollY, {
-    stiffness: 70,
-    damping: 26,
-    mass: 0.6,
-    restDelta: 0.1
-  });
-  const smoothScrollNear = useSpring(scrollY, {
-    stiffness: 85,
-    damping: 28,
-    mass: 0.5,
-    restDelta: 0.1
+  // Tight, critically-damped scroll smoothing: zero bounce/wiggle and no lag,
+  // just enough micro-smoothing to remove discrete mouse-wheel stepping
+  const smoothScroll = useSpring(scrollY, {
+    stiffness: 500,
+    damping: 60,
+    mass: 0.2,
+    restDelta: 0.5
   });
 
-  // Photos move up slower than the foreground scroll speed (0.20x, 0.32x, 0.45x)
-  const yDeep = useTransform(smoothScrollDeep, (v) => (prefersReducedMotion ? 0 : -v * 0.2));
-  const yMid = useTransform(smoothScrollMid, (v) => (prefersReducedMotion ? 0 : -v * 0.32));
-  const yNear = useTransform(smoothScrollNear, (v) => (prefersReducedMotion ? 0 : -v * 0.45));
+  // Photos move up slower than the foreground scroll speed without any jiggle
+  const yDeep = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.18));
+  const yMid = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.26));
+  const yNear = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.34));
 
   const { deepPhotos, midPhotos, nearPhotos } = useMemo(() => {
     const jitter = (range: number) => (Math.random() - 0.5) * range;
