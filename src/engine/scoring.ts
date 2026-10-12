@@ -270,9 +270,6 @@ export function validateSquadComposition(
   const isGW2OrLater = targetGW >= 2;
 
   for (const sp of squadPlayers) {
-    if (isGW2OrLater && POSITION_CHANGED_PLAYERS[sp.playerId]) {
-      affectedPlayers.push(POSITION_CHANGED_PLAYERS[sp.playerId]);
-    }
     const p = allPlayers[sp.playerId];
     if (!p) continue;
 
@@ -296,14 +293,10 @@ export function validateSquadComposition(
   const totalCount = gkCount + defCount + midCount + fwdCount;
   const isPosValid = gkCount === 1 && defCount === 3 && midCount === 3 && fwdCount === 2;
   const isClubValid = exceededClubs.length === 0;
-  const hasPositionChangedPlayers = affectedPlayers.length > 0;
-  const isValid = isPosValid && isClubValid && !hasPositionChangedPlayers;
+  const isValid = isPosValid && isClubValid;
 
   let message: string | undefined;
-  if (hasPositionChangedPlayers) {
-    const names = affectedPlayers.map((p) => `${p.name} (${p.oldPosition} → ${p.newPosition})`).join(', ');
-    message = `სავალდებულო ცვლილება (GW2): თქვენს გუნდშია მოთამაშე(ები), რომელთაც შეეცვალათ პოზიცია (${names}). აუცილებელია მათი ჩანაცვლება ტრანსფერით (+1 უფასო ტრანსფერი დამატებულია).`;
-  } else if (!isPosValid) {
+  if (!isPosValid) {
     const parts: string[] = [];
     if (gkCount !== 1) parts.push(`${gkCount}/1 GK`);
     if (defCount !== 3) parts.push(`${defCount}/3 Defenders (mcveli)`);
@@ -326,8 +319,8 @@ export function validateSquadComposition(
     totalCount,
     clubCounts,
     exceededClubs,
-    positionChangedPlayers: affectedPlayers,
-    hasPositionChangedPlayers,
+    positionChangedPlayers: [],
+    hasPositionChangedPlayers: false,
     message,
   };
 }

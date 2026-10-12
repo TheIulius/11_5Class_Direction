@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema } from './db';
-import { calculateGameweekSquadPoints, calculatePlayerPoints, POSITION_CHANGED_PLAYERS } from '../src/engine/scoring';
+import { calculateGameweekSquadPoints, calculatePlayerPoints } from '../src/engine/scoring';
 import { applyTransferAccountingToManager } from '../src/engine/transferAccounting';
 import { DEFAULT_SQUAD_PLAYER_IDS } from '../src/data/seedPlayers';
 import { CLUBS } from '../src/data/clubs';
@@ -963,17 +963,7 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
       });
     }
 
-    // Mandatory position change check: prevent finalizing team with changed players
-    const hasPositionChanged = players.some((sp: any) => POSITION_CHANGED_PLAYERS[sp.playerId]);
-    if (req.body.validateComplete && hasPositionChanged) {
-      const changedNames = players
-        .filter((sp: any) => POSITION_CHANGED_PLAYERS[sp.playerId])
-        .map((sp: any) => `${data.players[sp.playerId]?.name || sp.playerId} (${POSITION_CHANGED_PLAYERS[sp.playerId].oldPosition} → ${POSITION_CHANGED_PLAYERS[sp.playerId].newPosition})`)
-        .join(', ');
-      return res.status(400).json({
-        error: `სავალდებულო ცვლილება (GW2): თქვენს გუნდშია მოთამაშე(ები), რომელთაც შეეცვალათ პოზიცია (${changedNames}). გუნდის დასადასტურებლად აუცილებელია მათი ჩანაცვლება ტრანსფერით (+1 უფასო ტრანსფერი დამატებულია).`,
-      });
-    }
+    // Formation validation when squad is complete
 
     if (isComplete && req.body.validateComplete) {
       const starters = players.filter((sp: any) => sp.isStarter);
@@ -3989,78 +3979,9 @@ export function applyPositionChangesAndRemediation(data: any): boolean {
     }
   }
 
-  // 2. Grant remediation +1 Free Transfer per affected player owned
-  if (data.managers) {
-    for (const manager of Object.values(data.managers) as any[]) {
-      if (!manager.squad || !Array.isArray(manager.squad.players)) continue;
-      manager.squad.remediationGranted = manager.squad.remediationGranted || {};
+  // 2. (Completed) Remediation free transfers for GW1 holders have already been granted.
 
-      let grantedForThisManager = 0;
-      for (const sp of manager.squad.players) {
-        if (POSITION_CHANGED_PLAYERS[sp.playerId] && !manager.squad.remediationGranted[sp.playerId]) {
-          manager.squad.remediationGranted[sp.playerId] = true;
-          grantedForThisManager += 1;
-        }
-      }
-
-      if (grantedForThisManager > 0) {
-        manager.squad.startFreeTransfers = (manager.squad.startFreeTransfers ?? 2) + grantedForThisManager;
-        updateManagerTransferAccounting(manager, data);
-        modified = true;
-      }
-    }
-  }
-
-  // 3. Manually refund and remove illegal position-changed players from manager squads for GW2
-  const ILLEGAL_IDS = new Set(['p_10_5_shakarishvili', 'p_12_3_vashakmadze', 'p_12_3_palelashvili']);
-  if (data.managers) {
-    for (const manager of Object.values(data.managers) as any[]) {
-      if (!manager.squad || !Array.isArray(manager.squad.players)) continue;
-      const illegals = manager.squad.players.filter((sp: any) => ILLEGAL_IDS.has(sp.playerId));
-      if (illegals.length > 0) {
-        let refund = 0;
-        for (const ip of illegals) {
-          const cost = data.players?.[ip.playerId]?.cost || (ip.playerId === 'p_10_5_shakarishvili' ? 6.3 : ip.playerId === 'p_12_3_vashakmadze' ? 8.7 : 7.5);
-          refund += cost;
-        }
-        refund = Math.round(refund * 10) / 10;
-        manager.squad.bank = Math.round(((manager.squad.bank || 0) + refund) * 10) / 10;
-        manager.squad.players = manager.squad.players.filter((sp: any) => !ILLEGAL_IDS.has(sp.playerId));
-
-        // Sanitize captaincy on remaining starters
-        const starters = manager.squad.players.filter((sp: any) => sp.isStarter);
-        let cap = starters.find((sp: any) => sp.isCaptain);
-        let vc = starters.find((sp: any) => sp.isViceCaptain && sp !== cap);
-
-        if (!cap && starters.length > 0) {
-          starters[0].isCaptain = true;
-          starters[0].isViceCaptain = false;
-          cap = starters[0];
-        }
-
-        if (!vc && starters.length > 1) {
-          const next = starters.find((sp: any) => sp !== cap);
-          if (next) {
-            next.isViceCaptain = true;
-            vc = next;
-          }
-        }
-
-        // Re-index bench orders
-        let benchIndex = 1;
-        manager.squad.players.forEach((sp: any) => {
-          if (!sp.isStarter) {
-            sp.benchOrder = benchIndex++;
-          } else {
-            sp.benchOrder = 0;
-          }
-        });
-
-        console.log(`[Remediation] Removed ${illegals.length} illegal player(s) from ${manager.managerName} (${manager.teamName}), refunded £${refund}m to bank (new bank: £${manager.squad.bank}m)`);
-        modified = true;
-      }
-    }
-  }
+  // 3. (Completed) Position-changed players have been refunded and may now be purchased legally as DEF/FWD.
 
   // 4. Ensure Nikoloz Kirtadze (user_1790456870935) has TC active for GW2 and not locked in GW1
   const kirtadze = data.managers?.['user_1790456870935'];

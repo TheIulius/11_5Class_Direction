@@ -59,16 +59,15 @@ const res1 = validateSquadComposition(validSquad, mockPlayers);
 assert(res1.isValid === true, 'Standard squad is valid');
 assert(res1.hasPositionChangedPlayers === false, 'Standard squad has no position changed players');
 
-// Squad with Shakarishvili (even if positions matched)
+// Squad with Shakarishvili as DEF
 const squadWithShakara: SquadPlayer[] = [
   ...validSquad.slice(0, 3),
   { playerId: 'p_10_5_shakarishvili', isStarter: false, benchOrder: 1, isCaptain: false, isViceCaptain: false },
   ...validSquad.slice(4),
 ];
 const res2 = validateSquadComposition(squadWithShakara, mockPlayers);
-assert(res2.isValid === false, 'Squad containing Shakarishvili is invalid (must be transferred out)');
-assert(res2.hasPositionChangedPlayers === true, 'hasPositionChangedPlayers is true');
-assert(res2.positionChangedPlayers?.length === 1, 'positionChangedPlayers correctly tracks Shakarishvili');
+assert(res2.isValid === true, 'Squad containing Shakarishvili as DEF is valid now');
+assert(res2.hasPositionChangedPlayers === false, 'hasPositionChangedPlayers is false');
 
 // 3. Free Transfer Accounting with Remediation
 console.log('\nTest 3: Remediation Free Transfers Allowance');

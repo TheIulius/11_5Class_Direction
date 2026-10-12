@@ -192,26 +192,6 @@ export const PickTeamView: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Mandatory Position Change Alert */}
-        {!isPastGW && comp.hasPositionChangedPlayers && (
-          <div className="lg:hidden w-full max-w-4xl px-2 mb-2">
-            <div className="p-2.5 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold flex items-center justify-between gap-2 animate-pulse shadow-sm">
-              <div className="flex items-center gap-2 min-w-0">
-                <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
-                <span className="truncate text-[11px]">
-                  სავალდებულოა ტრანსფერი ({comp.positionChangedPlayers?.[0]?.name?.split(' ')[0]})
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveTab('transfers')}
-                className="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-black shrink-0 cursor-pointer"
-              >
-                ტრანსფერები →
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* Read-Only Notice for Past Gameweeks without Lineup */}
         {isPastGW && activeSquadPlayers.length === 0 && (

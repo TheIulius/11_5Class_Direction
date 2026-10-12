@@ -3,7 +3,7 @@ import { useFPL } from '../../context/FPLContext';
 import { KitJersey } from './KitJersey';
 import { canSwapPlayers } from '../../engine/formations';
 import { ArrowLeftRight, Check } from 'lucide-react';
-import { GameweekCalculationResult, calculatePlayerPoints, POSITION_CHANGED_PLAYERS } from '../../engine/scoring';
+import { GameweekCalculationResult, calculatePlayerPoints } from '../../engine/scoring';
 import { triggerHaptic } from '../../utils/haptics';
 
 interface PlayerCardProps {
@@ -99,9 +99,6 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
     onCardClick(playerId);
   };
 
-  const positionChange = POSITION_CHANGED_PLAYERS[playerId];
-  const isPositionChanged = Boolean(positionChange);
-
   const isDimmedDuringSwap =
     !readOnly && selectedPlayerForSwap && !isSwapSource && !isSwapTargetEligible;
 
@@ -115,8 +112,6 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
             ? 'ring-2 ring-amber-400 bg-amber-500/10'
             : isSwapTargetEligible
             ? 'ring-2 ring-white/80 bg-white/10'
-            : isPositionChanged
-            ? 'ring-2 ring-rose-500'
             : isDimmedDuringSwap
             ? 'opacity-35'
             : ''
@@ -161,22 +156,11 @@ export const PlayerCard: React.FC<PlayerCardProps> = ({
           ? 'scale-105 ring-2 ring-amber-400 bg-amber-500/15 z-30 shadow-xl'
           : isSwapTargetEligible
           ? 'scale-105 ring-2 ring-white/90 bg-white/15 z-20 shadow-xl'
-          : isPositionChanged
-          ? 'ring-2 ring-rose-500 shadow-rose-500/20'
           : isDimmedDuringSwap
           ? 'opacity-35 grayscale-[20%]'
           : 'hover:scale-[1.03] active:scale-95'
       }`}
     >
-      {/* Position Change Alert */}
-      {isPositionChanged && (
-        <div
-          className="absolute -top-2 -left-2 bg-rose-600 text-white font-black text-[10px] rounded-full w-4.5 h-4.5 flex items-center justify-center border border-white shadow-md z-30"
-          title={`${player.name}: პოზიცია შეიცვალა. აუცილებელია ტრანსფერი!`}
-        >
-          !
-        </div>
-      )}
 
       {/* Swap Status Floating Pill */}
       {isSwapSource && (

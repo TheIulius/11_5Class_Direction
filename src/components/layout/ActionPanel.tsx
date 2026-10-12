@@ -194,30 +194,6 @@ export const ActionPanel: React.FC<ActionPanelProps> = ({
         </div>
       )}
 
-      {/* Mandatory Position Changes Alert */}
-      {!isPastGW && comp.hasPositionChangedPlayers && (
-        <div className="p-3 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-bold space-y-2">
-          <div className="flex items-center gap-2">
-            <ShieldAlert className="w-4 h-4 text-rose-400 shrink-0" />
-            <span className="font-black text-rose-300 uppercase tracking-wide">
-              Mandatory Transfer (GW2)
-            </span>
-          </div>
-          <p className="text-[11px] text-rose-200/90 leading-relaxed font-normal">
-            Squad has position-changed player(s):{' '}
-            <strong className="text-white font-bold">
-              {comp.positionChangedPlayers?.map((p: any) => `${p.name} (${p.oldPosition}→${p.newPosition})`).join(', ')}
-            </strong>
-            . Must transfer out before GW2 lock!
-          </p>
-          <button
-            onClick={() => setActiveTab('transfers')}
-            className="w-full py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs transition-all cursor-pointer shadow-sm"
-          >
-            Go To Transfers
-          </button>
-        </div>
-      )}
 
       {/* Lineup Locked Status Banner */}
       {isSquadLocked && (
