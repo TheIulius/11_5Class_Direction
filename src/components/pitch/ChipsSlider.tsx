@@ -155,7 +155,7 @@ export const ChipsSlider: React.FC<ChipsSliderProps> = ({
       layout
       transition={SPRING_CONFIG}
       style={{ willChange: 'transform' }}
-      className={`relative flex items-center h-10 backdrop-blur-2xl rounded-r-2xl rounded-l-none border-y border-r border-l-0 select-none will-change-transform shadow-2xl transition-colors duration-300 ${
+      className={`relative flex items-center h-10 backdrop-blur-2xl rounded-2xl select-none will-change-transform shadow-2xl border transition-colors duration-300 ${
         currentTheme
           ? `${currentTheme.bg} ${currentTheme.border} ${currentTheme.glow}`
           : 'bg-black/90 dark:bg-[#070b12]/95 border-white/10 text-white'
@@ -204,8 +204,12 @@ export const ChipsSlider: React.FC<ChipsSliderProps> = ({
             className="h-full w-11 min-w-[44px] flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/10 rounded-r-2xl transition-colors touch-none"
             title="Drag right or tap to slide out chips"
           >
-            {/* The Physical "|" Handle Pill (Exact same gray & width as Substitutes slider below) */}
-            <span className="w-1.5 h-5 rounded-full bg-zinc-700 pointer-events-none transition-colors" />
+            {/* The Physical "|" Handle Pill */}
+            <span
+              className={`w-1.5 h-5 rounded-full transition-colors pointer-events-none shadow-xs ${
+                currentTheme ? currentTheme.handle : 'bg-zinc-400/90 group-hover:bg-zinc-200'
+              }`}
+            />
           </motion.div>
         </div>
       ) : (
@@ -278,7 +282,11 @@ export const ChipsSlider: React.FC<ChipsSliderProps> = ({
             className="h-full w-10 min-w-[40px] flex items-center justify-center cursor-ew-resize active:cursor-grabbing hover:bg-white/10 rounded-r-2xl transition-colors touch-none ml-0.5"
             title="Drag left or tap to slide in"
           >
-            <span className="w-1.5 h-5 rounded-full bg-zinc-700 pointer-events-none transition-colors" />
+            <span
+              className={`w-1.5 h-5 rounded-full transition-colors pointer-events-none shadow-xs ${
+                currentTheme ? currentTheme.handle : 'bg-zinc-400/90'
+              }`}
+            />
           </motion.div>
         </motion.div>
       )}

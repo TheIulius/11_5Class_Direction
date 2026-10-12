@@ -223,35 +223,33 @@ export const PickTeamView: React.FC = () => {
         {/* ======================================================== */}
         {/* TACTICAL PITCH CANVAS (Full Edge-to-Edge Hero with Depth) */}
         {/* ======================================================== */}
-        <div className="relative w-full max-w-4xl flex-1 min-h-0 flex flex-col items-center justify-center">
-          {/* Chips Slider: Emerging directly from the left wall on top of the pitch */}
-          <div className="absolute top-1.5 sm:top-2 left-0 z-40 pointer-events-auto">
+        <motion.div
+          animate={{
+            scale: isPrimaryExpanded ? 0.96 : 1,
+            opacity: isPrimaryExpanded ? 0.6 : 1,
+          }}
+          transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
+          style={{ willChange: 'transform' }}
+          className="w-full max-w-4xl flex-1 min-h-0 lg:min-h-[580px] lg:h-[580px] xl:h-[640px] flex flex-col items-center justify-center origin-top transition-none overflow-hidden relative"
+        >
+          {/* Top-Left Floating Chips Slider directly below GW Capsule */}
+          <div className="absolute top-1.5 left-2 sm:left-2 z-30 pointer-events-auto">
             <ChipsSlider
               selectedGW={selectedGW}
               isPastGW={isPastGW}
             />
           </div>
 
-          <motion.div
-            animate={{
-              scale: isPrimaryExpanded ? 0.96 : 1,
-              opacity: isPrimaryExpanded ? 0.6 : 1,
-            }}
-            transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
-            style={{ willChange: 'transform' }}
-            className="w-full h-full flex-1 min-h-0 lg:min-h-[580px] lg:h-[580px] xl:h-[640px] flex flex-col items-center justify-center origin-top transition-none overflow-hidden"
-          >
-            <PitchView
-              showPoints={isPastGW}
-              renderBench={false}
-              onCardClick={(id) => setActiveSheetPlayerId(id)}
-              customSquad={activeSquadPlayers}
-              customCalculation={activeCalculation}
-              selectedGW={selectedGW}
-              readOnly={isPastGW}
-            />
-          </motion.div>
-        </div>
+          <PitchView
+            showPoints={isPastGW}
+            renderBench={false}
+            onCardClick={(id) => setActiveSheetPlayerId(id)}
+            customSquad={activeSquadPlayers}
+            customCalculation={activeCalculation}
+            selectedGW={selectedGW}
+            readOnly={isPastGW}
+          />
+        </motion.div>
 
         {/* ======================================================== */}
         {/* SUBSTITUTES: Desktop Tactical Dock & Mobile Bottom Sheet */}
