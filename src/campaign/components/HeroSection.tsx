@@ -200,13 +200,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
       {/* Video Player Modal ("რატომ უნდა ამირჩიოთ") */}
       <AnimatePresence>
         {isVideoOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsVideoOpen(false)}
-              className="fixed inset-0 bg-black/75 backdrop-blur-xl"
+              className="fixed inset-0 bg-black/80 backdrop-blur-xl"
             />
 
             <motion.div
@@ -214,12 +214,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 28, scale: 0.96 }}
               transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-              className="relative z-10 w-full max-w-3xl rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/20 shadow-2xl overflow-hidden backdrop-blur-2xl will-change-transform"
+              className="relative z-10 w-[96vw] max-w-6xl rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/20 shadow-2xl overflow-hidden backdrop-blur-2xl will-change-transform"
             >
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#f5f2eb]/10 bg-[#181928]/80">
                 <div className="flex items-center gap-2.5">
                   <span className="w-2 h-2 rounded-full bg-[#fcfbf7] animate-pulse" />
-                  <h3 className="text-sm font-bold text-[#fcfbf7]">
+                  <h3 className="text-sm sm:text-base font-bold text-[#fcfbf7]">
                     რატომ უნდა ამირჩიოთ — 11/5 Direction
                   </h3>
                 </div>
@@ -237,16 +237,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
                 </div>
               </div>
 
-              <div className="bg-black aspect-video w-full flex items-center justify-center">
+              <div className="bg-black aspect-video w-full max-h-[82vh] flex items-center justify-center">
                 <video
                   ref={videoRef}
+                  src="/videos/why-vote.mp4?v=2"
                   controls
                   autoPlay
                   playsInline
                   className="w-full h-full object-contain"
                 >
-                  <source src="/videos/why-vote.mp4" type="video/mp4" />
-                  <source src="/videos/tiko-da-kaxno.mov" type="video/quicktime" />
                   თქვენი ბრაუზერი ვერ ხსნის ვიდეოს.
                 </video>
               </div>
