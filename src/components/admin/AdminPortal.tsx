@@ -49,6 +49,7 @@ import {
   Copy,
   Eye,
   EyeOff,
+  UserCheck,
 } from 'lucide-react';
 import {
   adminExportDbUrl,
@@ -431,6 +432,18 @@ export const AdminPortal: React.FC = () => {
 
         {/* Action Controls */}
         <div className="flex items-center gap-2">
+          {/* Jump to Managers Portal */}
+          {isModerator && (
+            <button
+              onClick={() => setActiveTab('managers')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-xs font-bold text-amber-300 transition-colors cursor-pointer"
+              title="Open Managers Portal"
+            >
+              <UserCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>Managers</span>
+            </button>
+          )}
+
           {/* ⌘K Command Palette Button */}
           <button
             onClick={() => setIsCommandPaletteOpen(true)}

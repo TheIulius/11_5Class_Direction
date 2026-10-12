@@ -108,7 +108,7 @@
       "totalPoints": 19,
       "gwPoints": 19,
       "form": 5,
-      "selectedByPercent": 20,
+      "selectedByPercent": 24,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -223,7 +223,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {},
       "photoUrl": "data:image/jpeg;base64,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"
@@ -304,7 +304,7 @@
       "totalPoints": 7,
       "gwPoints": 7,
       "form": 5,
-      "selectedByPercent": 10,
+      "selectedByPercent": 9,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -467,7 +467,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -495,7 +495,7 @@
       "totalPoints": 7,
       "gwPoints": 7,
       "form": 5,
-      "selectedByPercent": 0,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -595,7 +595,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 4,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -707,7 +707,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 4,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -782,7 +782,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -826,7 +826,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 5,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -2025,7 +2025,7 @@
       "totalPoints": 5,
       "gwPoints": 5,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 5,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2239,7 +2239,7 @@
       "totalPoints": 7,
       "gwPoints": 7,
       "form": 5,
-      "selectedByPercent": 29,
+      "selectedByPercent": 28,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2330,7 +2330,7 @@
       "totalPoints": 5,
       "gwPoints": 5,
       "form": 5,
-      "selectedByPercent": 8,
+      "selectedByPercent": 9,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2495,7 +2495,7 @@
       "totalPoints": 2,
       "gwPoints": 2,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2701,7 +2701,7 @@
       "totalPoints": 12,
       "gwPoints": 12,
       "form": 5,
-      "selectedByPercent": 24,
+      "selectedByPercent": 25,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2778,7 +2778,7 @@
       "totalPoints": 12,
       "gwPoints": 12,
       "form": 5,
-      "selectedByPercent": 19,
+      "selectedByPercent": 20,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -2904,7 +2904,7 @@
       "totalPoints": 6,
       "gwPoints": 6,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -3272,7 +3272,7 @@
       "totalPoints": 2,
       "gwPoints": 2,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -3392,7 +3392,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -3422,7 +3422,7 @@
       "totalPoints": 12,
       "gwPoints": 12,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -3606,7 +3606,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -3849,7 +3849,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 3,
+      "selectedByPercent": 1,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -3863,7 +3863,7 @@
       "totalPoints": 2,
       "gwPoints": 2,
       "form": 5,
-      "selectedByPercent": 8,
+      "selectedByPercent": 6,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -3951,7 +3951,7 @@
       "totalPoints": 2,
       "gwPoints": 2,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4354,7 +4354,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 6,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4445,7 +4445,7 @@
       "totalPoints": 9,
       "gwPoints": 9,
       "form": 5,
-      "selectedByPercent": 4,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4475,7 +4475,7 @@
       "totalPoints": 1,
       "gwPoints": 1,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 0,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4565,7 +4565,7 @@
       "totalPoints": 20,
       "gwPoints": 20,
       "form": 5,
-      "selectedByPercent": 13,
+      "selectedByPercent": 15,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4631,7 +4631,7 @@
       "totalPoints": 26,
       "gwPoints": 26,
       "form": 5,
-      "selectedByPercent": 5,
+      "selectedByPercent": 8,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -4664,7 +4664,7 @@
       "totalPoints": 0,
       "gwPoints": 0,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {}
     },
@@ -5691,7 +5691,7 @@
       "totalPoints": 8,
       "gwPoints": 8,
       "form": 5,
-      "selectedByPercent": 8,
+      "selectedByPercent": 6,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -5721,7 +5721,7 @@
       "totalPoints": 21,
       "gwPoints": 21,
       "form": 5,
-      "selectedByPercent": 10,
+      "selectedByPercent": 14,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -6489,7 +6489,7 @@
       "totalPoints": 7,
       "gwPoints": 7,
       "form": 5,
-      "selectedByPercent": 1,
+      "selectedByPercent": 3,
       "isAvailable": true,
       "gwStats": {
         "1": {
@@ -8408,10 +8408,10 @@
               "webName": "Giguashvili",
               "clubId": "SCH_12_2",
               "position": "DEF",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -8422,7 +8422,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 1,
               "points": 0
             },
             {
@@ -8444,7 +8444,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
@@ -8456,6 +8456,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_3_vashakmadze",
+              "webName": "Vashakmadze",
+              "clubId": "SCH_12_3",
+              "position": "FWD",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
               "points": 0
             }
           ],
@@ -8688,8 +8699,8 @@
               "clubId": "SCH_11_5",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
+              "isCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -8700,7 +8711,7 @@
               "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -8734,7 +8745,7 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 2,
+              "benchOrder": 3,
               "points": 0
             },
             {
@@ -8745,14 +8756,36 @@
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 2,
               "points": 0
             },
             {
-              "playerId": "p_custom_1790279808543",
-              "webName": "Barnovi",
-              "clubId": "SCH_11_2",
+              "playerId": "p_chaga",
+              "webName": "Chaga",
+              "clubId": "SCH_11_5",
               "position": "FWD",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_7_kopaleishvili",
+              "webName": "Kopaleishvili",
+              "clubId": "SCH_12_7",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_1_kirtadze",
+              "webName": "Kirtadze",
+              "clubId": "SCH_12_1",
+              "position": "DEF",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -8773,26 +8806,15 @@
           "gwPoints": 0,
           "rank": 5,
           "previousRank": 5,
-          "activeChip": null,
+          "activeChip": "wildcard",
           "lineup": [
             {
-              "playerId": "p_custom_1790194618189",
-              "webName": "Tsiskara",
+              "playerId": "p_custom_1790166332280",
+              "webName": "Futkara",
               "clubId": "SCH_11_5",
-              "position": "MID",
+              "position": "GKP",
               "isStarter": true,
               "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_6_qeldishvili",
-              "webName": "N. Qeldishvili",
-              "clubId": "SCH_10_6",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -8802,20 +8824,9 @@
               "webName": "Chikovani",
               "clubId": "SCH_10_1",
               "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
-              "playerId": "p_custom_1790166332280",
-              "webName": "Futkara",
-              "clubId": "SCH_11_5",
-              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -8831,10 +8842,32 @@
               "points": 0
             },
             {
-              "playerId": "p_9_1_papuashvili",
-              "webName": "Papuashvili",
-              "clubId": "SCH_9_1",
+              "playerId": "p_12_7_kopaleishvili",
+              "webName": "Kopaleishvili",
+              "clubId": "SCH_12_7",
               "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_11_7_giorgadze",
+              "webName": "Giorgadze",
+              "clubId": "SCH_11_7",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_1_chakvetadze",
+              "webName": "Chakvetadze",
+              "clubId": "SCH_10_1",
+              "position": "DEF",
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -8842,14 +8875,25 @@
               "points": 0
             },
             {
-              "playerId": "p_10_2_kupreishvili",
-              "webName": "N. Kupreishvili",
-              "clubId": "SCH_10_2",
-              "position": "FWD",
+              "playerId": "p_9_1_shalamberidze",
+              "webName": "Shalamberidze",
+              "clubId": "SCH_9_1",
+              "position": "MID",
               "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 3,
+              "points": 0
+            },
+            {
+              "playerId": "p_chaga",
+              "webName": "Chaga",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
               "points": 0
             }
           ],
@@ -8886,7 +8930,7 @@
               "position": "MID",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -8946,10 +8990,10 @@
               "points": 0
             },
             {
-              "playerId": "p_9_2_ukleba",
-              "webName": "Ukleba",
-              "clubId": "SCH_9_2",
-              "position": "FWD",
+              "playerId": "p_11_2_japaridze",
+              "webName": "Japaridze",
+              "clubId": "SCH_11_2",
+              "position": "MID",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -9129,6 +9173,17 @@
               "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_10_4_lobzhanidze",
+              "webName": "Lobzhanidze",
+              "clubId": "SCH_10_4",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 1,
               "points": 0
             }
           ],
@@ -9597,17 +9652,6 @@
           "activeChip": null,
           "lineup": [
             {
-              "playerId": "p_custom_1790166375573",
-              "webName": "Kakabadze",
-              "clubId": "SCH_11_5",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
               "playerId": "p_12_1_kirtadze",
               "webName": "Kirtadze",
               "clubId": "SCH_12_1",
@@ -9645,10 +9689,10 @@
               "webName": "Giorgadze",
               "clubId": "SCH_11_7",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 3,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -9674,21 +9718,21 @@
               "points": 0
             },
             {
-              "playerId": "p_11_4_gogoladze",
-              "webName": "Gogoladze",
-              "clubId": "SCH_11_4",
-              "position": "MID",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 2,
-              "points": 0
-            },
-            {
               "playerId": "p_rati",
               "webName": "Rati",
               "clubId": "SCH_11_5",
               "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_4_ruxaia",
+              "webName": "Ruxaia",
+              "clubId": "SCH_12_4",
+              "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
@@ -10025,117 +10069,13 @@
           "showRealNamePublicly": true
         },
         {
-          "id": "user_1790590014100",
-          "managerName": "Alexander",
-          "teamName": "Palelashvili FC",
-          "totalPoints": 75,
-          "gwPoints": 0,
-          "rank": 17,
-          "previousRank": 17,
-          "activeChip": null,
-          "lineup": [
-            {
-              "playerId": "p_12_3_bazadze",
-              "webName": "Bazadze",
-              "clubId": "SCH_12_3",
-              "position": "GKP",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_6_xixadze",
-              "webName": "Xixadze",
-              "clubId": "SCH_10_6",
-              "position": "DEF",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_4_zaqutashvili",
-              "webName": "Zaqutashvili",
-              "clubId": "SCH_10_4",
-              "position": "MID",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 1,
-              "points": 0
-            },
-            {
-              "playerId": "p_10_4_salbishvili",
-              "webName": "Salbishvili",
-              "clubId": "SCH_10_4",
-              "position": "MID",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 2,
-              "points": 0
-            },
-            {
-              "playerId": "p_rati",
-              "webName": "Rati",
-              "clubId": "SCH_11_5",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": true,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_zurashvili",
-              "webName": "Zurashvili",
-              "clubId": "SCH_11_1",
-              "position": "DEF",
-              "isStarter": false,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 3,
-              "points": 0
-            },
-            {
-              "playerId": "p_11_6_abuladze",
-              "webName": "Abuladze",
-              "clubId": "SCH_11_6",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_12_7_kevlishvili",
-              "webName": "Kevlishvili",
-              "clubId": "SCH_12_7",
-              "position": "FWD",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            }
-          ],
-          "grade": "12",
-          "parallel": "3",
-          "realName": "ალექსანდრე ფალელაშვილი",
-          "showRealNamePublicly": true
-        },
-        {
           "id": "user_1790510641784",
           "managerName": "Dachi",
           "teamName": "Fc zrn janjaphili",
           "totalPoints": 72,
           "gwPoints": 0,
-          "rank": 18,
-          "previousRank": 18,
+          "rank": 17,
+          "previousRank": 17,
           "activeChip": null,
           "lineup": [
             {
@@ -10249,8 +10189,8 @@
           "teamName": "IvaHavertz",
           "totalPoints": 71,
           "gwPoints": 0,
-          "rank": 19,
-          "previousRank": 19,
+          "rank": 18,
+          "previousRank": 18,
           "activeChip": null,
           "lineup": [
             {
@@ -10353,8 +10293,8 @@
           "teamName": "Bzkddshvc",
           "totalPoints": 70,
           "gwPoints": 0,
-          "rank": 20,
-          "previousRank": 20,
+          "rank": 19,
+          "previousRank": 19,
           "activeChip": null,
           "lineup": [
             {
@@ -10468,8 +10408,8 @@
           "teamName": "giorgievski's tractati",
           "totalPoints": 69,
           "gwPoints": 0,
-          "rank": 21,
-          "previousRank": 21,
+          "rank": 20,
+          "previousRank": 20,
           "activeChip": "triple_captain",
           "lineup": [
             {
@@ -10583,8 +10523,8 @@
           "teamName": "FC bumbum",
           "totalPoints": 69,
           "gwPoints": 0,
-          "rank": 22,
-          "previousRank": 22,
+          "rank": 21,
+          "previousRank": 21,
           "activeChip": null,
           "lineup": [
             {
@@ -10687,8 +10627,8 @@
           "teamName": "Sirebi FC",
           "totalPoints": 67,
           "gwPoints": 0,
-          "rank": 23,
-          "previousRank": 23,
+          "rank": 22,
+          "previousRank": 22,
           "activeChip": null,
           "lineup": [
             {
@@ -10802,8 +10742,8 @@
           "teamName": "noza",
           "totalPoints": 63,
           "gwPoints": 0,
-          "rank": 24,
-          "previousRank": 24,
+          "rank": 23,
+          "previousRank": 23,
           "activeChip": null,
           "lineup": [
             {
@@ -10913,8 +10853,8 @@
           "teamName": "JogaBonito",
           "totalPoints": 63,
           "gwPoints": 0,
-          "rank": 25,
-          "previousRank": 25,
+          "rank": 24,
+          "previousRank": 24,
           "activeChip": null,
           "lineup": [
             {
@@ -10924,7 +10864,7 @@
               "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -10958,17 +10898,6 @@
               "isStarter": true,
               "isCaptain": true,
               "isViceCaptain": false,
-              "benchOrder": 0,
-              "points": 0
-            },
-            {
-              "playerId": "p_custom_1790244156863",
-              "webName": "Atunashvili",
-              "clubId": "SCH_11_3",
-              "position": "MID",
-              "isStarter": true,
-              "isCaptain": false,
-              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -11015,6 +10944,17 @@
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
+            },
+            {
+              "playerId": "p_10_1_katamadze",
+              "webName": "E. Katamadze",
+              "clubId": "SCH_10_1",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
             }
           ],
           "grade": "11",
@@ -11028,8 +10968,8 @@
           "teamName": "12/7",
           "totalPoints": 61,
           "gwPoints": 0,
-          "rank": 26,
-          "previousRank": 26,
+          "rank": 25,
+          "previousRank": 25,
           "activeChip": "triple_captain",
           "lineup": [
             {
@@ -11143,8 +11083,8 @@
           "teamName": "Vortex",
           "totalPoints": 61,
           "gwPoints": 0,
-          "rank": 27,
-          "previousRank": 27,
+          "rank": 26,
+          "previousRank": 26,
           "activeChip": null,
           "lineup": [
             {
@@ -11250,6 +11190,121 @@
           "grade": "10",
           "parallel": "2",
           "realName": "Giorgi Turqia",
+          "showRealNamePublicly": true
+        },
+        {
+          "id": "user_1790590014100",
+          "managerName": "Alexander",
+          "teamName": "Palelashvili FC",
+          "totalPoints": 59,
+          "gwPoints": 0,
+          "rank": 27,
+          "previousRank": 27,
+          "activeChip": null,
+          "lineup": [
+            {
+              "playerId": "p_12_3_bazadze",
+              "webName": "Bazadze",
+              "clubId": "SCH_12_3",
+              "position": "GKP",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": true,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_1_kirtadze",
+              "webName": "Kirtadze",
+              "clubId": "SCH_12_1",
+              "position": "DEF",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_2_chalatashvili",
+              "webName": "Chalatashvili",
+              "clubId": "SCH_9_2",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 3,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_1_barnovi",
+              "webName": "Barnovi",
+              "clubId": "SCH_12_1",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_12_7_kopaleishvili",
+              "webName": "Kopaleishvili",
+              "clubId": "SCH_12_7",
+              "position": "MID",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_rati",
+              "webName": "Rati",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_1_siradze",
+              "webName": "Siradze",
+              "clubId": "SCH_9_1",
+              "position": "DEF",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 1,
+              "points": 0
+            },
+            {
+              "playerId": "p_9_2_gogichashvili",
+              "webName": "Gogichashvili",
+              "clubId": "SCH_9_2",
+              "position": "MID",
+              "isStarter": false,
+              "isCaptain": false,
+              "isViceCaptain": false,
+              "benchOrder": 2,
+              "points": 0
+            },
+            {
+              "playerId": "p_chaga",
+              "webName": "Chaga",
+              "clubId": "SCH_11_5",
+              "position": "FWD",
+              "isStarter": true,
+              "isCaptain": true,
+              "isViceCaptain": false,
+              "benchOrder": 0,
+              "points": 0
+            }
+          ],
+          "grade": "12",
+          "parallel": "3",
+          "realName": "ალექსანდრე ფალელაშვილი",
           "showRealNamePublicly": true
         },
         {
@@ -11488,7 +11543,7 @@
               "position": "GKP",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": true,
+              "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
             },
@@ -11520,7 +11575,7 @@
               "clubId": "SCH_11_5",
               "position": "MID",
               "isStarter": true,
-              "isCaptain": true,
+              "isCaptain": false,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -11565,7 +11620,7 @@
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
-              "isViceCaptain": false,
+              "isViceCaptain": true,
               "benchOrder": 0,
               "points": 0
             },
@@ -11575,7 +11630,7 @@
               "clubId": "SCH_10_1",
               "position": "FWD",
               "isStarter": true,
-              "isCaptain": false,
+              "isCaptain": true,
               "isViceCaptain": false,
               "benchOrder": 0,
               "points": 0
@@ -15997,16 +16052,16 @@
               "webName": "Giorguna",
               "clubId": "SCH_11_1",
               "position": "MID",
-              "isStarter": true,
+              "isStarter": false,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 0,
+              "benchOrder": 1,
               "points": 0
             },
             {
-              "playerId": "p_10_5_jajanidze",
-              "webName": "Jajanidze",
-              "clubId": "SCH_10_5",
+              "playerId": "p_12_1_bagauri",
+              "webName": "Bagauri",
+              "clubId": "SCH_12_1",
               "position": "FWD",
               "isStarter": true,
               "isCaptain": false,
@@ -16048,14 +16103,14 @@
               "points": 0
             },
             {
-              "playerId": "p_11_6_gardafxadze",
-              "webName": "Gardafxadze",
-              "clubId": "SCH_11_6",
+              "playerId": "p_12_1_barnovi",
+              "webName": "Barnovi",
+              "clubId": "SCH_12_1",
               "position": "MID",
-              "isStarter": false,
+              "isStarter": true,
               "isCaptain": false,
               "isViceCaptain": false,
-              "benchOrder": 1,
+              "benchOrder": 0,
               "points": 0
             },
             {
@@ -17174,7 +17229,7 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_dito",
@@ -17194,7 +17249,7 @@
             "playerId": "p_custom_1790194618189",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": true,
+            "isCaptain": false,
             "isViceCaptain": false
           },
           {
@@ -17223,13 +17278,13 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_10_1_shengelia",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
+            "isCaptain": true,
             "isViceCaptain": false
           }
         ],
@@ -17341,7 +17396,7 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_10_1_chakvetadze",
@@ -17363,13 +17418,6 @@
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
-          },
-          {
-            "playerId": "p_custom_1790244156863",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": true
           },
           {
             "playerId": "p_9_6_chigladze",
@@ -17398,9 +17446,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_katamadze",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 0.3,
+        "bank": 0.9,
         "freeTransfers": 1,
         "transfersMadeThisGW": 1,
         "activeChip": null,
@@ -19267,32 +19322,18 @@
         "managerName": "Gega",
         "players": [
           {
-            "playerId": "p_custom_1790194618189",
+            "playerId": "p_custom_1790166332280",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": true,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_6_qeldishvili",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_10_1_chikovani",
-            "isStarter": false,
-            "benchOrder": 1,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
-            "playerId": "p_custom_1790166332280",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_12_1_kirtadze",
@@ -19302,23 +19343,44 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_1_papuashvili",
+            "playerId": "p_12_7_kopaleishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_11_7_giorgadze",
+            "isStarter": false,
+            "benchOrder": 1,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_1_chakvetadze",
             "isStarter": false,
             "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_2_kupreishvili",
+            "playerId": "p_9_1_shalamberidze",
             "isStarter": false,
             "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_chaga",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 16.2,
+        "bank": 8.7,
         "freeTransfers": 2,
-        "transfersMadeThisGW": 0,
+        "transfersMadeThisGW": 5,
         "activeChip": "wildcard",
         "usedChips": {
           "triple_captain": false,
@@ -19445,15 +19507,15 @@
           },
           {
             "playerId": "p_12_2_giguashvili",
-            "isStarter": false,
-            "benchOrder": 1,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_12_7_vadachkoria",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -19467,7 +19529,7 @@
           {
             "playerId": "p_10_1_chakvetadze",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -19477,9 +19539,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_3_vashakmadze",
+            "isStarter": false,
+            "benchOrder": 3,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 9.3,
+        "bank": 0.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 3,
         "activeChip": "triple_captain",
@@ -19988,9 +20057,16 @@
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
+          },
+          {
+            "playerId": "p_10_4_lobzhanidze",
+            "isStarter": false,
+            "benchOrder": 1,
+            "isCaptain": false,
+            "isViceCaptain": false
           }
         ],
-        "bank": 20.4,
+        "bank": 15.6,
         "freeTransfers": 1,
         "transfersMadeThisGW": 3,
         "activeChip": null,
@@ -20284,15 +20360,15 @@
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": true,
-            "isViceCaptain": false
+            "isCaptain": false,
+            "isViceCaptain": true
           },
           {
             "playerId": "p_10_1_gogsadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": true
+            "isViceCaptain": false
           },
           {
             "playerId": "p_10_1_katamadze",
@@ -20311,28 +20387,42 @@
           {
             "playerId": "p_9_2_iosava",
             "isStarter": false,
-            "benchOrder": 2,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
             "playerId": "p_9_1_davitadze",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_custom_1790279808543",
+            "playerId": "p_chaga",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": true,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_7_kopaleishvili",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_1_kirtadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 17.4,
-        "freeTransfers": 4,
-        "transfersMadeThisGW": 0,
+        "bank": 0.8,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 3,
         "activeChip": null,
         "usedChips": {
           "triple_captain": true,
@@ -23276,7 +23366,7 @@
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
-            "isViceCaptain": false
+            "isViceCaptain": true
           },
           {
             "playerId": "p_12_7_kevlishvili",
@@ -23314,16 +23404,16 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_9_2_ukleba",
+            "playerId": "p_11_2_japaridze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 8.7,
-        "freeTransfers": 3,
-        "transfersMadeThisGW": 0,
+        "bank": 8.8,
+        "freeTransfers": 2,
+        "transfersMadeThisGW": 1,
         "activeChip": null,
         "usedChips": {
           "triple_captain": true,
@@ -23594,13 +23684,6 @@
         "managerName": "Dito",
         "players": [
           {
-            "playerId": "p_custom_1790166375573",
-            "isStarter": true,
-            "benchOrder": 0,
-            "isCaptain": false,
-            "isViceCaptain": false
-          },
-          {
             "playerId": "p_12_1_kirtadze",
             "isStarter": true,
             "benchOrder": 0,
@@ -23623,8 +23706,8 @@
           },
           {
             "playerId": "p_11_7_giorgadze",
-            "isStarter": false,
-            "benchOrder": 3,
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -23643,21 +23726,21 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_4_gogoladze",
-            "isStarter": false,
-            "benchOrder": 2,
+            "playerId": "p_rati",
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_rati",
+            "playerId": "p_12_4_ruxaia",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           }
         ],
-        "bank": 0,
+        "bank": 4.1,
         "freeTransfers": 2,
         "transfersMadeThisGW": 0,
         "activeChip": null,
@@ -26418,23 +26501,30 @@
             "isViceCaptain": true
           },
           {
-            "playerId": "p_10_6_xixadze",
+            "playerId": "p_12_1_kirtadze",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_4_zaqutashvili",
+            "playerId": "p_9_2_chalatashvili",
             "isStarter": false,
-            "benchOrder": 1,
+            "benchOrder": 3,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_4_salbishvili",
-            "isStarter": false,
-            "benchOrder": 2,
+            "playerId": "p_12_1_barnovi",
+            "isStarter": true,
+            "benchOrder": 0,
+            "isCaptain": false,
+            "isViceCaptain": false
+          },
+          {
+            "playerId": "p_12_7_kopaleishvili",
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -26442,34 +26532,34 @@
             "playerId": "p_rati",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": true,
+            "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_zurashvili",
+            "playerId": "p_9_1_siradze",
             "isStarter": false,
-            "benchOrder": 3,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_6_abuladze",
-            "isStarter": true,
-            "benchOrder": 0,
+            "playerId": "p_9_2_gogichashvili",
+            "isStarter": false,
+            "benchOrder": 2,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_12_7_kevlishvili",
+            "playerId": "p_chaga",
             "isStarter": true,
             "benchOrder": 0,
-            "isCaptain": false,
+            "isCaptain": true,
             "isViceCaptain": false
           }
         ],
-        "bank": 7.7,
-        "freeTransfers": 3,
-        "transfersMadeThisGW": 0,
+        "bank": 0.4,
+        "freeTransfers": 0,
+        "transfersMadeThisGW": 7,
         "activeChip": null,
         "usedChips": {
           "triple_captain": true,
@@ -26548,9 +26638,9 @@
         },
         "gwTransferPenalties": {
           "1": 0,
-          "2": 0
+          "2": 16
         },
-        "accumulatedTransferPenalties": 0,
+        "accumulatedTransferPenalties": 16,
         "startFreeTransfers": 3,
         "remediationGranted": {
           "p_12_3_palelashvili": true
@@ -26562,7 +26652,7 @@
       "realName": "ალექსანდრე ფალელაშვილი",
       "showRealNamePublicly": true,
       "gwPoints": 0,
-      "totalPoints": 75
+      "totalPoints": 59
     },
     "user_1790590112511": {
       "id": "user_1790590112511",
@@ -27035,13 +27125,13 @@
           },
           {
             "playerId": "p_giorguna",
-            "isStarter": true,
-            "benchOrder": 0,
+            "isStarter": false,
+            "benchOrder": 1,
             "isCaptain": false,
             "isViceCaptain": false
           },
           {
-            "playerId": "p_10_5_jajanidze",
+            "playerId": "p_12_1_bagauri",
             "isStarter": true,
             "benchOrder": 0,
             "isCaptain": false,
@@ -27069,9 +27159,9 @@
             "isViceCaptain": false
           },
           {
-            "playerId": "p_11_6_gardafxadze",
-            "isStarter": false,
-            "benchOrder": 1,
+            "playerId": "p_12_1_barnovi",
+            "isStarter": true,
+            "benchOrder": 0,
             "isCaptain": false,
             "isViceCaptain": false
           },
@@ -27083,7 +27173,7 @@
             "isViceCaptain": false
           }
         ],
-        "bank": 0,
+        "bank": 0.1,
         "freeTransfers": 1,
         "transfersMadeThisGW": 0,
         "activeChip": "triple_captain",
@@ -27093,7 +27183,9 @@
           "wildcard": false
         },
         "gameweekSquads": {},
-        "gameweekChips": {},
+        "gameweekChips": {
+          "2": "triple_captain"
+        },
         "gwTransferPenalties": {},
         "accumulatedTransferPenalties": 0,
         "startFreeTransfers": 1,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useFPL } from '../../context/FPLContext';
-import { BookOpen, Sun, Moon, Eye } from 'lucide-react';
+import { BookOpen, Sun, Moon, Eye, UserCheck } from 'lucide-react';
 import { hasManagerSeenLatestUpdate } from '../../data/updateNotes';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -18,6 +18,9 @@ export const TopHeader: React.FC = () => {
     exitDemoMode,
     calculationResult,
     leagues,
+    isModerator,
+    activeTab,
+    setActiveTab,
   } = useFPL();
 
   const userLeagueMember = leagues
@@ -79,8 +82,28 @@ export const TopHeader: React.FC = () => {
           </div>
         </div>
 
-        {/* Right: Rules ('წესები') + Theme Toggle */}
+        {/* Right: Managers Portal (Admin) + Rules ('წესები') + Theme Toggle */}
         <div className="flex items-center gap-1.5 shrink-0">
+          {/* Managers Portal Button (Admins only) */}
+          {isModerator && (
+            <button
+              onClick={() => {
+                triggerHaptic('light');
+                setActiveTab('managers');
+              }}
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer active:scale-95 shadow-xs ${
+                activeTab === 'managers'
+                  ? 'bg-amber-500 text-slate-950 border-amber-400 font-black'
+                  : 'bg-amber-500/15 border-amber-500/30 text-amber-500 dark:text-amber-300 hover:bg-amber-500/25'
+              }`}
+              title="მენეჯერების პორტალი (Managers Portal)"
+            >
+              <UserCheck className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">მენეჯერები</span>
+              <span className="sm:hidden">Mgrs</span>
+            </button>
+          )}
+
           {/* Rules Button with "წესები (icon)" */}
           <button
             onClick={() => openRulesModal('rules')}

@@ -1,6 +1,6 @@
 import React, { useRef, useCallback } from 'react';
 import { useFPL, TabType } from '../../context/FPLContext';
-import { Shirt, ArrowLeftRight, Trophy, Calendar, Wrench, Shield, Users, Award } from 'lucide-react';
+import { Shirt, ArrowLeftRight, Trophy, Calendar, Wrench, Shield, Users, Award, UserCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { triggerHaptic } from '../../utils/haptics';
 
@@ -16,6 +16,7 @@ const TABS: TabItem[] = [
   { id: 'players', label: 'Players', icon: Users },
   { id: 'standings', label: 'Standings', icon: Trophy },
   { id: 'fixtures', label: 'Fixtures', icon: Calendar },
+  { id: 'managers', label: 'Managers', icon: UserCheck },
   { id: 'dev', label: 'Dev', icon: Wrench },
 ];
 
@@ -27,7 +28,11 @@ export const BottomNav: React.FC = () => {
   activeTabRef.current = activeTab;
   const isPointerDownRef = useRef(false);
 
-  const visibleTabs = TABS.filter((tab) => tab.id !== 'dev' || isModerator || isReferee);
+  const visibleTabs = TABS.filter((tab) => {
+    if (tab.id === 'managers') return isModerator;
+    if (tab.id === 'dev') return isModerator || isReferee;
+    return true;
+  });
 
   const handleTabChange = useCallback(
     (tabId: TabType) => {
@@ -104,9 +109,11 @@ export const BottomNav: React.FC = () => {
       >
         {visibleTabs.map((tab, idx) => {
           const isDev = tab.id === 'dev';
+          const isMgr = tab.id === 'managers';
           const Icon = isDev ? (isModerator ? Shield : Award) : tab.icon;
           const isActive = activeTab === tab.id;
           const displayLabel = isDev ? (isModerator ? 'Mod' : 'Ref') : tab.label;
+          const isDense = visibleTabs.length >= 7;
 
           return (
             <button
@@ -116,7 +123,7 @@ export const BottomNav: React.FC = () => {
               }}
               type="button"
               onClick={() => handleTabChange(tab.id)}
-              className={`relative flex-1 py-1.5 px-1 flex flex-col items-center justify-center transition-colors group z-10 cursor-pointer ${
+              className={`relative flex-1 py-1.5 ${isDense ? 'px-0.5' : 'px-1'} flex flex-col items-center justify-center transition-colors group z-10 cursor-pointer ${
                 isActive ? 'text-white' : 'text-slate-400 hover:text-slate-200'
               }`}
             >
@@ -137,17 +144,20 @@ export const BottomNav: React.FC = () => {
 
               <div className="relative flex items-center justify-center pointer-events-none z-10">
                 <Icon
-                  className={`w-4 h-4 transition-transform duration-200 ${
+                  className={`${isDense ? 'w-3.5 h-3.5 sm:w-4 sm:h-4' : 'w-4 h-4'} transition-transform duration-200 ${
                     isActive ? 'scale-110 text-white' : 'text-slate-400 group-hover:text-slate-200'
                   }`}
                 />
                 {isDev && (isDevAuthenticated || isReferee) && (
                   <span className="absolute -top-1 -right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />
                 )}
+                {isMgr && (
+                  <span className="absolute -top-0.5 -right-1 w-1.5 h-1.5 rounded-full bg-amber-400" />
+                )}
               </div>
 
               <span
-                className={`text-[9.5px] mt-0.5 tracking-tight truncate max-w-[50px] leading-tight transition-colors pointer-events-none z-10 ${
+                className={`${isDense ? 'text-[8px] sm:text-[9.5px]' : 'text-[9.5px]'} mt-0.5 tracking-tighter sm:tracking-tight truncate max-w-full leading-tight transition-colors pointer-events-none z-10 ${
                   isActive ? 'font-bold text-white' : 'font-medium text-slate-400'
                 }`}
               >
