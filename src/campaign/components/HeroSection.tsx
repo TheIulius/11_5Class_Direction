@@ -1,6 +1,6 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Calendar, BookOpen, Compass, MessageSquare, Rocket } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, BookOpen, Compass, MessageSquare, Rocket, Play, X } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface HeroSectionProps {
@@ -8,6 +8,18 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    if (isVideoOpen && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {
+        // Fallback if browser requires user interaction on video element
+      });
+    }
+  }, [isVideoOpen]);
+
   return (
     <section className="pt-10 sm:pt-16 pb-12 sm:pb-16 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-10">
       {/* Top Subtle Pill */}
@@ -52,11 +64,24 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         <button
           onClick={() => {
             soundEffects.click();
+            setIsVideoOpen(true);
+          }}
+          className="px-5 py-2.5 rounded-xl bg-[#fcfbf7] hover:bg-white active:bg-[#e8e4d8] text-[#0c0d12] font-bold text-xs sm:text-sm transition-all cursor-pointer shadow-lg shadow-[#f5f2eb]/10 flex items-center gap-2 ring-1 ring-[#fcfbf7]/40"
+        >
+          <span className="w-5 h-5 rounded-full bg-[#0c0d12] text-[#fcfbf7] flex items-center justify-center">
+            <Play className="w-2.5 h-2.5 fill-current ml-0.5" />
+          </span>
+          <span>რატომ უნდა ამირჩიოთ</span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundEffects.click();
             onNavigateTab('calendar');
           }}
-          className="px-5 py-2.5 rounded-xl bg-[#f5f2eb] hover:bg-white active:bg-[#e8e4d8] text-[#0c0d12] font-semibold text-xs sm:text-sm transition-all cursor-pointer shadow-md flex items-center gap-2"
+          className="px-5 py-2.5 rounded-xl border border-[#f5f2eb]/25 bg-[#1b1c2c]/85 hover:bg-[#24263b]/95 text-[#fcfbf7] font-semibold text-xs sm:text-sm backdrop-blur-xl transition-all cursor-pointer shadow-md flex items-center gap-2"
         >
-          <Calendar className="w-4 h-4 text-[#0c0d12]" />
+          <Calendar className="w-4 h-4 text-[#dedacb]" />
           <span>კალენდრის გახსნა</span>
         </button>
 
@@ -165,6 +190,59 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
           </p>
         </div>
       </motion.div>
+
+      {/* Video Player Modal ("რატომ უნდა ამირჩიოთ") */}
+      <AnimatePresence>
+        {isVideoOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsVideoOpen(false)}
+              className="fixed inset-0 bg-black/75 backdrop-blur-xl"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, y: 28, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 28, scale: 0.96 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+              className="relative z-10 w-full max-w-3xl rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/20 shadow-2xl overflow-hidden backdrop-blur-2xl will-change-transform"
+            >
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#f5f2eb]/10 bg-[#181928]/80">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-2 h-2 rounded-full bg-[#fcfbf7] animate-pulse" />
+                  <h3 className="text-sm font-bold text-[#fcfbf7]">
+                    რატომ უნდა ამირჩიოთ — 11/5 Direction
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsVideoOpen(false)}
+                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-[#c5c1b2] hover:text-white transition-colors cursor-pointer"
+                  aria-label="დახურვა"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="bg-black aspect-video w-full flex items-center justify-center">
+                <video
+                  ref={videoRef}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain"
+                >
+                  <source src="/videos/why-vote.mp4" type="video/mp4" />
+                  <source src="/videos/tiko-da-kaxno.mov" type="video/quicktime" />
+                  თქვენი ბრაუზერი ვერ ხსნის ვიდეოს.
+                </video>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
