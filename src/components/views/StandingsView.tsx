@@ -272,12 +272,14 @@ export const StandingsView: React.FC = () => {
       </div>
 
       {/* Full Squad & Details Modal when tapping any manager */}
-      <ErrorBoundary onReset={() => setInspectedManagerId(null)}>
-        <ManagerSquadModal
-          managerId={inspectedManagerId}
-          onClose={() => setInspectedManagerId(null)}
-        />
-      </ErrorBoundary>
+      {inspectedManagerId && (
+        <ErrorBoundary onReset={() => setInspectedManagerId(null)}>
+          <ManagerSquadModal
+            managerId={inspectedManagerId}
+            onClose={() => setInspectedManagerId(null)}
+          />
+        </ErrorBoundary>
+      )}
     </div>
   );
 };

@@ -203,6 +203,37 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
     }
   }, [selectedGW, managerData, players, currentGW, isLineupHidden, fixtures, isCurrentGWFinished]);
 
+  // --- MARKET PICKER (TRANSFER / ADD) MEMOS (must be before early return) ---
+  const currentSquadPlayerIds = useMemo(() => {
+    return new Set((managerData?.squad?.players || []).map((sp) => sp.playerId));
+  }, [managerData]);
+
+  const schoolClubs = useMemo(() => getSortedSchoolClubs(CLUBS), []);
+
+  const marketPlayers = useMemo(() => {
+    let list = Object.values(players).filter((p) => !currentSquadPlayerIds.has(p.id));
+
+    if (pickerPosFilter !== 'ALL') {
+      list = list.filter((p) => p.position === pickerPosFilter);
+    }
+
+    if (pickerClubFilter !== 'ALL') {
+      list = list.filter((p) => p.clubId === pickerClubFilter);
+    }
+
+    if (pickerSearch.trim()) {
+      const q = pickerSearch.toLowerCase().trim();
+      list = list.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          p.webName.toLowerCase().includes(q) ||
+          (CLUBS[p.clubId]?.name || '').toLowerCase().includes(q)
+      );
+    }
+
+    return list.sort((a, b) => b.cost - a.cost);
+  }, [players, currentSquadPlayerIds, pickerPosFilter, pickerClubFilter, pickerSearch]);
+
   if (!managerId) return null;
 
   const isSelf = Boolean(authUser?.id && managerId === authUser.id);
@@ -476,36 +507,6 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   };
 
   // --- MARKET PICKER (TRANSFER / ADD) ---
-  const currentSquadPlayerIds = useMemo(() => {
-    return new Set((managerData?.squad?.players || []).map((sp) => sp.playerId));
-  }, [managerData]);
-
-  const schoolClubs = useMemo(() => getSortedSchoolClubs(CLUBS), []);
-
-  const marketPlayers = useMemo(() => {
-    let list = Object.values(players).filter((p) => !currentSquadPlayerIds.has(p.id));
-
-    if (pickerPosFilter !== 'ALL') {
-      list = list.filter((p) => p.position === pickerPosFilter);
-    }
-
-    if (pickerClubFilter !== 'ALL') {
-      list = list.filter((p) => p.clubId === pickerClubFilter);
-    }
-
-    if (pickerSearch.trim()) {
-      const q = pickerSearch.toLowerCase().trim();
-      list = list.filter(
-        (p) =>
-          p.name.toLowerCase().includes(q) ||
-          p.webName.toLowerCase().includes(q) ||
-          (CLUBS[p.clubId]?.name || '').toLowerCase().includes(q)
-      );
-    }
-
-    return list.sort((a, b) => b.cost - a.cost);
-  }, [players, currentSquadPlayerIds, pickerPosFilter, pickerClubFilter, pickerSearch]);
-
   const handleExecuteSwapOrAdd = async (selectedInPlayerId: string) => {
     if (!managerId || !pickingContext) return;
     setActionLoading(true);

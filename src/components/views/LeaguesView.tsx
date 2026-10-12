@@ -525,12 +525,14 @@ export const LeaguesView: React.FC = () => {
       </div>
 
       {/* Full Tactical Pitch Lineup Modal when clicking any Manager */}
-      <ErrorBoundary onReset={() => setInspectedManagerId(null)}>
-        <ManagerSquadModal
-          managerId={inspectedManagerId}
-          onClose={() => setInspectedManagerId(null)}
-        />
-      </ErrorBoundary>
+      {inspectedManagerId && (
+        <ErrorBoundary onReset={() => setInspectedManagerId(null)}>
+          <ManagerSquadModal
+            managerId={inspectedManagerId}
+            onClose={() => setInspectedManagerId(null)}
+          />
+        </ErrorBoundary>
+      )}
     </div>
   );
 };
