@@ -9,7 +9,9 @@ import {
   adminSwapManagerPlayerApi,
   adminToggleManagerPlayerRoleApi,
   adminResetManagerGW1Api,
+  adminUnlockManagerLineupApi,
 } from '../../services/api';
+import { IOSSwitch } from '../common/IOSSwitch';
 import { Squad, ChipType } from '../../types/fpl';
 import { GameweekCalculationResult, calculateGameweekSquadPoints, getEffectiveScoringPosition } from '../../engine/scoring';
 import { getFormationLayout } from '../../engine/formations';
@@ -29,6 +31,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Lock,
+  Unlock,
+  Clock,
   Users,
   ChevronDown,
   Plus,
@@ -75,6 +79,8 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
     bonusPointsAdjustment?: number;
     squad: Squad;
     joinedAt?: string;
+    isLineupUnlocked?: boolean;
+    unlockedUntil?: string | null;
   } | null>(null);
   const [calcResult, setCalcResult] = useState<GameweekCalculationResult | null>(null);
   const [selectedPlayerForSheet, setSelectedPlayerForSheet] = useState<string | null>(null);
@@ -89,6 +95,47 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   const [customBankInput, setCustomBankInput] = useState<string>('');
   const [customPointsInput, setCustomPointsInput] = useState<string>('');
   const [showRemoveConfirm, setShowRemoveConfirm] = useState<boolean>(false);
+
+  // Lineup Unlock Override State (for single-manager lock bypass & timer)
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
+  const [showCustomTimeInput, setShowCustomTimeInput] = useState<boolean>(false);
+  const [customMinutesInput, setCustomMinutesInput] = useState<string>('20');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const isManagerUnlocked = useMemo(() => {
+    if (!managerData) return false;
+    const isExplicitlyUnlocked = Boolean(
+      managerData.squad?.isLineupUnlocked ?? managerData.isLineupUnlocked
+    );
+    const until = managerData.squad?.unlockedUntil ?? managerData.unlockedUntil;
+    if (until) {
+      return isExplicitlyUnlocked && new Date(until).getTime() > nowMs;
+    }
+    return isExplicitlyUnlocked;
+  }, [managerData, nowMs]);
+
+  const unlockCountdownText = useMemo(() => {
+    if (!isManagerUnlocked || !managerData) return null;
+    const until = managerData.squad?.unlockedUntil ?? managerData.unlockedUntil;
+    if (!until) return 'განბლოკილია (მუდმივად)';
+    const diffMs = new Date(until).getTime() - nowMs;
+    if (diffMs <= 0) return 'ვადა ამოიწურა';
+    const totalSec = Math.floor(diffMs / 1000);
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    if (mins >= 60) {
+      const hours = Math.floor(mins / 60);
+      const remMins = mins % 60;
+      return `${hours}სთ ${remMins}წთ დარჩა`;
+    }
+    return `${mins}:${secs.toString().padStart(2, '0')} დარჩა`;
+  }, [isManagerUnlocked, managerData, nowMs]);
 
   // In-modal Player Market Picker State (for Swap or Add)
   const [isPickingPlayer, setIsPickingPlayer] = useState<boolean>(false);
@@ -373,6 +420,56 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
       }
     } catch (err: any) {
       showToast(err?.message || 'GW1-ზე დაბრუნება ვერ მოხერხდა');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleToggleManagerUnlock = async (checked: boolean) => {
+    if (!managerId) return;
+    setActionLoading(true);
+    triggerHaptic(checked ? 'success' : 'warning');
+    try {
+      const res = await adminUnlockManagerLineupApi({
+        managerId,
+        isUnlocked: checked,
+      });
+      if (res.success) {
+        showToast(
+          checked
+            ? 'შემადგენლობა განიბლოკა მენეჯერისთვის (შეუძლია გუნდის შეცვლა)!'
+            : 'შემადგენლობა დაბლოკილია მენეჯერისთვის.'
+        );
+        if (checked) confetti({ particleCount: 35, spread: 60, origin: { y: 0.6 } });
+        await loadManagerSquad(true);
+        refreshServerState?.();
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'სტატუსის შეცვლა ვერ მოხერხდა');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleGrantUnlockTime = async (minutes: number) => {
+    if (!managerId || minutes <= 0) return;
+    setActionLoading(true);
+    triggerHaptic('success');
+    try {
+      const res = await adminUnlockManagerLineupApi({
+        managerId,
+        isUnlocked: true,
+        durationMinutes: minutes,
+      });
+      if (res.success) {
+        confetti({ particleCount: 45, spread: 65, origin: { y: 0.6 } });
+        showToast(`შემადგენლობა განიბლოკა +${minutes} წუთით!`);
+        setShowCustomTimeInput(false);
+        await loadManagerSquad(true);
+        refreshServerState?.();
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'დროის მიცემა ვერ მოხერხდა');
     } finally {
       setActionLoading(false);
     }
@@ -668,6 +765,137 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
 
                 {showAdminDeck && (
                   <div className="p-3 space-y-3">
+                    {/* Lineup Unlock Override Card */}
+                    <div className={`p-3 rounded-xl border transition-all ${
+                      isManagerUnlocked
+                        ? 'bg-emerald-950/40 border-emerald-500/40 shadow-sm shadow-emerald-950/50'
+                        : 'bg-black/30 border-white/10'
+                    }`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-start gap-2.5 min-w-0">
+                          <div className={`p-2 rounded-xl shrink-0 ${
+                            isManagerUnlocked
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-slate-800 text-slate-400 border border-white/5'
+                          }`}>
+                            {isManagerUnlocked ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="font-bold text-white text-xs">
+                                შემადგენლობის განბლოკვა
+                              </span>
+                              <span className="text-[10px] text-slate-400 font-normal">
+                                (Lineup Override)
+                              </span>
+                            </div>
+                            <div className="text-[11px] mt-0.5 flex items-center gap-1.5 flex-wrap">
+                              {isManagerUnlocked ? (
+                                <span className="font-bold text-emerald-400 flex items-center gap-1">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
+                                  {unlockCountdownText}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400 font-medium">
+                                  ჩაკეტილია (Deadline Lock Active)
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Switch */}
+                        <div className="shrink-0 flex items-center gap-2">
+                          <IOSSwitch
+                            checked={isManagerUnlocked}
+                            onChange={handleToggleManagerUnlock}
+                            disabled={actionLoading}
+                            size="sm"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Time Extension Quick Bar */}
+                      <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-1.5 flex-wrap">
+                        <div className="flex items-center gap-1 text-[10.5px] text-slate-300 font-medium shrink-0">
+                          <Clock className="w-3 h-3 text-indigo-400" />
+                          <span>დრო:</span>
+                        </div>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => handleGrantUnlockTime(15)}
+                            className="px-2 py-1 rounded-lg bg-indigo-600/25 hover:bg-indigo-600/45 border border-indigo-500/30 text-indigo-300 font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                          >
+                            +15 წთ
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => handleGrantUnlockTime(20)}
+                            className="px-2 py-1 rounded-lg bg-emerald-600/25 hover:bg-emerald-600/45 border border-emerald-500/30 text-emerald-300 font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                          >
+                            +20 წთ
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => handleGrantUnlockTime(30)}
+                            className="px-2 py-1 rounded-lg bg-indigo-600/25 hover:bg-indigo-600/45 border border-indigo-500/30 text-indigo-300 font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                          >
+                            +30 წთ
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => handleGrantUnlockTime(60)}
+                            className="px-2 py-1 rounded-lg bg-indigo-600/25 hover:bg-indigo-600/45 border border-indigo-500/30 text-indigo-300 font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                          >
+                            +60 წთ
+                          </button>
+                          <button
+                            type="button"
+                            disabled={actionLoading}
+                            onClick={() => setShowCustomTimeInput(!showCustomTimeInput)}
+                            className="px-2 py-1 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-slate-200 font-bold text-[10px] active:scale-95 transition-all cursor-pointer"
+                          >
+                            სხვა...
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Custom Time Input Form */}
+                      {showCustomTimeInput && (
+                        <div className="mt-2 pt-2 border-t border-white/10 flex items-center gap-1.5 animate-fade-in">
+                          <input
+                            type="number"
+                            min="1"
+                            max="1440"
+                            placeholder="წუთები (მაგ. 45)"
+                            value={customMinutesInput}
+                            onChange={(e) => setCustomMinutesInput(e.target.value)}
+                            className="flex-1 bg-black/50 border border-white/15 rounded-lg px-2.5 py-1 text-white placeholder-slate-500 font-mono text-xs focus:outline-hidden focus:border-purple-400"
+                          />
+                          <button
+                            type="button"
+                            disabled={actionLoading || !customMinutesInput || parseInt(customMinutesInput, 10) <= 0}
+                            onClick={() => handleGrantUnlockTime(parseInt(customMinutesInput, 10))}
+                            className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white font-bold text-xs cursor-pointer active:scale-95 transition-all"
+                          >
+                            მიცემა
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowCustomTimeInput(false)}
+                            className="px-2 py-1 rounded-lg text-slate-400 hover:text-white text-xs cursor-pointer"
+                          >
+                            X
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     {/* Admin Navigation Tabs */}
                     <div className="flex items-center gap-1 bg-black/40 p-1 rounded-xl border border-white/5 overflow-x-auto scrollbar-none">
                       <button

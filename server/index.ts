@@ -48,6 +48,17 @@ function isDeadlinePassed(data: any): boolean {
   return new Date() >= new Date(data.deadline.deadlineTime);
 }
 
+export function isManagerLineupUnlocked(manager: any, data: any): boolean {
+  if (!manager) return false;
+  const isExplicit = Boolean(manager.isLineupUnlocked || manager.squad?.isLineupUnlocked);
+  const until = manager.unlockedUntil || manager.squad?.unlockedUntil;
+  if (until) {
+    if (new Date() < new Date(until)) return true;
+    return false; // Timer expired
+  }
+  return isExplicit;
+}
+
 function isLineupsVisibleForPublic(data: any): boolean {
   const mode = data.lineupVisibility || 'auto';
   if (mode === 'always_show') return true;
@@ -113,6 +124,8 @@ app.get('/api/state', (req: Request, res: Response) => {
       teamName: m.teamName,
       isApproved: user ? (isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isApproved)) : false,
       isAdmin: user ? (isUserAdmin(user.username) || user.role === 'admin') : false,
+      isLineupUnlocked: isManagerLineupUnlocked(m, data),
+      unlockedUntil: m.unlockedUntil || m.squad?.unlockedUntil || null,
     };
   });
 
@@ -195,7 +208,16 @@ app.get('/api/state', (req: Request, res: Response) => {
     playerOwnership,
     lineupVisibility: lineupVisibilityMode,
     isLineupsVisible: publicLineupsVisible,
-    activeManager: manager,
+    activeManager: manager ? {
+      ...manager,
+      isLineupUnlocked: isManagerLineupUnlocked(manager, data),
+      unlockedUntil: manager.unlockedUntil || manager.squad?.unlockedUntil || null,
+      squad: {
+        ...manager.squad,
+        isLineupUnlocked: isManagerLineupUnlocked(manager, data),
+        unlockedUntil: manager.unlockedUntil || manager.squad?.unlockedUntil || null,
+      },
+    } : null,
     currentUserApproved: isApproved,
     deadline: data.deadline || null,
     paymentSettings: {
@@ -302,7 +324,16 @@ app.get('/api/manager/:id', (req: Request, res: Response) => {
 
   res.json({
     success: true,
-    manager,
+    manager: {
+      ...manager,
+      isLineupUnlocked: isManagerLineupUnlocked(manager, data),
+      unlockedUntil: manager.unlockedUntil || manager.squad?.unlockedUntil || null,
+      squad: {
+        ...manager.squad,
+        isLineupUnlocked: isManagerLineupUnlocked(manager, data),
+        unlockedUntil: manager.unlockedUntil || manager.squad?.unlockedUntil || null,
+      },
+    },
     calculationResult: calc,
     currentGW: data.currentGW,
     isLineupHidden: false,
@@ -881,9 +912,10 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
   }
 
   const data = db.getData();
+  let manager = data.managers[managerId];
 
-  // Deadline check
-  if (data.deadline && new Date() >= new Date(data.deadline.deadlineTime)) {
+  // Deadline check (bypassed if manager has admin lineup unlock override)
+  if (!isManagerLineupUnlocked(manager, data) && data.deadline && new Date() >= new Date(data.deadline.deadlineTime)) {
     return res.status(403).json({ error: 'Lineups are locked. The deadline has passed.' });
   }
 
@@ -892,8 +924,6 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
   if (user && !isUserAdmin(user.username) && !user.isApproved) {
     return res.status(403).json({ error: 'Your account is pending approval by administrators.' });
   }
-
-  let manager = data.managers[managerId];
 
   if (!manager) {
     const user = data.users?.[managerId];
@@ -1029,6 +1059,10 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
     if (sanitizedPlayers.length === 9) {
       updateManagerTransferAccounting(manager, data);
     }
+
+    if (isManagerLineupUnlocked(manager, data) && manager.squad.gameweekSquads?.[currentGWKey]) {
+      manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(sanitizedPlayers));
+    }
   }
 
   const registeredUser = data.users?.[managerId];
@@ -1059,9 +1093,10 @@ app.post('/api/squad/save', (req: Request, res: Response) => {
 app.post('/api/squad/chip', (req: Request, res: Response) => {
   const { managerId, chip } = req.body;
   const data = db.getData();
+  let manager = data.managers[managerId];
 
-  // Deadline check: cannot activate/change chips once lineups are locked
-  if (data.deadline && new Date() >= new Date(data.deadline.deadlineTime)) {
+  // Deadline check: cannot activate/change chips once lineups are locked (unless unlocked by admin)
+  if (!isManagerLineupUnlocked(manager, data) && data.deadline && new Date() >= new Date(data.deadline.deadlineTime)) {
     return res.status(403).json({ error: 'Lineups are locked. The deadline has passed.' });
   }
 
@@ -1070,8 +1105,6 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
   if (user && !isUserAdmin(user.username) && !user.isApproved) {
     return res.status(403).json({ error: 'Your account is pending approval by administrators.' });
   }
-
-  let manager = data.managers[managerId];
 
   if (!manager) {
     const user = data.users?.[managerId];
@@ -1150,9 +1183,10 @@ app.post('/api/squad/chip', (req: Request, res: Response) => {
 app.post('/api/squad/transfer', (req: Request, res: Response) => {
   const { managerId, outPlayerId, inPlayerId } = req.body;
   const data = db.getData();
+  let manager = data.managers[managerId];
 
-  // Deadline check
-  if (data.deadline && new Date() >= new Date(data.deadline.deadlineTime)) {
+  // Deadline check: unless manager has lineup unlock override
+  if (!isManagerLineupUnlocked(manager, data) && data.deadline && new Date() >= new Date(data.deadline.deadlineTime)) {
     return res.status(403).json({ error: 'Transfers are locked. The deadline has passed.' });
   }
 
@@ -1161,8 +1195,6 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
   if (user && !isUserAdmin(user.username) && !user.isApproved) {
     return res.status(403).json({ error: 'Your account is pending approval by administrators.' });
   }
-
-  let manager = data.managers[managerId];
 
   if (!manager) {
     const user = data.users?.[managerId];
@@ -1235,8 +1267,8 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
   if (!manager.squad.gameweekSquads) manager.squad.gameweekSquads = {};
   if (!manager.squad.gameweekChips) manager.squad.gameweekChips = {};
 
-  // If deadline has passed for the ongoing gameweek, preserve snapshot
-  if (!isCurrentGWFinished && (data.deadline && new Date() >= new Date(data.deadline.deadlineTime))) {
+  // If deadline has passed for the ongoing gameweek, preserve snapshot (unless manager has lineup unlock override)
+  if (!isManagerLineupUnlocked(manager, data) && !isCurrentGWFinished && (data.deadline && new Date() >= new Date(data.deadline.deadlineTime))) {
     if (!manager.squad.gameweekSquads[currentGWKey] && manager.squad.players?.length === 9) {
       manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(manager.squad.players));
       manager.squad.gameweekChips[currentGWKey] = manager.squad.activeChip || null;
@@ -1253,6 +1285,10 @@ app.post('/api/squad/transfer', (req: Request, res: Response) => {
     sp.playerId === outPlayerId ? { ...sp, playerId: inPlayerId } : sp
   );
   manager.squad.transfersMadeThisGW = (manager.squad.transfersMadeThisGW || 0) + 1;
+
+  if (isManagerLineupUnlocked(manager, data) && manager.squad.gameweekSquads?.[currentGWKey]) {
+    manager.squad.gameweekSquads[currentGWKey] = JSON.parse(JSON.stringify(manager.squad.players));
+  }
 
   updateManagerTransferAccounting(manager, data);
   recalculateAllManagersLeaguePoints(data);
@@ -2780,6 +2816,9 @@ app.get('/api/admin/users', (req: Request, res: Response) => {
   const usersList = Object.values(data.users || {}).map((u) => {
     const isAdmin = isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isAdmin);
     const isReferee = Boolean(u.role === 'ref' || u.isReferee);
+    const mgr = data.managers?.[u.id];
+    const isUnlocked = isManagerLineupUnlocked(mgr, data);
+    const unlockedUntil = mgr?.unlockedUntil || mgr?.squad?.unlockedUntil || null;
     return {
       id: u.id,
       username: u.username,
@@ -2795,6 +2834,8 @@ app.get('/api/admin/users', (req: Request, res: Response) => {
       parallel: u.parallel,
       realName: u.realName,
       showRealNamePublicly: u.showRealNamePublicly,
+      isLineupUnlocked: isUnlocked,
+      unlockedUntil,
     };
   });
   res.json({ success: true, users: usersList });
@@ -3496,6 +3537,62 @@ app.post('/api/admin/manager/reset-to-gw1', (req: Request, res: Response) => {
     message: `${manager.managerName} (${manager.teamName}) წარმატებით დაბრუნდა GW1-ის შემადგენლობაზე, ქულებსა (სრული ${manager.totalPoints} ქულა) და 2 უფასო ტრანსფერზე!`,
     manager,
     ...breakdown,
+  });
+});
+
+// 12g. Admin: Toggle or Time-extend Manager Lineup Unlock Override
+app.post('/api/admin/manager/unlock-lineup', (req: Request, res: Response) => {
+  const { managerId, isUnlocked, durationMinutes, unlockedUntil } = req.body;
+  if (!managerId) {
+    return res.status(400).json({ error: 'managerId is required' });
+  }
+
+  const data = db.getData();
+  const manager = data.managers?.[managerId];
+  if (!manager || !manager.squad) {
+    return res.status(404).json({ error: 'Manager not found' });
+  }
+
+  let finalUntil: string | null = null;
+  let finalUnlocked: boolean = Boolean(isUnlocked);
+
+  if (finalUnlocked) {
+    if (typeof durationMinutes === 'number' && durationMinutes > 0) {
+      finalUntil = new Date(Date.now() + durationMinutes * 60 * 1000).toISOString();
+    } else if (unlockedUntil) {
+      finalUntil = unlockedUntil;
+    } else {
+      finalUntil = null; // Indefinite unlock
+    }
+  } else {
+    finalUnlocked = false;
+    finalUntil = null;
+  }
+
+  manager.isLineupUnlocked = finalUnlocked;
+  manager.unlockedUntil = finalUntil;
+  manager.squad.isLineupUnlocked = finalUnlocked;
+  manager.squad.unlockedUntil = finalUntil;
+
+  db.save();
+  const timeDesc = finalUntil ? `until ${new Date(finalUntil).toLocaleTimeString()}` : (finalUnlocked ? 'indefinitely' : 'locked');
+  commitDbToGitHub(`Admin update: Admin set lineup unlock for manager ${manager.managerName} (${timeDesc}) [skip ci]`).catch(console.error);
+
+  res.json({
+    success: true,
+    message: finalUnlocked
+      ? `მენეჯერის (${manager.managerName}) შემადგენლობა წარმატებით განიბლოკა ${finalUntil ? `(${durationMinutes ? `${durationMinutes} წუთით` : ''})` : 'მუდმივად'}!`
+      : `მენეჯერის (${manager.managerName}) შემადგენლობა დაბლოკილია.`,
+    manager: {
+      ...manager,
+      isLineupUnlocked: isManagerLineupUnlocked(manager, data),
+      unlockedUntil: finalUntil,
+      squad: {
+        ...manager.squad,
+        isLineupUnlocked: isManagerLineupUnlocked(manager, data),
+        unlockedUntil: finalUntil,
+      },
+    },
   });
 });
 

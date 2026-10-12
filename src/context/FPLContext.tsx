@@ -394,14 +394,29 @@ export const FPLProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsDemoMode(false);
   }, []);
 
-  // Deadline / Freeze system
+  // Deadline / Freeze system with live ticker
   const [deadline, setDeadlineState] = useState<{ gameweek: number; deadlineTime: string } | null>(null);
+  const [currentTimeMs, setCurrentTimeMs] = useState<number>(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTimeMs(Date.now());
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   const isSquadLocked = useMemo(() => {
     if (isDemoMode) return true;
+    const isExplicit = Boolean(squad?.isLineupUnlocked);
+    const until = squad?.unlockedUntil;
+    if (until) {
+      if (currentTimeMs < new Date(until).getTime()) return false; // Override: Unlocked by admin timer!
+    } else if (isExplicit) {
+      return false; // Override: Explicitly unlocked by admin switch!
+    }
     if (!deadline) return false;
-    return new Date() >= new Date(deadline.deadlineTime);
-  }, [deadline, isDemoMode]);
+    return currentTimeMs >= new Date(deadline.deadlineTime).getTime();
+  }, [deadline, isDemoMode, squad?.isLineupUnlocked, squad?.unlockedUntil, currentTimeMs]);
 
   const setDeadline = useCallback(async (d: { gameweek: number; deadlineTime: string } | null) => {
     try {

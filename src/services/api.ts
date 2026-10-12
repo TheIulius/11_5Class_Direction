@@ -734,4 +734,18 @@ export async function adminToggleManagerPlayerRoleApi(
   return safeJson(res, 'როლის შეცვლა ვერ მოხერხდა (Failed to toggle player role)');
 }
 
+export async function adminUnlockManagerLineupApi(params: {
+  managerId: string;
+  isUnlocked: boolean;
+  durationMinutes?: number;
+  unlockedUntil?: string | null;
+}): Promise<{ success: boolean; manager: any; message?: string }> {
+  const res = await fetch(`${API_BASE}/api/admin/manager/unlock-lineup`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(params),
+  });
+  return safeJson(res, 'შემადგენლობის განბლოკვის შეცვლა ვერ მოხერხდა (Failed to toggle lineup lock)');
+}
+
 

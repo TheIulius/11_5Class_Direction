@@ -78,6 +78,8 @@ export interface Squad {
   gwTransferPenalties?: Record<number, number>;
   gameweekSquads?: Record<number, SquadPlayer[]>;
   gameweekChips?: Record<number, ChipType | null>;
+  isLineupUnlocked?: boolean;
+  unlockedUntil?: string | null;
 }
 
 export type Venue = 'parki' | 'delisi' | 'one_price';
@@ -179,6 +181,8 @@ export interface AuthUser {
   parallel?: string;
   realName?: string;
   showRealNamePublicly?: boolean;
+  isLineupUnlocked?: boolean;
+  unlockedUntil?: string | null;
 }
 
 export type LineupVisibilityMode = 'auto' | 'always_show' | 'always_hide';

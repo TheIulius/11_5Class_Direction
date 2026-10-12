@@ -28,6 +28,7 @@ import {
   AlertCircle,
   RefreshCw,
   Award,
+  Unlock,
 } from 'lucide-react';
 
 export const ManagersView: React.FC = () => {
@@ -553,6 +554,12 @@ export const ManagersView: React.FC = () => {
                           <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1 font-mono">
                             <Award className="w-2.5 h-2.5" />
                             Ref
+                          </span>
+                        )}
+                        {u.isLineupUnlocked && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 font-mono animate-pulse">
+                            <Unlock className="w-2.5 h-2.5" />
+                            Unlocked
                           </span>
                         )}
                       </div>
