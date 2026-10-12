@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Sun, Moon } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 export type ActiveTab = 'hero' | 'calendar' | 'homework' | 'opportunities' | 'ideas' | 'clubs';
@@ -8,6 +8,8 @@ export type ActiveTab = 'hero' | 'calendar' | 'homework' | 'opportunities' | 'id
 interface NavbarProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
 }
 
 const NAV_LINKS: { id: ActiveTab; label: string }[] = [
@@ -19,7 +21,12 @@ const NAV_LINKS: { id: ActiveTab; label: string }[] = [
   { id: 'clubs', label: 'კლუბები' }
 ];
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  onSelectTab,
+  theme,
+  onToggleTheme
+}) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleClick = (id: ActiveTab) => {
@@ -64,9 +71,31 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab }) => {
           })}
         </nav>
 
-        {/* Right Actions & Subtle Signature */}
-        <div className="flex items-center gap-2">
-          <span className="hidden md:inline-block text-[10px] font-mono text-[#7c796e]/75 tracking-wide select-none">
+        {/* Right Actions: Theme Switch & Subtle Signature */}
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => {
+              soundEffects.click();
+              onToggleTheme();
+            }}
+            title={theme === 'dark' ? 'ნათელ რეჟიმზე გადართვა' : 'მუქ რეჟიმზე გადართვა'}
+            aria-label={theme === 'dark' ? 'ნათელ რეჟიმზე გადართვა' : 'მუქ რეჟიმზე გადართვა'}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-[#171825]/70 hover:bg-[#202235]/85 border border-[#f5f2eb]/15 text-xs font-medium text-[#fcfbf7] backdrop-blur-xl transition-all cursor-pointer shadow-sm"
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun className="w-3.5 h-3.5 text-[#f5f2eb]" />
+                <span className="hidden sm:inline text-[11px]">ნათელი</span>
+              </>
+            ) : (
+              <>
+                <Moon className="w-3.5 h-3.5 text-[#fcfbf7]" />
+                <span className="hidden sm:inline text-[11px]">მუქი</span>
+              </>
+            )}
+          </button>
+
+          <span className="hidden lg:inline-block text-[10px] font-mono text-[#7c796e]/75 tracking-wide select-none">
             made by Theiulius
           </span>
 

@@ -10,6 +10,14 @@
     --card-bg: #ffffff;
     --card-border: #e2e8f0;
     --accent: #10b981;
+    color-scheme: light dark;
+  }
+
+  :root:has(> head > meta[name="color-scheme"][content="dark"]) {
+    color-scheme: dark;
+  }
+
+  :root:has(> head > meta[name="color-scheme"][content="light"]) {
     color-scheme: light;
   }
 
@@ -60,6 +68,208 @@
       font-size: 16px;
     }
   }
+}
+
+/* ==========================================================================
+   11/5 DIRECTION — MULTI-SHADE WARM CREAM LIGHT MODE (.campaign-light)
+   ========================================================================== */
+.campaign-light {
+  color-scheme: light;
+  background-color: #f6f3eb !important;
+  color: #1c1914 !important;
+}
+
+/* Shade 0: Whiter Warm Porcelain Surfaces (Navbar, Primary Cards, Modals, Shade 1) */
+.campaign-light [class*="bg-[#12131d]"],
+.campaign-light [class*="bg-[#13141f]"],
+.campaign-light [class*="bg-[#131420]"],
+.campaign-light [class*="bg-[#141520]"],
+.campaign-light [class*="bg-[#141522]"] {
+  background-color: rgba(253, 252, 249, 0.88) !important;
+  box-shadow: 0 4px 24px -4px rgba(38, 33, 24, 0.06);
+}
+
+/* Shade 1: Soft Warm Ivory / Cream Containers (Shade 2, Nav Pill Bar, Calendar Cells) */
+.campaign-light [class*="bg-[#161722]"],
+.campaign-light [class*="bg-[#161724]"],
+.campaign-light [class*="bg-[#171825]"],
+.campaign-light [class*="bg-[#171826]"],
+.campaign-light [class*="bg-[#181926]"],
+.campaign-light [class*="bg-[#181928]"],
+.campaign-light [class*="bg-[#181a28]"],
+.campaign-light [class*="bg-[#191a27]"],
+.campaign-light [class*="bg-[#191b29]"] {
+  background-color: rgba(242, 237, 225, 0.85) !important;
+}
+
+/* Shade 2: Slightly Darker Oat Cream Containers (Shade 3, Secondary Cards, Nested Pills) */
+.campaign-light [class*="bg-[#1a1b28]"],
+.campaign-light [class*="bg-[#1a1b2a]"],
+.campaign-light [class*="bg-[#1a1c2d]"],
+.campaign-light [class*="bg-[#1b1c2b]"],
+.campaign-light [class*="bg-[#1b1c2c]"],
+.campaign-light [class*="bg-[#1d1f30]"],
+.campaign-light [class*="bg-[#1e2030]"],
+.campaign-light [class*="bg-[#1f2133]"],
+.campaign-light [class*="bg-[#202235]"] {
+  background-color: rgba(234, 227, 211, 0.82) !important;
+}
+
+/* Shade 3: Richer Warm Almond / Sand Containers (Shade 4, Elevated Accents) */
+.campaign-light [class*="bg-[#222436]"],
+.campaign-light [class*="bg-[#222438]"],
+.campaign-light [class*="bg-[#24263b]"],
+.campaign-light [class*="bg-[#25283e]"],
+.campaign-light [class*="bg-[#2a2d46]"] {
+  background-color: rgba(225, 216, 198, 0.78) !important;
+}
+
+/* Shade 4: Subtle Recessed Surfaces & Footer */
+.campaign-light [class*="bg-[#0c0d14]"],
+.campaign-light [class*="bg-[#0f1018]"],
+.campaign-light [class*="bg-[#0f1019]"],
+.campaign-light [class*="bg-[#11121c]"] {
+  background-color: rgba(248, 245, 237, 0.82) !important;
+}
+
+/* Hover refinements for cream containers */
+.campaign-light [class*="hover:bg-[#1a1c2d]"]:hover,
+.campaign-light [class*="hover:bg-[#1e2030]"]:hover,
+.campaign-light [class*="hover:bg-[#202235]"]:hover,
+.campaign-light [class*="hover:bg-[#24263b]"]:hover,
+.campaign-light [class*="hover:bg-[#25283e]"]:hover,
+.campaign-light [class*="hover:bg-[#2a2d46]"]:hover {
+  background-color: rgba(255, 254, 250, 0.96) !important;
+}
+
+/* Subtle translucent white/cream chips in Light Mode */
+.campaign-light .bg-white\/5,
+.campaign-light [class*="bg-[#f5f2eb]/10"],
+.campaign-light [class*="bg-[#f5f2eb]/[0.05]"] {
+  background-color: rgba(42, 37, 28, 0.055) !important;
+}
+
+.campaign-light .hover\:bg-white\/5:hover,
+.campaign-light .hover\:bg-white\/10:hover,
+.campaign-light .hover\:bg-white\/15:hover,
+.campaign-light [class*="bg-[#f5f2eb]/15"],
+.campaign-light [class*="bg-[#f5f2eb]/20"],
+.campaign-light [class*="bg-[#f5f2eb]/25"] {
+  background-color: rgba(42, 37, 28, 0.095) !important;
+}
+
+/* Primary Solid Active Buttons & Selected Pills in Light Mode */
+.campaign-light .bg-\[\#f5f2eb\],
+.campaign-light .bg-\[\#fcfbf7\],
+.campaign-light [class*="bg-[#f5f2eb]/90"] {
+  background-color: #1e1b16 !important;
+  color: #fcfbf7 !important;
+}
+
+.campaign-light .bg-\[\#f5f2eb\] *,
+.campaign-light .bg-\[\#fcfbf7\] * {
+  color: #fcfbf7 !important;
+}
+
+.campaign-light .bg-\[\#fcfbf7\] .bg-\[\#0c0d12\] {
+  background-color: #fcfbf7 !important;
+  color: #1e1b16 !important;
+}
+
+.campaign-light .bg-\[\#fcfbf7\] .bg-\[\#0c0d12\] * {
+  color: #1e1b16 !important;
+}
+
+/* Borders in Light Mode */
+.campaign-light [class*="border-[#f5f2eb]/10"],
+.campaign-light [class*="border-[#f5f2eb]/12"] {
+  border-color: rgba(38, 33, 24, 0.10) !important;
+}
+
+.campaign-light [class*="border-[#f5f2eb]/15"],
+.campaign-light [class*="border-[#f5f2eb]/18"],
+.campaign-light [class*="border-[#f5f2eb]/20"] {
+  border-color: rgba(38, 33, 24, 0.15) !important;
+}
+
+.campaign-light [class*="border-[#f5f2eb]/25"],
+.campaign-light [class*="border-[#f5f2eb]/40"] {
+  border-color: rgba(38, 33, 24, 0.24) !important;
+}
+
+/* Typography Hierarchy in Light Mode */
+.campaign-light [class*="text-[#fcfbf7]"],
+.campaign-light [class*="text-[#f5f2eb]"],
+.campaign-light .text-white {
+  color: #1b1813 !important;
+}
+
+.campaign-light [class*="text-[#eae7da]"],
+.campaign-light [class*="text-[#e8e5d8]"],
+.campaign-light [class*="text-[#e6e2d3]"],
+.campaign-light [class*="text-[#dedacb]"],
+.campaign-light [class*="text-[#d4d1c5]"] {
+  color: #3a342a !important;
+}
+
+.campaign-light [class*="text-[#c7c4b5]"],
+.campaign-light [class*="text-[#c5c1b2]"],
+.campaign-light [class*="text-[#c2bfae]"],
+.campaign-light [class*="text-[#bab6a5]"],
+.campaign-light [class*="text-[#b8b5a8]"] {
+  color: #524b3d !important;
+}
+
+.campaign-light [class*="text-[#a8a495]"] {
+  color: #6b6353 !important;
+}
+
+.campaign-light [class*="text-[#78756c]"],
+.campaign-light [class*="text-[#7c796e]"] {
+  color: #857d6d !important;
+}
+
+/* Ping-Pong subtle dark green in Light Mode */
+.campaign-light [class*="bg-[#151c18]"],
+.campaign-light [class*="bg-[#23382b]"] {
+  background-color: rgba(53, 84, 64, 0.12) !important;
+}
+
+.campaign-light [class*="text-[#7c9987]"],
+.campaign-light [class*="text-[#8ca695]"],
+.campaign-light [class*="text-[#9cbba7]"] {
+  color: #294734 !important;
+}
+
+/* Category & Event Badge Text Contrast in Light Mode */
+.campaign-light .text-red-300,
+.campaign-light .text-red-200 {
+  color: #b91c1c !important;
+}
+.campaign-light .text-amber-200 {
+  color: #92400e !important;
+}
+.campaign-light .text-sky-200 {
+  color: #0369a1 !important;
+}
+.campaign-light .text-emerald-200,
+.campaign-light .text-emerald-300 {
+  color: #047857 !important;
+}
+.campaign-light .text-violet-200 {
+  color: #5b21b6 !important;
+}
+.campaign-light .text-orange-200 {
+  color: #c2410c !important;
+}
+.campaign-light .text-pink-200 {
+  color: #be185d !important;
+}
+.campaign-light .text-teal-200 {
+  color: #0f766e !important;
+}
+.campaign-light .text-indigo-200 {
+  color: #3730a3 !important;
 }
 
 /* Custom scrollbar for mobile and desktop */

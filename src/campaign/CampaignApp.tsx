@@ -15,10 +15,69 @@ interface CampaignAppProps {
 
 export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('hero');
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      const saved = localStorage.getItem('color-scheme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    } catch {}
+    return 'dark';
+  });
 
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    const metaColorScheme = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
+    const metaTheme = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      if (metaTheme) metaTheme.setAttribute('content', '#0b0c13');
+    } else {
+      document.documentElement.classList.remove('dark');
+      if (metaTheme) metaTheme.setAttribute('content', '#f6f3eb');
+    }
+
+    try {
+      const stored = localStorage.getItem('color-scheme');
+      if (metaColorScheme) {
+        metaColorScheme.content = stored === 'light' || stored === 'dark' ? stored : 'light dark';
+      }
+    } catch {}
+  }, [theme]);
+
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'color-scheme') {
+        if (e.newValue === 'light' || e.newValue === 'dark') {
+          setTheme(e.newValue);
+        } else {
+          const prefersDark =
+            window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+          setTheme(prefersDark ? 'dark' : 'light');
+        }
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
   }, []);
+
+  const handleToggleTheme = () => {
+    const next: 'dark' | 'light' = theme === 'dark' ? 'light' : 'dark';
+    const prefersDark =
+      window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const systemScheme: 'dark' | 'light' = prefersDark ? 'dark' : 'light';
+    const metaColorScheme = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]');
+
+    try {
+      if (next === systemScheme) {
+        localStorage.removeItem('color-scheme');
+        if (metaColorScheme) metaColorScheme.content = 'light dark';
+      } else {
+        localStorage.setItem('color-scheme', next);
+        if (metaColorScheme) metaColorScheme.content = next;
+      }
+    } catch {}
+
+    setTheme(next);
+  };
 
   const handleSelectTab = (tab: ActiveTab) => {
     setActiveTab(tab);
@@ -26,7 +85,13 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#0b0c13] text-[#f5f2eb] flex flex-col font-sans selection:bg-[#f5f2eb] selection:text-[#0b0c13] antialiased overflow-x-hidden">
+    <div
+      className={`relative min-h-screen w-full ${
+        theme === 'light'
+          ? 'campaign-light bg-[#f6f3eb] text-[#1c1914] selection:bg-[#1e1b16] selection:text-[#fcfbf7]'
+          : 'campaign-dark bg-[#0b0c13] text-[#f5f2eb] selection:bg-[#f5f2eb] selection:text-[#0b0c13]'
+      } flex flex-col font-sans antialiased overflow-x-hidden transition-colors duration-300`}
+    >
       {/* Subtle Scattered Class Photos in Background */}
       <BackgroundClassPhotos />
 
@@ -34,6 +99,8 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
       <Navbar
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
+        theme={theme}
+        onToggleTheme={handleToggleTheme}
       />
 
       {/* Main Tab Content */}
