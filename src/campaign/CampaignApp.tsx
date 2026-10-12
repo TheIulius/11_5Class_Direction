@@ -8,7 +8,6 @@ import { IdeaBoardSection } from './components/IdeaBoardSection';
 import { ClubFastTrackSection } from './components/ClubFastTrackSection';
 import { StudyMatcherSection } from './components/StudyMatcherSection';
 import { BackgroundClassPhotos } from './components/BackgroundClassPhotos';
-import { Ilo777Modal } from './components/Ilo777Modal';
 
 interface CampaignAppProps {
   onSwitchToFantasy?: () => void;
@@ -16,7 +15,6 @@ interface CampaignAppProps {
 
 export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('hero');
-  const [isIlo777Open, setIsIlo777Open] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.add('dark');
@@ -36,7 +34,6 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
       <Navbar
         activeTab={activeTab}
         onSelectTab={handleSelectTab}
-        onOpenIlo777={() => setIsIlo777Open(true)}
       />
 
       {/* Main Tab Content */}
@@ -45,7 +42,6 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
           <div className="space-y-12">
             <HeroSection
               onNavigateTab={handleSelectTab}
-              onOpenIlo777={() => setIsIlo777Open(true)}
             />
             {/* Quick overview of study pods on home tab */}
             <StudyMatcherSection />
@@ -93,32 +89,17 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
           </div>
 
           <div className="flex items-center gap-4 text-[11px] font-mono">
-            <button
-              onClick={() => setIsIlo777Open(true)}
-              className="text-[#dedacb] hover:text-white transition-colors cursor-pointer"
-            >
-              ilo777slots 🎰
-            </button>
             {onSwitchToFantasy && (
-              <>
-                <span>&bull;</span>
-                <button
-                  onClick={onSwitchToFantasy}
-                  className="text-[#a8a495] hover:text-[#fcfbf7] transition-colors cursor-pointer"
-                >
-                  საქველმოქმედო ლიგა &rarr;
-                </button>
-              </>
+              <button
+                onClick={onSwitchToFantasy}
+                className="text-[#a8a495] hover:text-[#fcfbf7] transition-colors cursor-pointer"
+              >
+                საქველმოქმედო ლიგა &rarr;
+              </button>
             )}
           </div>
         </div>
       </footer>
-
-      {/* ilo777slots Easter Egg Modal */}
-      <Ilo777Modal
-        isOpen={isIlo777Open}
-        onClose={() => setIsIlo777Open(false)}
-      />
     </div>
   );
 };

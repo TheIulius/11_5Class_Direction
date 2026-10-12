@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Coins } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 export type ActiveTab = 'hero' | 'calendar' | 'homework' | 'opportunities' | 'ideas' | 'clubs';
@@ -8,7 +8,6 @@ export type ActiveTab = 'hero' | 'calendar' | 'homework' | 'opportunities' | 'id
 interface NavbarProps {
   activeTab: ActiveTab;
   onSelectTab: (tab: ActiveTab) => void;
-  onOpenIlo777: () => void;
 }
 
 const NAV_LINKS: { id: ActiveTab; label: string }[] = [
@@ -20,7 +19,7 @@ const NAV_LINKS: { id: ActiveTab; label: string }[] = [
   { id: 'clubs', label: 'კლუბები' }
 ];
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab, onOpenIlo777 }) => {
+export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleClick = (id: ActiveTab) => {
@@ -65,23 +64,11 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab, onOpenIl
           })}
         </nav>
 
-        {/* Right End: Subtle ilo777slots button */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => {
-              soundEffects.click();
-              onOpenIlo777();
-            }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#f5f2eb]/15 bg-[#f5f2eb]/8 hover:bg-[#f5f2eb]/15 text-xs text-[#dedacb] hover:text-white font-medium transition-all cursor-pointer active:scale-98"
-          >
-            <Coins className="w-3.5 h-3.5 text-amber-400" />
-            <span className="font-mono">ilo777slots</span>
-          </button>
-
-          {/* Mobile hamburger */}
+        {/* Mobile hamburger */}
+        <div className="flex items-center md:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-1.5 text-[#dedacb] hover:text-white cursor-pointer"
+            className="p-1.5 text-[#dedacb] hover:text-white cursor-pointer"
             aria-label="მენიუს გახსნა"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

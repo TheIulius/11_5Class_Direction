@@ -5,10 +5,9 @@ import { soundEffects } from '../utils/soundEffects';
 
 interface HeroSectionProps {
   onNavigateTab: (tab: 'calendar' | 'homework' | 'opportunities' | 'ideas' | 'clubs') => void;
-  onOpenIlo777: () => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenIlo777 }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
   return (
     <section className="pt-10 sm:pt-16 pb-12 sm:pb-16 max-w-5xl mx-auto px-4 sm:px-6 text-center space-y-10">
       {/* Top Subtle Pill */}
