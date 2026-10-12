@@ -16782,6 +16782,21 @@
               "points": 0
             }
           ]
+        },
+        {
+          "id": "user_1791832738832",
+          "managerName": "Giorgi",
+          "teamName": "Mekravachia",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 84,
+          "previousRank": 84,
+          "grade": "სხვა",
+          "parallel": "სხვა სკოლელი 12 კლასი",
+          "realName": "გიორგი ღაჟონია",
+          "showRealNamePublicly": true,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -28262,6 +28277,37 @@
       "totalPoints": 0,
       "isLineupUnlocked": true,
       "unlockedUntil": "2026-10-12T13:18:57.017Z"
+    },
+    "user_1791832738832": {
+      "id": "user_1791832738832",
+      "managerName": "Giorgi",
+      "teamName": "Mekravachia",
+      "grade": "სხვა",
+      "parallel": "სხვა სკოლელი 12 კლასი",
+      "realName": "გიორგი ღაჟონია",
+      "showRealNamePublicly": true,
+      "squad": {
+        "teamName": "Mekravachia",
+        "managerName": "Giorgi",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        },
+        "startFreeTransfers": 1,
+        "gwTransferPenalties": {},
+        "accumulatedTransferPenalties": 0,
+        "gameweekSquads": {},
+        "gameweekChips": {}
+      },
+      "joinedAt": "2026-10-12T19:18:58.833Z",
+      "gwPoints": 0,
+      "totalPoints": 0
     }
   },
   "users": {
@@ -29721,6 +29767,24 @@
       "grade": "სხვა",
       "parallel": "Megobari",
       "realName": "გიო გაგუა",
+      "showRealNamePublicly": true
+    },
+    "user_1791832738832": {
+      "id": "user_1791832738832",
+      "username": "gio5476",
+      "email": "gioghazho@gmail.com",
+      "passwordHash": "b44ce769e48fe23bb6bbc189ea9a57a811cd0bcab18bf525eeeb49a4b2ef6e34b8b8430976c876285029006b314f363f93d6acea34adf6a4fee65195dc586688",
+      "salt": "892835448291f2a2fc1944d304ad3025",
+      "managerName": "Giorgi",
+      "teamName": "Mekravachia",
+      "token": "ec5b295541aecb6df6ccbeed5a8072451992cf28caaff3b3f2da002f72f2747d",
+      "createdAt": "2026-10-12T19:18:58.833Z",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": true,
+      "grade": "სხვა",
+      "parallel": "სხვა სკოლელი 12 კლასი",
+      "realName": "გიორგი ღაჟონია",
       "showRealNamePublicly": true
     }
   },

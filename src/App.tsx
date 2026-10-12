@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { CampaignApp } from './campaign/CampaignApp';
 import { FPLProvider, useFPL } from './context/FPLContext';
 import { MobileContainer } from './components/layout/MobileContainer';
 import { PickTeamView } from './components/views/PickTeamView';
@@ -15,7 +16,7 @@ import { StudentProfileModal } from './components/auth/StudentProfileModal';
 import { UpdateNotesModal } from './components/common/UpdateNotesModal';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 
-const AppContent: React.FC = () => {
+const FantasyAppContent: React.FC<{ onReturnToCampaign: () => void }> = ({ onReturnToCampaign }) => {
   const { activeTab, setActiveTab, authUser, isModerator, isReferee, openRulesModal } = useFPL();
 
   React.useEffect(() => {
@@ -44,15 +45,22 @@ const AppContent: React.FC = () => {
     };
   }, [activeTab]);
 
-  if (!authUser) {
-    return <AuthLandingView />;
-  }
-
-  const isAccountApproved = authUser.isAdmin || Boolean(authUser.isApproved);
-
   return (
-    <div className={`relative ${activeTab === 'team' ? 'h-[100dvh] lg:h-auto lg:min-h-screen w-full overflow-hidden lg:overflow-visible overscroll-none' : 'min-h-screen w-full'}`}>
-      {!isAccountApproved ? (
+    <div className="relative min-h-screen w-full bg-[#090d16]">
+      {/* Return to Campaign Top Banner */}
+      <div className="bg-gradient-to-r from-purple-900/90 to-cyan-900/90 border-b border-cyan-500/30 px-3 py-1.5 flex items-center justify-between text-xs text-white z-50 sticky top-0">
+        <span className="font-mono text-[11px] font-bold">⚽ Fantasy League Archive Mode</span>
+        <button
+          onClick={onReturnToCampaign}
+          className="px-2.5 py-0.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-[10px] uppercase tracking-wider cursor-pointer transition-colors"
+        >
+          &larr; Return to Presidential Portal
+        </button>
+      </div>
+
+      {!authUser ? (
+        <AuthLandingView />
+      ) : !(authUser.isAdmin || Boolean(authUser.isApproved)) ? (
         <PendingApprovalOverlay />
       ) : (
         <MobileContainer>
@@ -69,33 +77,6 @@ const AppContent: React.FC = () => {
               <AdminPortal />
             ) : isReferee ? (
               <div className="space-y-4">
-                <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black">
-                      🏁
-                    </div>
-                    <div>
-                      <h3 className="text-xs font-black text-slate-950 dark:text-white uppercase tracking-wider">
-                        Referee Match Console
-                      </h3>
-                      <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                        შეიყვანეთ და განაახლეთ მატჩის შედეგები და მოთამაშეთა სტატისტიკა
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500 text-slate-950">
-                      Trusted Ref
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab('team')}
-                      className="px-2.5 py-1 rounded-xl bg-slate-200 dark:bg-white/10 hover:bg-slate-300 dark:hover:bg-white/20 text-xs font-bold transition-all text-slate-700 dark:text-slate-200 cursor-pointer"
-                    >
-                      ← Team
-                    </button>
-                  </div>
-                </div>
                 <MatchDayAdmin />
               </div>
             ) : (
@@ -111,11 +92,21 @@ const AppContent: React.FC = () => {
 };
 
 export default function App() {
+  const [viewMode, setViewMode] = useState<'campaign' | 'fantasy'>('campaign');
+
+  if (viewMode === 'fantasy') {
+    return (
+      <ErrorBoundary>
+        <FPLProvider>
+          <FantasyAppContent onReturnToCampaign={() => setViewMode('campaign')} />
+        </FPLProvider>
+      </ErrorBoundary>
+    );
+  }
+
   return (
     <ErrorBoundary>
-      <FPLProvider>
-        <AppContent />
-      </FPLProvider>
+      <CampaignApp onSwitchToFantasy={() => setViewMode('fantasy')} />
     </ErrorBoundary>
   );
 }

@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: komarovi-charity-league
+    name: 11_5Class_Direction
     env: node
     plan: free
     buildCommand: npm install && npm run build
@@ -13,6 +13,6 @@ services:
       - key: GITHUB_OWNER
         value: TheIulius
       - key: GITHUB_REPO
-        value: premier-league-fantasy
+        value: 11_5Class_Direction
       - key: GITHUB_BRANCH
-        value: data
+        value: main
