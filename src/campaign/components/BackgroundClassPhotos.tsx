@@ -32,12 +32,12 @@ const PHOTO_SOURCES = [
   '/class-photos/566540435_1801019863866461_6743571529053003991_n.jpg.webp'
 ];
 
-// Horizontal offset bands (in %) so photos stay in the outer margins and softly frame the content
-const HORIZONTAL_SLOTS = [1.5, 5.2, 2.8, 9.5, 1.8, 6.4, 3.6, 11.2];
-const BASE_ROTATIONS = [-7, 6, 5, -6, -8, 7, 4, -5, 8, -4];
+// Alternate between outer edge and inner margin on each side so consecutive same-side photos never overlap
+const HORIZONTAL_SLOTS = [1.2, 1.4, 8.8, 8.5, 2.4, 2.6, 10.2, 9.8];
+const BASE_ROTATIONS = [-6, 5, 4, -5, -7, 6, 3, -4, 7, -3];
 
 const REPEAT_CYCLES = 4; // 4 * 17 = 68 scattered photos down the parallax canvas
-const VERTICAL_STEP_PX = 48; // Average vertical spacing between alternating left/right photos
+const VERTICAL_STEP_PX = 78; // ~156px vertical gap on the same side so photos never cover each other
 
 export const BackgroundClassPhotos: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
@@ -54,8 +54,8 @@ export const BackgroundClassPhotos: React.FC = () => {
 
   // Photos move up slower than the foreground scroll speed without any jiggle
   const yDeep = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.18));
-  const yMid = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.26));
-  const yNear = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.34));
+  const yMid = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.25));
+  const yNear = useTransform(smoothScroll, (v) => (prefersReducedMotion ? 0 : -v * 0.32));
 
   const { deepPhotos, midPhotos, nearPhotos } = useMemo(() => {
     const jitter = (range: number) => (Math.random() - 0.5) * range;
@@ -81,12 +81,12 @@ export const BackgroundClassPhotos: React.FC = () => {
       const baseSlot = HORIZONTAL_SLOTS[idx % HORIZONTAL_SLOTS.length];
       const baseRot = BASE_ROTATIONS[idx % BASE_ROTATIONS.length];
 
-      const topPx = Math.max(28, Math.round(45 + idx * VERTICAL_STEP_PX + jitter(24)));
-      const sideOffset = Math.max(0.8, baseSlot + jitter(2.2));
-      const rotate = baseRot + jitter(5);
+      const topPx = Math.max(24, Math.round(36 + idx * VERTICAL_STEP_PX + jitter(16)));
+      const sideOffset = Math.max(0.8, baseSlot + jitter(1.2));
+      const rotate = baseRot + jitter(4);
       const depthTier = (idx % 3) as 0 | 1 | 2;
-      const scaleBase = depthTier === 0 ? 0.82 : depthTier === 1 ? 0.9 : 0.98;
-      const scale = scaleBase + Math.random() * 0.1;
+      const scaleBase = depthTier === 0 ? 0.85 : depthTier === 1 ? 0.92 : 0.98;
+      const scale = scaleBase + Math.random() * 0.08;
 
       return {
         id: `bg-class-photo-${idx}`,
@@ -117,14 +117,14 @@ export const BackgroundClassPhotos: React.FC = () => {
         right: photo.right,
         transform: `rotate(${photo.rotate.toFixed(1)}deg) scale(${photo.scale.toFixed(2)})`
       }}
-      className={`absolute w-20 sm:w-28 md:w-32 lg:w-36 p-1 rounded-xl bg-[#f5f2eb]/[0.05] border border-[#f5f2eb]/10 shadow-lg ${opacityClass} transition-opacity duration-500`}
+      className={`absolute w-20 sm:w-28 md:w-32 lg:w-36 p-1 rounded-xl bg-[#f5f2eb]/[0.08] border border-[#f5f2eb]/15 shadow-lg ${opacityClass} transition-opacity duration-500`}
     >
       <img
         src={photo.src}
         alt=""
         loading="lazy"
         decoding="async"
-        className="w-full h-auto max-h-36 rounded-lg object-cover saturate-[0.75] contrast-[0.95]"
+        className="w-full h-auto max-h-36 rounded-lg object-cover brightness-105 contrast-100 saturate-100"
       />
     </div>
   );
@@ -134,33 +134,33 @@ export const BackgroundClassPhotos: React.FC = () => {
       className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none"
       aria-hidden="true"
     >
-      {/* Deep Parallax Layer (Slowest: 0.20x scroll speed) */}
+      {/* Deep Parallax Layer (Slowest: 0.18x scroll speed) */}
       <motion.div
         style={{ y: yDeep }}
-        className="absolute inset-x-0 top-0 h-[3600px] will-change-transform"
+        className="absolute inset-x-0 top-0 h-[5600px] will-change-transform"
       >
         {deepPhotos.map((photo) =>
-          renderPhotoCard(photo, 'opacity-[0.10] sm:opacity-[0.13] md:opacity-[0.15]')
+          renderPhotoCard(photo, 'opacity-[0.28] sm:opacity-[0.34] md:opacity-[0.38]')
         )}
       </motion.div>
 
-      {/* Mid Parallax Layer (Medium: 0.32x scroll speed) */}
+      {/* Mid Parallax Layer (Medium: 0.25x scroll speed) */}
       <motion.div
         style={{ y: yMid }}
-        className="absolute inset-x-0 top-0 h-[3600px] will-change-transform"
+        className="absolute inset-x-0 top-0 h-[5600px] will-change-transform"
       >
         {midPhotos.map((photo) =>
-          renderPhotoCard(photo, 'opacity-[0.12] sm:opacity-[0.16] md:opacity-[0.18]')
+          renderPhotoCard(photo, 'opacity-[0.32] sm:opacity-[0.38] md:opacity-[0.44]')
         )}
       </motion.div>
 
-      {/* Near Parallax Layer (Faster: 0.45x scroll speed) */}
+      {/* Near Parallax Layer (Faster: 0.32x scroll speed) */}
       <motion.div
         style={{ y: yNear }}
-        className="absolute inset-x-0 top-0 h-[3600px] will-change-transform"
+        className="absolute inset-x-0 top-0 h-[5600px] will-change-transform"
       >
         {nearPhotos.map((photo) =>
-          renderPhotoCard(photo, 'opacity-[0.14] sm:opacity-[0.18] md:opacity-[0.21]')
+          renderPhotoCard(photo, 'opacity-[0.36] sm:opacity-[0.42] md:opacity-[0.48]')
         )}
       </motion.div>
     </div>
