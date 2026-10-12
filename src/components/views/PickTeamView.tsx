@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useFPL } from '../../context/FPLContext';
 import { PitchView } from '../pitch/PitchView';
+import { ChipsSlider } from '../pitch/ChipsSlider';
 import { PlayerActionSheet } from '../pitch/PlayerActionSheet';
 import { SubstitutesDrawer } from '../pitch/SubstitutesDrawer';
 import { ActionPanel } from '../layout/ActionPanel';
@@ -229,8 +230,16 @@ export const PickTeamView: React.FC = () => {
           }}
           transition={{ type: 'spring', stiffness: 400, damping: 40, mass: 0.8 }}
           style={{ willChange: 'transform' }}
-          className="w-full max-w-4xl flex-1 min-h-0 lg:min-h-[580px] lg:h-[580px] xl:h-[640px] flex flex-col items-center justify-center origin-top transition-none overflow-hidden"
+          className="w-full max-w-4xl flex-1 min-h-0 lg:min-h-[580px] lg:h-[580px] xl:h-[640px] flex flex-col items-center justify-center origin-top transition-none overflow-hidden relative"
         >
+          {/* Top-Left Floating Chips Slider directly below GW Capsule */}
+          <div className="absolute top-1.5 left-2 sm:left-2 z-30 pointer-events-auto">
+            <ChipsSlider
+              selectedGW={selectedGW}
+              isPastGW={isPastGW}
+            />
+          </div>
+
           <PitchView
             showPoints={isPastGW}
             renderBench={false}

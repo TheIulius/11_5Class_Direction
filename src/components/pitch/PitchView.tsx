@@ -3,7 +3,6 @@ import { useFPL } from '../../context/FPLContext';
 import { getFormationLayout } from '../../engine/formations';
 import { PlayerCard } from './PlayerCard';
 import { PlayerActionSheet } from './PlayerActionSheet';
-import { InlineChipSelector } from './InlineChipSelector';
 import { X, Sparkles, Shield, UserPlus, Plus } from 'lucide-react';
 
 import { SquadPlayer } from '../../types/fpl';
@@ -189,14 +188,8 @@ export const PitchView: React.FC<PitchViewProps> = ({
           <path d="M calc(100% - 26px) calc(100% - 12px) A 14 14 0 0 1 calc(100% - 12px) calc(100% - 26px)" stroke="rgba(255, 255, 255, 0.24)" strokeWidth="1" />
         </svg>
 
-        {/* Pitch Top Bar: Chip Selector (Upper Left) & Formation (Upper Right) */}
-        <div className="relative pt-2 px-3 flex items-center justify-between z-10">
-          {/* Upper Left: Horizontal Sliding Chip Selector */}
-          <InlineChipSelector
-            selectedGW={activeGW}
-            isPastGW={readOnly || (showPoints && isCurrentGWFinished)}
-          />
-
+        {/* Pitch Top Bar: Formation (Upper Right) */}
+        <div className="relative pt-2 px-3 flex items-center justify-end z-10">
           {/* Upper Right: Formation Pill */}
           <div className="flex items-center gap-1.5 shrink-0">
             <span
