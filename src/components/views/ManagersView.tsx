@@ -11,6 +11,7 @@ import {
 } from '../../services/api';
 import { IOSSwitch } from '../common/IOSSwitch';
 import { ManagerSquadModal } from '../leagues/ManagerSquadModal';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 import confetti from 'canvas-confetti';
 import {
   Users,
@@ -723,10 +724,12 @@ export const ManagersView: React.FC = () => {
 
       {/* Squad Inspection Modal */}
       {selectedManagerIdForSquad && (
-        <ManagerSquadModal
-          managerId={selectedManagerIdForSquad}
-          onClose={() => setSelectedManagerIdForSquad(null)}
-        />
+        <ErrorBoundary onReset={() => setSelectedManagerIdForSquad(null)}>
+          <ManagerSquadModal
+            managerId={selectedManagerIdForSquad}
+            onClose={() => setSelectedManagerIdForSquad(null)}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );

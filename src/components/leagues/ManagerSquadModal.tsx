@@ -182,12 +182,12 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
     if (managerData && !isLineupHidden && selectedGW && managerData.squad?.players?.length > 0) {
       const isPastGW = selectedGW < currentGW;
       const isThisGWFinished = isPastGW || (selectedGW === currentGW ? isCurrentGWFinished : false);
-      const gwSquad = (managerData.squad.gameweekSquads && managerData.squad.gameweekSquads[selectedGW])
+      const gwSquad = (managerData.squad?.gameweekSquads && managerData.squad?.gameweekSquads[selectedGW])
         ? managerData.squad.gameweekSquads[selectedGW]
-        : (isPastGW ? [] : managerData.squad.players);
-      const gwChip = (managerData.squad.gameweekChips && managerData.squad.gameweekChips[selectedGW] !== undefined)
+        : (isPastGW ? [] : (managerData.squad?.players || []));
+      const gwChip = (managerData.squad?.gameweekChips && managerData.squad?.gameweekChips[selectedGW] !== undefined)
         ? managerData.squad.gameweekChips[selectedGW]
-        : (selectedGW === currentGW ? managerData.squad.activeChip : null);
+        : (selectedGW === currentGW ? managerData.squad?.activeChip : null);
 
       const pastCalc = calculateGameweekSquadPoints(
         gwSquad,
@@ -208,35 +208,35 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   const isSelf = Boolean(authUser?.id && managerId === authUser.id);
   const shouldHideLineup = !isModerator && ((!isSelf && !isLineupsVisible) || isLineupHidden);
 
-  const activeGwSquad = (managerData?.squad.gameweekSquads && managerData?.squad.gameweekSquads[selectedGW])
-    ? managerData.squad.gameweekSquads[selectedGW]
-    : (selectedGW < currentGW ? [] : (managerData?.squad.players || []));
+  const activeGwSquad = (managerData?.squad?.gameweekSquads && managerData?.squad?.gameweekSquads[selectedGW])
+    ? managerData.squad?.gameweekSquads?.[selectedGW]
+    : (selectedGW < currentGW ? [] : (managerData?.squad?.players || []));
   const squadPlayers = shouldHideLineup ? [] : activeGwSquad;
   const layout = getFormationLayout(squadPlayers, players, selectedGW);
 
   // Financial calculations
-  const totalSquadCost = (managerData?.squad.players || []).reduce(
+  const totalSquadCost = (managerData?.squad?.players || []).reduce(
     (sum, sp) => sum + (players[sp.playerId]?.cost || 0),
     0
   );
-  const managerBank = managerData?.squad.bank ?? 0;
+  const managerBank = managerData?.squad?.bank ?? 0;
   const squadVal = Math.round((totalSquadCost + managerBank) * 10) / 10;
-  const freeTransfersCount = managerData?.squad.freeTransfers ?? 1;
-  const transfersMadeCount = managerData?.squad.transfersMadeThisGW ?? 0;
+  const freeTransfersCount = managerData?.squad?.freeTransfers ?? 1;
+  const transfersMadeCount = managerData?.squad?.transfersMadeThisGW ?? 0;
   const penaltiesCount = calcResult?.transferCost ?? 0;
   const bonusAdjustment = managerData?.bonusPointsAdjustment ?? 0;
   const overallPoints = (managerData?.totalPoints ?? (calcResult?.totalPoints || 0)) + (bonusAdjustment || 0);
 
   // Active Chip
-  const activeChipForSelectedGW = (managerData?.squad.gameweekChips && managerData.squad.gameweekChips[selectedGW] !== undefined)
-    ? managerData.squad.gameweekChips[selectedGW]
-    : (selectedGW === currentGW ? managerData?.squad.activeChip : null);
+  const activeChipForSelectedGW = (managerData?.squad?.gameweekChips && managerData.squad?.gameweekChips[selectedGW] !== undefined)
+    ? managerData.squad?.gameweekChips?.[selectedGW]
+    : (selectedGW === currentGW ? managerData?.squad?.activeChip : null);
 
   // Top performer
   const squadPointsList = squadPlayers
     .map((sp) => {
       const p = players[sp.playerId];
-      const bd = calcResult?.playerPointsBreakdown[sp.playerId];
+      const bd = calcResult?.playerPointsBreakdown?.[sp.playerId];
       return {
         player: p,
         points: bd ? bd.finalPoints : 0,
@@ -249,8 +249,8 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
   const topPerformer = squadPointsList[0];
 
   const sheetPlayer = selectedPlayerForSheet ? players[selectedPlayerForSheet] : null;
-  const sheetStats = sheetPlayer ? sheetPlayer.gwStats[currentGW] : null;
-  const sheetBreakdown = selectedPlayerForSheet && calcResult ? calcResult.playerPointsBreakdown[selectedPlayerForSheet] : null;
+  const sheetStats = sheetPlayer ? sheetPlayer.gwStats?.[currentGW] : null;
+  const sheetBreakdown = selectedPlayerForSheet && calcResult ? calcResult.playerPointsBreakdown?.[selectedPlayerForSheet] : null;
   const sheetSquadPlayer = squadPlayers.find((sp) => sp.playerId === selectedPlayerForSheet);
   const ownership = selectedPlayerForSheet && playerOwnership ? playerOwnership[selectedPlayerForSheet] : null;
   const ownershipPercent = ownership?.percent ?? (sheetPlayer?.selectedByPercent ?? 0);
@@ -477,7 +477,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
 
   // --- MARKET PICKER (TRANSFER / ADD) ---
   const currentSquadPlayerIds = useMemo(() => {
-    return new Set((managerData?.squad.players || []).map((sp) => sp.playerId));
+    return new Set((managerData?.squad?.players || []).map((sp) => sp.playerId));
   }, [managerData]);
 
   const schoolClubs = useMemo(() => getSortedSchoolClubs(CLUBS), []);
@@ -727,13 +727,13 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
 
                   {/* Used Chips Indicators */}
                   <div className="flex items-center gap-1 text-[9px] font-mono font-bold">
-                    <span className={`px-1.5 py-0.5 rounded ${managerData.squad.usedChips?.triple_captain ? 'bg-rose-500/20 text-rose-400 line-through' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
+                    <span className={`px-1.5 py-0.5 rounded ${managerData?.squad?.usedChips?.triple_captain ? 'bg-rose-500/20 text-rose-400 line-through' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
                       TC
                     </span>
-                    <span className={`px-1.5 py-0.5 rounded ${managerData.squad.usedChips?.bench_boost ? 'bg-rose-500/20 text-rose-400 line-through' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
+                    <span className={`px-1.5 py-0.5 rounded ${managerData?.squad?.usedChips?.bench_boost ? 'bg-rose-500/20 text-rose-400 line-through' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
                       BB
                     </span>
-                    <span className={`px-1.5 py-0.5 rounded ${managerData.squad.usedChips?.wildcard ? 'bg-rose-500/20 text-rose-400 line-through' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
+                    <span className={`px-1.5 py-0.5 rounded ${managerData?.squad?.usedChips?.wildcard ? 'bg-rose-500/20 text-rose-400 line-through' : 'bg-slate-100 dark:bg-white/5 text-slate-400'}`}>
                       WC
                     </span>
                   </div>
@@ -1137,7 +1137,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                               disabled={actionLoading}
                               onClick={() => handleSetChip('triple_captain')}
                               className={`py-1.5 px-1 rounded-lg border font-bold text-[10px] text-center truncate cursor-pointer ${
-                                managerData.squad.activeChip === 'triple_captain'
+                                managerData?.squad?.activeChip === 'triple_captain'
                                   ? 'bg-amber-500 text-slate-950 border-amber-400 font-black'
                                   : 'bg-black/30 border-white/10 text-slate-300 hover:bg-white/10'
                               }`}
@@ -1149,7 +1149,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                               disabled={actionLoading}
                               onClick={() => handleSetChip('bench_boost')}
                               className={`py-1.5 px-1 rounded-lg border font-bold text-[10px] text-center truncate cursor-pointer ${
-                                managerData.squad.activeChip === 'bench_boost'
+                                managerData?.squad?.activeChip === 'bench_boost'
                                   ? 'bg-sky-500 text-white border-sky-400 font-black'
                                   : 'bg-black/30 border-white/10 text-slate-300 hover:bg-white/10'
                               }`}
@@ -1161,7 +1161,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                               disabled={actionLoading}
                               onClick={() => handleSetChip('wildcard')}
                               className={`py-1.5 px-1 rounded-lg border font-bold text-[10px] text-center truncate cursor-pointer ${
-                                managerData.squad.activeChip === 'wildcard'
+                                managerData?.squad?.activeChip === 'wildcard'
                                   ? 'bg-indigo-500 text-white border-indigo-400 font-black'
                                   : 'bg-black/30 border-white/10 text-slate-300 hover:bg-white/10'
                               }`}
@@ -1170,7 +1170,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                             </button>
                             <button
                               type="button"
-                              disabled={actionLoading || !managerData.squad.activeChip}
+                              disabled={actionLoading || !managerData?.squad?.activeChip}
                               onClick={() => handleSetChip(null)}
                               className="py-1.5 px-1 rounded-lg bg-rose-600/30 hover:bg-rose-600/50 border border-rose-500/40 text-rose-300 font-bold text-[10px] cursor-pointer"
                             >
@@ -1185,7 +1185,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                           </span>
                           <div className="grid grid-cols-3 gap-1.5">
                             {(['triple_captain', 'bench_boost', 'wildcard'] as ChipType[]).map((c) => {
-                              const isUsed = Boolean(managerData.squad.usedChips?.[c]);
+                              const isUsed = Boolean(managerData?.squad?.usedChips?.[c]);
                               return (
                                 <button
                                   key={c}
@@ -1214,7 +1214,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                         <div className="flex items-center justify-between text-slate-300">
                           <span>მოთამაშეების რაოდენობა:</span>
                           <strong className="text-slate-200 font-mono text-xs">
-                            {managerData.squad.players.length} / 9 მოთამაშე
+                            {managerData?.squad?.players?.length ?? 0} / 9 მოთამაშე
                           </strong>
                         </div>
 
@@ -1222,7 +1222,7 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                           <button
                             type="button"
                             onClick={() => {
-                              setPickingContext({ mode: 'add', isStarter: managerData.squad.players.filter((p) => p.isStarter).length < 6 });
+                              setPickingContext({ mode: 'add', isStarter: (managerData?.squad?.players || []).filter((p) => p.isStarter).length < 6 });
                               setIsPickingPlayer(true);
                             }}
                             className="w-full py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer text-xs"

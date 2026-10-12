@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ManagerSquadModal } from '../leagues/ManagerSquadModal';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 import {
   ClassTwoTierPillStrip,
   GradeOption,
@@ -271,10 +272,12 @@ export const StandingsView: React.FC = () => {
       </div>
 
       {/* Full Squad & Details Modal when tapping any manager */}
-      <ManagerSquadModal
-        managerId={inspectedManagerId}
-        onClose={() => setInspectedManagerId(null)}
-      />
+      <ErrorBoundary onReset={() => setInspectedManagerId(null)}>
+        <ManagerSquadModal
+          managerId={inspectedManagerId}
+          onClose={() => setInspectedManagerId(null)}
+        />
+      </ErrorBoundary>
     </div>
   );
 };

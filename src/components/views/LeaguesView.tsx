@@ -18,6 +18,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { ManagerSquadModal } from '../leagues/ManagerSquadModal';
+import { ErrorBoundary } from '../common/ErrorBoundary';
 import { KitJersey } from '../pitch/KitJersey';
 
 export const LeaguesView: React.FC = () => {
@@ -524,10 +525,12 @@ export const LeaguesView: React.FC = () => {
       </div>
 
       {/* Full Tactical Pitch Lineup Modal when clicking any Manager */}
-      <ManagerSquadModal
-        managerId={inspectedManagerId}
-        onClose={() => setInspectedManagerId(null)}
-      />
+      <ErrorBoundary onReset={() => setInspectedManagerId(null)}>
+        <ManagerSquadModal
+          managerId={inspectedManagerId}
+          onClose={() => setInspectedManagerId(null)}
+        />
+      </ErrorBoundary>
     </div>
   );
 };

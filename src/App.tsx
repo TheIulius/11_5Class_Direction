@@ -13,6 +13,7 @@ import { AuthLandingView } from './components/auth/AuthLandingView';
 import { PendingApprovalOverlay } from './components/auth/PendingApprovalOverlay';
 import { StudentProfileModal } from './components/auth/StudentProfileModal';
 import { UpdateNotesModal } from './components/common/UpdateNotesModal';
+import { ErrorBoundary } from './components/common/ErrorBoundary';
 
 const AppContent: React.FC = () => {
   const { activeTab, setActiveTab, authUser, isModerator, isReferee, openRulesModal } = useFPL();
@@ -111,8 +112,10 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <FPLProvider>
-      <AppContent />
-    </FPLProvider>
+    <ErrorBoundary>
+      <FPLProvider>
+        <AppContent />
+      </FPLProvider>
+    </ErrorBoundary>
   );
 }
