@@ -64,11 +64,15 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab }) => {
           })}
         </nav>
 
-        {/* Mobile hamburger */}
-        <div className="flex items-center md:hidden">
+        {/* Right Actions & Subtle Signature */}
+        <div className="flex items-center gap-2">
+          <span className="hidden md:inline-block text-[10px] font-mono text-[#7c796e]/75 tracking-wide select-none">
+            made by Theiulius
+          </span>
+
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 text-[#dedacb] hover:text-white cursor-pointer"
+            className="md:hidden p-1.5 text-[#dedacb] hover:text-white cursor-pointer"
             aria-label="მენიუს გახსნა"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -101,6 +105,9 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onSelectTab }) => {
                 </button>
               );
             })}
+            <div className="pt-2 px-3 text-[10px] font-mono text-[#7c796e]/70 select-none">
+              &copy; made by Theiulius
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -191,6 +191,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         </div>
       </motion.div>
 
+      <div className="pt-1 flex items-center justify-end px-1">
+        <span className="text-[10px] font-mono text-[#7c796e]/65 tracking-wider select-none">
+          &copy; made by Theiulius
+        </span>
+      </div>
+
       {/* Video Player Modal ("რატომ უნდა ამირჩიოთ") */}
       <AnimatePresence>
         {isVideoOpen && (
@@ -217,13 +223,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
                     რატომ უნდა ამირჩიოთ — 11/5 Direction
                   </h3>
                 </div>
-                <button
-                  onClick={() => setIsVideoOpen(false)}
-                  className="p-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-[#c5c1b2] hover:text-white transition-colors cursor-pointer"
-                  aria-label="დახურვა"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-3">
+                  <span className="hidden sm:inline-block text-[10px] font-mono text-[#7c796e]/75 select-none">
+                    made by Theiulius
+                  </span>
+                  <button
+                    onClick={() => setIsVideoOpen(false)}
+                    className="p-1.5 rounded-xl bg-white/5 hover:bg-white/15 text-[#c5c1b2] hover:text-white transition-colors cursor-pointer"
+                    aria-label="დახურვა"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="bg-black aspect-video w-full flex items-center justify-center">

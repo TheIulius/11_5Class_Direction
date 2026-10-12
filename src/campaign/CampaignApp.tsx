@@ -82,20 +82,28 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
       {/* Minimalist Footer in Georgian */}
       <footer className="relative z-10 w-full border-t border-[#f5f2eb]/10 py-8 px-4 sm:px-6 text-xs text-[#a8a495] bg-[#0c0d14]/80 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <span className="font-semibold text-[#fcfbf7]">11/5 Direction</span>
             <span>&bull;</span>
             <span>მე-11 კლასის საპრეზიდენტო პლატფორმა</span>
+            <span className="text-[#7c796e]/60">&bull;</span>
+            <span className="text-[11px] font-mono text-[#7c796e]/85 select-none">
+              &copy; made by Theiulius
+            </span>
           </div>
 
           <div className="flex items-center gap-4 text-[11px] font-mono">
+            <span className="text-[#7c796e]/70 select-none">made by Theiulius</span>
             {onSwitchToFantasy && (
-              <button
-                onClick={onSwitchToFantasy}
-                className="text-[#a8a495] hover:text-[#fcfbf7] transition-colors cursor-pointer"
-              >
-                საქველმოქმედო ლიგა &rarr;
-              </button>
+              <>
+                <span className="text-[#7c796e]/50">&bull;</span>
+                <button
+                  onClick={onSwitchToFantasy}
+                  className="text-[#a8a495] hover:text-[#fcfbf7] transition-colors cursor-pointer"
+                >
+                  საქველმოქმედო ლიგა &rarr;
+                </button>
+              </>
             )}
           </div>
         </div>

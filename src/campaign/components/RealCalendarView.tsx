@@ -470,6 +470,9 @@ export const RealCalendarView: React.FC = () => {
             <CalendarIcon className="w-4 h-4 text-[#e6e2d3]" />
             <span>აღნიშნული მოვლენები ({filteredEvents.length})</span>
           </div>
+          <span className="text-[10px] font-mono font-normal text-[#7c796e]/65 select-none">
+            made by Theiulius
+          </span>
         </h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
