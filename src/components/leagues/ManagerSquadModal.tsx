@@ -990,32 +990,46 @@ export const ManagerSquadModal: React.FC<ManagerSquadModalProps> = ({ managerId,
                           </strong>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2">
+                        <div>
                           <button
                             type="button"
                             onClick={() => {
                               setPickingContext({ mode: 'add', isStarter: managerData.squad.players.filter((p) => p.isStarter).length < 6 });
                               setIsPickingPlayer(true);
                             }}
-                            className="py-2 px-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold flex items-center justify-center gap-1.5 shadow-sm active:scale-95 cursor-pointer"
+                            className="w-full py-2.5 px-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 cursor-pointer text-xs"
                           >
-                            <UserPlus className="w-3.5 h-3.5" />
-                            <span>+ მოთამაშის დამატება</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            disabled={actionLoading}
-                            onClick={handleResetToGW1}
-                            className="py-2 px-2.5 rounded-xl bg-amber-600/30 hover:bg-amber-600/50 border border-amber-500/40 text-amber-300 font-bold flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
-                          >
-                            <RotateCcw className="w-3.5 h-3.5" />
-                            <span>↺ GW1 შემადგენლობაზე</span>
+                            <UserPlus className="w-4 h-4" />
+                            <span>+ მოთამაშის დამატება შემადგენლობაში</span>
                           </button>
                         </div>
                         <p className="text-[10.5px] text-slate-400 leading-tight">
                           💡 რჩევა: მოთამაშის გაყიდვა/ჩანაცვლება ან კაპიტნად დანიშვნა შეგიძლიათ პირდაპირ მოთამაშის ბარათზე დაკლიკებით ქვემოთ.
                         </p>
+
+                        {/* Separate Protected Danger Zone */}
+                        <div className="pt-2 border-t border-red-500/20">
+                          <details className="group">
+                            <summary className="text-[11px] font-semibold text-red-400/80 cursor-pointer hover:text-red-300 flex items-center justify-between">
+                              <span>⚠️ სახიფათო ზონა (GW1 Rollback)</span>
+                              <span className="text-[10px] text-zinc-500 group-open:rotate-180 transition-transform">▼</span>
+                            </summary>
+                            <div className="mt-2 p-2 rounded-lg bg-red-950/30 border border-red-500/30 space-y-1.5">
+                              <p className="text-[10px] text-red-300/80 leading-snug">
+                                ეს მოქმედება წაშლის მენეჯერის GW2-ის ყველა ცვლილებას და დააბრუნებს GW1-ის ჩაკეტილ გუნდს.
+                              </p>
+                              <button
+                                type="button"
+                                disabled={actionLoading}
+                                onClick={handleResetToGW1}
+                                className="w-full py-1.5 px-2 rounded-lg bg-red-600/30 hover:bg-red-600/50 border border-red-500/50 text-red-200 font-bold text-[11px] flex items-center justify-center gap-1.5 active:scale-95 cursor-pointer"
+                              >
+                                <RotateCcw className="w-3.5 h-3.5" />
+                                <span>↺ GW1 შემადგენლობაზე დაბრუნება</span>
+                              </button>
+                            </div>
+                          </details>
+                        </div>
                       </div>
                     )}
                   </div>
