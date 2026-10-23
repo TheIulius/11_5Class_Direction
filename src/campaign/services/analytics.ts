@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 
 export interface DetailedAnalyticsStats {
   visits: number;
+  uniqueIpsCount: number;
   quizClicks: number;
   loading: boolean;
   lastUpdated?: string;
@@ -94,6 +95,7 @@ const listeners = new Set<Listener>();
 function getDefaultStats(): DetailedAnalyticsStats {
   return {
     visits: 1,
+    uniqueIpsCount: 1,
     quizClicks: 1,
     loading: true,
     lastUpdated: new Date().toISOString(),
@@ -181,6 +183,7 @@ export async function refreshAnalytics(): Promise<DetailedAnalyticsStats> {
         ...currentStats,
         ...data,
         visits: Math.max(currentStats.visits, data.visits || 0),
+        uniqueIpsCount: Math.max(currentStats.uniqueIpsCount || 1, data.uniqueIpsCount || 1),
         quizClicks: Math.max(currentStats.quizClicks, data.quizClicks || 0),
         loading: false
       };

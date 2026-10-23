@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData } from './db';
@@ -14,6 +15,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Enable reverse-proxy trust for Cloudflare / Render so client IPs are accurately resolved
+app.set('trust proxy', true);
 
 app.use(cors());
 app.use(express.json({ limit: '25mb' }));
@@ -43,6 +47,46 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
+// Helper to get actual client IP behind Cloudflare and Render proxies
+export function getClientIp(req: Request): string {
+  const cfIp = req.headers['cf-connecting-ip'];
+  if (typeof cfIp === 'string' && cfIp.trim()) return cfIp.trim();
+
+  const realIp = req.headers['x-real-ip'];
+  if (typeof realIp === 'string' && realIp.trim()) return realIp.trim();
+
+  const xForwarded = req.headers['x-forwarded-for'];
+  if (typeof xForwarded === 'string' && xForwarded.trim()) {
+    const parts = xForwarded.split(',');
+    if (parts[0] && parts[0].trim()) return parts[0].trim();
+  }
+  if (Array.isArray(xForwarded) && xForwarded.length > 0) {
+    return xForwarded[0].trim();
+  }
+
+  if (req.ip) return req.ip;
+  return req.socket?.remoteAddress || '127.0.0.1';
+}
+
+// Helper to register unique client IP hash (GDPR/privacy-safe SHA-256 for mathematical uniqueness)
+export function registerClientIp(a: DetailedAnalyticsData, req: Request): boolean {
+  try {
+    const rawIp = getClientIp(req);
+    // Hash IP using SHA-256 for privacy while guaranteeing exact unique count
+    const ipHash = crypto.createHash('sha256').update(rawIp).digest('hex').substring(0, 16);
+    if (!a.uniqueIps) a.uniqueIps = [];
+    if (!a.uniqueIps.includes(ipHash)) {
+      a.uniqueIps.push(ipHash);
+      a.uniqueIpsCount = a.uniqueIps.length;
+      return true;
+    }
+    a.uniqueIpsCount = Math.max(a.uniqueIpsCount || 0, a.uniqueIps.length, 1);
+  } catch (e) {
+    console.warn('[Analytics IP Registration Error]', e);
+  }
+  return false;
+}
+
 // Helper to initialize and sanitize detailed analytics structure
 function initAnalytics(data: DatabaseSchema): DetailedAnalyticsData {
   if (!data.analytics) {
@@ -50,6 +94,8 @@ function initAnalytics(data: DatabaseSchema): DetailedAnalyticsData {
   }
   const a = data.analytics;
   a.visits = a.visits || 1;
+  a.uniqueIps = a.uniqueIps || [];
+  a.uniqueIpsCount = Math.max(a.uniqueIpsCount || 0, a.uniqueIps.length, 1);
   a.quizClicks = a.quizClicks || 1;
   a.lastUpdated = a.lastUpdated || new Date().toISOString();
   a.tabClicks = a.tabClicks || { overview: 0, poem: 0, analysis: 0, quiz: 0, open: 0, flashcards: 0 };
@@ -86,6 +132,10 @@ function initAnalytics(data: DatabaseSchema): DetailedAnalyticsData {
 app.get('/api/analytics', (req: Request, res: Response) => {
   const data = db.getData();
   const analytics = initAnalytics(data);
+  const isNew = registerClientIp(analytics, req);
+  if (isNew) {
+    db.saveSilent();
+  }
   res.json(analytics);
 });
 
@@ -93,9 +143,10 @@ app.post('/api/analytics/visit', (req: Request, res: Response) => {
   const data = db.getData();
   const a = initAnalytics(data);
   a.visits = (a.visits || 0) + 1;
+  registerClientIp(a, req);
   a.lastUpdated = new Date().toISOString();
   db.save('Analytics: new site visit');
-  scheduleAutoSyncToGitHub('Analytics: new site visit');
+  scheduleAutoSyncToGitHub('Analytics: new site visit', false, 5000);
   res.json(a);
 });
 
@@ -103,15 +154,17 @@ app.post('/api/analytics/quiz-click', (req: Request, res: Response) => {
   const data = db.getData();
   const a = initAnalytics(data);
   a.quizClicks = (a.quizClicks || 0) + 1;
+  registerClientIp(a, req);
   a.lastUpdated = new Date().toISOString();
   db.save('Analytics: quiz click');
-  scheduleAutoSyncToGitHub('Analytics: quiz click');
+  scheduleAutoSyncToGitHub('Analytics: quiz click', false, 5000);
   res.json(a);
 });
 
 app.post('/api/analytics/event', (req: Request, res: Response) => {
   const data = db.getData();
   const a = initAnalytics(data);
+  registerClientIp(a, req);
   const { event, payload } = req.body || {};
 
   try {
@@ -2662,6 +2715,28 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
       local.analytics.visits = maxVisits;
       local.analytics.quizClicks = maxQuiz;
       local.analytics.lastUpdated = new Date().toISOString();
+      changed = true;
+    }
+
+    // Merge unique IPs
+    const localIps = new Set(local.analytics.uniqueIps || []);
+    if (Array.isArray(remote.analytics.uniqueIps)) {
+      for (const ip of remote.analytics.uniqueIps) {
+        if (!localIps.has(ip)) {
+          localIps.add(ip);
+          changed = true;
+        }
+      }
+    }
+    local.analytics.uniqueIps = Array.from(localIps);
+    const maxIps = Math.max(
+      localIps.size,
+      local.analytics.uniqueIpsCount || 0,
+      remote.analytics.uniqueIpsCount || 0,
+      1
+    );
+    if (maxIps !== local.analytics.uniqueIpsCount) {
+      local.analytics.uniqueIpsCount = maxIps;
       changed = true;
     }
 

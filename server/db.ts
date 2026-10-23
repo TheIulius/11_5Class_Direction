@@ -61,6 +61,8 @@ export interface ActivationCode {
 
 export interface DetailedAnalyticsData {
   visits: number;
+  uniqueIpsCount?: number;
+  uniqueIps?: string[];
   quizClicks: number;
   lastUpdated?: string;
   tabClicks?: Record<string, number>;

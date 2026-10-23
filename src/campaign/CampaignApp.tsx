@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Flame, BarChart3 } from 'lucide-react';
+import { Eye, Flame, BarChart3, Globe } from 'lucide-react';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { RealCalendarView } from './components/RealCalendarView';
@@ -238,6 +238,18 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
                 <span className="text-[11px] text-stone-600 dark:text-[#a8a495]">საიტზე ვიზიტები:</span>
                 <span className="font-mono font-bold text-xs text-stone-900 dark:text-[#fcfbf7] bg-stone-200/70 dark:bg-white/10 px-2 py-0.5 rounded-md">
                   {analytics.visits.toLocaleString()}
+                </span>
+              </div>
+
+              {/* Unique IPs Counter */}
+              <div
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/25 text-indigo-900 dark:text-indigo-200 shadow-sm backdrop-blur-md"
+                title="განსხვავებული უნიკალური IP მისამართების (ვიზიტორების) რაოდენობა"
+              >
+                <Globe className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                <span className="text-[11px] text-indigo-700 dark:text-[#a8a495]">უნიკალური IP:</span>
+                <span className="font-mono font-bold text-xs text-indigo-950 dark:text-indigo-100 bg-indigo-200/70 dark:bg-indigo-500/30 px-2 py-0.5 rounded-md">
+                  {analytics.uniqueIpsCount.toLocaleString()}
                 </span>
               </div>
 

@@ -16,7 +16,8 @@ import {
   RefreshCw,
   TrendingUp,
   FileText,
-  Percent
+  Percent,
+  Globe
 } from 'lucide-react';
 import { usePlatformAnalytics, refreshAnalytics } from '../services/analytics';
 import { soundEffects } from '../utils/soundEffects';
@@ -128,8 +129,8 @@ export const AnalyticsDashboardModal: React.FC<AnalyticsDashboardModalProps> = (
 
         {/* Modal Scrollable Body */}
         <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-[#fcfbf7]">
-          {/* Top 4 KPI Cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Top 5 KPI Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
             {/* 1. Visits */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-[#181928] border border-stone-700/50 space-y-1.5">
               <div className="flex items-center justify-between text-sky-400">
@@ -142,7 +143,19 @@ export const AnalyticsDashboardModal: React.FC<AnalyticsDashboardModalProps> = (
               <div className="text-[11px] text-[#b8b5a8]">ჯამური ვიზიტები</div>
             </div>
 
-            {/* 2. Quiz Views */}
+            {/* 2. Unique IPs */}
+            <div className="p-3.5 sm:p-4 rounded-2xl bg-[#181928] border border-indigo-500/30 space-y-1.5">
+              <div className="flex items-center justify-between text-indigo-400">
+                <Globe className="w-4 h-4" />
+                <span className="text-[10px] font-mono text-indigo-300">უნიკალური</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-black font-mono text-indigo-200">
+                {stats.uniqueIpsCount.toLocaleString()}
+              </div>
+              <div className="text-[11px] text-[#b8b5a8]">განსხვავებული IP</div>
+            </div>
+
+            {/* 3. Quiz Views */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-[#181928] border border-red-500/30 space-y-1.5">
               <div className="flex items-center justify-between text-red-400">
                 <Flame className="w-4 h-4" />
@@ -154,7 +167,7 @@ export const AnalyticsDashboardModal: React.FC<AnalyticsDashboardModalProps> = (
               <div className="text-[11px] text-[#b8b5a8]">„ქვიზი“-ს გახსნა</div>
             </div>
 
-            {/* 3. Tests Answered */}
+            {/* 4. Tests Answered */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-[#181928] border border-amber-500/30 space-y-1.5">
               <div className="flex items-center justify-between text-amber-400">
                 <CheckCircle2 className="w-4 h-4" />
@@ -166,7 +179,7 @@ export const AnalyticsDashboardModal: React.FC<AnalyticsDashboardModalProps> = (
               <div className="text-[11px] text-[#b8b5a8]">ამოხსნილი ტესტური</div>
             </div>
 
-            {/* 4. Open Questions */}
+            {/* 5. Open Questions */}
             <div className="p-3.5 sm:p-4 rounded-2xl bg-[#181928] border border-purple-500/30 space-y-1.5">
               <div className="flex items-center justify-between text-purple-400">
                 <PenTool className="w-4 h-4" />
