@@ -2101,6 +2101,14 @@ export const QuizPrepSection: React.FC = () => {
   const activePoem =
     PROGRAM_TOPICS_AND_POEMS[activePoemIndex >= 0 ? activePoemIndex : 0];
 
+  const closedCountForPoem = TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length;
+  const openCountForPoem = (OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []).length;
+  const totalQuizCountForPoem = closedCountForPoem + openCountForPoem;
+  const hasOfficialQuestionsForPoem = Boolean(
+    OFFICIAL_QUIZ_QUESTIONS.some(q => q.topicId === selectedPoemId) ||
+    (OFFICIAL_OPEN_QUESTIONS[selectedPoemId] && OFFICIAL_OPEN_QUESTIONS[selectedPoemId].length > 0)
+  );
+
   // Mouse & Wheel horizontal scroll handling for Poem Selector Bar
   const poemBarScrollRef = useRef<HTMLDivElement>(null);
   const isPoemDragRef = useRef(false);
@@ -2629,6 +2637,7 @@ export const QuizPrepSection: React.FC = () => {
           {STUDIO_TAB_LIST.map(tab => {
             const Icon = tab.icon;
             const isActive = activeStudioTab === tab.id;
+            const isQuizTab = tab.id === 'quiz';
             return (
               <button
                 key={tab.id}
@@ -2649,6 +2658,27 @@ export const QuizPrepSection: React.FC = () => {
                   <span className="sm:hidden">{tab.mobileLabel}</span>
                   <span className="hidden sm:inline">{tab.shortLabel}</span>
                 </span>
+
+                {isQuizTab && (
+                  <span
+                    title={
+                      hasOfficialQuestionsForPoem
+                        ? `ოფიციალური ტესტური დავალებები: ამ თემაზე ${totalQuizCountForPoem} კითხვაა (${closedCountForPoem} ტესტური + ${openCountForPoem} ღია)`
+                        : `ამ თემაზე ${totalQuizCountForPoem} ტესტური კითხვაა`
+                    }
+                    className={`absolute -top-1 -right-0.5 sm:-top-1.5 sm:right-0.5 z-20 px-1 min-w-[15px] sm:min-w-[17px] h-[13px] sm:h-[15px] flex items-center justify-center rounded-md sm:rounded-lg text-[8px] sm:text-[9.5px] font-mono font-black leading-none transition-all shadow-sm ${
+                      hasOfficialQuestionsForPoem
+                        ? isActive
+                          ? 'bg-emerald-950/90 text-emerald-300 border border-emerald-400/70 shadow-[0_0_8px_rgba(16,185,129,0.35)]'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/45 shadow-[0_0_6px_rgba(16,185,129,0.25)]'
+                        : isActive
+                        ? 'bg-black/40 text-white/90 border border-white/20'
+                        : 'bg-[#181928] text-[#b8b5a8] border border-[#f5f2eb]/15'
+                    }`}
+                  >
+                    {totalQuizCountForPoem}
+                  </span>
+                )}
               </button>
             );
           })}
