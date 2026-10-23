@@ -29170,5 +29170,71 @@
     "user_1790687565506"
   ],
   "lineupVisibility": "auto",
-  "pendingPhotos": []
+  "pendingPhotos": [],
+  "analytics": {
+    "visits": 1,
+    "quizClicks": 1,
+    "lastUpdated": "2026-10-23T21:43:49.672Z",
+    "tabClicks": {
+      "overview": 0,
+      "poem": 0,
+      "analysis": 0,
+      "quiz": 0,
+      "open": 0,
+      "flashcards": 0
+    },
+    "topicViews": {
+      "edemi": 0,
+      "visac-gsurt": 0,
+      "vah-droni": 0,
+      "gogcha": 0,
+      "sagamo": 0,
+      "tamar-mefe": 0
+    },
+    "tests": {
+      "totalAnswered": 0,
+      "correctAnswers": 0,
+      "incorrectAnswers": 0,
+      "quizzesCompleted": 0,
+      "byTopic": {}
+    },
+    "openQuestions": {
+      "totalSubmitted": 0,
+      "meaningfulSubmissions": 0,
+      "totalWords": 0,
+      "averageWordCount": 0,
+      "statusBreakdown": {
+        "correct": 0,
+        "partial": 0,
+        "needs_work": 0
+      },
+      "byTopic": {}
+    },
+    "podcastStats": {
+      "totalPlays": 0,
+      "totalCompletes": 0,
+      "totalSeconds": 0,
+      "averageSeconds": 0,
+      "milestones": {
+        "reached25": 0,
+        "reached50": 0,
+        "reached75": 0,
+        "reached100": 0
+      },
+      "byEpisode": {}
+    },
+    "videoStats": {
+      "totalPlays": 0,
+      "totalCompletes": 0,
+      "totalSeconds": 0,
+      "averageSeconds": 0,
+      "milestones": {
+        "reached25": 0,
+        "reached50": 0,
+        "reached75": 0,
+        "reached100": 0
+      },
+      "byVideo": {}
+    }
+  }
 }
