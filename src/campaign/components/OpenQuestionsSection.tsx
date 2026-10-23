@@ -30,11 +30,13 @@ import { soundEffects } from '../utils/soundEffects';
 interface OpenQuestionsSectionProps {
   topicId: string;
   topicTitle: string;
+  onSelectTopic?: (topicId: any) => void;
 }
 
 export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
   topicId,
-  topicTitle
+  topicTitle,
+  onSelectTopic
 }) => {
   const questions: OpenQuestionItem[] = OFFICIAL_OPEN_QUESTIONS[topicId] || [];
 
@@ -101,6 +103,15 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
     });
     setAnswers(freshAns);
     setEvaluations(freshEval);
+
+    try {
+      const savedTable = localStorage.getItem(`11_5_open_table_${topicId}`);
+      if (savedTable) {
+        setTableAnswers(JSON.parse(savedTable));
+      } else {
+        setTableAnswers({});
+      }
+    } catch {}
   }, [topicId]);
 
   const handleAnswerChange = (qId: string, val: string) => {
@@ -209,14 +220,43 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
 
   if (questions.length === 0) {
     return (
-      <div className="p-8 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 text-center space-y-3">
-        <PenTool className="w-10 h-10 text-red-400 mx-auto opacity-70" />
-        <h3 className="text-base font-bold text-[#fcfbf7]">
-          ამ თემაზე ღია ჩასაწერი დავალებები მზადების პროცესშია
-        </h3>
-        <p className="text-xs text-[#b8b5a8] max-w-md mx-auto">
-          ოფიციალური ტესტური დავალებები უკვე ხელმისაწვდომია „ვისაც გსურთ“ და „იარალის“ სექციებში.
-        </p>
+      <div className="p-8 rounded-3xl bg-[#181928] border border-[#f5f2eb]/15 text-center space-y-4">
+        <div className="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400 mx-auto">
+          <PenTool className="w-6 h-6" />
+        </div>
+        <div className="space-y-1">
+          <h3 className="text-base font-bold text-[#fcfbf7]">
+            „{topicTitle}“ — ღია ჩასაწერი დავალებები მზადების პროცესშია
+          </h3>
+          <p className="text-xs text-[#b8b5a8] max-w-md mx-auto">
+            ამ ეტაპზე ოფიციალური ღია ტესტური დავალებები და AI შეფასება ხელმისაწვდომია შემდეგ თემებზე:
+          </p>
+        </div>
+
+        {onSelectTopic && (
+          <div className="flex flex-wrap items-center justify-center gap-2.5 pt-2">
+            <button
+              onClick={() => {
+                soundEffects.click();
+                onSelectTopic('visac-gsurt');
+              }}
+              className="px-4 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-xs font-bold text-red-200 transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+            >
+              <PenTool className="w-3.5 h-3.5" />
+              <span>2. ვისაც გსურთ (7 ღია დავალება)</span>
+            </button>
+            <button
+              onClick={() => {
+                soundEffects.click();
+                onSelectTopic('iarali');
+              }}
+              className="px-4 py-2.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-xs font-bold text-red-200 transition-all cursor-pointer flex items-center gap-2 shadow-sm"
+            >
+              <PenTool className="w-3.5 h-3.5" />
+              <span>7. იარალის (10 ღია დავალება)</span>
+            </button>
+          </div>
+        )}
       </div>
     );
   }

@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 import { OpenQuestionsSection } from './OpenQuestionsSection';
-import { OFFICIAL_QUIZ_QUESTIONS } from '../data/testsData';
+import { OFFICIAL_QUIZ_QUESTIONS, OFFICIAL_OPEN_QUESTIONS } from '../data/testsData';
 
 type StudioTab = 'media' | 'text' | 'analysis' | 'open_essay' | 'quiz' | 'flash_ai';
 
@@ -2025,8 +2025,8 @@ const STUDIO_TAB_LIST: {
   { id: 'media', label: 'ვიდეო & პოდკასტი', shortLabel: 'მედია', mobileLabel: 'მედია', icon: Video },
   { id: 'text', label: 'ტექსტი & ლექსიკონი', shortLabel: 'ტექსტი', mobileLabel: 'ტექსტი', icon: ScrollText },
   { id: 'analysis', label: 'კონსპექტი & ეპოქა', shortLabel: 'ანალიზი', mobileLabel: 'ანალიზი', icon: BookOpen },
-  { id: 'open_essay', label: 'ღია კითხვები & ესე', shortLabel: 'ღია & ესე', mobileLabel: 'ღია/ესე', icon: PenTool },
-  { id: 'quiz', label: 'ტესტები (სრული)', shortLabel: 'ტესტი', mobileLabel: 'ტესტი', icon: HelpCircle },
+  { id: 'open_essay', label: 'ანალიტიკური ესე (120 წთ)', shortLabel: 'ესე', mobileLabel: 'ესე', icon: PenTool },
+  { id: 'quiz', label: 'ტესტები & ღია დავალებები', shortLabel: 'ტესტი', mobileLabel: 'ტესტი', icon: HelpCircle },
   { id: 'flash_ai', label: 'ბარათები & AI', shortLabel: 'AI & ბარათი', mobileLabel: 'AI ბარათი', icon: Layers }
 ];
 
@@ -2063,7 +2063,8 @@ export const QuizPrepSection: React.FC = () => {
   const [openEssaySubView, setOpenEssaySubView] = useState<'open' | 'essay'>('open');
   const [flashAiSubView, setFlashAiSubView] = useState<'flashcards' | 'chat'>('flashcards');
 
-  // Quiz state: defaults to single-card mode on mobile for zero-scroll testing
+  // Quiz state: segmented between closed (multiple-choice) and open written assignments
+  const [quizKindTab, setQuizKindTab] = useState<'closed' | 'open'>('closed');
   const [quizFilter, setQuizFilter] = useState<QuizCategoryFilter>('all');
   const [quizDisplayMode, setQuizDisplayMode] = useState<'card' | 'list'>('card');
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
@@ -2763,13 +2764,14 @@ export const QuizPrepSection: React.FC = () => {
                         onClick={() => {
                           setQuizFilter(activePoem.id);
                           setActiveQuestionIdx(0);
+                          setQuizKindTab('closed');
                           handleSwitchStudioTab('quiz');
                         }}
                         className="p-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-left transition-all cursor-pointer"
                       >
-                        <div className="text-[10px] font-mono text-red-200">სასკოლო ტესტი</div>
+                        <div className="text-[10px] font-mono text-red-200">სასკოლო ტესტი &amp; ღია</div>
                         <div className="text-xs font-bold text-[#fcfbf7] mt-0.5">
-                          ამ ლექსის 4 კითხვა &rarr;
+                          ამ ლექსის ტესტები ({TEACHER_QUIZ_BANK.filter(q => q.topicId === activePoem.id).length} კითხვა) &rarr;
                         </div>
                       </button>
                     </div>
@@ -3073,170 +3075,230 @@ export const QuizPrepSection: React.FC = () => {
               </div>
             )}
 
-            {/* ==================== TAB 4: OPEN QUESTIONS (1.a / 1.b) & ESSAY ==================== */}
+            {/* ==================== TAB 4: ESSAY GUIDES & 120-MIN EXAM STRUCTURE ==================== */}
             {activeStudioTab === 'open_essay' && (
-              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
-                <div className="inline-flex p-1 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-4 shadow-xl">
+                {/* Exam Breakdown & Link to Open Questions in Quiz tab */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-[#fcfbf7] flex items-center gap-1.5">
+                        <PenTool className="w-3.5 h-3.5 text-red-400" />
+                        ანალიტიკური ესე &amp; 120-წუთიანი საგამოცდო გეგმა
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-[#b8b5a8]">
+                      სასკოლო და ეროვნული გამოცდების ფორმატი: 1.ა (მოკლე) + 1.ბ (სამსჯელო) + 2 (ესე)
+                    </p>
+                  </div>
+
                   <button
                     onClick={() => {
                       soundEffects.click();
-                      setOpenEssaySubView('open');
+                      setQuizKindTab('open');
+                      handleSwitchStudioTab('quiz');
                     }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      openEssaySubView === 'open'
-                        ? 'bg-red-500 text-white shadow-sm'
-                        : 'text-[#b8b5a8] hover:text-white'
-                    }`}
+                    className="px-3.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-md"
                   >
-                    ✍️ ღია კითხვები (1.ა &amp; 1.ბ)
-                  </button>
-                  <button
-                    onClick={() => {
-                      soundEffects.click();
-                      setOpenEssaySubView('essay');
-                    }}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                      openEssaySubView === 'essay'
-                        ? 'bg-red-500 text-white shadow-sm'
-                        : 'text-[#b8b5a8] hover:text-white'
-                    }`}
-                  >
-                    📝 ანალიტიკური ესე (120 წთ)
+                    <span>✍️ ღია დავალებების ტესტზე გადასვლა</span>
+                    <span>&rarr;</span>
                   </button>
                 </div>
 
-                {openEssaySubView === 'open' ? (
-                  <div className="space-y-4">
-                    <OpenQuestionsSection topicId={activePoem.id} topicTitle={activePoem.title} />
+                <div className="grid grid-cols-3 gap-2 text-[11px]">
+                  <div className="p-3 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-0.5">
+                    <strong className="text-red-300 block font-bold">1.ა) მოკლე პასუხი</strong>
+                    <span className="text-[#a8a495] block text-[10px]">~20 წუთი &bull; 1–2 წინადადება</span>
+                    <span className="text-[#d4d1c5] block text-[10px] pt-1">უშუალო, კონკრეტული და მკაფიო განმარტება</span>
                   </div>
-                ) : (
-                  <div className="space-y-3 max-h-[56vh] overflow-y-auto pr-1">
-                    <div className="grid grid-cols-3 gap-2 text-[11px]">
-                      <div className="p-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
-                        <strong className="text-red-300 block">1.ა) მოკლე (~20 წთ)</strong>
-                        <span className="text-[#b8b5a8]">1–2 წინადადებით</span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
-                        <strong className="text-amber-300 block">1.ბ) სამსჯელო (~40 წთ)</strong>
-                        <span className="text-[#b8b5a8]">ნარატიული ანალიზი</span>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
-                        <strong className="text-emerald-300 block">2. ესე (~60 წთ)</strong>
-                        <span className="text-[#b8b5a8]">კრიტიკული ანალიზი</span>
-                      </div>
-                    </div>
+                  <div className="p-3 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-0.5">
+                    <strong className="text-amber-300 block font-bold">1.ბ) სამსჯელო პასუხი</strong>
+                    <span className="text-[#a8a495] block text-[10px]">~40 წუთი &bull; ნარატიული ანალიზი</span>
+                    <span className="text-[#d4d1c5] block text-[10px] pt-1">არგუმენტი, ციტირება და მხატვრული ხერხი</span>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-0.5">
+                    <strong className="text-emerald-300 block font-bold">2. ანალიტიკური ესე</strong>
+                    <span className="text-[#a8a495] block text-[10px]">~60 წუთი &bull; კრიტიკული ანალიზი</span>
+                    <span className="text-[#d4d1c5] block text-[10px] pt-1">თეზისი, კონტრარგუმენტი და დასკვნა</span>
+                  </div>
+                </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                      {ESSAY_GUIDES.map(essay => (
-                        <div
-                          key={essay.id}
-                          className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-2"
-                        >
-                          <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
-                            {essay.title}
-                          </h4>
-                          <p className="text-[11px] text-[#b8b5a8] leading-relaxed">
-                            {essay.prompt}
-                          </p>
-                          <div className="space-y-1.5 pt-1">
-                            {essay.structure.map((step, i) => (
-                              <div
-                                key={i}
-                                className="p-2.5 rounded-lg bg-[#12131d] border border-[#f5f2eb]/10 text-[11px] text-[#d4d1c5] leading-relaxed"
-                              >
-                                {step}
-                              </div>
-                            ))}
-                          </div>
+                <div className="space-y-3 max-h-[56vh] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    {ESSAY_GUIDES.map(essay => (
+                      <div
+                        key={essay.id}
+                        className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-2.5"
+                      >
+                        <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
+                          {essay.title}
+                        </h4>
+                        <p className="text-[11px] text-[#b8b5a8] leading-relaxed">
+                          {essay.prompt}
+                        </p>
+                        <div className="space-y-1.5 pt-1">
+                          {essay.structure.map((step, i) => (
+                            <div
+                              key={i}
+                              className="p-2.5 rounded-lg bg-[#12131d] border border-[#f5f2eb]/10 text-[11px] text-[#d4d1c5] leading-relaxed"
+                            >
+                              {step}
+                            </div>
+                          ))}
                         </div>
-                      ))}
-                    </div>
+                      </div>
+                    ))}
                   </div>
-                )}
+                </div>
               </div>
             )}
 
-            {/* ==================== TAB 5: SMART QUIZ BANK (ZERO-SCROLL CARD MODE + LIST MODE) ==================== */}
+            {/* ==================== TAB 5: TESTS & OPEN WRITTEN QUESTIONS ==================== */}
             {activeStudioTab === 'quiz' && (
-              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
-                {/* Compact Filter + Mode Header */}
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-4 shadow-xl">
+                {/* Segmented Switcher: Multiple Choice vs Open Written Questions */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#f5f2eb]/10">
+                  <div className="inline-flex p-1 rounded-2xl bg-[#181928] border border-[#f5f2eb]/15 shadow-inner">
                     <button
                       onClick={() => {
                         soundEffects.click();
-                        setQuizFilter(selectedPoemId);
-                        setActiveQuestionIdx(0);
+                        setQuizKindTab('closed');
                       }}
-                      className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
-                        quizFilter === selectedPoemId
-                          ? 'bg-red-500 text-white border-red-400'
-                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
+                      className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                        quizKindTab === 'closed'
+                          ? 'bg-red-500 text-white shadow-md'
+                          : 'text-[#b8b5a8] hover:text-white'
                       }`}
                     >
-                      ამ თემის ({TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length})
+                      <HelpCircle className="w-3.5 h-3.5" />
+                      <span>ტესტური კითხვები</span>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                          quizKindTab === 'closed'
+                            ? 'bg-white/20 text-white'
+                            : 'bg-white/5 text-[#a8a495]'
+                        }`}
+                      >
+                        {quizFilter === 'all'
+                          ? TEACHER_QUIZ_BANK.length
+                          : TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length}
+                      </span>
                     </button>
+
                     <button
                       onClick={() => {
                         soundEffects.click();
-                        setQuizFilter('all');
-                        setActiveQuestionIdx(0);
+                        setQuizKindTab('open');
                       }}
-                      className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
-                        quizFilter === 'all'
-                          ? 'bg-red-500 text-white border-red-400'
-                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
+                      className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                        quizKindTab === 'open'
+                          ? 'bg-red-500 text-white shadow-md'
+                          : 'text-[#b8b5a8] hover:text-white'
                       }`}
                     >
-                      ყველა ({TEACHER_QUIZ_BANK.length})
+                      <PenTool className="w-3.5 h-3.5" />
+                      <span>ღია (ჩასაწერი) დავალებები</span>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
+                          quizKindTab === 'open'
+                            ? 'bg-white/20 text-white'
+                            : 'bg-white/5 text-[#a8a495]'
+                        }`}
+                      >
+                        {(OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []).length}
+                      </span>
                     </button>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    <span className="px-2.5 py-1 rounded-xl bg-red-500/15 border border-red-500/30 text-[11px] font-mono text-red-200">
-                      ✓ {correctCount}/{answeredCount}
-                    </span>
+                  {quizKindTab === 'closed' && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          onClick={() => {
+                            soundEffects.click();
+                            setQuizFilter(selectedPoemId);
+                            setActiveQuestionIdx(0);
+                          }}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
+                            quizFilter === selectedPoemId
+                              ? 'bg-red-500 text-white border-red-400'
+                              : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
+                          }`}
+                        >
+                          ამ თემის ({TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length})
+                        </button>
+                        <button
+                          onClick={() => {
+                            soundEffects.click();
+                            setQuizFilter('all');
+                            setActiveQuestionIdx(0);
+                          }}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
+                            quizFilter === 'all'
+                              ? 'bg-red-500 text-white border-red-400'
+                              : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
+                          }`}
+                        >
+                          ყველა ({TEACHER_QUIZ_BANK.length})
+                        </button>
+                      </div>
 
-                    <div className="inline-flex p-0.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
-                      <button
-                        onClick={() => {
-                          soundEffects.click();
-                          setQuizDisplayMode('card');
-                        }}
-                        className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
-                          quizDisplayMode === 'card'
-                            ? 'bg-white/15 text-white font-bold'
-                            : 'text-[#a8a495]'
-                        }`}
-                      >
-                        1-ბარათი
-                      </button>
-                      <button
-                        onClick={() => {
-                          soundEffects.click();
-                          setQuizDisplayMode('list');
-                        }}
-                        className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
-                          quizDisplayMode === 'list'
-                            ? 'bg-white/15 text-white font-bold'
-                            : 'text-[#a8a495]'
-                        }`}
-                      >
-                        სია
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2.5 py-1 rounded-xl bg-red-500/15 border border-red-500/30 text-[11px] font-mono text-red-200">
+                          ✓ {correctCount}/{answeredCount}
+                        </span>
+
+                        <div className="inline-flex p-0.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                          <button
+                            onClick={() => {
+                              soundEffects.click();
+                              setQuizDisplayMode('card');
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
+                              quizDisplayMode === 'card'
+                                ? 'bg-white/15 text-white font-bold'
+                                : 'text-[#a8a495]'
+                            }`}
+                          >
+                            1-ბარათი
+                          </button>
+                          <button
+                            onClick={() => {
+                              soundEffects.click();
+                              setQuizDisplayMode('list');
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
+                              quizDisplayMode === 'list'
+                                ? 'bg-white/15 text-white font-bold'
+                                : 'text-[#a8a495]'
+                            }`}
+                          >
+                            სია
+                          </button>
+                        </div>
+
+                        <button
+                          onClick={handleResetQuiz}
+                          className="p-1.5 rounded-xl border border-[#f5f2eb]/15 bg-white/5 hover:bg-white/10 text-[#dedacb] cursor-pointer"
+                          title="თავიდან დაწყება"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
-
-                    <button
-                      onClick={handleResetQuiz}
-                      className="p-1.5 rounded-xl border border-[#f5f2eb]/15 bg-white/5 hover:bg-white/10 text-[#dedacb] cursor-pointer"
-                      title="თავიდან დაწყება"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
+                  )}
                 </div>
 
-                {/* Single-Question Card Mode (Fits 100% on phone screen without scrolling!) */}
+                {/* Body: Open Questions Section OR Closed Multiple Choice Engine */}
+                {quizKindTab === 'open' ? (
+                  <OpenQuestionsSection
+                    topicId={selectedPoemId}
+                    topicTitle={activePoem.title}
+                    onSelectTopic={newId => setSelectedPoemId(newId)}
+                  />
+                ) : (
+                  <>
+                    {/* Single-Question Card Mode (Fits 100% on phone screen without scrolling!) */}
                 {quizDisplayMode === 'card' && currentQuizQuestion ? (
                   <div className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-3">
                     <div className="flex items-center justify-between gap-2">
@@ -3385,6 +3447,8 @@ export const QuizPrepSection: React.FC = () => {
                     })}
                   </div>
                 )}
+                    </>
+                  )}
               </div>
             )}
 
