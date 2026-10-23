@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   AlertCircle,
   HelpCircle,
-  Key,
   RotateCcw,
   Check,
   ChevronDown,
@@ -16,8 +15,7 @@ import {
   Award,
   Clock,
   Send,
-  Layers,
-  X
+  Layers
 } from 'lucide-react';
 import {
   OFFICIAL_OPEN_QUESTIONS,
@@ -78,16 +76,6 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
 
   const [loadingQuestions, setLoadingQuestions] = useState<Record<string, boolean>>({});
   const [expandedKeys, setExpandedKeys] = useState<Record<string, boolean>>({});
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    try {
-      return localStorage.getItem('gemini_api_key_v1') || '';
-    } catch {
-      return '';
-    }
-  });
-  const [hasApiKey, setHasApiKey] = useState(Boolean(apiKeyInput));
 
   // Sync state when topicId changes
   useEffect(() => {
@@ -160,7 +148,7 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
     setLoadingQuestions(prev => ({ ...prev, [item.id]: true }));
 
     try {
-      const result = await evaluateOpenAnswer(item, textToEvaluate, apiKeyInput);
+      const result = await evaluateOpenAnswer(item, textToEvaluate);
       setEvaluations(prev => ({ ...prev, [item.id]: result }));
       try {
         localStorage.setItem(`11_5_open_eval_${item.id}`, JSON.stringify(result));
@@ -194,21 +182,6 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
       localStorage.removeItem(`11_5_open_ans_${qId}`);
       localStorage.removeItem(`11_5_open_eval_${qId}`);
     } catch {}
-  };
-
-  const handleSaveApiKey = () => {
-    soundEffects.click();
-    const clean = apiKeyInput.trim();
-    try {
-      if (clean) {
-        localStorage.setItem('gemini_api_key_v1', clean);
-        setHasApiKey(true);
-      } else {
-        localStorage.removeItem('gemini_api_key_v1');
-        setHasApiKey(false);
-      }
-    } catch {}
-    setIsApiKeyModalOpen(false);
   };
 
   // Calculations
@@ -281,24 +254,6 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
                 {topicTitle} • შეასრულეთ წერილობით და შეამოწმეთ AI ექსპერტით
               </p>
             </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                soundEffects.click();
-                setIsApiKeyModalOpen(true);
-              }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all cursor-pointer ${
-                hasApiKey
-                  ? 'bg-purple-900/30 border-purple-500/40 text-purple-200 hover:bg-purple-900/50'
-                  : 'bg-white/5 border-white/10 text-[#d4d1c5] hover:bg-white/10'
-              }`}
-              title="დააყენეთ საკუთარი Gemini API Key ცოცხალი AI შეფასებისთვის"
-            >
-              <Key className="w-3.5 h-3.5 text-purple-400" />
-              <span>{hasApiKey ? 'Gemini AI: ჩართულია ✓' : 'AI API Key (არჩევითი)'}</span>
-            </button>
           </div>
         </div>
 
@@ -584,84 +539,6 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
           );
         })}
       </div>
-
-      {/* Gemini API Key Modal */}
-      <AnimatePresence>
-        {isApiKeyModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-md p-5 sm:p-6 rounded-3xl bg-[#141522] border border-[#f5f2eb]/20 shadow-2xl space-y-4"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Key className="w-5 h-5 text-purple-400" />
-                  <h3 className="text-base font-bold text-[#fcfbf7]">
-                    Gemini Live AI პარამეტრები
-                  </h3>
-                </div>
-                <button
-                  onClick={() => setIsApiKeyModalOpen(false)}
-                  className="p-1 rounded-lg text-[#b8b5a8] hover:text-white cursor-pointer"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <p className="text-xs text-[#b8b5a8] leading-relaxed">
-                ჩასვით თქვენი Google Gemini API Key რეალურ დროში ღრმა და დეტალური AI შეფასებისთვის.
-                გასაღები ინახება მხოლოდ თქვენს ბრაუზერში (LocalStorage). თუ გასაღებს არ მიუთითებთ,
-                საიტი გამოიყენებს ჩაშენებულ სემანტიკურ შეფასების ძრავას ავტომატურად.
-              </p>
-
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-bold text-[#fcfbf7] block">
-                  Gemini API Key:
-                </label>
-                <input
-                  type="password"
-                  value={apiKeyInput}
-                  onChange={e => setApiKeyInput(e.target.value)}
-                  placeholder="AIzaSy..."
-                  className="w-full p-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/15 text-xs text-[#fcfbf7] focus:outline-none focus:border-purple-500"
-                />
-                <a
-                  href="https://aistudio.google.com/apikey"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] text-purple-400 hover:underline block pt-1"
-                >
-                  🔗 უფასო API Key-ის აღება Google AI Studio-ზე &rarr;
-                </a>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  onClick={() => {
-                    setApiKeyInput('');
-                    try {
-                      localStorage.removeItem('gemini_api_key_v1');
-                    } catch {}
-                    setHasApiKey(false);
-                    setIsApiKeyModalOpen(false);
-                  }}
-                  className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-[#b8b5a8] hover:text-white cursor-pointer"
-                >
-                  გასაღების წაშლა
-                </button>
-                <button
-                  onClick={handleSaveApiKey}
-                  className="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-all shadow-md cursor-pointer"
-                >
-                  შენახვა
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

@@ -633,8 +633,9 @@ export async function evaluateOpenAnswer(
     };
   }
 
-  // 1. თუ მომხმარებელს მითითებული აქვს Gemini API Key, ვიყენებთ Gemini 2.5 Flash / 1.5 Flash-ს
-  const activeKey = userApiKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('gemini_api_key_v1') || '' : '');
+  // 1. თუ ხელმისაწვდომია Gemini API Key (env ან ადრე შენახული), ვიყენებთ Gemini 2.5 Flash / 1.5 Flash-ს
+  const envKey = (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_GEMINI_API_KEY) || '';
+  const activeKey = userApiKey || envKey || (typeof localStorage !== 'undefined' ? localStorage.getItem('gemini_api_key_v1') || '' : '');
 
   if (activeKey) {
     try {

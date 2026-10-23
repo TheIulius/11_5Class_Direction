@@ -5,7 +5,6 @@ import {
   Sparkles,
   CheckCircle2,
   AlertCircle,
-  Key,
   RotateCcw,
   Check,
   ChevronDown,
@@ -66,16 +65,6 @@ export const OpenQuestionCard: React.FC<OpenQuestionCardProps> = ({
   const [isCriteriaOpen, setIsCriteriaOpen] = useState(false);
   const [isSampleOpen, setIsSampleOpen] = useState(false);
   const [copiedSample, setCopiedSample] = useState(false);
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
-  const [apiKeyInput, setApiKeyInput] = useState(() => {
-    if (typeof window === 'undefined') return '';
-    try {
-      return localStorage.getItem('gemini_api_key_v1') || '';
-    } catch {
-      return '';
-    }
-  });
-  const [hasApiKey, setHasApiKey] = useState(Boolean(apiKeyInput));
 
   // Sync on question.id change (in 1-card mode)
   useEffect(() => {
@@ -135,7 +124,7 @@ export const OpenQuestionCard: React.FC<OpenQuestionCardProps> = ({
     setIsLoading(true);
 
     try {
-      const result = await evaluateOpenAnswer(question, textToEvaluate, apiKeyInput);
+      const result = await evaluateOpenAnswer(question, textToEvaluate);
       setEvaluation(result);
       try {
         localStorage.setItem(`11_5_open_eval_${question.id}`, JSON.stringify(result));
@@ -177,15 +166,6 @@ export const OpenQuestionCard: React.FC<OpenQuestionCardProps> = ({
       setCopiedSample(true);
       setTimeout(() => setCopiedSample(false), 2000);
     }
-  };
-
-  const handleSaveApiKey = () => {
-    soundEffects.click();
-    try {
-      localStorage.setItem('gemini_api_key_v1', apiKeyInput.trim());
-      setHasApiKey(Boolean(apiKeyInput.trim()));
-      setIsApiKeyModalOpen(false);
-    } catch {}
   };
 
   const wordCount = answer.trim().split(/\s+/).filter(Boolean).length;
@@ -337,14 +317,6 @@ export const OpenQuestionCard: React.FC<OpenQuestionCardProps> = ({
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
           )}
-
-          <button
-            onClick={() => setIsApiKeyModalOpen(true)}
-            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-[#a8a495] hover:text-purple-300 transition-all cursor-pointer"
-            title="Gemini API Key კონფიგურაცია"
-          >
-            <Key className="w-3.5 h-3.5" />
-          </button>
         </div>
 
         <div className="flex items-center gap-1.5">
@@ -473,53 +445,6 @@ export const OpenQuestionCard: React.FC<OpenQuestionCardProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* API Key Modal */}
-      {isApiKeyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md p-5 rounded-3xl bg-[#181928] border border-[#f5f2eb]/20 space-y-4 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Key className="w-5 h-5 text-purple-400" />
-                <h3 className="text-sm font-bold text-white">Gemini Live AI შეფასება</h3>
-              </div>
-              <button
-                onClick={() => setIsApiKeyModalOpen(false)}
-                className="p-1 rounded-lg hover:bg-white/10 text-white cursor-pointer"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-[#b8b5a8] leading-relaxed">
-              პლატფორმას აქვს ჩაშენებული სემანტიკური შემმოწმებელი. თუ გსურთ ცოცხალი Gemini AI API-ის გამოყენება, ჩასვით Google AI Studio-ს უფასო გასაღები:
-            </p>
-
-            <input
-              type="password"
-              value={apiKeyInput}
-              onChange={e => setApiKeyInput(e.target.value)}
-              placeholder="AIzaSy..."
-              className="w-full p-2.5 rounded-xl bg-[#12131d] border border-[#f5f2eb]/20 text-xs text-white placeholder-[#6b675c] focus:outline-none focus:border-purple-500"
-            />
-
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button
-                onClick={() => setIsApiKeyModalOpen(false)}
-                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-xs text-white cursor-pointer"
-              >
-                გაუქმება
-              </button>
-              <button
-                onClick={handleSaveApiKey}
-                className="px-4 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-xs font-bold text-white shadow-md cursor-pointer"
-              >
-                შენახვა
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -2088,8 +2088,7 @@ export const QuizPrepSection: React.FC = () => {
   const [openEssaySubView, setOpenEssaySubView] = useState<'open' | 'essay'>('open');
   const [flashAiSubView, setFlashAiSubView] = useState<'flashcards' | 'chat'>('flashcards');
 
-  // Quiz state: all questions (closed & open) interleaved in one pool
-  const [quizFilter, setQuizFilter] = useState<QuizCategoryFilter>('all');
+  // Quiz state: all questions (closed & open) interleaved in one pool for active poem
   const [quizDisplayMode, setQuizDisplayMode] = useState<'card' | 'list'>('card');
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
@@ -2227,10 +2226,7 @@ export const QuizPrepSection: React.FC = () => {
     setSelectedPoemId(poemId);
     setSelectedWordInfo(null);
     setExpandedStanzas({});
-    if (quizFilter !== 'all') {
-      setQuizFilter(poemId);
-      setActiveQuestionIdx(0);
-    }
+    setActiveQuestionIdx(0);
   };
   const handleSelectWord = (id: string, word: string, meaning: string, stanzaNum?: number) => {
     soundEffects.click();
@@ -2448,7 +2444,7 @@ export const QuizPrepSection: React.FC = () => {
 
   const unifiedQuestions = useMemo<UnifiedQuestion[]>(() => {
     const closedList: UnifiedQuestion[] = TEACHER_QUIZ_BANK
-      .filter(q => quizFilter === 'all' || q.topicId === selectedPoemId)
+      .filter(q => q.topicId === selectedPoemId)
       .map(q => ({
         kind: 'closed' as const,
         id: q.id,
@@ -2457,9 +2453,7 @@ export const QuizPrepSection: React.FC = () => {
       }));
 
     const openList: UnifiedQuestion[] = (
-      quizFilter === 'all'
-        ? Object.values(OFFICIAL_OPEN_QUESTIONS).flat()
-        : OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []
+      OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []
     ).map(q => ({
       kind: 'open' as const,
       id: q.id,
@@ -2474,7 +2468,7 @@ export const QuizPrepSection: React.FC = () => {
     });
 
     return combined;
-  }, [quizFilter, selectedPoemId]);
+  }, [selectedPoemId]);
 
   const safeUnifiedIdx = Math.min(
     activeQuestionIdx,
@@ -2844,7 +2838,6 @@ export const QuizPrepSection: React.FC = () => {
 
                       <button
                         onClick={() => {
-                          setQuizFilter(activePoem.id);
                           setActiveQuestionIdx(0);
                           handleSwitchStudioTab('quiz');
                         }}
@@ -2852,7 +2845,7 @@ export const QuizPrepSection: React.FC = () => {
                       >
                         <div className="text-[10px] font-mono text-red-200">სასკოლო ტესტი &amp; ღია</div>
                         <div className="text-xs font-bold text-[#fcfbf7] mt-0.5">
-                          ამ ლექსის ტესტები ({TEACHER_QUIZ_BANK.filter(q => q.topicId === activePoem.id).length} კითხვა) &rarr;
+                          ამ ლექსის ტესტები ({TEACHER_QUIZ_BANK.filter(q => q.topicId === activePoem.id).length + (OFFICIAL_OPEN_QUESTIONS[activePoem.id] || []).length} კითხვა) &rarr;
                         </div>
                       </button>
                     </div>
@@ -3238,35 +3231,14 @@ export const QuizPrepSection: React.FC = () => {
               <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-4 shadow-xl">
                 {/* Header Controls: Filter + Stats + Card/List Switcher + Reset */}
                 <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2 border-b border-[#f5f2eb]/10">
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => {
-                        soundEffects.click();
-                        setQuizFilter(selectedPoemId);
-                        setActiveQuestionIdx(0);
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                        quizFilter === selectedPoemId
-                          ? 'bg-red-500 text-white border-red-400 shadow-sm'
-                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10 hover:border-[#f5f2eb]/25'
-                      }`}
-                    >
-                      ამ თემის ({TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length + (OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []).length})
-                    </button>
-                    <button
-                      onClick={() => {
-                        soundEffects.click();
-                        setQuizFilter('all');
-                        setActiveQuestionIdx(0);
-                      }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                        quizFilter === 'all'
-                          ? 'bg-red-500 text-white border-red-400 shadow-sm'
-                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10 hover:border-[#f5f2eb]/25'
-                      }`}
-                    >
-                      ყველა ({TEACHER_QUIZ_BANK.length + Object.values(OFFICIAL_OPEN_QUESTIONS).flat().length})
-                    </button>
+                  <div className="flex items-center gap-2">
+                    <div className="px-3 py-1.5 rounded-xl bg-red-500/15 border border-red-500/30 text-xs font-bold text-red-200 flex items-center gap-2 shadow-sm">
+                      <BookOpen className="w-3.5 h-3.5 text-red-400" />
+                      <span>{activePoem.title}</span>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-white font-bold">
+                        {unifiedQuestions.length} კითხვა
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2">
