@@ -34,6 +34,7 @@ import {
 import { soundEffects } from '../utils/soundEffects';
 import { OpenQuestionsSection } from './OpenQuestionsSection';
 import { OpenQuestionCard } from './OpenQuestionCard';
+import { IOSSegmentedToggle } from './IOSSegmentedToggle';
 import { OFFICIAL_QUIZ_QUESTIONS, OFFICIAL_OPEN_QUESTIONS, OpenQuestionItem } from '../data/testsData';
 import {
   trackTabClick,
@@ -3362,34 +3363,10 @@ export const QuizPrepSection: React.FC = () => {
                       )}
                     </div>
 
-                    <div className="inline-flex p-0.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
-                      <button
-                        onClick={() => {
-                          soundEffects.click();
-                          setQuizDisplayMode('card');
-                        }}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-mono cursor-pointer transition-all ${
-                          quizDisplayMode === 'card'
-                            ? 'bg-white/15 text-white font-bold'
-                            : 'text-[#a8a495] hover:text-white'
-                        }`}
-                      >
-                        1-ბარათი
-                      </button>
-                      <button
-                        onClick={() => {
-                          soundEffects.click();
-                          setQuizDisplayMode('list');
-                        }}
-                        className={`px-2.5 py-1 rounded-lg text-[10px] font-mono cursor-pointer transition-all ${
-                          quizDisplayMode === 'list'
-                            ? 'bg-white/15 text-white font-bold'
-                            : 'text-[#a8a495] hover:text-white'
-                        }`}
-                      >
-                        სია
-                      </button>
-                    </div>
+                    <IOSSegmentedToggle
+                      value={quizDisplayMode}
+                      onChange={setQuizDisplayMode}
+                    />
 
                     <button
                       onClick={handleResetQuiz}
