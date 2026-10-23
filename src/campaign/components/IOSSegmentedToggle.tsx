@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { motion, PanInfo } from 'framer-motion';
+import React, { useEffect } from 'react';
+import { motion, useMotionValue, animate, PanInfo } from 'framer-motion';
 import { soundEffects } from '../utils/soundEffects';
 
 interface IOSSegmentedToggleProps {
@@ -8,31 +8,55 @@ interface IOSSegmentedToggleProps {
   className?: string;
 }
 
+// iOS Spring Physics from ios-fluid-gestures skill
+const SPRING_CONFIG = {
+  type: 'spring' as const,
+  stiffness: 450,
+  damping: 36,
+  mass: 0.8
+};
+
+const THUMB_OFFSET = 38; // Distance between card (0) and list (38px)
+
 export const IOSSegmentedToggle: React.FC<IOSSegmentedToggleProps> = ({
   value,
   onChange,
   className = ''
 }) => {
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const x = useMotionValue(value === 'card' ? 0 : THUMB_OFFSET);
 
-  // iOS Spring Physics from ios-fluid-gestures skill
-  const springTransition = {
-    type: 'spring' as const,
-    stiffness: 450,
-    damping: 36,
-    mass: 0.8
-  };
+  // Synchronize motion value when value prop changes (e.g. on click)
+  useEffect(() => {
+    const target = value === 'card' ? 0 : THUMB_OFFSET;
+    animate(x, target, SPRING_CONFIG);
+  }, [value, x]);
 
   const handleDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    // If dragged right past threshold or flicked right
     if (value === 'card') {
-      if (info.offset.x > 12 || info.velocity.x > 100) {
+      if (info.offset.x > 12 || info.velocity.x > 120) {
+        soundEffects.click();
+        onChange('list');
+      } else {
+        animate(x, 0, SPRING_CONFIG);
+      }
+    } else {
+      if (info.offset.x < -12 || info.velocity.x < -120) {
+        soundEffects.click();
+        onChange('card');
+      } else {
+        animate(x, THUMB_OFFSET, SPRING_CONFIG);
+      }
+    }
+  };
+
+  const handlePanEnd = (_e: any, info: PanInfo) => {
+    if (info.offset.x > 15 || info.velocity.x > 150) {
+      if (value !== 'list') {
         soundEffects.click();
         onChange('list');
       }
-    } else {
-      // If dragged left past threshold or flicked left
-      if (info.offset.x < -12 || info.velocity.x < -100) {
+    } else if (info.offset.x < -15 || info.velocity.x < -150) {
+      if (value !== 'card') {
         soundEffects.click();
         onChange('card');
       }
@@ -40,21 +64,19 @@ export const IOSSegmentedToggle: React.FC<IOSSegmentedToggleProps> = ({
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`relative inline-flex items-center p-1 rounded-2xl bg-[#12131d]/90 border border-[#f5f2eb]/15 shadow-inner touch-none select-none ${className}`}
+    <motion.div
+      onPanEnd={handlePanEnd}
+      className={`relative inline-flex items-center p-1 rounded-2xl bg-stone-300/80 dark:bg-[#12131d] border border-stone-400/60 dark:border-[#f5f2eb]/20 shadow-inner select-none touch-none ${className}`}
       title={value === 'card' ? '1-ბარათის ხედვა (სათითაოდ)' : 'სრული სიის ხედვა (ერთად)'}
     >
-      {/* Sliding Active Pill (Draggable & Click-responsive with GPU transform) */}
+      {/* Authentic iOS Draggable Thumb (Solid, Crisp & Highly Visible in both Light & Dark modes) */}
       <motion.div
+        style={{ x, willChange: 'transform' }}
         drag="x"
-        dragConstraints={{ left: 0, right: 38 }}
-        dragElastic={0.18}
+        dragConstraints={{ left: 0, right: THUMB_OFFSET }}
+        dragElastic={0.16}
         onDragEnd={handleDragEnd}
-        animate={{ x: value === 'card' ? 0 : 38 }}
-        transition={springTransition}
-        className="absolute left-1 top-1 w-9 h-7.5 rounded-xl bg-gradient-to-b from-white/20 to-white/10 dark:from-red-500 dark:to-red-600 shadow-md border border-white/25 cursor-grab active:cursor-grabbing will-change-transform z-10"
-        style={{ willChange: 'transform' }}
+        className="absolute left-1 top-1 w-9 h-7.5 rounded-xl bg-white dark:bg-red-500 shadow-[0_2px_6px_rgba(0,0,0,0.22),0_1px_2px_rgba(0,0,0,0.12)] dark:shadow-[0_2px_12px_rgba(239,68,68,0.5)] border border-stone-200 dark:border-red-400/40 cursor-grab active:cursor-grabbing z-10 will-change-transform"
       />
 
       {/* Button 1: Card View Icon */}
@@ -69,19 +91,18 @@ export const IOSSegmentedToggle: React.FC<IOSSegmentedToggleProps> = ({
         }}
         className={`relative z-20 w-9 h-7.5 flex items-center justify-center rounded-xl transition-colors duration-200 cursor-pointer ${
           value === 'card'
-            ? 'text-white drop-shadow-sm font-bold'
-            : 'text-[#8c887b] hover:text-[#d4d1c5]'
+            ? 'text-stone-900 dark:text-white font-bold drop-shadow-sm'
+            : 'text-stone-600 dark:text-[#8c887b] hover:text-stone-950 dark:hover:text-[#d4d1c5]'
         }`}
         title="1 კითხვა ბარათად"
         aria-label="1-ბარათის ხედვა"
       >
-        {/* Single Card / Slide SVG icon */}
         <svg
           className="w-4 h-4 transition-transform duration-200"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.2"
+          strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -103,19 +124,18 @@ export const IOSSegmentedToggle: React.FC<IOSSegmentedToggleProps> = ({
         }}
         className={`relative z-20 w-9 h-7.5 flex items-center justify-center rounded-xl transition-colors duration-200 cursor-pointer ${
           value === 'list'
-            ? 'text-white drop-shadow-sm font-bold'
-            : 'text-[#8c887b] hover:text-[#d4d1c5]'
+            ? 'text-stone-900 dark:text-white font-bold drop-shadow-sm'
+            : 'text-stone-600 dark:text-[#8c887b] hover:text-stone-950 dark:hover:text-[#d4d1c5]'
         }`}
         title="ყველა კითხვა სიად"
         aria-label="სიის ხედვა"
       >
-        {/* List SVG icon with 3 horizontal rows and bullets */}
         <svg
           className="w-4 h-4 transition-transform duration-200"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2.2"
+          strokeWidth="2.4"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -127,6 +147,6 @@ export const IOSSegmentedToggle: React.FC<IOSSegmentedToggleProps> = ({
           <circle cx="4" cy="18" r="1.5" fill="currentColor" stroke="none" />
         </svg>
       </motion.button>
-    </div>
+    </motion.div>
   );
 };
