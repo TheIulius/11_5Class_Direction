@@ -2738,9 +2738,9 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
 
   db.isSyncing = true;
   try {
-    const token = explicitToken || runtimeGithubToken || loadStoredGithubToken();
+    const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
     const owner = process.env.GITHUB_OWNER || 'TheIulius';
-    const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
+    const repo = process.env.GITHUB_REPO || '11_5Class_Direction';
     const branch = process.env.GITHUB_BRANCH || 'data';
     const filePath = 'data/db.json';
     let remoteData: any = null;
@@ -2752,7 +2752,7 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: 'application/vnd.github.v3+json',
-            'User-Agent': 'Premier-League-Fantasy-App',
+            'User-Agent': '11-5-Class-Direction-App',
           },
         });
 
@@ -2764,10 +2764,31 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
             console.log('[GitHub Sync] Retrieved latest database via GitHub REST API.');
           }
         } else {
-          console.warn(`[GitHub Sync] GitHub REST API returned HTTP ${getRes.status}. Attempting git fallback...`);
+          console.warn(`[GitHub Sync] GitHub REST API returned HTTP ${getRes.status}. Attempting fallbacks...`);
         }
       } catch (apiErr: any) {
         console.warn('[GitHub Sync] GitHub REST API request failed:', apiErr?.message || apiErr);
+      }
+    }
+
+    // Method 1b: Unauthenticated fetch from raw.githubusercontent.com (fast fallback for public repos)
+    if (!remoteData) {
+      try {
+        const rawRes = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`, {
+          headers: {
+            'User-Agent': '11-5-Class-Direction-App',
+            Accept: 'application/json',
+          },
+        });
+        if (rawRes.ok) {
+          const rawText = await rawRes.text();
+          if (rawText && rawText.trim().startsWith('{')) {
+            remoteData = JSON.parse(rawText);
+            console.log('[GitHub Sync] Successfully retrieved latest database via raw.githubusercontent.com public URL.');
+          }
+        }
+      } catch (rawErr: any) {
+        console.warn('[GitHub Sync] raw.githubusercontent.com fetch failed:', rawErr?.message || rawErr);
       }
     }
 
@@ -2835,9 +2856,9 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
 }
 
 export async function commitDbToGitHub(message: string, explicitToken?: string): Promise<{ success: boolean; commitUrl?: string; error?: string }> {
-  const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN;
+  const token = explicitToken || runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
   const owner = process.env.GITHUB_OWNER || 'TheIulius';
-  const repo = process.env.GITHUB_REPO || 'premier-league-fantasy';
+  const repo = process.env.GITHUB_REPO || '11_5Class_Direction';
   const branch = process.env.GITHUB_BRANCH || 'data';
   const filePath = 'data/db.json';
 
@@ -2859,7 +2880,7 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'Premier-League-Fantasy-App',
+        'User-Agent': '11-5-Class-Direction-App',
       },
     });
 
@@ -2899,7 +2920,7 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github.v3+json',
         'Content-Type': 'application/json',
-        'User-Agent': 'Premier-League-Fantasy-App',
+        'User-Agent': '11-5-Class-Direction-App',
       },
       body: JSON.stringify({
         message: commitMsg,
@@ -2933,18 +2954,18 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
   }
 }
 
-export function scheduleAutoSyncToGitHub(reason: string, immediate: boolean = false) {
+export function scheduleAutoSyncToGitHub(reason: string, immediate: boolean = false, customDelay?: number) {
   hasPendingLocalChanges = true;
   lastLocalWriteTime = Date.now();
 
-  const token = runtimeGithubToken || process.env.GITHUB_TOKEN;
+  const token = runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
   if (!token) return;
 
   if (autoSyncTimer) clearTimeout(autoSyncTimer);
-  const delay = immediate ? 50 : 1000; // 1s debounce for batch edits, 50ms for immediate
+  const delay = customDelay !== undefined ? customDelay : (immediate ? 50 : 2500); // 2.5s debounce for batch edits
   autoSyncTimer = setTimeout(async () => {
     try {
-      await commitDbToGitHub(`Admin update: ${reason}`);
+      await commitDbToGitHub(`Data sync: ${reason}`);
     } catch (e) {
       console.warn('Background auto-sync failed:', e);
     }
@@ -2962,7 +2983,7 @@ app.get('/api/admin/db/sync-status', (req: Request, res: Response) => {
   res.json({
     hasServerToken: hasToken,
     owner: process.env.GITHUB_OWNER || 'TheIulius',
-    repo: process.env.GITHUB_REPO || 'premier-league-fantasy',
+    repo: process.env.GITHUB_REPO || '11_5Class_Direction',
     branch: process.env.GITHUB_BRANCH || 'data',
   });
 });
