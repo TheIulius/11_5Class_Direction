@@ -2523,11 +2523,11 @@ export const QuizPrepSection: React.FC = () => {
               </div>
             )}
 
-            {/* ==================== TAB 2: FULL TEXT & VOCABULARY ==================== */}
+            {/* ==================== TAB 2: FULL TEXT, CLICKABLE WORDS & STANZA MEANINGS ==================== */}
             {activeStudioTab === 'text' && (
               <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
-                {/* Compact Sub-Toggle on Mobile (Full Text vs Vocabulary) */}
-                <div className="flex items-center justify-between gap-2">
+                {/* Header Sub-Toggles & Quick Actions */}
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#f5f2eb]/10 pb-3">
                   <div className="inline-flex p-1 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
                     <button
                       onClick={() => {
@@ -2557,25 +2557,155 @@ export const QuizPrepSection: React.FC = () => {
                     </button>
                   </div>
 
-                  <span className="text-[10px] font-mono text-[#a8a495] hidden sm:inline">
-                    {activePoem.author}
-                  </span>
+                  {textSubView === 'poem' && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={toggleAllStanzas}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-400/30 text-amber-200 text-xs font-medium transition-all cursor-pointer shadow-sm active:scale-95"
+                      >
+                        <Lightbulb className="w-3.5 h-3.5 text-amber-300" />
+                        <span>
+                          {activePoem.stanzas.every(s => expandedStanzas[s.stanzaNumber])
+                            ? 'სტროფების დაკეცვა'
+                            : '💡 ყველა სტროფის ახსნა'}
+                        </span>
+                      </button>
+                      <span className="text-[10px] font-mono text-[#a8a495] hidden md:inline">
+                        {activePoem.author}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {textSubView === 'poem' ? (
-                  <div className="p-4 rounded-2xl bg-[#181928]/90 border border-[#f5f2eb]/10">
-                    <pre className="font-sans text-xs sm:text-sm text-[#fcfbf7] whitespace-pre-wrap leading-relaxed max-h-[54vh] overflow-y-auto pr-1">
-                      {activePoem.fullText}
-                    </pre>
+                  <div className="space-y-3">
+                    {/* Helper Banner */}
+                    <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-[#181928]/80 border border-amber-400/20 text-[11px] text-[#c7c4b6]">
+                      <div className="flex items-center gap-2">
+                        <span className="text-amber-300">✨</span>
+                        <span>დააწკაპუნე ნებისმიერ <strong>ხაზგასმულ სიტყვას</strong> მოკლე განმარტებისთვის</span>
+                      </div>
+                      <span className="text-[10px] text-amber-400/80 font-mono hidden sm:inline">
+                        {activePoem.stanzas.length} სტროფი
+                      </span>
+                    </div>
+
+                    {/* Active Selected Word Popover Dock */}
+                    <AnimatePresence>
+                      {selectedWordInfo && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                          transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                          className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-[#1f2038] via-[#242238] to-[#1c1d30] border border-amber-400/40 shadow-xl flex items-center justify-between gap-3 sticky top-2 z-20 backdrop-blur-md"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-xl bg-amber-400/20 border border-amber-400/35 flex items-center justify-center text-amber-300 font-bold text-xs shrink-0 shadow-sm">
+                              📖
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs sm:text-sm font-bold text-amber-300">
+                                  {selectedWordInfo.word}
+                                </span>
+                                <span className="text-[10px] uppercase tracking-wider text-[#a8a495] bg-white/5 px-1.5 py-0.5 rounded">
+                                  მოკლე განმარტება
+                                </span>
+                                {selectedWordInfo.stanzaNum && (
+                                  <span className="text-[10px] text-amber-400/70">
+                                    (სტროფი #{selectedWordInfo.stanzaNum})
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-xs sm:text-sm text-[#fcfbf7] leading-snug mt-0.5">
+                                {selectedWordInfo.meaning}
+                              </div>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => setSelectedWordInfo(null)}
+                            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors cursor-pointer shrink-0"
+                            title="დახურვა"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Interactive Stanza Cards */}
+                    <div className="space-y-3 max-h-[58vh] overflow-y-auto pr-1">
+                      {activePoem.stanzas.map(stanza => {
+                        const isExpanded = !!expandedStanzas[stanza.stanzaNumber];
+                        return (
+                          <div
+                            key={stanza.stanzaNumber}
+                            className="p-3.5 sm:p-4 rounded-2xl bg-[#181928]/90 border border-[#f5f2eb]/10 space-y-2.5 transition-all hover:border-[#f5f2eb]/20"
+                          >
+                            <div className="flex items-center justify-between gap-2 border-b border-[#f5f2eb]/5 pb-2">
+                              <span className="text-[11px] font-mono font-bold text-amber-400/90 uppercase tracking-wider bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
+                                სტროფი #{stanza.stanzaNumber}
+                              </span>
+
+                              <button
+                                onClick={() => toggleStanza(stanza.stanzaNumber)}
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all cursor-pointer ${
+                                  isExpanded
+                                    ? 'bg-amber-500/20 text-amber-200 border border-amber-400/30'
+                                    : 'bg-white/5 hover:bg-white/10 text-[#a8a495] hover:text-white border border-transparent'
+                                }`}
+                              >
+                                <Lightbulb className={`w-3.5 h-3.5 ${isExpanded ? 'text-amber-300' : 'text-[#a8a495]'}`} />
+                                <span>{isExpanded ? 'აზრის დამალვა' : '💡 სტროფის აზრი'}</span>
+                                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`} />
+                              </button>
+                            </div>
+
+                            {/* Stanza Lines */}
+                            <div className="space-y-1 font-serif text-xs sm:text-sm text-[#fcfbf7] leading-relaxed pl-1 sm:pl-2">
+                              {stanza.lines.map((line, lIdx) =>
+                                renderInteractiveLine(line, stanza.stanzaNumber, lIdx, activePoem.wordGlossary)
+                              )}
+                            </div>
+
+                            {/* Expandable Stanza Explanation */}
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0 }}
+                                  animate={{ opacity: 1, height: 'auto' }}
+                                  exit={{ opacity: 0, height: 0 }}
+                                  transition={{ type: 'spring', stiffness: 400, damping: 35 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="mt-2.5 p-3 rounded-xl bg-gradient-to-r from-amber-950/30 to-amber-900/15 border border-amber-500/30 text-xs text-[#f5f2eb]/95 leading-relaxed flex items-start gap-2.5 shadow-inner">
+                                    <Sparkles className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                                    <div className="min-w-0">
+                                      <div className="text-[10px] uppercase font-bold text-amber-300 tracking-wider mb-0.5">
+                                        სტროფის მოკლე შინაარსი
+                                      </div>
+                                      <p className="text-xs sm:text-sm text-[#fcfbf7]">
+                                        {stanza.explanation}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[54vh] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[58vh] overflow-y-auto pr-1">
                     {activePoem.vocabulary.map((v, idx) => (
                       <div
                         key={idx}
                         className="p-3 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10 text-xs text-[#d4d1c5] leading-relaxed"
                       >
-                        <strong className="text-red-300 block text-xs sm:text-sm mb-0.5">
+                        <strong className="text-amber-300 block text-xs sm:text-sm mb-0.5">
                           {v.word}
                         </strong>
                         <span>{v.meaning}</span>
