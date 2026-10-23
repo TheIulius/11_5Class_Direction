@@ -1054,7 +1054,6 @@ export const QuizPrepSection: React.FC = () => {
   const [analysisSubView, setAnalysisSubView] = useState<'context' | 'stanzas'>('context');
   const [openEssaySubView, setOpenEssaySubView] = useState<'open' | 'essay'>('open');
   const [flashAiSubView, setFlashAiSubView] = useState<'flashcards' | 'chat'>('flashcards');
-  const [showExtraMedia, setShowExtraMedia] = useState(false);
 
   // Quiz state: defaults to single-card mode on mobile for zero-scroll testing
   const [quizFilter, setQuizFilter] = useState<QuizCategoryFilter>('all');
@@ -1488,52 +1487,45 @@ export const QuizPrepSection: React.FC = () => {
                         </div>
                       </button>
                     </div>
-
-                    {/* Collapsible TV School Lesson & External Links */}
-                    <button
-                      onClick={() => {
-                        soundEffects.click();
-                        setShowExtraMedia(prev => !prev);
-                      }}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/12 text-xs font-semibold text-[#dedacb] flex items-center justify-between cursor-pointer"
-                    >
-                      <span>📺 ტელესკოლის გაკვეთილი &amp; ყველა პოდკასტი</span>
-                      <span className="text-[10px] font-mono text-red-300">
-                        {showExtraMedia ? 'დამალვა ▲' : 'გახსნა ▼'}
-                      </span>
-                    </button>
                   </div>
                 </div>
 
-                {showExtraMedia && (
-                  <div className="pt-3 border-t border-[#f5f2eb]/10 grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="text-xs font-bold text-[#dedacb]">
-                        ტელესკოლის ვიდეო: {activePoem.youtubeTitle}
-                      </div>
-                      <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#f5f2eb]/15 bg-black">
-                        <iframe
-                          key={activePoem.youtubeEmbedId}
-                          src={`https://www.youtube.com/embed/${activePoem.youtubeEmbedId}`}
-                          title={activePoem.youtubeTitle}
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          className="w-full h-full border-0"
-                        />
-                      </div>
+                {/* Always-Visible TV School Video Lesson & Additional Media Links */}
+                <div className="pt-3 border-t border-[#f5f2eb]/10 grid grid-cols-1 lg:grid-cols-12 gap-4">
+                  <div className="lg:col-span-7 space-y-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[10px] font-mono uppercase text-red-300 flex items-center gap-1">
+                        <Volume2 className="w-3.5 h-3.5 shrink-0" />
+                        <span>📺 ტელესკოლის ვიდეო-გაკვეთილი (პირველი არხი)</span>
+                      </span>
                     </div>
+                    <div className="text-xs sm:text-sm font-bold text-[#fcfbf7] truncate">
+                      {activePoem.youtubeTitle}
+                    </div>
+                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-[#f5f2eb]/15 bg-black shadow-inner">
+                      <iframe
+                        key={activePoem.youtubeEmbedId}
+                        src={`https://www.youtube.com/embed/${activePoem.youtubeEmbedId}`}
+                        title={activePoem.youtubeTitle}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full border-0"
+                      />
+                    </div>
+                  </div>
 
+                  <div className="lg:col-span-5 space-y-2">
+                    <div className="text-xs font-bold text-[#dedacb]">
+                      🔗 პირდაპირი მედია-ბმულები &amp; წყაროები:
+                    </div>
                     <div className="space-y-2">
-                      <div className="text-xs font-bold text-[#dedacb]">
-                        დამატებითი ბმულები &amp; წყაროები:
-                      </div>
                       {activePoem.directLinks.map((lnk, i) => (
                         <a
                           key={i}
                           href={lnk.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="p-2.5 rounded-xl bg-[#181928] hover:bg-[#222438] border border-[#f5f2eb]/12 flex items-center justify-between gap-2"
+                          className="p-3 rounded-xl bg-[#181928] hover:bg-[#222438] border border-[#f5f2eb]/12 flex items-center justify-between gap-2 transition-colors"
                         >
                           <div className="min-w-0">
                             <div className="text-xs font-bold text-[#fcfbf7] truncate">
@@ -1548,7 +1540,7 @@ export const QuizPrepSection: React.FC = () => {
                       ))}
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             )}
 
