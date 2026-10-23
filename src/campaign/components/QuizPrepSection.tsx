@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   Sparkles,
   ExternalLink,
@@ -23,11 +23,15 @@ import {
   Video,
   PenTool,
   BookmarkCheck,
-  Filter
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  MoreHorizontal,
+  BookOpen
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
-type StudioTab = 'poems' | 'podcast' | 'quiz' | 'essays' | 'flashcards' | 'chat';
+type StudioTab = 'media' | 'text' | 'analysis' | 'open_essay' | 'quiz' | 'flash_ai';
 
 type QuizCategoryFilter =
   | 'all'
@@ -1003,19 +1007,70 @@ const INITIAL_FLASHCARDS: FlashcardItem[] = [
   }
 ];
 
+const SHORT_POEM_LABELS: Record<Exclude<QuizCategoryFilter, 'all'>, string> = {
+  'edemi': '1. დაკარგული ედემი',
+  'visac-gsurt': '2. ვისაც გსურთ',
+  'vah-droni': '3. ვაჰ, დრონი',
+  'gogcha': '4. გოგჩა',
+  'sagamo': '5. საღამო...',
+  'tamar-mefe': '6. თამარ მეფე'
+};
+
+const STUDIO_TAB_LIST: {
+  id: StudioTab;
+  label: string;
+  shortLabel: string;
+  icon: React.FC<{ className?: string }>;
+}[] = [
+  { id: 'media', label: 'ვიდეო & პოდკასტი', shortLabel: 'მედია', icon: Video },
+  { id: 'text', label: 'ტექსტი & ლექსიკონი', shortLabel: 'ტექსტი', icon: ScrollText },
+  { id: 'analysis', label: 'კონსპექტი & ეპოქა', shortLabel: 'ანალიზი', icon: BookOpen },
+  { id: 'open_essay', label: 'ღია კითხვები & ესე', shortLabel: 'ღია & ესე', icon: PenTool },
+  { id: 'quiz', label: 'ტესტები (24)', shortLabel: 'ტესტი', icon: HelpCircle },
+  { id: 'flash_ai', label: 'ბარათები & AI', shortLabel: 'AI & ბარათი', icon: Layers }
+];
+
+const IOS_SPRING = {
+  type: 'spring' as const,
+  stiffness: 400,
+  damping: 40,
+  mass: 1
+};
+
+const IOS_QUICK_SPRING = {
+  type: 'spring' as const,
+  stiffness: 500,
+  damping: 35
+};
+
 export const QuizPrepSection: React.FC = () => {
-  const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('poems');
+  const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('media');
+  const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [selectedPoemId, setSelectedPoemId] =
     useState<Exclude<QuizCategoryFilter, 'all'>>('edemi');
+
+  // Compact sub-toggles inside tabs so mobile never scrolls endlessly
+  const [textSubView, setTextSubView] = useState<'poem' | 'vocab'>('poem');
+  const [analysisSubView, setAnalysisSubView] = useState<'context' | 'stanzas'>('context');
+  const [openEssaySubView, setOpenEssaySubView] = useState<'open' | 'essay'>('open');
+  const [flashAiSubView, setFlashAiSubView] = useState<'flashcards' | 'chat'>('flashcards');
+  const [showExtraMedia, setShowExtraMedia] = useState(false);
+
+  // Quiz state: defaults to single-card mode on mobile for zero-scroll testing
   const [quizFilter, setQuizFilter] = useState<QuizCategoryFilter>('all');
+  const [quizDisplayMode, setQuizDisplayMode] = useState<'card' | 'list'>('card');
+  const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
+  const [showExplanations, setShowExplanations] = useState<Record<string, boolean>>({});
+
+  // iOS Fluid Bottom Sheets (Hidden NotebookLM / Resources, Poem Picker, Syllabus Photo)
+  const [showResourcesSheet, setShowResourcesSheet] = useState(false);
+  const [showPoemPickerSheet, setShowPoemPickerSheet] = useState(false);
+  const [showSyllabusModal, setShowSyllabusModal] = useState(false);
+
   const [notebookUrl] = useState<string>(DEFAULT_NOTEBOOKLM_URL);
   const [copiedSourcePack, setCopiedSourcePack] = useState(false);
   const [copiedSinglePoem, setCopiedSinglePoem] = useState(false);
-  const [showSyllabusModal, setShowSyllabusModal] = useState(false);
-
-  // Quiz State
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, number>>({});
-  const [showExplanations, setShowExplanations] = useState<Record<string, boolean>>({});
 
   // Flashcards State
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
@@ -1028,11 +1083,73 @@ export const QuizPrepSection: React.FC = () => {
     {
       id: 'welcome-msg',
       role: 'assistant',
-      text: 'გამარჯობა! ექვსივე საპროგრამო ერთეულზე უკვე დაგენერირებულია და ჩაშენებულია:\n• 6 AI ვიდეო-მიმოხილვა (.mp4) და 6 ორწამყვანიანი AI აუდიო-პოდკასტი (.mp3)\n• სრული ტექსტები, უცხო სიტყვების ლექსიკონი, ეპოქისა და რომანტიზმის კონტექსტი\n• 24 სასკოლო სატესტო კითხვა თემების მიხედვით.\n\nმკითხე ნებისმიერ სტროფზე, ციტატაზე, ღია კითხვებზე ან ანალიტიკურ ესეზე!',
-      citations: ['6 AI ვიდეო & 6 პოდკასტი', '24 სატესტო კითხვის ბანკი']
+      text: 'გამარჯობა! მკითხე ნებისმიერ ლექსზე, უცხო სიტყვაზე, ალეგორიაზე, ღია კითხვაზე ან ანალიტიკურ ესეზე!',
+      citations: ['6 AI ვიდეო & 6 პოდკასტი', '24 სატესტო კითხვა']
     }
   ]);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  const activePoemIndex = PROGRAM_TOPICS_AND_POEMS.findIndex(p => p.id === selectedPoemId);
+  const activePoem =
+    PROGRAM_TOPICS_AND_POEMS[activePoemIndex >= 0 ? activePoemIndex : 0];
+
+  const handleSelectPoem = (poemId: Exclude<QuizCategoryFilter, 'all'>) => {
+    soundEffects.click();
+    setSelectedPoemId(poemId);
+    if (quizFilter !== 'all') {
+      setQuizFilter(poemId);
+      setActiveQuestionIdx(0);
+    }
+  };
+
+  const handleStepPoem = (delta: number) => {
+    soundEffects.click();
+    const nextIdx =
+      (activePoemIndex + delta + PROGRAM_TOPICS_AND_POEMS.length) %
+      PROGRAM_TOPICS_AND_POEMS.length;
+    handleSelectPoem(PROGRAM_TOPICS_AND_POEMS[nextIdx].id);
+  };
+
+  const handleSwitchStudioTab = (nextTab: StudioTab) => {
+    const currentIdx = STUDIO_TAB_LIST.findIndex(t => t.id === activeStudioTab);
+    const nextIdx = STUDIO_TAB_LIST.findIndex(t => t.id === nextTab);
+    if (currentIdx === nextIdx) return;
+    soundEffects.click();
+    setSwipeDirection(nextIdx > currentIdx ? 1 : -1);
+    setActiveStudioTab(nextTab);
+  };
+
+  const handleHorizontalSwipeEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
+    const currentIdx = STUDIO_TAB_LIST.findIndex(t => t.id === activeStudioTab);
+    // Swipe left -> next tab
+    if (info.offset.x < -55 || info.velocity.x < -360) {
+      if (currentIdx < STUDIO_TAB_LIST.length - 1) {
+        soundEffects.click();
+        setSwipeDirection(1);
+        setActiveStudioTab(STUDIO_TAB_LIST[currentIdx + 1].id);
+      }
+    } else if (info.offset.x > 55 || info.velocity.x > 360) {
+      // Swipe right -> previous tab
+      if (currentIdx > 0) {
+        soundEffects.click();
+        setSwipeDirection(-1);
+        setActiveStudioTab(STUDIO_TAB_LIST[currentIdx - 1].id);
+      }
+    }
+  };
+
+  const handleSheetDragEnd = (
+    closeFn: () => void,
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
+    if (info.offset.y > 120 || info.velocity.y > 400) {
+      closeFn();
+    }
+  };
 
   const handleSelectAnswer = (qId: string, optionIdx: number) => {
     soundEffects.click();
@@ -1044,12 +1161,19 @@ export const QuizPrepSection: React.FC = () => {
     soundEffects.click();
     setSelectedAnswers({});
     setShowExplanations({});
+    setActiveQuestionIdx(0);
   };
 
   const filteredQuestions =
     quizFilter === 'all'
       ? TEACHER_QUIZ_BANK
       : TEACHER_QUIZ_BANK.filter(q => q.topicId === quizFilter);
+
+  const safeQuestionIdx = Math.min(
+    activeQuestionIdx,
+    Math.max(0, filteredQuestions.length - 1)
+  );
+  const currentQuizQuestion = filteredQuestions[safeQuestionIdx];
 
   const correctCount = filteredQuestions.reduce((acc, q) => {
     return selectedAnswers[q.id] === q.correctIndex ? acc + 1 : acc;
@@ -1077,19 +1201,19 @@ export const QuizPrepSection: React.FC = () => {
 
     if (lower.includes('ჭავჭავაძე') || lower.includes('გოგჩა') || lower.includes('დრონი') || lower.includes('ვისაც')) {
       reply =
-        'ალექსანდრე ჭავჭავაძის სამივე საპროგრამო ლექსში წამყვანია რომანტიკული სევდა და წუთისოფლის ცვალებადობა:\n• „ვისაც გსურთ“: „მას ვჭვრეტ პატიმრად, ვის მონებს გული“ — პატიმარი სატრფო დამონებული საქართველოს ალეგორიაა, ხოლო „გველივე ჰშთება გველად“ მიანიშნებს დამპყრობელთა უცვლელ ბუნებაზე.\n• „ვაჰ, დრონი, დრონი“: რეფრენი „მე იგივე ვარ მარად და მარად!“ უპირისპირდება დროის წარმავლობას.\n• „გოგჩა“: ტბის მარადიული მშვენიერება უპირისპირდება ნაპირზე დანგრეულ ძველ ქალაქებსა და ტაძრებს, სადაც ოდესღაც მეფეები მუხლს იდრეკდნენ, დღეს კი პირუტყვები და მხეცები ბინადრობენ.';
+        'ალექსანდრე ჭავჭავაძის სამივე საპროგრამო ლექსში წამყვანია რომანტიკული სევდა და წუთისოფლის ცვალებადობა:\n• „ვისაც გსურთ“: „მას ვჭვრეტ პატიმრად, ვის მონებს გული“ — პატიმარი სატრფო დამონებული საქართველოს ალეგორიაა, ხოლო „გველივე ჰშთება გველად“ მიანიშნებს დამპყრობელთა უცვლელ ბუნებაზე.\n• „ვაჰ, დრონი, დრონი“: რეფრენი „მე იგივე ვარ მარად და მარად!“ უპირისპირდება დროის წარმავლობას.\n• „გოგჩა“: ტბის მარადიული მშვენიერება უპირისპირდება ნაპირზე დანგრეულ ძველ ქალაქებსა და ტაძრებს.';
       citations = ['ალექსანდრე ჭავჭავაძე • 3 ლექსი', 'ალეგორია და რეფრენი'];
     } else if (lower.includes('ორბელიანი') || lower.includes('თამარ') || lower.includes('ბეთანი') || lower.includes('საღამო')) {
       reply =
-        'გრიგოლ ორბელიანის საპროგრამო ლექსები:\n• „თამარ მეფის სახე ბეთანიის ეკლესიაში“: ბეთანიის ტაძარში თამარის ფრესკის წინ მდგომი პოეტი უპირისპირებს საქართველოს „ყვავილოვან წალკოტს“ (ოქროს ხანას) და აწმყოს „სულით დაცემას“. იგი შესთხოვს თამარს, რომ ივერი აღდგეს წმინდა საყდრით, რუსთაველის მდიდარი ენითა და სწავლის შუქით.\n• „საღამო გამოსალმებისა“: კავკასიონისა და მბრდღვინავი თერგის ფონზე ლირიკული გმირი გაჰყურებს მიმავალ ეტლს და ეთხოვება სატრფოს, რომელიც მისთვის „ზეციური სხივია“.';
+        'გრიგოლ ორბელიანის საპროგრამო ლექსები:\n• „თამარ მეფის სახე ბეთანიის ეკლესიაში“: ბეთანიის ტაძარში თამარის ფრესკის წინ მდგომი პოეტი უპირისპირებს საქართველოს „ყვავილოვან წალკოტს“ (ოქროს ხანას) და აწმყოს „სულით დაცემას“.\n• „საღამო გამოსალმებისა“: კავკასიონისა და მბრდღვინავი თერგის ფონზე ლირიკული გმირი გაჰყურებს მიმავალ ეტლს და ეთხოვება სატრფოს.';
       citations = ['გრიგოლ ორბელიანი • 2 ლექსი', 'რომანტიზმი'];
     } else if (lower.includes('ედემ') || lower.includes('რომანტიზმ') || lower.includes('ალეგორი')) {
       reply =
-        '• „დაკარგული ედემი“: რომანტიკოსებისთვის დაკარგული სამოთხე (ედემი) ალეგორიულად უკავშირდება საქართველოს დაკარგულ თავისუფლებასა და წარსულ დიდებას.\n• რომანტიზმის ნიშნები: ორსამყაროიანობა (მძიმე აწმყო vs იდეალური წარსული), ეროვნული და მსოფლიო სევდა, ბუნების გაპიროვნება.\n• ალეგორია: ქარაგმული თხრობა (მაგ., „ვისაც გსურთ“-ში პატიმარი = საქართველო; „გოგჩაში“ ნანგრევები = დაცემული დიდება).';
+        '• „დაკარგული ედემი“: რომანტიკოსებისთვის დაკარგული სამოთხე (ედემი) ალეგორიულად უკავშირდება საქართველოს დაკარგულ თავისუფლებასა და წარსულ დიდებას.\n• რომანტიზმის ნიშნები: ორსამყაროიანობა (მძიმე აწმყო vs იდეალური წარსული), ეროვნული და მსოფლიო სევდა, ბუნების გაპიროვნება.';
       citations = ['„დაკარგული ედემი“', 'მხატვრული გამოსახვის ფორმები'];
     } else if (lower.includes('ესე') || lower.includes('ფორმატ') || lower.includes('ღია')) {
       reply =
-        'ტესტის ფორმატი (120 წუთი):\n1. ა) მოკლე ღია შეკითხვები — უპასუხე ზუსტად 1–2 წინადადებით, ზედმეტი შესავლის გარეშე.\n1. ბ) სამსჯელო/საანალიზო კითხვები — დაწერე ნარატიული თხრობით: ჩამოაყალიბე მთავარი აზრი, მოიყვანე ტექსტიდან არგუმენტი/ციტატა და ახსენი მხატვრული ხერხი (ალეგორია/რეფრენი).\n2. ანალიტიკური ესე — დასმული საკითხის კრიტიკული ანალიზი (შესავალი თეზისით, 2-3 არგუმენტირებული აბზაცი ლიტერატურული და თანამედროვე პარალელებით, დასკვნა).';
+        'ტესტის ფორმატი (120 წუთი):\n1. ა) მოკლე ღია შეკითხვები — 1–2 წინადადებით.\n1. ბ) სამსჯელო/საანალიზო კითხვები — ნარატიული თხრობით, არგუმენტითა და მხატვრული ხერხების ახსნით.\n2. ანალიტიკური ესე — შესავალი თეზისით, 2-3 არგუმენტირებული აბზაცი, დასკვნა.';
       citations = ['ტესტურ დავალებათა ფორმატი • 120 წთ'];
     }
 
@@ -1112,9 +1236,7 @@ export const QuizPrepSection: React.FC = () => {
       await navigator.clipboard?.writeText(fullText);
       setCopiedSourcePack(true);
       setTimeout(() => setCopiedSourcePack(false), 3500);
-    } catch {
-      // Fallback
-    }
+    } catch {}
     window.open(notebookUrl, '_blank', 'noopener,noreferrer');
   };
 
@@ -1130,599 +1252,714 @@ export const QuizPrepSection: React.FC = () => {
   };
 
   const currentFlashcard = INITIAL_FLASHCARDS[currentCardIndex];
-  const activePoem =
-    PROGRAM_TOPICS_AND_POEMS.find(p => p.id === selectedPoemId) || PROGRAM_TOPICS_AND_POEMS[0];
+  const activeTabIndex = STUDIO_TAB_LIST.findIndex(t => t.id === activeStudioTab);
+
+  const panelVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 48 : dir < 0 ? -48 : 0,
+      opacity: 0
+    }),
+    center: {
+      x: 0,
+      opacity: 1
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -48 : dir < 0 ? 48 : 0,
+      opacity: 0
+    })
+  };
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-      className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-8 space-y-6"
-    >
-      {/* Top Urgent Monday Quiz Red Alert Header */}
-      <div className="relative overflow-hidden rounded-3xl border border-red-500/45 bg-gradient-to-br from-red-950/65 via-[#18131d]/95 to-[#12131d]/95 p-5 sm:p-7 shadow-[0_0_45px_rgba(239,68,68,0.18)] backdrop-blur-2xl">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-5">
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500 text-white text-xs font-extrabold uppercase tracking-wider shadow-[0_0_18px_rgba(239,68,68,0.65)] animate-pulse">
-                <Flame className="w-3.5 h-3.5 fill-current" />
-                <span>ორშაბათი &bull; I ქვიზი</span>
-              </span>
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full border border-red-400/30 bg-red-500/15 text-red-200 text-xs font-mono">
-                <Clock className="w-3.5 h-3.5" />
-                <span>საგამოცდო დრო: 120 წთ</span>
-              </span>
-              <span className="px-2.5 py-1 rounded-full border border-[#f5f2eb]/15 bg-white/5 text-[#dedacb] text-xs font-mono">
-                6 AI ვიდეო &bull; 6 AI პოდკასტი &bull; 24 ტესტი
-              </span>
-            </div>
+    <section className="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3.5">
+      {/* 1. ULTRA-COMPACT TOP STATUS BAR (Hidden Extras Tucked into iOS Sheet) */}
+      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-[#141522]/90 border border-red-500/30 backdrop-blur-xl">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider shrink-0 shadow-[0_0_12px_rgba(239,68,68,0.5)]">
+            <Flame className="w-3 h-3 fill-current" />
+            <span>ორშაბათი</span>
+          </span>
+          <h1 className="text-xs sm:text-sm font-extrabold text-[#fcfbf7] truncate">
+            ქართულის I ქვიზი
+          </h1>
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 border border-[#f5f2eb]/10 text-[10px] font-mono text-[#c5c1b2] shrink-0">
+            <Clock className="w-3 h-3 text-red-300" />
+            <span>120 წთ</span>
+          </span>
+        </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[#fcfbf7]">
-              ქართულის I ქვიზის AI სტუდია &amp; კონსპექტები
-            </h1>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => {
+              soundEffects.click();
+              setShowSyllabusModal(true);
+            }}
+            className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[11px] font-semibold text-[#dedacb] flex items-center gap-1.5 cursor-pointer"
+            title="ოფიციალური პროგრამის ფოტო"
+          >
+            <ImageIcon className="w-3.5 h-3.5 text-red-300" />
+            <span className="hidden xs:inline">პროგრამა</span>
+          </button>
 
-            <p className="text-xs sm:text-sm text-[#d4d1c5] leading-relaxed">
-              თითოეულ ლექსსა და თემაზე დაგენერირებულია <strong className="text-[#fcfbf7]">NotebookLM-ის სტილის 2-წამყვანიანი ქართული აუდიო-პოდკასტი (.mp3)</strong> და <strong className="text-[#fcfbf7]">ვიდეო-მიმოხილვა (.mp4)</strong> უცხო სიტყვების განმარტებით, ლექსის ვითარებით, ეპოქალური კონტექსტითა და რომანტიზმის ანალიზით + <strong className="text-red-300">24 სასკოლო სატესტო კითხვა</strong>.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-2.5 pt-1">
-              <button
-                onClick={() => {
-                  soundEffects.click();
-                  setShowSyllabusModal(true);
-                }}
-                className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-[#f5f2eb]/20 text-xs font-semibold text-[#fcfbf7] flex items-center gap-2 transition-all cursor-pointer"
-              >
-                <ImageIcon className="w-4 h-4 text-red-300" />
-                <span>ოფიციალური პროგრამის ფოტო (ცხრილი)</span>
-              </button>
-
-              <a
-                href="/quiz/georgian-quiz-1-source-pack.txt"
-                download="Georgian_Quiz_1_NotebookLM_Source_Pack.txt"
-                onClick={() => soundEffects.click()}
-                className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-[#f5f2eb]/20 text-xs font-semibold text-[#fcfbf7] flex items-center gap-2 transition-all cursor-pointer"
-              >
-                <Download className="w-4 h-4 text-emerald-300" />
-                <span>ჩამოტვირთე სრული კონსპექტი (.txt)</span>
-              </a>
-            </div>
-          </div>
-
-          {/* Direct NotebookLM Launchpad Card */}
-          <div className="w-full lg:w-84 shrink-0 rounded-2xl border border-red-400/35 bg-[#141522]/90 p-4 space-y-3 shadow-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="w-7 h-7 rounded-lg bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-300">
-                  <Sparkles className="w-4 h-4" />
-                </span>
-                <div>
-                  <div className="text-xs font-bold text-[#fcfbf7]">NotebookLM სტუდია</div>
-                  <div className="text-[10px] font-mono text-red-300">6 ვიდეო &amp; 6 პოდკასტი მზადაა</div>
-                </div>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                ON-SITE
-              </span>
-            </div>
-
-            <p className="text-[11px] text-[#c5c1b2] leading-relaxed">
-              ყველა ვიდეო და პოდკასტი პირდაპირ საიტზევე ირთვება ქვემოთ! ასევე შეგიძლია 1 კლიკით გახსნა Google NotebookLM სრული კონსპექტით:
-            </p>
-
-            <button
-              onClick={handleCopyFullSourceAndOpenNotebookLM}
-              className="w-full py-2.5 px-3.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-lg shadow-red-500/25 cursor-pointer"
-            >
-              {copiedSourcePack ? (
-                <>
-                  <Check className="w-4 h-4" />
-                  <span>დაკოპირდა! ჩასვი NotebookLM-ში</span>
-                </>
-              ) : (
-                <>
-                  <span>გახსენი NotebookLM-ში (სრული მასალით)</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </>
-              )}
-            </button>
-          </div>
+          <button
+            onClick={() => {
+              soundEffects.click();
+              setShowResourcesSheet(true);
+            }}
+            className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[11px] font-semibold text-[#dedacb] flex items-center gap-1 cursor-pointer"
+            title="დამატებითი ფაილები და NotebookLM"
+          >
+            <MoreHorizontal className="w-3.5 h-3.5 text-red-300" />
+            <span className="text-[10px] font-mono">რესურსები</span>
+          </button>
         </div>
       </div>
 
-      {/* Studio Navigation Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-        {[
-          {
-            id: 'poems' as StudioTab,
-            label: 'ლექსების ვიდეოები, პოდკასტები & კონსპექტები',
-            icon: ScrollText,
-            badge: '6 საპროგრამო ერთეული'
-          },
-          {
-            id: 'quiz' as StudioTab,
-            label: 'სასკოლო ტესტების ბანკი',
-            icon: HelpCircle,
-            badge: `${TEACHER_QUIZ_BANK.length} კითხვა`
-          },
-          {
-            id: 'podcast' as StudioTab,
-            label: 'ყველა აუდიო-პოდკასტი (6 ეპიზოდი)',
-            icon: Headphones,
-            badge: 'MP3 პლეილისტი'
-          },
-          {
-            id: 'essays' as StudioTab,
-            label: 'ანალიტიკური ესე & ფორმატი (120 წთ)',
-            icon: PenTool,
-            badge: 'ესეს გეგმა'
-          },
-          {
-            id: 'flashcards' as StudioTab,
-            label: 'ფლეშ-ბარათები',
-            icon: Layers,
-            badge: `${INITIAL_FLASHCARDS.length} ბარათი`
-          },
-          {
-            id: 'chat' as StudioTab,
-            label: 'კითხვების დასმა (AI)',
-            icon: MessageSquare,
-            badge: 'Q&A'
-          }
-        ].map(tab => {
-          const Icon = tab.icon;
-          const isActive = activeStudioTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                soundEffects.click();
-                setActiveStudioTab(tab.id);
-              }}
-              className={`shrink-0 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer border ${
-                isActive
-                  ? 'bg-red-500 text-white border-red-400 shadow-[0_0_20px_rgba(239,68,68,0.35)]'
-                  : 'bg-[#171825]/80 text-[#c7c4b5] border-[#f5f2eb]/10 hover:text-[#fcfbf7] hover:bg-[#1f2133]'
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{tab.label}</span>
-              <span
-                className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
-                  isActive ? 'bg-black/25 text-white' : 'bg-white/5 text-[#a8a495]'
+      {/* 2. SMART COMPACT POEM SELECTOR AT THE TOP OF THE PAGE */}
+      <div className="rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-2 sm:p-2.5 space-y-2 shadow-lg backdrop-blur-xl">
+        {/* Horizontal Pill Strip of the 6 Poems */}
+        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
+          {PROGRAM_TOPICS_AND_POEMS.map(poem => {
+            const isSelected = poem.id === selectedPoemId;
+            return (
+              <button
+                key={poem.id}
+                onClick={() => handleSelectPoem(poem.id)}
+                className={`relative shrink-0 px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer select-none ${
+                  isSelected ? 'text-white' : 'text-[#b8b5a8] hover:text-[#fcfbf7]'
                 }`}
               >
-                {tab.badge}
-              </span>
-            </button>
-          );
-        })}
+                {isSelected && (
+                  <motion.div
+                    layoutId="activePoemSelectorPill"
+                    transition={IOS_QUICK_SPRING}
+                    className="absolute inset-0 rounded-xl bg-red-500 shadow-[0_0_16px_rgba(239,68,68,0.4)] will-change-transform"
+                  />
+                )}
+                <span className="relative z-10 whitespace-nowrap">
+                  {SHORT_POEM_LABELS[poem.id]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active Poem Compact Bar with Prev/Next Arrows & Quick Drawer Trigger */}
+        <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10">
+          <button
+            onClick={() => handleStepPoem(-1)}
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#dedacb] shrink-0 cursor-pointer active:scale-95 transition-transform"
+            aria-label="წინა ლექსი"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => {
+              soundEffects.click();
+              setShowPoemPickerSheet(true);
+            }}
+            className="min-w-0 flex-1 text-center px-1 cursor-pointer group"
+          >
+            <div className="text-[10px] font-mono text-red-300 truncate">
+              {activePoem.numberLabel} &bull; {activePoem.author}
+            </div>
+            <div className="text-xs sm:text-sm font-extrabold text-[#fcfbf7] truncate group-hover:text-red-200 transition-colors">
+              {activePoem.title} <span className="text-[10px] opacity-60">▾</span>
+            </div>
+          </button>
+
+          <button
+            onClick={() => handleStepPoem(1)}
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#dedacb] shrink-0 cursor-pointer active:scale-95 transition-transform"
+            aria-label="შემდეგი ლექსი"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* STUDIO MODULE 0: EACH POEM / WORK WITH GENERATED AI VIDEO, AI PODCAST & FULL CONSPECTUS */}
-      {activeStudioTab === 'poems' && (
-        <div className="space-y-5">
-          {/* Selector Grid for all 6 Syllabus Works */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5">
-            {PROGRAM_TOPICS_AND_POEMS.map(poem => {
-              const isSelected = poem.id === selectedPoemId;
-              return (
-                <button
-                  key={poem.id}
-                  onClick={() => {
-                    soundEffects.click();
-                    setSelectedPoemId(poem.id);
-                  }}
-                  className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
-                    isSelected
-                      ? 'bg-red-500/20 border-red-500/60 text-[#fcfbf7] shadow-[0_0_20px_rgba(239,68,68,0.22)] ring-1 ring-red-400/40'
-                      : 'bg-[#141522]/85 border-[#f5f2eb]/12 text-[#c5c1b2] hover:bg-[#1a1c2d]'
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-1">
-                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 font-bold">
-                      {poem.numberLabel}
-                    </span>
-                    <span className="text-[9px] font-mono text-[#a8a495] truncate">
-                      {poem.badge}
-                    </span>
-                  </div>
-                  <div className="text-xs font-extrabold text-[#fcfbf7] leading-snug line-clamp-2 mt-0.5">
-                    {poem.title}
-                  </div>
-                  <div className="text-[10px] text-[#b8b5a8] truncate">{poem.author}</div>
-                </button>
-              );
-            })}
-          </div>
+      {/* 3. SEGMENTED MATERIAL MENU BAR (Tap OR Swipe Left/Right) */}
+      <div className="rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 shadow-md backdrop-blur-xl">
+        <div className="grid grid-cols-6 gap-1">
+          {STUDIO_TAB_LIST.map(tab => {
+            const Icon = tab.icon;
+            const isActive = activeStudioTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleSwitchStudioTab(tab.id)}
+                className={`relative py-2 px-1 sm:px-2.5 rounded-xl flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 text-center transition-colors cursor-pointer select-none ${
+                  isActive ? 'text-white' : 'text-[#a8a495] hover:text-[#fcfbf7]'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="activeMaterialMenuTab"
+                    transition={IOS_QUICK_SPRING}
+                    className="absolute inset-0 rounded-xl bg-red-500/90 border border-red-400/50 shadow-[0_0_14px_rgba(239,68,68,0.35)] will-change-transform"
+                  />
+                )}
+                <Icon className="relative z-10 w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="relative z-10 text-[10px] sm:text-xs font-bold leading-tight truncate max-w-full">
+                  <span className="sm:hidden">{tab.shortLabel}</span>
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
 
-          {/* TOP MEDIA STUDIO BAR FOR THIS POEM: GENERATED AI VIDEO (.MP4) + AI PODCAST (.MP3) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Generated NotebookLM Video Overview Player (7 cols) */}
-            <div className="lg:col-span-7 p-5 rounded-2xl bg-[#141522]/95 border border-red-500/35 space-y-3 shadow-xl">
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-red-300 flex items-center gap-1.5">
-                    <Video className="w-3.5 h-3.5" />
-                    <span>AI NOTEBOOKLM VIDEO OVERVIEW &bull; {activePoem.numberLabel}</span>
-                  </span>
-                  <h3 className="text-base sm:text-lg font-extrabold text-[#fcfbf7] mt-0.5">
-                    ვიდეო-გარჩევა: {activePoem.title}
-                  </h3>
-                </div>
-                <a
-                  href={activePoem.generatedVideoUrl}
-                  download
-                  className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[11px] font-mono text-[#dedacb] flex items-center gap-1 shrink-0"
-                >
-                  <Download className="w-3.5 h-3.5 text-red-300" />
-                  <span>MP4</span>
-                </a>
-              </div>
+        {/* Subtle Swipe Indicator Bar */}
+        <div className="flex items-center justify-between px-2.5 pt-1.5 pb-0.5 text-[10px] font-mono text-[#a8a495]">
+          <span>
+            {activeTabIndex + 1}/{STUDIO_TAB_LIST.length} &bull;{' '}
+            {STUDIO_TAB_LIST[activeTabIndex]?.label}
+          </span>
+          <span className="flex items-center gap-1">
+            <span>&larr; გაუსვი თითი (Swipe) &rarr;</span>
+          </span>
+        </div>
+      </div>
 
-              <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#f5f2eb]/15 bg-black shadow-inner">
-                <video
-                  key={activePoem.generatedVideoUrl}
-                  src={activePoem.generatedVideoUrl}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  className="w-full h-full object-contain"
-                >
-                  თქვენი ბრაუზერი ვერ ხსნის ვიდეოს.
-                </video>
-              </div>
-
-              <p className="text-[11px] text-[#b8b5a8]">
-                ვიდეოში განხილულია: <strong>უცხო სიტყვების განმარტება, ლექსის ვითარება, კავშირი ეპოქასთან და რომანტიზმის მახასიათებლები</strong>.
-              </p>
-            </div>
-
-            {/* Generated 2-Host Audio Podcast Player + Epoch & Romanticism Summary (5 cols) */}
-            <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-              {/* Native Audio Podcast Card */}
-              <div className="p-5 rounded-2xl bg-[#141522]/95 border border-red-500/35 space-y-3.5 shadow-xl">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-300">
-                      <Headphones className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="text-[10px] font-mono uppercase text-red-300">
-                        AI PODCAST (2 წამყვანი: გიორგი &amp; ეკა)
+      {/* 4. HORIZONTAL SWIPEABLE CONTENT DECK (iOS Spring Physics, Zero Endless Scroll) */}
+      <div className="relative overflow-hidden rounded-3xl isolate">
+        <AnimatePresence mode="wait" initial={false} custom={swipeDirection}>
+          <motion.div
+            key={`${activeStudioTab}-${selectedPoemId}`}
+            custom={swipeDirection}
+            variants={panelVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={IOS_SPRING}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.16}
+            onDragEnd={handleHorizontalSwipeEnd}
+            className="w-full will-change-transform touch-pan-y"
+          >
+            {/* ==================== TAB 1: MEDIA (VIDEO + PODCAST) ==================== */}
+            {activeStudioTab === 'media' && (
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-4 shadow-xl">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                  {/* Video Player (7 cols) */}
+                  <div className="lg:col-span-7 space-y-2.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-mono uppercase text-red-300 flex items-center gap-1">
+                          <Video className="w-3.5 h-3.5 shrink-0" />
+                          <span>AI VIDEO OVERVIEW &bull; {activePoem.numberLabel}</span>
+                        </span>
+                        <h3 className="text-sm sm:text-base font-extrabold text-[#fcfbf7] truncate">
+                          {activePoem.title}
+                        </h3>
                       </div>
-                      <h4 className="text-sm font-bold text-[#fcfbf7]">
-                        აუდიო პოდკასტი: {activePoem.title}
-                      </h4>
+                      <a
+                        href={activePoem.generatedVideoUrl}
+                        download
+                        className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[10px] font-mono text-[#dedacb] flex items-center gap-1 shrink-0"
+                      >
+                        <Download className="w-3 h-3 text-red-300" />
+                        <span>MP4</span>
+                      </a>
+                    </div>
+
+                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-[#f5f2eb]/15 bg-black shadow-inner">
+                      <video
+                        key={activePoem.generatedVideoUrl}
+                        src={activePoem.generatedVideoUrl}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-contain"
+                      >
+                        თქვენი ბრაუზერი ვერ ხსნის ვიდეოს.
+                      </video>
                     </div>
                   </div>
-                  <a
-                    href={activePoem.generatedPodcastUrl}
-                    download
-                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[11px] font-mono text-[#dedacb] flex items-center gap-1 shrink-0"
-                  >
-                    <Download className="w-3 h-3 text-emerald-300" />
-                    <span>MP3</span>
-                  </a>
-                </div>
 
-                <audio
-                  key={activePoem.generatedPodcastUrl}
-                  src={activePoem.generatedPodcastUrl}
-                  controls
-                  preload="metadata"
-                  className="w-full h-10 rounded-lg"
-                />
+                  {/* Podcast Player + Quick Actions (5 cols) */}
+                  <div className="lg:col-span-5 flex flex-col justify-between gap-3">
+                    <div className="p-4 rounded-2xl bg-[#181928] border border-red-500/30 space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div className="w-8 h-8 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-300 shrink-0">
+                            <Headphones className="w-4 h-4" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[10px] font-mono uppercase text-red-300">
+                              2-წამყვანიანი პოდკასტი
+                            </div>
+                            <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7] truncate">
+                              {activePoem.title}
+                            </h4>
+                          </div>
+                        </div>
+                        <a
+                          href={activePoem.generatedPodcastUrl}
+                          download
+                          className="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[10px] font-mono text-[#dedacb] flex items-center gap-1 shrink-0"
+                        >
+                          <Download className="w-3 h-3 text-emerald-300" />
+                          <span>MP3</span>
+                        </a>
+                      </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <button
-                    onClick={() => {
-                      soundEffects.click();
-                      setQuizFilter(activePoem.id);
-                      setActiveStudioTab('quiz');
-                    }}
-                    className="text-xs font-bold text-red-300 hover:text-red-200 underline cursor-pointer"
-                  >
-                    გაიარე ამ ლექსის ტესტი (4 კითხვა) &rarr;
-                  </button>
-                </div>
-              </div>
-
-              {/* Epoch & Romanticism Connection Card */}
-              <div className="p-5 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/15 space-y-3 flex-1">
-                <div className="space-y-1.5">
-                  <div className="text-xs font-bold text-red-300 uppercase font-mono">
-                    🏛 ლექსის ვითარება &amp; კავშირი ეპოქასთან:
-                  </div>
-                  <p className="text-xs text-[#d4d1c5] leading-relaxed">
-                    {activePoem.situationAndEpoch}
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-[#f5f2eb]/10 space-y-1.5">
-                  <div className="text-xs font-bold text-amber-300 uppercase font-mono">
-                    ✨ რა აერთიანებს რომანტიზმთან:
-                  </div>
-                  <p className="text-xs text-[#d4d1c5] leading-relaxed">
-                    {activePoem.romanticismConnection}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* BOTTOM SPLIT: FULL TEXT + VOCABULARY (5 cols) AND DETAILED CONSPECTUS + OPEN QUESTIONS (7 cols) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Left Column (5 cols): Full Text + Vocabulary + Additional Video Lessons */}
-            <div className="lg:col-span-5 space-y-5">
-              {/* Full Text Card */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/15 space-y-4">
-                <div className="border-b border-[#f5f2eb]/10 pb-3 flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-xs font-mono text-red-300">
-                      {activePoem.numberLabel} &bull; {activePoem.author}
+                      <audio
+                        key={activePoem.generatedPodcastUrl}
+                        src={activePoem.generatedPodcastUrl}
+                        controls
+                        preload="metadata"
+                        className="w-full h-10 rounded-lg"
+                      />
                     </div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-[#fcfbf7] mt-0.5">
-                      {activePoem.title}
-                    </h3>
+
+                    {/* Quick Jump Pills to Other Material Tabs */}
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => handleSwitchStudioTab('text')}
+                        className="p-3 rounded-xl bg-[#181928] hover:bg-[#202235] border border-[#f5f2eb]/10 text-left transition-all cursor-pointer"
+                      >
+                        <div className="text-[10px] font-mono text-red-300">ტექსტი &amp; ლექსიკონი</div>
+                        <div className="text-xs font-bold text-[#fcfbf7] mt-0.5">
+                          სრული ლექსი + {activePoem.vocabulary.length} სიტყვა &rarr;
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setQuizFilter(activePoem.id);
+                          setActiveQuestionIdx(0);
+                          handleSwitchStudioTab('quiz');
+                        }}
+                        className="p-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-left transition-all cursor-pointer"
+                      >
+                        <div className="text-[10px] font-mono text-red-200">სასკოლო ტესტი</div>
+                        <div className="text-xs font-bold text-[#fcfbf7] mt-0.5">
+                          ამ ლექსის 4 კითხვა &rarr;
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* Collapsible TV School Lesson & External Links */}
+                    <button
+                      onClick={() => {
+                        soundEffects.click();
+                        setShowExtraMedia(prev => !prev);
+                      }}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/12 text-xs font-semibold text-[#dedacb] flex items-center justify-between cursor-pointer"
+                    >
+                      <span>📺 ტელესკოლის გაკვეთილი &amp; ყველა პოდკასტი</span>
+                      <span className="text-[10px] font-mono text-red-300">
+                        {showExtraMedia ? 'დამალვა ▲' : 'გახსნა ▼'}
+                      </span>
+                    </button>
                   </div>
-                  <span className="shrink-0 text-[10px] font-mono px-2.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-200">
-                    სრული ტექსტი
+                </div>
+
+                {showExtraMedia && (
+                  <div className="pt-3 border-t border-[#f5f2eb]/10 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <div className="text-xs font-bold text-[#dedacb]">
+                        ტელესკოლის ვიდეო: {activePoem.youtubeTitle}
+                      </div>
+                      <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#f5f2eb]/15 bg-black">
+                        <iframe
+                          key={activePoem.youtubeEmbedId}
+                          src={`https://www.youtube.com/embed/${activePoem.youtubeEmbedId}`}
+                          title={activePoem.youtubeTitle}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full border-0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="text-xs font-bold text-[#dedacb]">
+                        დამატებითი ბმულები &amp; წყაროები:
+                      </div>
+                      {activePoem.directLinks.map((lnk, i) => (
+                        <a
+                          key={i}
+                          href={lnk.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2.5 rounded-xl bg-[#181928] hover:bg-[#222438] border border-[#f5f2eb]/12 flex items-center justify-between gap-2"
+                        >
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-[#fcfbf7] truncate">
+                              {lnk.label}
+                            </div>
+                            <div className="text-[10px] text-[#a8a495] truncate">
+                              {lnk.subtitle}
+                            </div>
+                          </div>
+                          <ExternalLink className="w-3.5 h-3.5 text-red-300 shrink-0" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ==================== TAB 2: FULL TEXT & VOCABULARY ==================== */}
+            {activeStudioTab === 'text' && (
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
+                {/* Compact Sub-Toggle on Mobile (Full Text vs Vocabulary) */}
+                <div className="flex items-center justify-between gap-2">
+                  <div className="inline-flex p-1 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                    <button
+                      onClick={() => {
+                        soundEffects.click();
+                        setTextSubView('poem');
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        textSubView === 'poem'
+                          ? 'bg-red-500 text-white shadow-sm'
+                          : 'text-[#b8b5a8] hover:text-white'
+                      }`}
+                    >
+                      📜 ლექსის ტექსტი
+                    </button>
+                    <button
+                      onClick={() => {
+                        soundEffects.click();
+                        setTextSubView('vocab');
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        textSubView === 'vocab'
+                          ? 'bg-red-500 text-white shadow-sm'
+                          : 'text-[#b8b5a8] hover:text-white'
+                      }`}
+                    >
+                      📖 ლექსიკონი ({activePoem.vocabulary.length})
+                    </button>
+                  </div>
+
+                  <span className="text-[10px] font-mono text-[#a8a495] hidden sm:inline">
+                    {activePoem.author}
                   </span>
                 </div>
 
-                <pre className="font-sans text-xs sm:text-sm text-[#fcfbf7] whitespace-pre-wrap leading-relaxed max-h-[460px] overflow-y-auto pr-1">
-                  {activePoem.fullText}
-                </pre>
-
-                {/* Vocabulary Glossary for this poem */}
-                <div className="pt-3 border-t border-[#f5f2eb]/10 space-y-2">
-                  <div className="text-xs font-bold text-red-300 font-mono uppercase">
-                    📖 უცხო სიტყვების განმარტება (ლექსიკონი):
+                {textSubView === 'poem' ? (
+                  <div className="p-4 rounded-2xl bg-[#181928]/90 border border-[#f5f2eb]/10">
+                    <pre className="font-sans text-xs sm:text-sm text-[#fcfbf7] whitespace-pre-wrap leading-relaxed max-h-[54vh] overflow-y-auto pr-1">
+                      {activePoem.fullText}
+                    </pre>
                   </div>
-                  <div className="space-y-1.5">
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[54vh] overflow-y-auto pr-1">
                     {activePoem.vocabulary.map((v, idx) => (
                       <div
                         key={idx}
-                        className="text-xs p-2.5 rounded-lg bg-[#181928]/90 border border-[#f5f2eb]/10 text-[#d4d1c5]"
+                        className="p-3 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10 text-xs text-[#d4d1c5] leading-relaxed"
                       >
-                        <strong className="text-[#fcfbf7]">{v.word}</strong> — {v.meaning}
+                        <strong className="text-red-300 block text-xs sm:text-sm mb-0.5">
+                          {v.word}
+                        </strong>
+                        <span>{v.meaning}</span>
                       </div>
                     ))}
                   </div>
-                </div>
+                )}
               </div>
+            )}
 
-              {/* Additional TV School Video + External Links */}
-              <div className="p-5 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/15 space-y-3">
-                <div className="text-xs font-bold text-[#dedacb]">
-                  დამატებითი ტელესკოლის ვიდეო-გაკვეთილი &amp; წყაროები:
-                </div>
-
-                <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#f5f2eb]/15 bg-black">
-                  <iframe
-                    key={activePoem.youtubeEmbedId}
-                    src={`https://www.youtube.com/embed/${activePoem.youtubeEmbedId}`}
-                    title={activePoem.youtubeTitle}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="w-full h-full border-0"
-                  />
-                </div>
-
-                <div className="space-y-2 pt-1">
-                  {activePoem.directLinks.map((lnk, i) => (
-                    <a
-                      key={i}
-                      href={lnk.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => soundEffects.click()}
-                      className="p-3 rounded-xl bg-[#181928] hover:bg-[#222438] border border-[#f5f2eb]/12 flex items-center justify-between gap-3 transition-all group"
-                    >
-                      <div className="min-w-0">
-                        <div className="text-xs font-bold text-[#fcfbf7] group-hover:text-red-300 transition-colors truncate">
-                          {lnk.label}
-                        </div>
-                        <div className="text-[11px] text-[#a8a495] truncate">{lnk.subtitle}</div>
-                      </div>
-                      <ExternalLink className="w-4 h-4 text-red-300 shrink-0" />
-                    </a>
-                  ))}
-
+            {/* ==================== TAB 3: ANALYSIS, EPOCH & ROMANTICISM ==================== */}
+            {activeStudioTab === 'analysis' && (
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
+                <div className="inline-flex p-1 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
                   <button
-                    onClick={() => handleCopySinglePoemToNotebookLM(activePoem)}
-                    className="w-full p-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-left flex items-center justify-between gap-3 transition-all cursor-pointer"
-                  >
-                    <div>
-                      <div className="text-xs font-bold text-red-200">
-                        {copiedSinglePoem
-                          ? 'ამ ნაწარმოების კონსპექტი დაკოპირდა!'
-                          : `გაუშვი „${activePoem.title}“ Google NotebookLM-ში`}
-                      </div>
-                      <div className="text-[11px] text-[#c5c1b2]">
-                        აკოპირებს ამ ლექსის სრულ ტექსტს + ანალიზს და ხსნის NotebookLM-ს
-                      </div>
-                    </div>
-                    <Copy className="w-4 h-4 text-red-300 shrink-0" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column (7 cols): Detailed Conspectus, Literary Forms, Type A & Type B Open Question Answers */}
-            <div className="lg:col-span-7 space-y-5">
-              {/* Complete Conspectus Card */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/15 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-mono uppercase tracking-wider text-red-300">
-                      სრული სასწავლო კონსპექტი
-                    </span>
-                    <h4 className="text-base sm:text-lg font-bold text-[#fcfbf7]">
-                      სტროფული ანალიზი, სახე-სიმბოლოები და მთავარი სათქმელი
-                    </h4>
-                  </div>
-                  <BookmarkCheck className="w-5 h-5 text-red-400" />
-                </div>
-
-                <ul className="space-y-3 text-xs sm:text-sm text-[#d4d1c5]">
-                  {activePoem.analysisPoints.map((pt, i) => (
-                    <li
-                      key={i}
-                      className="p-3.5 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10 leading-relaxed"
-                    >
-                      {pt}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Literary Devices Block */}
-                <div className="p-4 rounded-xl bg-[#181928]/60 border border-[#f5f2eb]/12 space-y-2">
-                  <div className="text-xs font-bold text-red-300 uppercase font-mono">
-                    ბ) მხატვრული გამოსახვის ფორმები ამ ტექსტში (ალეგორია, რეფრენი, ტროპები):
-                  </div>
-                  <ul className="space-y-1.5 text-xs sm:text-sm text-[#d4d1c5]">
-                    {activePoem.literaryDevices.map((dev, i) => (
-                      <li key={i} className="flex items-start gap-2 leading-relaxed">
-                        <span className="text-red-400 font-bold">&bull;</span>
-                        <span>{dev}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              {/* Type A Open Question (Short 1-2 Sentences) */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-red-950/40 to-[#141522]/90 border border-red-500/35 space-y-2.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-red-500/20 text-red-200 border border-red-500/30 font-bold">
-                    ტესტის დავალება 1. ა) მოკლე ღია შეკითხვა (პასუხი 1–2 წინადადებით)
-                  </span>
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
-                  კითხვა: {activePoem.shortAnswerQ.q}
-                </div>
-                <div className="p-3.5 rounded-xl bg-[#12131d]/90 border border-[#f5f2eb]/10 text-xs sm:text-sm text-emerald-200 leading-relaxed">
-                  <strong className="text-emerald-300">მზა პასუხი (1–2 წინადადებით): </strong>
-                  {activePoem.shortAnswerQ.a}
-                </div>
-              </div>
-
-              {/* Type B Open Question (Narrative Analytical Answer) */}
-              <div className="p-5 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/15 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-500/30 font-bold">
-                    ტესტის დავალება 1. ბ) სამსჯელო / საანალიზო კითხვა (ნარატიული თხრობით)
-                  </span>
-                </div>
-                <div className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
-                  კითხვა: {activePoem.narrativeAnswerQ.q}
-                </div>
-                <div className="p-4 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10 text-xs sm:text-sm text-[#e6e2d3] leading-relaxed">
-                  <strong className="text-amber-300 block mb-1">
-                    სანიმუშო ნარატიული პასუხი (უმაღლესი ქულის სტრუქტურით):
-                  </strong>
-                  {activePoem.narrativeAnswerQ.a}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* STUDIO MODULE 1: SMART ORGANIZED TEACHER QUIZ BANK (24 QUESTIONS WITH TOPIC FILTERS) */}
-      {activeStudioTab === 'quiz' && (
-        <div className="space-y-5">
-          {/* Top Smart Filter & Score Header */}
-          <div className="p-5 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/15 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-red-300 flex items-center gap-1.5">
-                  <Filter className="w-3.5 h-3.5" />
-                  <span>სასკოლო და საგამოცდო ტესტების ბანკი &bull; 24 კითხვა</span>
-                </span>
-                <h3 className="text-lg sm:text-xl font-bold text-[#fcfbf7] mt-0.5">
-                  აირჩიე კონკრეტული ლექსი ან გაიარე სრული შემაჯამებელი ტესტი
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-2.5">
-                <div className="px-3.5 py-2 rounded-xl bg-red-500/15 border border-red-500/30 text-xs font-mono text-red-200">
-                  სწორია: <strong>{correctCount}</strong> / {answeredCount} (სულ {filteredQuestions.length})
-                </div>
-                <button
-                  onClick={handleResetQuiz}
-                  className="px-3.5 py-2 rounded-xl border border-[#f5f2eb]/15 bg-white/5 hover:bg-white/10 text-xs text-[#dedacb] flex items-center gap-1.5 cursor-pointer"
-                >
-                  <RotateCcw className="w-3.5 h-3.5" />
-                  <span>გასუფთავება</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Category Filter Pills */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              {[
-                { id: 'all' as QuizCategoryFilter, label: 'ყველა საკითხი (24)' },
-                { id: 'edemi' as QuizCategoryFilter, label: '1. დაკარგული ედემი & რომანტიზმი (4)' },
-                { id: 'visac-gsurt' as QuizCategoryFilter, label: '2. „ვისაც გსურთ“ (4)' },
-                { id: 'vah-droni' as QuizCategoryFilter, label: '3. „ვაჰ, დრონი, დრონი“ (4)' },
-                { id: 'gogcha' as QuizCategoryFilter, label: '4. „გოგჩა“ (4)' },
-                { id: 'sagamo' as QuizCategoryFilter, label: '5. „საღამო გამოსალმებისა“ (4)' },
-                { id: 'tamar-mefe' as QuizCategoryFilter, label: '6. „თამარ მეფის სახე...“ (4)' }
-              ].map(f => {
-                const isSelected = quizFilter === f.id;
-                return (
-                  <button
-                    key={f.id}
                     onClick={() => {
                       soundEffects.click();
-                      setQuizFilter(f.id);
+                      setAnalysisSubView('context');
                     }}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                      isSelected
-                        ? 'bg-red-500 text-white border-red-400 shadow-sm'
-                        : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10 hover:text-white'
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      analysisSubView === 'context'
+                        ? 'bg-red-500 text-white shadow-sm'
+                        : 'text-[#b8b5a8] hover:text-white'
                     }`}
                   >
-                    {f.label}
+                    🏛 ეპოქა &amp; რომანტიზმი
                   </button>
-                );
-              })}
-            </div>
-          </div>
+                  <button
+                    onClick={() => {
+                      soundEffects.click();
+                      setAnalysisSubView('stanzas');
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      analysisSubView === 'stanzas'
+                        ? 'bg-red-500 text-white shadow-sm'
+                        : 'text-[#b8b5a8] hover:text-white'
+                    }`}
+                  >
+                    🔍 სტროფული გარჩევა &amp; ხერხები
+                  </button>
+                </div>
 
-          {/* 2-Column Clean Grid of Questions */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredQuestions.map((q, qIndex) => {
-              const userChoice = selectedAnswers[q.id];
-              const isAnswered = userChoice !== undefined;
+                {analysisSubView === 'context' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="p-4 rounded-2xl bg-[#181928]/90 border border-[#f5f2eb]/10 space-y-2">
+                      <div className="text-xs font-bold text-red-300 uppercase font-mono">
+                        🏛 ლექსის ვითარება &amp; კავშირი ეპოქასთან
+                      </div>
+                      <p className="text-xs sm:text-sm text-[#d4d1c5] leading-relaxed">
+                        {activePoem.situationAndEpoch}
+                      </p>
+                    </div>
 
-              return (
-                <div
-                  key={q.id}
-                  className="p-5 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/12 flex flex-col justify-between space-y-4"
-                >
-                  <div className="space-y-3">
+                    <div className="p-4 rounded-2xl bg-[#181928]/90 border border-[#f5f2eb]/10 space-y-2">
+                      <div className="text-xs font-bold text-amber-300 uppercase font-mono">
+                        ✨ რა აერთიანებს რომანტიზმთან
+                      </div>
+                      <p className="text-xs sm:text-sm text-[#d4d1c5] leading-relaxed">
+                        {activePoem.romanticismConnection}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[56vh] overflow-y-auto pr-1">
+                    <div className="space-y-2">
+                      {activePoem.analysisPoints.map((pt, i) => (
+                        <div
+                          key={i}
+                          className="p-3 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10 text-xs sm:text-sm text-[#d4d1c5] leading-relaxed"
+                        >
+                          {pt}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 space-y-1.5">
+                      <div className="text-xs font-bold text-red-300 uppercase font-mono">
+                        მხატვრული ხერხები (ალეგორია, რეფრენი, ტროპები):
+                      </div>
+                      <ul className="space-y-1 text-xs text-[#dedacb]">
+                        {activePoem.literaryDevices.map((dev, i) => (
+                          <li key={i} className="flex items-start gap-1.5 leading-relaxed">
+                            <span className="text-red-400 font-bold">&bull;</span>
+                            <span>{dev}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ==================== TAB 4: OPEN QUESTIONS (1.a / 1.b) & ESSAY ==================== */}
+            {activeStudioTab === 'open_essay' && (
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
+                <div className="inline-flex p-1 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                  <button
+                    onClick={() => {
+                      soundEffects.click();
+                      setOpenEssaySubView('open');
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      openEssaySubView === 'open'
+                        ? 'bg-red-500 text-white shadow-sm'
+                        : 'text-[#b8b5a8] hover:text-white'
+                    }`}
+                  >
+                    ✍️ ღია კითხვები (1.ა &amp; 1.ბ)
+                  </button>
+                  <button
+                    onClick={() => {
+                      soundEffects.click();
+                      setOpenEssaySubView('essay');
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      openEssaySubView === 'essay'
+                        ? 'bg-red-500 text-white shadow-sm'
+                        : 'text-[#b8b5a8] hover:text-white'
+                    }`}
+                  >
+                    📝 ანალიტიკური ესე (120 წთ)
+                  </button>
+                </div>
+
+                {openEssaySubView === 'open' ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="p-4 rounded-2xl bg-gradient-to-br from-red-950/35 to-[#181928] border border-red-500/30 space-y-2">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-red-500/20 text-red-200 border border-red-500/30 font-bold">
+                        1. ა) მოკლე ღია კითხვა (1–2 წინადადებით)
+                      </span>
+                      <div className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
+                        {activePoem.shortAnswerQ.q}
+                      </div>
+                      <div className="p-3 rounded-xl bg-[#12131d]/90 border border-[#f5f2eb]/10 text-xs text-emerald-200 leading-relaxed">
+                        <strong className="text-emerald-300">პასუხი: </strong>
+                        {activePoem.shortAnswerQ.a}
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-2">
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-500/30 font-bold">
+                        1. ბ) სამსჯელო კითხვა (ნარატიული თხრობით)
+                      </span>
+                      <div className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
+                        {activePoem.narrativeAnswerQ.q}
+                      </div>
+                      <div className="p-3 rounded-xl bg-[#12131d]/90 border border-[#f5f2eb]/10 text-xs text-[#e6e2d3] leading-relaxed">
+                        <strong className="text-amber-300">სანიმუშო მსჯელობა: </strong>
+                        {activePoem.narrativeAnswerQ.a}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[56vh] overflow-y-auto pr-1">
+                    <div className="grid grid-cols-3 gap-2 text-[11px]">
+                      <div className="p-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                        <strong className="text-red-300 block">1.ა) მოკლე (~20 წთ)</strong>
+                        <span className="text-[#b8b5a8]">1–2 წინადადებით</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                        <strong className="text-amber-300 block">1.ბ) სამსჯელო (~40 წთ)</strong>
+                        <span className="text-[#b8b5a8]">ნარატიული ანალიზი</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                        <strong className="text-emerald-300 block">2. ესე (~60 წთ)</strong>
+                        <span className="text-[#b8b5a8]">კრიტიკული ანალიზი</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                      {ESSAY_GUIDES.map(essay => (
+                        <div
+                          key={essay.id}
+                          className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-2"
+                        >
+                          <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
+                            {essay.title}
+                          </h4>
+                          <p className="text-[11px] text-[#b8b5a8] leading-relaxed">
+                            {essay.prompt}
+                          </p>
+                          <div className="space-y-1.5 pt-1">
+                            {essay.structure.map((step, i) => (
+                              <div
+                                key={i}
+                                className="p-2.5 rounded-lg bg-[#12131d] border border-[#f5f2eb]/10 text-[11px] text-[#d4d1c5] leading-relaxed"
+                              >
+                                {step}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ==================== TAB 5: SMART QUIZ BANK (ZERO-SCROLL CARD MODE + LIST MODE) ==================== */}
+            {activeStudioTab === 'quiz' && (
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
+                {/* Compact Filter + Mode Header */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => {
+                        soundEffects.click();
+                        setQuizFilter(selectedPoemId);
+                        setActiveQuestionIdx(0);
+                      }}
+                      className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
+                        quizFilter === selectedPoemId
+                          ? 'bg-red-500 text-white border-red-400'
+                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
+                      }`}
+                    >
+                      ამ თემის (4)
+                    </button>
+                    <button
+                      onClick={() => {
+                        soundEffects.click();
+                        setQuizFilter('all');
+                        setActiveQuestionIdx(0);
+                      }}
+                      className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
+                        quizFilter === 'all'
+                          ? 'bg-red-500 text-white border-red-400'
+                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
+                      }`}
+                    >
+                      ყველა (24)
+                    </button>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2.5 py-1 rounded-xl bg-red-500/15 border border-red-500/30 text-[11px] font-mono text-red-200">
+                      ✓ {correctCount}/{answeredCount}
+                    </span>
+
+                    <div className="inline-flex p-0.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setQuizDisplayMode('card');
+                        }}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
+                          quizDisplayMode === 'card'
+                            ? 'bg-white/15 text-white font-bold'
+                            : 'text-[#a8a495]'
+                        }`}
+                      >
+                        1-ბარათი
+                      </button>
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setQuizDisplayMode('list');
+                        }}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
+                          quizDisplayMode === 'list'
+                            ? 'bg-white/15 text-white font-bold'
+                            : 'text-[#a8a495]'
+                        }`}
+                      >
+                        სია
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={handleResetQuiz}
+                      className="p-1.5 rounded-xl border border-[#f5f2eb]/15 bg-white/5 hover:bg-white/10 text-[#dedacb] cursor-pointer"
+                      title="თავიდან დაწყება"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Single-Question Card Mode (Fits 100% on phone screen without scrolling!) */}
+                {quizDisplayMode === 'card' && currentQuizQuestion ? (
+                  <div className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-3">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300">
-                        #{qIndex + 1} &bull; {q.category}
+                        კითხვა {safeQuestionIdx + 1} / {filteredQuestions.length} &bull;{' '}
+                        {currentQuizQuestion.category}
                       </span>
                     </div>
 
                     <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7] leading-relaxed">
-                      {q.question}
+                      {currentQuizQuestion.question}
                     </h4>
 
                     <div className="grid grid-cols-1 gap-2">
-                      {q.options.map((opt, optIdx) => {
+                      {currentQuizQuestion.options.map((opt, optIdx) => {
+                        const userChoice = selectedAnswers[currentQuizQuestion.id];
+                        const isAnswered = userChoice !== undefined;
                         const isSelected = userChoice === optIdx;
-                        const isCorrectOption = q.correctIndex === optIdx;
+                        const isCorrectOption = currentQuizQuestion.correctIndex === optIdx;
 
                         let btnStyle =
-                          'bg-[#181928] border-[#f5f2eb]/12 text-[#dedacb] hover:border-[#f5f2eb]/30';
+                          'bg-[#12131d] border-[#f5f2eb]/12 text-[#dedacb] hover:border-[#f5f2eb]/30';
                         if (isAnswered) {
                           if (isCorrectOption) {
                             btnStyle = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200';
@@ -1734,8 +1971,8 @@ export const QuizPrepSection: React.FC = () => {
                         return (
                           <button
                             key={optIdx}
-                            onClick={() => handleSelectAnswer(q.id, optIdx)}
-                            className={`w-full p-3 rounded-xl border text-left text-xs font-medium transition-all flex items-center justify-between gap-2.5 cursor-pointer ${btnStyle}`}
+                            onClick={() => handleSelectAnswer(currentQuizQuestion.id, optIdx)}
+                            className={`w-full p-3 rounded-xl border text-left text-xs font-medium transition-all flex items-center justify-between gap-2 cursor-pointer ${btnStyle}`}
                           >
                             <span className="leading-snug">{opt}</span>
                             {isAnswered && isCorrectOption && (
@@ -1748,373 +1985,488 @@ export const QuizPrepSection: React.FC = () => {
                         );
                       })}
                     </div>
-                  </div>
 
-                  {showExplanations[q.id] && (
-                    <div className="p-3 rounded-xl bg-white/5 border border-[#f5f2eb]/10 text-[11px] text-[#d4d1c5] leading-relaxed">
-                      <strong className="text-emerald-300">სწორი პასუხის განმარტება: </strong>
-                      {q.explanation}
+                    {showExplanations[currentQuizQuestion.id] && (
+                      <div className="p-3 rounded-xl bg-white/5 border border-[#f5f2eb]/10 text-[11px] text-[#d4d1c5] leading-relaxed">
+                        <strong className="text-emerald-300">განმარტება: </strong>
+                        {currentQuizQuestion.explanation}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between pt-1">
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setActiveQuestionIdx(prev =>
+                            prev === 0 ? filteredQuestions.length - 1 : prev - 1
+                          );
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-[#12131d] border border-[#f5f2eb]/15 text-xs font-semibold text-[#dedacb] cursor-pointer"
+                      >
+                        &larr; წინა
+                      </button>
+
+                      {/* Question Dots */}
+                      <div className="flex items-center gap-1 overflow-x-auto max-w-[180px] scrollbar-none">
+                        {filteredQuestions.map((q, idx) => {
+                          const ans = selectedAnswers[q.id];
+                          const isCurr = idx === safeQuestionIdx;
+                          let dotColor = 'bg-white/20';
+                          if (ans !== undefined) {
+                            dotColor =
+                              ans === q.correctIndex ? 'bg-emerald-400' : 'bg-red-400';
+                          }
+                          return (
+                            <button
+                              key={q.id}
+                              onClick={() => setActiveQuestionIdx(idx)}
+                              className={`h-2 rounded-full transition-all cursor-pointer shrink-0 ${
+                                isCurr ? 'w-5 bg-red-500' : `w-2 ${dotColor}`
+                              }`}
+                              aria-label={`კითხვა ${idx + 1}`}
+                            />
+                          );
+                        })}
+                      </div>
+
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setActiveQuestionIdx(prev => (prev + 1) % filteredQuestions.length);
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold cursor-pointer"
+                      >
+                        შემდეგი &rarr;
+                      </button>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* STUDIO MODULE 2: ALL 6 GENERATED AUDIO PODCASTS PLAYLIST */}
-      {activeStudioTab === 'podcast' && (
-        <div className="p-6 rounded-3xl bg-[#141522]/90 border border-[#f5f2eb]/15 backdrop-blur-2xl space-y-6">
-          <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 text-xs font-mono text-red-300">
-              <Volume2 className="w-4 h-4" />
-              <span>NOTEBOOKLM AUDIO OVERVIEW PLAYLIST &bull; 6 ეპიზოდი</span>
-            </div>
-            <h3 className="text-xl font-bold text-[#fcfbf7]">
-              6-ივე საპროგრამო ერთეულის აუდიო-პოდკასტი (2 წამყვანი: გიორგი &amp; ეკა)
-            </h3>
-            <p className="text-xs text-[#b8b5a8]">
-              მოუსმინე ექვსივე თემის ცოცხალ დიალოგურ გარჩევას პირდაპირ საიტზე ან ჩამოტვირთე MP3 ფაილები.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {PROGRAM_TOPICS_AND_POEMS.map(ep => (
-              <div
-                key={ep.id}
-                className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-3"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <span className="text-[10px] font-mono text-red-300">{ep.numberLabel}</span>
-                    <h4 className="text-sm font-bold text-[#fcfbf7]">{ep.title}</h4>
-                    <div className="text-[11px] text-[#a8a495]">{ep.author}</div>
                   </div>
-                  <a
-                    href={ep.generatedPodcastUrl}
-                    download
-                    className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[10px] font-mono text-[#dedacb] flex items-center gap-1 shrink-0"
-                  >
-                    <Download className="w-3 h-3 text-emerald-300" />
-                    <span>MP3</span>
-                  </a>
-                </div>
-
-                <audio
-                  src={ep.generatedPodcastUrl}
-                  controls
-                  preload="metadata"
-                  className="w-full h-10"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* STUDIO MODULE 3: ANALYTICAL ESSAY & 120-MIN FORMAT */}
-      {activeStudioTab === 'essays' && (
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-[#f5f2eb]/15 bg-[#161724]/90 p-5 backdrop-blur-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#f5f2eb]/10 pb-3">
-              <div>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-red-300">
-                  ოფიციალური ფორმატი &bull; 120 წუთი
-                </span>
-                <h2 className="text-base sm:text-lg font-bold text-[#fcfbf7]">
-                  როგორ ნაწილდება დრო და დავალებები ქვიზზე
-                </h2>
-              </div>
-              <span className="text-xs font-mono px-2.5 py-1 rounded-lg bg-red-500/15 border border-red-500/30 text-red-200">
-                XI კლასი &bull; 120 წთ
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              <div className="p-4 rounded-xl bg-[#12131d]/90 border border-[#f5f2eb]/10 space-y-2">
-                <div className="font-bold text-red-300 uppercase font-mono">
-                  1. ა) მოკლე ღია შეკითხვები (~20 წთ)
-                </div>
-                <p className="text-[#d4d1c5] leading-relaxed">
-                  მოითხოვს კონკრეტულ, ლაკონიურ პასუხს <strong>1–2 წინადადებით</strong>. ამოწმებს ტექსტის ფაქტობრივ ცოდნას, ციტატის ან ალეგორიის ზუსტ გაგებას.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#12131d]/90 border border-[#f5f2eb]/10 space-y-2">
-                <div className="font-bold text-amber-300 uppercase font-mono">
-                  1. ბ) სამსჯელო / საანალიზო (~40 წთ)
-                </div>
-                <p className="text-[#d4d1c5] leading-relaxed">
-                  იწერება <strong>ნარატიული თხრობით</strong> (ერთიანი გამართული მსჯელობით). უნდა ახსნათ მხატვრული ხერხი (ალეგორია, რეფრენი, კონტრასტი), მოიყვანოთ ციტატა და გააკეთოთ დასკვნა.
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-[#12131d]/90 border border-[#f5f2eb]/10 space-y-2">
-                <div className="font-bold text-emerald-300 uppercase font-mono">
-                  2. ანალიტიკური ესე (~60 წთ)
-                </div>
-                <p className="text-[#d4d1c5] leading-relaxed">
-                  <strong>დასმული საკითხის კრიტიკული ანალიზი:</strong> შესავალი (თეზისი), 2–3 არგუმენტირებული აბზაცი საპროგრამო ტექსტებისა და თანამედროვე კონტექსტის მოშველიებით, დასკვნა.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-            {ESSAY_GUIDES.map(essay => (
-              <div
-                key={essay.id}
-                className="p-5 sm:p-6 rounded-2xl bg-[#141522]/90 border border-[#f5f2eb]/15 space-y-4"
-              >
-                <span className="text-[10px] font-mono uppercase px-2.5 py-0.5 rounded-full bg-red-500/15 text-red-300 border border-red-500/30">
-                  ანალიტიკური ესეს სავარაუდო მიმართულება
-                </span>
-                <h3 className="text-base sm:text-lg font-bold text-[#fcfbf7] leading-snug">
-                  {essay.title}
-                </h3>
-                <p className="text-xs text-[#b8b5a8] leading-relaxed">{essay.prompt}</p>
-
-                <div className="space-y-2.5 pt-2">
-                  <div className="text-xs font-bold text-red-300 font-mono uppercase">
-                    ესეს აგების მზა გეგმა &amp; არგუმენტები:
-                  </div>
-                  {essay.structure.map((step, i) => (
-                    <div
-                      key={i}
-                      className="p-3 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10 text-xs text-[#d4d1c5] leading-relaxed"
-                    >
-                      {step}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* STUDIO MODULE 4: ACTIVE RECALL FLASHCARDS */}
-      {activeStudioTab === 'flashcards' && currentFlashcard && (
-        <div className="max-w-2xl mx-auto space-y-5">
-          <div className="flex items-center justify-between text-xs font-mono text-[#b8b5a8]">
-            <span>
-              ბარათი {currentCardIndex + 1} / {INITIAL_FLASHCARDS.length}
-            </span>
-            <span>
-              დამახსოვრებულია: {Object.values(masteredCards).filter(Boolean).length} /{' '}
-              {INITIAL_FLASHCARDS.length}
-            </span>
-          </div>
-
-          <div
-            onClick={() => {
-              soundEffects.click();
-              setIsCardFlipped(!isCardFlipped);
-            }}
-            className="min-h-[250px] p-7 rounded-3xl bg-gradient-to-br from-[#181928] to-[#12131d] border border-[#f5f2eb]/20 shadow-2xl flex flex-col justify-between cursor-pointer select-none transition-transform active:scale-[0.99]"
-          >
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-300 text-[11px] font-mono">
-                {currentFlashcard.tag}
-              </span>
-              <span className="text-[11px] font-mono text-[#a8a495]">
-                {isCardFlipped ? 'პასუხი (დააჭირე გადასაბრუნებლად)' : 'კითხვა (დააჭირე პასუხის სანახავად)'}
-              </span>
-            </div>
-
-            <div className="my-6 text-center">
-              <p className="text-base sm:text-xl font-bold text-[#fcfbf7] leading-relaxed">
-                {isCardFlipped ? currentFlashcard.back : currentFlashcard.front}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center">
-              <span className="text-[11px] font-mono text-red-300/80">
-                დააჭირე ბარათს გადასაბრუნებლად ↻
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <button
-              onClick={() => {
-                soundEffects.click();
-                setIsCardFlipped(false);
-                setCurrentCardIndex(prev =>
-                  prev === 0 ? INITIAL_FLASHCARDS.length - 1 : prev - 1
-                );
-              }}
-              className="px-4 py-2.5 rounded-xl border border-[#f5f2eb]/15 bg-[#161724] text-xs font-semibold text-[#dedacb] cursor-pointer"
-            >
-              &larr; წინა ბარათი
-            </button>
-
-            <button
-              onClick={() => {
-                soundEffects.success();
-                setMasteredCards(prev => ({
-                  ...prev,
-                  [currentFlashcard.id]: !prev[currentFlashcard.id]
-                }));
-              }}
-              className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
-                masteredCards[currentFlashcard.id]
-                  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200'
-                  : 'bg-white/5 border-[#f5f2eb]/15 text-[#dedacb]'
-              }`}
-            >
-              {masteredCards[currentFlashcard.id] ? 'ვიცი ეს საკითხი ✓' : 'მონიშნე როგორც ნასწავლი'}
-            </button>
-
-            <button
-              onClick={() => {
-                soundEffects.click();
-                setIsCardFlipped(false);
-                setCurrentCardIndex(prev => (prev + 1) % INITIAL_FLASHCARDS.length);
-              }}
-              className="px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold cursor-pointer"
-            >
-              შემდეგი ბარათი &rarr;
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* STUDIO MODULE 5: GROUNDED AI Q&A CHAT */}
-      {activeStudioTab === 'chat' && (
-        <div className="rounded-3xl bg-[#141522]/90 border border-[#f5f2eb]/15 overflow-hidden flex flex-col h-[520px]">
-          <div className="p-4 border-b border-[#f5f2eb]/10 bg-[#181928]/80 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse" />
-              <div>
-                <h3 className="text-sm font-bold text-[#fcfbf7]">
-                  ჰკითხე AI-ს I ქვიზის პროგრამაზე
-                </h3>
-                <p className="text-[11px] text-[#a8a495]">
-                  „დაკარგული ედემი“, ალ. ჭავჭავაძე, გრ. ორბელიანი, რომანტიზმი, ესე
-                </p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-1.5">
-              {[
-                'გამირჩიე ალ. ჭავჭავაძის 3 ლექსი',
-                'გრიგოლ ორბელიანის ლექსების მთავარი სათქმელი',
-                'როგორ დავწერო ღია კითხვები და ესე?'
-              ].map(qPrompt => (
-                <button
-                  key={qPrompt}
-                  onClick={() => handleSendChat(qPrompt)}
-                  className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/10 text-[11px] text-[#dedacb] cursor-pointer"
-                >
-                  {qPrompt}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Messages Scroll Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {chatMessages.map(msg => (
-              <div
-                key={msg.id}
-                className={`flex flex-col ${
-                  msg.role === 'user' ? 'items-end' : 'items-start'
-                }`}
-              >
-                <div
-                  className={`max-w-[85%] sm:max-w-[75%] p-3.5 rounded-2xl text-xs sm:text-sm whitespace-pre-line leading-relaxed ${
-                    msg.role === 'user'
-                      ? 'bg-red-500 text-white font-medium'
-                      : 'bg-[#191b29] border border-[#f5f2eb]/12 text-[#fcfbf7]'
-                  }`}
-                >
-                  {msg.text}
-                  {msg.citations && msg.citations.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-2.5 pt-2 border-t border-white/10">
-                      {msg.citations.map((cit, i) => (
-                        <span
-                          key={i}
-                          className="text-[10px] font-mono px-2 py-0.5 rounded bg-black/30 text-red-300"
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[58vh] overflow-y-auto pr-1">
+                    {filteredQuestions.map((q, qIndex) => {
+                      const userChoice = selectedAnswers[q.id];
+                      const isAnswered = userChoice !== undefined;
+                      return (
+                        <div
+                          key={q.id}
+                          className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-3"
                         >
-                          წყარო: {cit}
+                          <div className="text-[10px] font-mono text-red-300">
+                            #{qIndex + 1} &bull; {q.category}
+                          </div>
+                          <h4 className="text-xs font-bold text-[#fcfbf7] leading-relaxed">
+                            {q.question}
+                          </h4>
+                          <div className="space-y-1.5">
+                            {q.options.map((opt, optIdx) => {
+                              const isSelected = userChoice === optIdx;
+                              const isCorrectOption = q.correctIndex === optIdx;
+                              let btnStyle =
+                                'bg-[#12131d] border-[#f5f2eb]/10 text-[#dedacb]';
+                              if (isAnswered) {
+                                if (isCorrectOption) {
+                                  btnStyle =
+                                    'bg-emerald-500/20 border-emerald-500/50 text-emerald-200';
+                                } else if (isSelected && !isCorrectOption) {
+                                  btnStyle = 'bg-red-500/20 border-red-500/50 text-red-200';
+                                }
+                              }
+                              return (
+                                <button
+                                  key={optIdx}
+                                  onClick={() => handleSelectAnswer(q.id, optIdx)}
+                                  className={`w-full p-2.5 rounded-xl border text-left text-[11px] flex items-center justify-between gap-2 cursor-pointer ${btnStyle}`}
+                                >
+                                  <span>{opt}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ==================== TAB 6: FLASHCARDS & AI Q&A ==================== */}
+            {activeStudioTab === 'flash_ai' && (
+              <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-3.5 shadow-xl">
+                <div className="inline-flex p-1 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                  <button
+                    onClick={() => {
+                      soundEffects.click();
+                      setFlashAiSubView('flashcards');
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      flashAiSubView === 'flashcards'
+                        ? 'bg-red-500 text-white shadow-sm'
+                        : 'text-[#b8b5a8] hover:text-white'
+                    }`}
+                  >
+                    🃏 ფლეშ-ბარათები ({INITIAL_FLASHCARDS.length})
+                  </button>
+                  <button
+                    onClick={() => {
+                      soundEffects.click();
+                      setFlashAiSubView('chat');
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      flashAiSubView === 'chat'
+                        ? 'bg-red-500 text-white shadow-sm'
+                        : 'text-[#b8b5a8] hover:text-white'
+                    }`}
+                  >
+                    💬 AI კითხვა-პასუხი
+                  </button>
+                </div>
+
+                {flashAiSubView === 'flashcards' && currentFlashcard ? (
+                  <div className="max-w-xl mx-auto space-y-3">
+                    <div
+                      onClick={() => {
+                        soundEffects.click();
+                        setIsCardFlipped(!isCardFlipped);
+                      }}
+                      className="min-h-[200px] p-5 rounded-2xl bg-[#181928] border border-[#f5f2eb]/15 flex flex-col justify-between cursor-pointer select-none active:scale-[0.99] transition-transform"
+                    >
+                      <div className="flex items-center justify-between text-[11px] font-mono">
+                        <span className="px-2 py-0.5 rounded-full bg-red-500/15 text-red-300">
+                          {currentFlashcard.tag}
                         </span>
+                        <span className="text-[#a8a495]">
+                          {currentCardIndex + 1}/{INITIAL_FLASHCARDS.length}
+                        </span>
+                      </div>
+                      <p className="text-sm sm:text-base font-bold text-[#fcfbf7] text-center my-4 leading-relaxed">
+                        {isCardFlipped ? currentFlashcard.back : currentFlashcard.front}
+                      </p>
+                      <div className="text-center text-[10px] font-mono text-red-300/80">
+                        {isCardFlipped ? 'პასუხი • დააჭირე გადასაბრუნებლად ↻' : 'კითხვა • დააჭირე პასუხის სანახავად ↻'}
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2">
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setIsCardFlipped(false);
+                          setCurrentCardIndex(prev =>
+                            prev === 0 ? INITIAL_FLASHCARDS.length - 1 : prev - 1
+                          );
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-[#181928] border border-[#f5f2eb]/15 text-xs font-semibold text-[#dedacb] cursor-pointer"
+                      >
+                        &larr; წინა
+                      </button>
+                      <button
+                        onClick={() => {
+                          soundEffects.success();
+                          setMasteredCards(prev => ({
+                            ...prev,
+                            [currentFlashcard.id]: !prev[currentFlashcard.id]
+                          }));
+                        }}
+                        className={`px-3 py-2 rounded-xl text-xs font-bold border cursor-pointer ${
+                          masteredCards[currentFlashcard.id]
+                            ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-200'
+                            : 'bg-white/5 border-[#f5f2eb]/15 text-[#dedacb]'
+                        }`}
+                      >
+                        {masteredCards[currentFlashcard.id] ? 'ნასწავლია ✓' : 'მონიშნე'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setIsCardFlipped(false);
+                          setCurrentCardIndex(prev => (prev + 1) % INITIAL_FLASHCARDS.length);
+                        }}
+                        className="px-3.5 py-2 rounded-xl bg-red-500 text-white text-xs font-bold cursor-pointer"
+                      >
+                        შემდეგი &rarr;
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 overflow-hidden flex flex-col h-[380px]">
+                    <div className="p-2.5 border-b border-[#f5f2eb]/10 flex flex-wrap gap-1.5">
+                      {[
+                        'ალ. ჭავჭავაძის 3 ლექსი',
+                        'გრ. ორბელიანის ლექსები',
+                        'ღია კითხვები & ესე'
+                      ].map(qPrompt => (
+                        <button
+                          key={qPrompt}
+                          onClick={() => handleSendChat(qPrompt)}
+                          className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/10 text-[10px] text-[#dedacb] cursor-pointer"
+                        >
+                          {qPrompt}
+                        </button>
                       ))}
                     </div>
-                  )}
-                </div>
+
+                    <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
+                      {chatMessages.map(msg => (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col ${
+                            msg.role === 'user' ? 'items-end' : 'items-start'
+                          }`}
+                        >
+                          <div
+                            className={`max-w-[85%] p-3 rounded-2xl text-xs whitespace-pre-line leading-relaxed ${
+                              msg.role === 'user'
+                                ? 'bg-red-500 text-white font-medium'
+                                : 'bg-[#12131d] border border-[#f5f2eb]/10 text-[#fcfbf7]'
+                            }`}
+                          >
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                      <div ref={chatEndRef} />
+                    </div>
+
+                    <form
+                      onSubmit={e => {
+                        e.preventDefault();
+                        handleSendChat();
+                      }}
+                      className="p-2.5 border-t border-[#f5f2eb]/10 bg-[#12131d] flex items-center gap-2"
+                    >
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={e => setChatInput(e.target.value)}
+                        placeholder="იკითხე ლექსზე, ალეგორიაზე ან ესეზე..."
+                        className="flex-1 px-3 py-2 rounded-xl bg-[#181928] border border-[#f5f2eb]/15 text-xs text-[#fcfbf7] placeholder:text-[#7c796e] focus:outline-none focus:border-red-400"
+                      />
+                      <button
+                        type="submit"
+                        className="px-3.5 py-2 rounded-xl bg-red-500 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
-            ))}
-            <div ref={chatEndRef} />
-          </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
 
-          {/* Input Bar */}
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleSendChat();
-            }}
-            className="p-3 border-t border-[#f5f2eb]/10 bg-[#12131d] flex items-center gap-2"
-          >
-            <input
-              type="text"
-              value={chatInput}
-              onChange={e => setChatInput(e.target.value)}
-              placeholder="იკითხე „გოგჩაზე“, „თამარ მეფის სახეზე“, ალეგორიაზე ან ესეზე..."
-              className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/15 text-xs sm:text-sm text-[#fcfbf7] placeholder:text-[#7c796e] focus:outline-none focus:border-red-400"
-            />
-            <button
-              type="submit"
-              className="px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>გაგზავნა</span>
-              <Send className="w-3.5 h-3.5" />
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Fullscreen Modal for Official Syllabus Image */}
+      {/* ==================== iOS FLUID BOTTOM SHEET 1: POEM PICKER ==================== */}
       <AnimatePresence>
-        {showSyllabusModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+        {showPoemPickerSheet && (
+          <>
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setShowSyllabusModal(false)}
-              className="fixed inset-0 bg-black/80 backdrop-blur-xl"
+              transition={{ duration: 0.2 }}
+              onClick={() => setShowPoemPickerSheet(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              aria-hidden="true"
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 20 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-              className="relative z-10 max-w-5xl w-full rounded-2xl bg-[#141522] border border-[#f5f2eb]/20 overflow-hidden shadow-2xl will-change-transform"
+              role="dialog"
+              aria-modal="true"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={IOS_SPRING}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0.08, bottom: 0.65 }}
+              onDragEnd={(e, info) =>
+                handleSheetDragEnd(() => setShowPoemPickerSheet(false), e, info)
+              }
+              className="fixed bottom-0 inset-x-0 max-w-lg mx-auto bg-zinc-950/90 backdrop-blur-2xl border-t border-white/10 rounded-t-[28px] shadow-2xl z-50 will-change-transform isolate flex flex-col max-h-[82vh] pb-[max(1rem,env(safe-area-inset-bottom))]"
             >
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#f5f2eb]/10 bg-[#181928]">
-                <span className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
-                  ქართული ენისა და ლიტერატურის I ქვიზის პროგრამა და ტესტის ფორმატი (120 წთ)
-                </span>
-                <button
-                  onClick={() => setShowSyllabusModal(false)}
-                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-[#fcfbf7] cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+              <div className="w-full pt-3 pb-2 touch-none cursor-grab active:cursor-grabbing select-none flex flex-col items-center">
+                <div className="w-12 h-1 bg-white/20 rounded-full" />
+                <div className="mt-2 text-xs font-bold tracking-wider uppercase text-[#c5c1b2]">
+                  აირჩიე საპროგრამო ლექსი / თემა (6)
+                </div>
               </div>
-              <div className="p-3 sm:p-6 bg-white flex items-center justify-center">
+
+              <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2 overscroll-contain">
+                {PROGRAM_TOPICS_AND_POEMS.map(poem => {
+                  const isSelected = poem.id === selectedPoemId;
+                  return (
+                    <button
+                      key={poem.id}
+                      onClick={() => {
+                        handleSelectPoem(poem.id);
+                        setShowPoemPickerSheet(false);
+                      }}
+                      className={`w-full p-3.5 rounded-2xl border text-left transition-all flex items-center justify-between gap-3 cursor-pointer ${
+                        isSelected
+                          ? 'bg-red-500/20 border-red-500/60 text-[#fcfbf7]'
+                          : 'bg-[#141522] border-white/10 text-[#c5c1b2]'
+                      }`}
+                    >
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-mono text-red-300">
+                          {poem.numberLabel} &bull; {poem.author}
+                        </div>
+                        <div className="text-xs sm:text-sm font-bold text-[#fcfbf7] truncate">
+                          {poem.title}
+                        </div>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-red-400 shrink-0" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ==================== iOS FLUID BOTTOM SHEET 2: HIDDEN NOTEBOOKLM & EXTRA RESOURCES ==================== */}
+      <AnimatePresence>
+        {showResourcesSheet && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setShowResourcesSheet(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              aria-hidden="true"
+            />
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={IOS_SPRING}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0.08, bottom: 0.65 }}
+              onDragEnd={(e, info) =>
+                handleSheetDragEnd(() => setShowResourcesSheet(false), e, info)
+              }
+              className="fixed bottom-0 inset-x-0 max-w-lg mx-auto bg-zinc-950/90 backdrop-blur-2xl border-t border-white/10 rounded-t-[28px] shadow-2xl z-50 will-change-transform isolate flex flex-col max-h-[85vh] pb-[max(1rem,env(safe-area-inset-bottom))]"
+            >
+              <div className="w-full pt-3 pb-2 touch-none cursor-grab active:cursor-grabbing select-none flex flex-col items-center">
+                <div className="w-12 h-1 bg-white/20 rounded-full" />
+                <div className="mt-2 text-xs font-bold tracking-wider uppercase text-[#c5c1b2]">
+                  დამატებითი ფაილები &amp; Google NotebookLM
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 overscroll-contain">
+                <p className="text-xs text-[#b8b5a8] leading-relaxed">
+                  ყველა ვიდეო, აუდიო პოდკასტი და კონსპექტი უკვე პირდაპირ საიტზეა ჩაშენებული. სურვილის შემთხვევაში აქედან შეგიძლია გარე NotebookLM-ში გადასვლა ან ფაილების ჩამოტვირთვა:
+                </p>
+
+                <button
+                  onClick={handleCopyFullSourceAndOpenNotebookLM}
+                  className="w-full py-3 px-4 rounded-2xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                >
+                  {copiedSourcePack ? (
+                    <>
+                      <Check className="w-4 h-4" />
+                      <span>დაკოპირდა! ჩასვი NotebookLM-ში</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      <span>გახსენი Google NotebookLM-ში (სრული მასალით)</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+
+                <button
+                  onClick={() => handleCopySinglePoemToNotebookLM(activePoem)}
+                  className="w-full p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-left flex items-center justify-between gap-2 cursor-pointer"
+                >
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-[#fcfbf7] truncate">
+                      {copiedSinglePoem
+                        ? 'დაკოპირდა!'
+                        : `მხოლოდ „${activePoem.title}“-ის კოპირება NotebookLM-ში`}
+                    </div>
+                    <div className="text-[10px] text-[#a8a495]">
+                      აკოპირებს ამ ლექსის ტექსტს + ანალიზს
+                    </div>
+                  </div>
+                  <Copy className="w-4 h-4 text-red-300 shrink-0" />
+                </button>
+
+                <a
+                  href="/quiz/georgian-quiz-1-source-pack.txt"
+                  download="Georgian_Quiz_1_NotebookLM_Source_Pack.txt"
+                  className="w-full p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-between gap-2 text-xs font-semibold text-[#fcfbf7]"
+                >
+                  <span>ჩამოტვირთე სრული კონსპექტი (.txt)</span>
+                  <Download className="w-4 h-4 text-emerald-300 shrink-0" />
+                </a>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ==================== iOS FLUID BOTTOM SHEET 3: SYLLABUS PHOTO ==================== */}
+      <AnimatePresence>
+        {showSyllabusModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setShowSyllabusModal(false)}
+              className="fixed inset-0 bg-black/75 backdrop-blur-md z-40"
+              aria-hidden="true"
+            />
+            <motion.div
+              role="dialog"
+              aria-modal="true"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={IOS_SPRING}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0.08, bottom: 0.65 }}
+              onDragEnd={(e, info) =>
+                handleSheetDragEnd(() => setShowSyllabusModal(false), e, info)
+              }
+              className="fixed bottom-0 inset-x-0 max-w-3xl mx-auto bg-zinc-950/95 backdrop-blur-2xl border-t border-white/10 rounded-t-[28px] shadow-2xl z-50 will-change-transform isolate flex flex-col max-h-[88vh] pb-[max(1rem,env(safe-area-inset-bottom))]"
+            >
+              <div className="w-full pt-3 pb-2 px-4 touch-none cursor-grab active:cursor-grabbing select-none flex flex-col items-center">
+                <div className="w-12 h-1 bg-white/20 rounded-full" />
+                <div className="w-full flex items-center justify-between mt-2">
+                  <span className="text-xs font-bold text-[#fcfbf7]">
+                    ქართულის I ქვიზის ოფიციალური პროგრამა (120 წთ)
+                  </span>
+                  <button
+                    onClick={() => setShowSyllabusModal(false)}
+                    className="p-1 rounded-lg bg-white/10 text-[#fcfbf7] cursor-pointer"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+              <div className="p-3 bg-white overflow-y-auto overscroll-contain flex items-center justify-center">
                 <img
                   src="/quiz/georgian-quiz-syllabus.jpg"
                   alt="ქართული ენისა და ლიტერატურის I ქვიზის პროგრამა"
-                  className="w-full h-auto max-h-[78vh] object-contain"
+                  className="w-full h-auto max-h-[72vh] object-contain"
                 />
               </div>
             </motion.div>
-          </div>
+          </>
         )}
       </AnimatePresence>
-    </motion.section>
+    </section>
   );
 };
