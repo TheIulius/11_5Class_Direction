@@ -1269,9 +1269,9 @@ export const QuizPrepSection: React.FC = () => {
   };
 
   return (
-    <section className="max-w-5xl mx-auto px-2.5 sm:px-6 py-1.5 sm:py-3 space-y-2">
-      {/* COMPACT 2-ROW CONTROL DOCK: ROW 1 = POEM SELECTOR + HIDDEN EXTRAS, ROW 2 = SWIPEABLE MATERIAL TABS */}
-      <div className="rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 sm:p-2 space-y-1.5 shadow-lg backdrop-blur-xl">
+    <section className="max-w-4xl mx-auto px-2.5 sm:px-5 py-1.5 sm:py-3 space-y-2.5">
+      {/* COMPACT 2-ROW CONTROL DOCK: IDENTICAL COMPACT SHORT LABELS ON MOBILE & DESKTOP */}
+      <div className="max-w-2xl mx-auto rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 space-y-1.5 shadow-lg backdrop-blur-xl">
         {/* Row 1: Compact Poem Selector Pills + Discreet Icon Triggers */}
         <div className="flex items-center justify-between gap-1.5">
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5 flex-1 min-w-0">
@@ -1281,7 +1281,7 @@ export const QuizPrepSection: React.FC = () => {
                 <button
                   key={poem.id}
                   onClick={() => handleSelectPoem(poem.id)}
-                  className={`relative shrink-0 px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer select-none ${
+                  className={`relative shrink-0 px-2.5 py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer select-none ${
                     isSelected ? 'text-white' : 'text-[#b8b5a8] hover:text-[#fcfbf7]'
                   }`}
                 >
@@ -1337,7 +1337,7 @@ export const QuizPrepSection: React.FC = () => {
           </div>
         </div>
 
-        {/* Row 2: Segmented Material Menu Bar (Tap or Swipe Left/Right) */}
+        {/* Row 2: Segmented Material Menu Bar (Short, Compact Titles on Both Mobile & Desktop) */}
         <div className="grid grid-cols-6 gap-1 pt-1 border-t border-[#f5f2eb]/10">
           {STUDIO_TAB_LIST.map(tab => {
             const Icon = tab.icon;
@@ -1346,7 +1346,7 @@ export const QuizPrepSection: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => handleSwitchStudioTab(tab.id)}
-                className={`relative py-1.5 px-1 sm:px-2 rounded-xl flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 text-center transition-colors cursor-pointer select-none ${
+                className={`relative py-1.5 px-1.5 rounded-xl flex items-center justify-center gap-1 text-center transition-colors cursor-pointer select-none ${
                   isActive ? 'text-white' : 'text-[#a8a495] hover:text-[#fcfbf7]'
                 }`}
               >
@@ -1358,9 +1358,8 @@ export const QuizPrepSection: React.FC = () => {
                   />
                 )}
                 <Icon className="relative z-10 w-3.5 h-3.5 shrink-0" />
-                <span className="relative z-10 text-[9.5px] sm:text-xs font-bold leading-tight truncate max-w-full">
-                  <span className="sm:hidden">{tab.shortLabel}</span>
-                  <span className="hidden sm:inline">{tab.label}</span>
+                <span className="relative z-10 text-[10px] sm:text-[11px] font-bold leading-tight truncate">
+                  {tab.shortLabel}
                 </span>
               </button>
             );
