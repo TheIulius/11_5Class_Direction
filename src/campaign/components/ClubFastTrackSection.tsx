@@ -48,8 +48,15 @@ export const ClubFastTrackSection: React.FC = () => {
     <section id="clubs" className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8">
       {/* Section Header */}
       <div>
-        <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1.5 opacity-80">
-          სასკოლო ინიციატივები &bull; 11/5 <span className="text-[9px] font-normal lowercase opacity-75 mx-0.5">class</span> PLATFORM
+        <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1.5 opacity-80 flex items-center flex-wrap">
+          <span>სასკოლო ინიციატივები &bull;&nbsp;</span>
+          <span className="inline-flex items-end">
+            <span>11/5</span>
+            <span className="text-[8px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-[1px]">
+              class
+            </span>
+          </span>
+          <span className="ml-1">PLATFORM</span>
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
           კლუბების სწრაფი დამტკიცება (&quot;მწვანე შუქი&quot;)
@@ -158,8 +165,14 @@ export const ClubFastTrackSection: React.FC = () => {
               className="relative w-full max-w-sm bg-[#131420] border border-[#f5f2eb]/20 rounded-2xl p-6 z-10 text-[#f5f2eb] space-y-4 shadow-2xl"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-[#dedacb]">
-                  11/5 <span className="text-[9px] opacity-75 mx-0.5">class</span> Platform წესდება
+                <span className="text-xs font-mono text-[#dedacb] flex items-center">
+                  <span className="inline-flex items-end">
+                    <span>11/5</span>
+                    <span className="text-[8px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-[1px]">
+                      class
+                    </span>
+                  </span>
+                  <span className="ml-1">Platform წესდება</span>
                 </span>
                 <button
                   onClick={() => setActiveCharter(null)}

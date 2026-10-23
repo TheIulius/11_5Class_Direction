@@ -30,7 +30,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#f5f2eb]/15 bg-[#171825]/60 text-xs font-mono text-[#dedacb] backdrop-blur-xl shadow-sm"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-[#f5f2eb] animate-pulse" />
-        <span>11/5 <span className="text-[9px] font-normal lowercase opacity-75 mx-0.5">class</span> PLATFORM &bull; საპრეზიდენტო პლატფორმა 2026</span>
+        <span>
+          <span className="inline-flex items-end">
+            <span>11/5</span>
+            <span className="text-[8px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-[1px]">
+              class
+            </span>
+          </span>
+          <span className="ml-1">PLATFORM</span> &bull; საპრეზიდენტო პლატფორმა 2026
+        </span>
       </motion.div>
 
       {/* Main Title */}
@@ -41,7 +49,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
           transition={{ duration: 0.4, delay: 0.05 }}
           className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#fcfbf7] uppercase"
         >
-          11/5 <span className="text-2xl sm:text-4xl lg:text-5xl font-normal lowercase tracking-normal opacity-75 align-middle mx-1">class</span> PLATFORM
+          <span className="inline-flex items-end">
+            <span>11/5</span>
+            <span className="text-[0.26em] font-extrabold lowercase tracking-tight leading-none mb-[0.14em] ml-0.5 sm:ml-1 text-current">
+              class
+            </span>
+          </span>
+          <span className="ml-2 sm:ml-3">PLATFORM</span>
         </motion.h1>
 
         <motion.p
@@ -237,8 +251,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
               <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#f5f2eb]/10 bg-[#181928]/80">
                 <div className="flex items-center gap-2.5">
                   <span className="w-2 h-2 rounded-full bg-[#fcfbf7] animate-pulse" />
-                  <h3 className="text-sm sm:text-base font-bold text-[#fcfbf7]">
-                    რატომ უნდა ამირჩიოთ — 11/5 <span className="text-xs font-normal opacity-75 mx-0.5">class</span> Platform
+                  <h3 className="text-sm sm:text-base font-bold text-[#fcfbf7] flex items-center">
+                    რატომ უნდა ამირჩიოთ —{' '}
+                    <span className="inline-flex items-end ml-1">
+                      <span>11/5</span>
+                      <span className="text-[9px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-0.5">
+                        class
+                      </span>
+                    </span>
+                    <span className="ml-1">Platform</span>
                   </h3>
                 </div>
                 <div className="flex items-center gap-3">

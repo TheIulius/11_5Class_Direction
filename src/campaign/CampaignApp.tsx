@@ -179,8 +179,14 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
       <footer className="relative z-10 w-full border-t border-[#f5f2eb]/10 py-8 px-4 sm:px-6 text-xs text-[#a8a495] bg-[#0c0d14]/80 backdrop-blur-xl">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-            <span className="font-semibold text-[#fcfbf7]">
-              11/5 <span className="text-[10px] font-normal lowercase opacity-75 mx-0.5">class</span> Platform
+            <span className="font-semibold text-[#fcfbf7] flex items-center">
+              <span className="inline-flex items-end">
+                <span>11/5</span>
+                <span className="text-[9px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-0.5">
+                  class
+                </span>
+              </span>
+              <span className="ml-1">Platform</span>
             </span>
             <span>&bull;</span>
             <span>მე-11 კლასის საპრეზიდენტო პლატფორმა</span>

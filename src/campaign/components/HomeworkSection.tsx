@@ -50,8 +50,15 @@ export const HomeworkSection: React.FC = () => {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80">
-            სასწავლო დავალებები &bull; 11/5 <span className="text-[9px] font-normal lowercase opacity-75 mx-0.5">class</span> PLATFORM
+          <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80 flex items-center flex-wrap">
+            <span>სასწავლო დავალებები &bull;&nbsp;</span>
+            <span className="inline-flex items-end">
+              <span>11/5</span>
+              <span className="text-[8px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-[1px]">
+                class
+              </span>
+            </span>
+            <span className="ml-1">PLATFORM</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
             საშინაო დავალებების ცენტრი &amp; ცხრილი

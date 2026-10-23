@@ -53,8 +53,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="w-6 h-6 rounded-md bg-[#f5f2eb]/15 border border-[#f5f2eb]/20 flex items-center justify-center text-xs font-mono font-bold text-[#fcfbf7] group-hover:bg-[#f5f2eb] group-hover:text-[#0c0d12] transition-colors">
             11
           </div>
-          <span className="text-sm font-semibold tracking-tight text-[#fcfbf7] group-hover:text-white transition-colors">
-            11/5 <span className="text-[10px] font-normal lowercase opacity-75 mx-0.5">class</span> Platform
+          <span className="text-sm font-semibold tracking-tight text-[#fcfbf7] group-hover:text-white transition-colors flex items-center">
+            <span className="inline-flex items-end">
+              <span>11/5</span>
+              <span className="text-[9px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-0.5">
+                class
+              </span>
+            </span>
+            <span className="ml-1.5">Platform</span>
           </span>
         </button>
 
