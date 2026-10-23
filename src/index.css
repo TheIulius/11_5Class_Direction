@@ -132,6 +132,20 @@
   background-color: rgba(248, 245, 237, 0.82) !important;
 }
 
+/* Locked Overlay & Red Quiz Banner in Light Mode */
+.campaign-light [class*="bg-[#0b0c13]/55"] {
+  background-color: rgba(246, 243, 235, 0.55) !important;
+}
+
+.campaign-light [class*="from-red-950"] {
+  background-image: linear-gradient(to bottom right, rgba(254, 226, 226, 0.85), rgba(253, 252, 249, 0.94), rgba(242, 237, 225, 0.94)) !important;
+}
+
+.campaign-light .bg-red-500,
+.campaign-light .bg-red-500 * {
+  color: #ffffff !important;
+}
+
 /* Hover refinements for cream containers */
 .campaign-light [class*="hover:bg-[#1a1c2d]"]:hover,
 .campaign-light [class*="hover:bg-[#1e2030]"]:hover,

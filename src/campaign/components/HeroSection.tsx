@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, BookOpen, Compass, MessageSquare, Rocket, Play, X } from 'lucide-react';
+import { Calendar, BookOpen, Compass, MessageSquare, Rocket, Play, X, Flame, Lock } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
 interface HeroSectionProps {
-  onNavigateTab: (tab: 'calendar' | 'homework' | 'opportunities' | 'ideas' | 'clubs') => void;
+  onNavigateTab: (tab: 'calendar' | 'quiz' | 'homework' | 'opportunities' | 'ideas' | 'clubs') => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
@@ -77,6 +77,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         <button
           onClick={() => {
             soundEffects.click();
+            onNavigateTab('quiz');
+          }}
+          className="px-5 py-2.5 rounded-xl border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 text-red-200 font-bold text-xs sm:text-sm backdrop-blur-xl transition-all cursor-pointer shadow-[0_0_20px_rgba(239,68,68,0.3)] flex items-center gap-2"
+        >
+          <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+          <Flame className="w-4 h-4 text-red-400 fill-current" />
+          <span>ქართულის ქვიზი</span>
+          <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-red-500 text-white">
+            ორშაბათი
+          </span>
+        </button>
+
+        <button
+          onClick={() => {
+            soundEffects.click();
             onNavigateTab('calendar');
           }}
           className="px-5 py-2.5 rounded-xl border border-[#f5f2eb]/25 bg-[#1b1c2c]/85 hover:bg-[#24263b]/95 text-[#fcfbf7] font-semibold text-xs sm:text-sm backdrop-blur-xl transition-all cursor-pointer shadow-md flex items-center gap-2"
@@ -94,6 +109,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         >
           <BookOpen className="w-4 h-4 text-[#dedacb]" />
           <span>დავალებები &amp; ცხრილი</span>
+          <Lock className="w-3 h-3 opacity-60" />
         </button>
 
         <button
@@ -105,6 +121,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         >
           <Compass className="w-4 h-4 text-[#a8a495]" />
           <span>ალუმნები</span>
+          <Lock className="w-3 h-3 opacity-60" />
         </button>
 
         <button
@@ -116,6 +133,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         >
           <MessageSquare className="w-4 h-4 text-[#a8a495]" />
           <span>იდეების დაფა</span>
+          <Lock className="w-3 h-3 opacity-60" />
         </button>
       </motion.div>
 

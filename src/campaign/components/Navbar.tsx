@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon } from 'lucide-react';
+import { Menu, X, Sun, Moon, Lock } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 
-export type ActiveTab = 'hero' | 'calendar' | 'homework' | 'opportunities' | 'ideas' | 'clubs';
+export type ActiveTab = 'hero' | 'calendar' | 'quiz' | 'homework' | 'opportunities' | 'ideas' | 'clubs';
 
 interface NavbarProps {
   activeTab: ActiveTab;
@@ -12,13 +12,20 @@ interface NavbarProps {
   onToggleTheme: () => void;
 }
 
-const NAV_LINKS: { id: ActiveTab; label: string }[] = [
+const NAV_LINKS: {
+  id: ActiveTab;
+  label: string;
+  isUrgentQuiz?: boolean;
+  caption?: string;
+  isLocked?: boolean;
+}[] = [
   { id: 'hero', label: 'მთავარი' },
   { id: 'calendar', label: 'კალენდარი' },
-  { id: 'homework', label: 'დავალებები' },
-  { id: 'opportunities', label: 'შესაძლებლობები' },
-  { id: 'ideas', label: 'იდეები' },
-  { id: 'clubs', label: 'კლუბები' }
+  { id: 'quiz', label: 'ქვიზი', isUrgentQuiz: true, caption: 'ორშაბათი' },
+  { id: 'homework', label: 'დავალებები', isLocked: true },
+  { id: 'opportunities', label: 'შესაძლებლობები', isLocked: true },
+  { id: 'ideas', label: 'იდეები', isLocked: true },
+  { id: 'clubs', label: 'კლუბები', isLocked: true }
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -55,17 +62,48 @@ export const Navbar: React.FC<NavbarProps> = ({
         <nav className="hidden md:flex items-center gap-1.5 p-1 rounded-xl bg-[#171825]/60 border border-[#f5f2eb]/10 backdrop-blur-xl">
           {NAV_LINKS.map(link => {
             const isActive = activeTab === link.id;
+            if (link.isUrgentQuiz) {
+              return (
+                <button
+                  key={link.id}
+                  onClick={() => handleClick(link.id)}
+                  className={`relative px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                    isActive
+                      ? 'bg-red-500 text-white shadow-[0_0_20px_rgba(239,68,68,0.6)] ring-1 ring-red-300'
+                      : 'bg-red-500/20 text-red-200 border border-red-500/50 hover:bg-red-500/30 shadow-[0_0_15px_rgba(239,68,68,0.3)]'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-ping" />
+                  <span>{link.label}</span>
+                  {link.caption && (
+                    <span
+                      className={`text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded-full tracking-tight ${
+                        isActive
+                          ? 'bg-black/30 text-white'
+                          : 'bg-red-500 text-white'
+                      }`}
+                    >
+                      {link.caption}
+                    </span>
+                  )}
+                </button>
+              );
+            }
+
             return (
               <button
                 key={link.id}
                 onClick={() => handleClick(link.id)}
-                className={`relative px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                className={`relative px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                   isActive
                     ? 'text-[#0c0d12] font-semibold bg-[#f5f2eb] shadow-sm'
                     : 'text-[#c7c4b5] hover:text-[#fcfbf7] hover:bg-white/5'
                 }`}
               >
-                {link.label}
+                <span>{link.label}</span>
+                {link.isLocked && (
+                  <Lock className="w-3 h-3 opacity-60" />
+                )}
               </button>
             );
           })}
@@ -120,17 +158,47 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             {NAV_LINKS.map(link => {
               const isActive = activeTab === link.id;
+              if (link.isUrgentQuiz) {
+                return (
+                  <button
+                    key={link.id}
+                    onClick={() => handleClick(link.id)}
+                    className={`w-full text-left py-2.5 px-3 rounded-lg text-sm font-bold transition-colors cursor-pointer flex items-center justify-between ${
+                      isActive
+                        ? 'bg-red-500 text-white shadow-[0_0_16px_rgba(239,68,68,0.5)]'
+                        : 'bg-red-500/20 border border-red-500/45 text-red-200'
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
+                      <span>{link.label}</span>
+                    </span>
+                    {link.caption && (
+                      <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-red-500 text-white">
+                        {link.caption}
+                      </span>
+                    )}
+                  </button>
+                );
+              }
+
               return (
                 <button
                   key={link.id}
                   onClick={() => handleClick(link.id)}
-                  className={`w-full text-left py-2 px-3 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                  className={`w-full text-left py-2 px-3 rounded-lg text-sm font-medium transition-colors cursor-pointer flex items-center justify-between ${
                     isActive
                       ? 'bg-[#f5f2eb] text-[#0c0d12] font-semibold'
                       : 'text-[#d4d1c5] hover:bg-white/5 hover:text-white'
                   }`}
                 >
-                  {link.label}
+                  <span>{link.label}</span>
+                  {link.isLocked && (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono opacity-70">
+                      <Lock className="w-3 h-3" />
+                      <span>COMING SOON</span>
+                    </span>
+                  )}
                 </button>
               );
             })}
