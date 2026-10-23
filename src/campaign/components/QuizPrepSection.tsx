@@ -1903,7 +1903,7 @@ const SHORT_POEM_LABELS: Record<Exclude<QuizCategoryFilter, 'all'>, string> = {
   'visac-gsurt': '2. ვისაც გსურთ',
   'vah-droni': '3. ვაჰ, დრონი',
   'gogcha': '4. გოგჩა',
-  'sagamo': '5. საღამო...',
+  'sagamo': '5. საღამო',
   'tamar-mefe': '6. თამარ მეფე'
 };
 
@@ -1911,14 +1911,15 @@ const STUDIO_TAB_LIST: {
   id: StudioTab;
   label: string;
   shortLabel: string;
+  mobileLabel: string;
   icon: React.FC<{ className?: string }>;
 }[] = [
-  { id: 'media', label: 'ვიდეო & პოდკასტი', shortLabel: 'მედია', icon: Video },
-  { id: 'text', label: 'ტექსტი & ლექსიკონი', shortLabel: 'ტექსტი', icon: ScrollText },
-  { id: 'analysis', label: 'კონსპექტი & ეპოქა', shortLabel: 'ანალიზი', icon: BookOpen },
-  { id: 'open_essay', label: 'ღია კითხვები & ესე', shortLabel: 'ღია & ესე', icon: PenTool },
-  { id: 'quiz', label: 'ტესტები (24)', shortLabel: 'ტესტი', icon: HelpCircle },
-  { id: 'flash_ai', label: 'ბარათები & AI', shortLabel: 'AI & ბარათი', icon: Layers }
+  { id: 'media', label: 'ვიდეო & პოდკასტი', shortLabel: 'მედია', mobileLabel: 'მედია', icon: Video },
+  { id: 'text', label: 'ტექსტი & ლექსიკონი', shortLabel: 'ტექსტი', mobileLabel: 'ტექსტი', icon: ScrollText },
+  { id: 'analysis', label: 'კონსპექტი & ეპოქა', shortLabel: 'ანალიზი', mobileLabel: 'ანალიზი', icon: BookOpen },
+  { id: 'open_essay', label: 'ღია კითხვები & ესე', shortLabel: 'ღია & ესე', mobileLabel: 'ღია/ესე', icon: PenTool },
+  { id: 'quiz', label: 'ტესტები (24)', shortLabel: 'ტესტი', mobileLabel: 'ტესტი', icon: HelpCircle },
+  { id: 'flash_ai', label: 'ბარათები & AI', shortLabel: 'AI & ბარათი', mobileLabel: 'AI ბარათი', icon: Layers }
 ];
 
 const IOS_SPRING = {
@@ -2316,7 +2317,7 @@ export const QuizPrepSection: React.FC = () => {
         </div>
 
         {/* Row 2: Segmented Material Menu Bar (Short, Compact Titles on Both Mobile & Desktop) */}
-        <div className="grid grid-cols-6 gap-1 pt-1 border-t border-[#f5f2eb]/10">
+        <div className="grid grid-cols-6 gap-0.5 sm:gap-1 pt-1 border-t border-[#f5f2eb]/10">
           {STUDIO_TAB_LIST.map(tab => {
             const Icon = tab.icon;
             const isActive = activeStudioTab === tab.id;
@@ -2324,7 +2325,7 @@ export const QuizPrepSection: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => handleSwitchStudioTab(tab.id)}
-                className={`relative py-1.5 px-1.5 rounded-xl flex items-center justify-center gap-1 text-center transition-colors cursor-pointer select-none ${
+                className={`relative py-1 sm:py-1.5 px-0.5 sm:px-1.5 rounded-xl flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1 text-center transition-colors cursor-pointer select-none ${
                   isActive ? 'text-white' : 'text-[#a8a495] hover:text-[#fcfbf7]'
                 }`}
               >
@@ -2336,8 +2337,9 @@ export const QuizPrepSection: React.FC = () => {
                   />
                 )}
                 <Icon className="relative z-10 w-3.5 h-3.5 shrink-0" />
-                <span className="relative z-10 text-[10px] sm:text-[11px] font-bold leading-tight truncate">
-                  {tab.shortLabel}
+                <span className="relative z-10 text-[9.5px] sm:text-[11px] font-bold leading-tight whitespace-nowrap">
+                  <span className="sm:hidden">{tab.mobileLabel}</span>
+                  <span className="hidden sm:inline">{tab.shortLabel}</span>
                 </span>
               </button>
             );
