@@ -29235,6 +29235,8 @@
         "reached100": 0
       },
       "byVideo": {}
-    }
+    },
+    "uniqueIps": [],
+    "uniqueIpsCount": 1
   }
 }
