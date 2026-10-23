@@ -364,18 +364,18 @@
   }
 
   .campaign-parallax-layer:nth-child(1) {
-    --parallax-offset: 60px;
-    animation-range: entry 25% exit 55%;
+    --parallax-offset: 55px;
+    animation-range: entry 0% exit 100%;
   }
 
   .campaign-parallax-layer:nth-child(2) {
-    --parallax-offset: 95px;
-    animation-range: entry 25% exit 78%;
+    --parallax-offset: 68px;
+    animation-range: entry 0% exit 100%;
   }
 
   .campaign-parallax-layer:nth-child(3) {
-    --parallax-offset: 130px;
-    animation-range: entry 25% exit 100%;
+    --parallax-offset: 80px;
+    animation-range: entry 0% exit 100%;
   }
 }
 

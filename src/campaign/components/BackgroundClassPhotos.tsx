@@ -31,27 +31,19 @@ const PHOTO_SOURCES = [
   '/class-photos/566540435_1801019863866461_6743571529053003991_n.jpg.webp'
 ];
 
-// 5 horizontal lanes per side (10 lanes total across left & right wings)
-const WING_LANES_PERCENT = [0.9, 5.1, 9.3, 13.5, 17.7];
-// Knight's-move vertical phase per lane so adjacent lanes are maximally staggered vertically
-const LANE_PHASE_FRACTIONS = [0.0, 0.42, 0.82, 0.22, 0.62];
-// Subtle, calm micro-rotations (-2.4 deg to +2.4 deg) so dense tiles never feel chaotic
-const CALM_ROTATIONS = [-2.2, 1.8, -1.4, 2.1, -1.9, 1.5, -1.1, 2.3, -1.6, 1.2];
-
-const ROWS_PER_LANE = 16; // 16 rows * 10 lanes = 160 miniature photos across the viewport canvas
-const ROW_SPACING_PX = 82; // ~82px vertical spacing within the same lane (tiles are ~30-42px tall)
-
-// Deterministic pseudo-random helper in [-0.5, 0.5] so layout never shifts on re-render
-function seededUnit(seed: number): number {
-  const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
-  return x - Math.floor(x) - 0.5;
+// Deterministic PRNG in [0, 1) so random scatter is organic and stable across renders
+function createRng(seed: number) {
+  let s = seed >>> 0;
+  return () => {
+    s = (s * 1664525 + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
 }
 
 export const BackgroundClassPhotos: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Fallback for browsers that don't support CSS scroll-driven animations:
-  // Direct 1:1 scroll transform with zero spring delay and zero jiggle
+  // Fallback for browsers that don't support CSS scroll-driven animations
   useEffect(() => {
     if (
       typeof window === 'undefined' ||
@@ -74,7 +66,7 @@ export const BackgroundClassPhotos: React.FC = () => {
     const layers = Array.from(
       container.querySelectorAll<HTMLElement>('.campaign-parallax-layer')
     );
-    const layerOffsets = [60, 95, 130];
+    const layerOffsets = [55, 68, 80];
 
     const onScroll = () => {
       const scrollY = window.scrollY;
@@ -88,7 +80,7 @@ export const BackgroundClassPhotos: React.FC = () => {
         const scrollPercent = (scrollY - (wrapperTop - windowHeight)) / denom;
 
         layers.forEach((layer, index) => {
-          const initialTranslateY = layerOffsets[index] ?? 60 * (index + 1);
+          const initialTranslateY = layerOffsets[index] ?? 55;
           const translateY = initialTranslateY * (1 - scrollPercent);
           layer.style.transform = `translate3d(0, ${translateY.toFixed(2)}px, 0)`;
         });
@@ -118,52 +110,78 @@ export const BackgroundClassPhotos: React.FC = () => {
   }, []);
 
   const { deepPhotos, midPhotos, nearPhotos } = useMemo(() => {
+    const rng = createRng(11052026);
     const generated: ScatteredPhoto[] = [];
-    const totalLanes = WING_LANES_PERCENT.length * 2; // 5 left + 5 right = 10 lanes
-    let photoIdx = 0;
 
-    for (let row = 0; row < ROWS_PER_LANE; row++) {
-      for (let laneIdx = 0; laneIdx < totalLanes; laneIdx++) {
-        const side: 'left' | 'right' = laneIdx % 2 === 0 ? 'left' : 'right';
-        const wingLane = Math.floor(laneIdx / 2); // 0..4
+    // True 2D Poisson-disc rejection sampling carried out independently on Left & Right wings
+    // so there are ZERO vertical columns or rows, and ZERO overlapping pairs!
+    const canvasHeightPx = 1360;
+    const minHorizontalDistPct = 6.2; // prevents side-by-side overlap
+    const minVerticalDistPx = 104; // prevents top-to-bottom overlap even with parallax shift
 
-        const baseHorizontal = WING_LANES_PERCENT[wingLane];
-        const phaseOffsetPx = LANE_PHASE_FRACTIONS[wingLane] * ROW_SPACING_PX;
-        const sideStaggerPx = side === 'right' ? ROW_SPACING_PX * 0.19 : 0;
+    const populateWing = (side: 'left' | 'right', targetCount: number) => {
+      const placed: { xPct: number; yPx: number; src: string }[] = [];
+      let attempts = 0;
 
-        const topJitter = seededUnit(photoIdx * 3 + 1) * 10;
-        const horizJitter = seededUnit(photoIdx * 5 + 2) * 0.7;
-        const rotJitter = seededUnit(photoIdx * 7 + 3) * 0.8;
+      while (placed.length < targetCount && attempts < 6000) {
+        attempts++;
+        // Continuous random horizontal position between 0.6% and 22.5% from screen edge
+        const xPct = 0.6 + rng() * 21.9;
+        // Continuous random vertical position across the canvas
+        const yPx = 18 + rng() * (canvasHeightPx - 36);
 
-        const topPx = Math.max(
-          10,
-          Math.round(14 + row * ROW_SPACING_PX + phaseOffsetPx + sideStaggerPx + topJitter)
-        );
-        const sideOffset = Math.max(0.6, baseHorizontal + horizJitter);
-        const rotate = CALM_ROTATIONS[photoIdx % CALM_ROTATIONS.length] + rotJitter;
+        // Check elliptical minimum distance against all already-placed photos on this side
+        let tooClose = false;
+        for (const p of placed) {
+          const dx = (xPct - p.xPct) / minHorizontalDistPct;
+          const dy = (yPx - p.yPx) / minVerticalDistPx;
+          if (dx * dx + dy * dy < 1.0) {
+            tooClose = true;
+            break;
+          }
+        }
+        if (tooClose) continue;
 
-        const depthTier = ((row + wingLane + (side === 'right' ? 1 : 0)) % 3) as 0 | 1 | 2;
-        const scaleBase = depthTier === 0 ? 0.86 : depthTier === 1 ? 0.92 : 0.98;
-        const scale = scaleBase + (seededUnit(photoIdx * 11 + 5) + 0.5) * 0.05;
+        // Avoid picking the exact same photo source as a nearby neighbor
+        const startIdx = Math.floor(rng() * PHOTO_SOURCES.length);
+        let chosenSrc = PHOTO_SOURCES[startIdx];
+        for (let s = 0; s < PHOTO_SOURCES.length; s++) {
+          const candidate = PHOTO_SOURCES[(startIdx + s) % PHOTO_SOURCES.length];
+          const neighborHasSame = placed.some(
+            (p) =>
+              p.src === candidate &&
+              Math.abs(p.yPx - yPx) < 260 &&
+              Math.abs(p.xPct - xPct) < 14
+          );
+          if (!neighborHasSame) {
+            chosenSrc = candidate;
+            break;
+          }
+        }
 
-        // Pick source using coprime stride so neighbors in row & lane are always distinct photos
-        const src = PHOTO_SOURCES[(row * 7 + laneIdx * 3) % PHOTO_SOURCES.length];
+        const idx = generated.length;
+        const depthTier = (idx % 3) as 0 | 1 | 2;
+        // Organic polaroid tilt (-6.5 deg to +6.5 deg) and varied scale (0.86 to 1.10)
+        const rotate = (rng() - 0.5) * 13;
+        const scale = 0.86 + rng() * 0.24;
 
+        placed.push({ xPct, yPx, src: chosenSrc });
         generated.push({
-          id: `bg-class-photo-${photoIdx}`,
-          src,
-          topPx,
+          id: `bg-class-photo-${side}-${placed.length}`,
+          src: chosenSrc,
+          topPx: Math.round(yPx),
           ...(side === 'left'
-            ? { left: `${sideOffset.toFixed(2)}%` }
-            : { right: `${sideOffset.toFixed(2)}%` }),
+            ? { left: `${xPct.toFixed(2)}%` }
+            : { right: `${xPct.toFixed(2)}%` }),
           rotate,
           scale,
           depthTier
         });
-
-        photoIdx++;
       }
-    }
+    };
+
+    populateWing('left', 42);
+    populateWing('right', 42);
 
     return {
       deepPhotos: generated.filter((p) => p.depthTier === 0),
@@ -181,14 +199,14 @@ export const BackgroundClassPhotos: React.FC = () => {
         right: photo.right,
         transform: `rotate(${photo.rotate.toFixed(1)}deg) scale(${photo.scale.toFixed(2)})`
       }}
-      className={`absolute w-8 sm:w-10 md:w-12 lg:w-14 p-[2px] rounded-md bg-[#f5f2eb]/[0.03] border border-[#f5f2eb]/[0.06] ${opacityClass}`}
+      className={`absolute w-12 sm:w-16 md:w-[4.5rem] lg:w-20 p-[3px] rounded-lg bg-[#f5f2eb]/[0.09] border border-[#f5f2eb]/[0.16] shadow-sm ${opacityClass}`}
     >
       <img
         src={photo.src}
         alt=""
         loading="lazy"
         decoding="async"
-        className="w-full aspect-[4/3] rounded-[4px] object-cover brightness-[0.88] contrast-[0.88] saturate-[0.65]"
+        className="w-full aspect-[4/3] rounded-[5px] object-cover brightness-[0.97] contrast-[0.96] saturate-[0.90]"
       />
     </div>
   );
@@ -198,31 +216,31 @@ export const BackgroundClassPhotos: React.FC = () => {
       ref={containerRef}
       style={{
         WebkitMaskImage:
-          'linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.82) 11%, rgba(0,0,0,0.38) 21%, rgba(0,0,0,0.08) 32%, rgba(0,0,0,0.08) 68%, rgba(0,0,0,0.38) 79%, rgba(0,0,0,0.82) 89%, rgba(0,0,0,0.95) 100%)',
+          'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 14%, rgba(0,0,0,0.52) 24%, rgba(0,0,0,0.12) 34%, rgba(0,0,0,0.12) 66%, rgba(0,0,0,0.52) 76%, rgba(0,0,0,0.92) 86%, rgba(0,0,0,1) 100%)',
         maskImage:
-          'linear-gradient(to right, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.82) 11%, rgba(0,0,0,0.38) 21%, rgba(0,0,0,0.08) 32%, rgba(0,0,0,0.08) 68%, rgba(0,0,0,0.38) 79%, rgba(0,0,0,0.82) 89%, rgba(0,0,0,0.95) 100%)'
+          'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 14%, rgba(0,0,0,0.52) 24%, rgba(0,0,0,0.12) 34%, rgba(0,0,0,0.12) 66%, rgba(0,0,0,0.52) 76%, rgba(0,0,0,0.92) 86%, rgba(0,0,0,1) 100%)'
       }}
       className="fixed inset-0 pointer-events-none overflow-clip z-0 select-none"
       aria-hidden="true"
     >
       {/* Deep Parallax Layer */}
-      <div className="campaign-parallax-layer absolute inset-x-0 -top-28 h-[1420px] will-change-transform">
+      <div className="campaign-parallax-layer absolute inset-x-0 -top-24 h-[1420px] will-change-transform">
         {deepPhotos.map((photo) =>
-          renderPhotoCard(photo, 'opacity-[0.10] sm:opacity-[0.12] md:opacity-[0.14]')
+          renderPhotoCard(photo, 'opacity-[0.20] sm:opacity-[0.24] md:opacity-[0.27]')
         )}
       </div>
 
       {/* Mid Parallax Layer */}
-      <div className="campaign-parallax-layer absolute inset-x-0 -top-28 h-[1420px] will-change-transform">
+      <div className="campaign-parallax-layer absolute inset-x-0 -top-24 h-[1420px] will-change-transform">
         {midPhotos.map((photo) =>
-          renderPhotoCard(photo, 'opacity-[0.12] sm:opacity-[0.15] md:opacity-[0.17]')
+          renderPhotoCard(photo, 'opacity-[0.24] sm:opacity-[0.28] md:opacity-[0.31]')
         )}
       </div>
 
       {/* Near Parallax Layer */}
-      <div className="campaign-parallax-layer absolute inset-x-0 -top-28 h-[1420px] will-change-transform">
+      <div className="campaign-parallax-layer absolute inset-x-0 -top-24 h-[1420px] will-change-transform">
         {nearPhotos.map((photo) =>
-          renderPhotoCard(photo, 'opacity-[0.14] sm:opacity-[0.18] md:opacity-[0.20]')
+          renderPhotoCard(photo, 'opacity-[0.27] sm:opacity-[0.31] md:opacity-[0.35]')
         )}
       </div>
     </div>
