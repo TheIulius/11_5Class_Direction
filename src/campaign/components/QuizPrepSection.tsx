@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   Sparkles,
@@ -33,7 +33,8 @@ import {
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 import { OpenQuestionsSection } from './OpenQuestionsSection';
-import { OFFICIAL_QUIZ_QUESTIONS, OFFICIAL_OPEN_QUESTIONS } from '../data/testsData';
+import { OpenQuestionCard } from './OpenQuestionCard';
+import { OFFICIAL_QUIZ_QUESTIONS, OFFICIAL_OPEN_QUESTIONS, OpenQuestionItem } from '../data/testsData';
 
 type StudioTab = 'media' | 'text' | 'analysis' | 'open_essay' | 'quiz' | 'flash_ai';
 
@@ -55,6 +56,30 @@ interface QuizQuestion {
   options: string[];
   correctIndex: number;
   explanation: string;
+}
+
+type UnifiedQuestion =
+  | {
+      kind: 'closed';
+      id: string;
+      orderNum: number;
+      data: QuizQuestion;
+    }
+  | {
+      kind: 'open';
+      id: string;
+      orderNum: number;
+      data: OpenQuestionItem;
+    };
+
+function getQuestionOrderNumber(item: { id: string; numberLabel?: string }): number {
+  if (item.numberLabel) {
+    const match = item.numberLabel.match(/\d+/);
+    if (match) return parseInt(match[0], 10);
+  }
+  const idMatch = item.id.match(/(?:q|open|-)(\d+)/);
+  if (idMatch) return parseInt(idMatch[1], 10);
+  return 999;
 }
 
 interface FlashcardItem {
@@ -2063,8 +2088,7 @@ export const QuizPrepSection: React.FC = () => {
   const [openEssaySubView, setOpenEssaySubView] = useState<'open' | 'essay'>('open');
   const [flashAiSubView, setFlashAiSubView] = useState<'flashcards' | 'chat'>('flashcards');
 
-  // Quiz state: segmented between closed (multiple-choice) and open written assignments
-  const [quizKindTab, setQuizKindTab] = useState<'closed' | 'open'>('closed');
+  // Quiz state: all questions (closed & open) interleaved in one pool
   const [quizFilter, setQuizFilter] = useState<QuizCategoryFilter>('all');
   const [quizDisplayMode, setQuizDisplayMode] = useState<'card' | 'list'>('card');
   const [activeQuestionIdx, setActiveQuestionIdx] = useState(0);
@@ -2422,23 +2446,51 @@ export const QuizPrepSection: React.FC = () => {
     setActiveQuestionIdx(0);
   };
 
-  const filteredQuestions =
-    quizFilter === 'all'
-      ? TEACHER_QUIZ_BANK
-      : TEACHER_QUIZ_BANK.filter(q => q.topicId === quizFilter);
+  const unifiedQuestions = useMemo<UnifiedQuestion[]>(() => {
+    const closedList: UnifiedQuestion[] = TEACHER_QUIZ_BANK
+      .filter(q => quizFilter === 'all' || q.topicId === selectedPoemId)
+      .map(q => ({
+        kind: 'closed' as const,
+        id: q.id,
+        orderNum: getQuestionOrderNumber(q),
+        data: q
+      }));
 
-  const safeQuestionIdx = Math.min(
+    const openList: UnifiedQuestion[] = (
+      quizFilter === 'all'
+        ? Object.values(OFFICIAL_OPEN_QUESTIONS).flat()
+        : OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []
+    ).map(q => ({
+      kind: 'open' as const,
+      id: q.id,
+      orderNum: getQuestionOrderNumber({ id: q.id, numberLabel: q.numberLabel }),
+      data: q
+    }));
+
+    const combined = [...closedList, ...openList];
+    combined.sort((a, b) => {
+      if (a.orderNum !== b.orderNum) return a.orderNum - b.orderNum;
+      return a.id.localeCompare(b.id);
+    });
+
+    return combined;
+  }, [quizFilter, selectedPoemId]);
+
+  const safeUnifiedIdx = Math.min(
     activeQuestionIdx,
-    Math.max(0, filteredQuestions.length - 1)
+    Math.max(0, unifiedQuestions.length - 1)
   );
-  const currentQuizQuestion = filteredQuestions[safeQuestionIdx];
+  const currentUnifiedQuestion = unifiedQuestions[safeUnifiedIdx];
 
-  const correctCount = filteredQuestions.reduce((acc, q) => {
-    return selectedAnswers[q.id] === q.correctIndex ? acc + 1 : acc;
+  const closedInFilter = unifiedQuestions.filter(q => q.kind === 'closed');
+  const openInFilter = unifiedQuestions.filter(q => q.kind === 'open');
+
+  const correctCount = closedInFilter.reduce((acc, q) => {
+    return selectedAnswers[q.data.id] === q.data.correctIndex ? acc + 1 : acc;
   }, 0);
 
-  const answeredCount = filteredQuestions.reduce((acc, q) => {
-    return selectedAnswers[q.id] !== undefined ? acc + 1 : acc;
+  const answeredCount = closedInFilter.reduce((acc, q) => {
+    return selectedAnswers[q.data.id] !== undefined ? acc + 1 : acc;
   }, 0);
 
   const handleSendChat = (promptText?: string) => {
@@ -2794,7 +2846,6 @@ export const QuizPrepSection: React.FC = () => {
                         onClick={() => {
                           setQuizFilter(activePoem.id);
                           setActiveQuestionIdx(0);
-                          setQuizKindTab('closed');
                           handleSwitchStudioTab('quiz');
                         }}
                         className="p-3 rounded-xl bg-red-500/15 hover:bg-red-500/25 border border-red-500/35 text-left transition-all cursor-pointer"
@@ -3125,12 +3176,11 @@ export const QuizPrepSection: React.FC = () => {
                   <button
                     onClick={() => {
                       soundEffects.click();
-                      setQuizKindTab('open');
                       handleSwitchStudioTab('quiz');
                     }}
                     className="px-3.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shrink-0 cursor-pointer shadow-md"
                   >
-                    <span>✍️ ღია დავალებების ტესტზე გადასვლა</span>
+                    <span>✍️ ტესტებსა &amp; ღია დავალებებზე გადასვლა</span>
                     <span>&rarr;</span>
                   </button>
                 </div>
@@ -3183,229 +3233,189 @@ export const QuizPrepSection: React.FC = () => {
               </div>
             )}
 
-            {/* ==================== TAB 5: TESTS & OPEN WRITTEN QUESTIONS ==================== */}
+            {/* ==================== TAB 5: TESTS & OPEN WRITTEN QUESTIONS (INTERLEAVED) ==================== */}
             {activeStudioTab === 'quiz' && (
               <div className="p-3.5 sm:p-5 rounded-3xl bg-[#141522]/95 border border-[#f5f2eb]/15 space-y-4 shadow-xl">
-                {/* Segmented Switcher: Multiple Choice vs Open Written Questions */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#f5f2eb]/10">
-                  <div className="inline-flex p-1 rounded-2xl bg-[#181928] border border-[#f5f2eb]/15 shadow-inner">
+                {/* Header Controls: Filter + Stats + Card/List Switcher + Reset */}
+                <div className="flex flex-wrap items-center justify-between gap-2.5 pb-2 border-b border-[#f5f2eb]/10">
+                  <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => {
                         soundEffects.click();
-                        setQuizKindTab('closed');
+                        setQuizFilter(selectedPoemId);
+                        setActiveQuestionIdx(0);
                       }}
-                      className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                        quizKindTab === 'closed'
-                          ? 'bg-red-500 text-white shadow-md'
-                          : 'text-[#b8b5a8] hover:text-white'
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        quizFilter === selectedPoemId
+                          ? 'bg-red-500 text-white border-red-400 shadow-sm'
+                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10 hover:border-[#f5f2eb]/25'
                       }`}
                     >
-                      <HelpCircle className="w-3.5 h-3.5" />
-                      <span>ტესტური კითხვები</span>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                          quizKindTab === 'closed'
-                            ? 'bg-white/20 text-white'
-                            : 'bg-white/5 text-[#a8a495]'
-                        }`}
-                      >
-                        {quizFilter === 'all'
-                          ? TEACHER_QUIZ_BANK.length
-                          : TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length}
-                      </span>
+                      ამ თემის ({TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length + (OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []).length})
                     </button>
-
                     <button
                       onClick={() => {
                         soundEffects.click();
-                        setQuizKindTab('open');
+                        setQuizFilter('all');
+                        setActiveQuestionIdx(0);
                       }}
-                      className={`px-3 sm:px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
-                        quizKindTab === 'open'
-                          ? 'bg-red-500 text-white shadow-md'
-                          : 'text-[#b8b5a8] hover:text-white'
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        quizFilter === 'all'
+                          ? 'bg-red-500 text-white border-red-400 shadow-sm'
+                          : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10 hover:border-[#f5f2eb]/25'
                       }`}
                     >
-                      <PenTool className="w-3.5 h-3.5" />
-                      <span>ღია (ჩასაწერი) დავალებები</span>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-bold ${
-                          quizKindTab === 'open'
-                            ? 'bg-white/20 text-white'
-                            : 'bg-white/5 text-[#a8a495]'
-                        }`}
-                      >
-                        {(OFFICIAL_OPEN_QUESTIONS[selectedPoemId] || []).length}
-                      </span>
+                      ყველა ({TEACHER_QUIZ_BANK.length + Object.values(OFFICIAL_OPEN_QUESTIONS).flat().length})
                     </button>
                   </div>
 
-                  {quizKindTab === 'closed' && (
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <button
-                          onClick={() => {
-                            soundEffects.click();
-                            setQuizFilter(selectedPoemId);
-                            setActiveQuestionIdx(0);
-                          }}
-                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
-                            quizFilter === selectedPoemId
-                              ? 'bg-red-500 text-white border-red-400'
-                              : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
-                          }`}
-                        >
-                          ამ თემის ({TEACHER_QUIZ_BANK.filter(q => q.topicId === selectedPoemId).length})
-                        </button>
-                        <button
-                          onClick={() => {
-                            soundEffects.click();
-                            setQuizFilter('all');
-                            setActiveQuestionIdx(0);
-                          }}
-                          className={`px-2.5 py-1.5 rounded-xl text-xs font-bold border cursor-pointer ${
-                            quizFilter === 'all'
-                              ? 'bg-red-500 text-white border-red-400'
-                              : 'bg-[#181928] text-[#c5c1b2] border-[#f5f2eb]/10'
-                          }`}
-                        >
-                          ყველა ({TEACHER_QUIZ_BANK.length})
-                        </button>
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <span className="px-2.5 py-1 rounded-xl bg-red-500/15 border border-red-500/30 text-[11px] font-mono text-red-200">
-                          ✓ {correctCount}/{answeredCount}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-2.5 py-1 rounded-xl bg-red-500/15 border border-red-500/30 text-[11px] font-mono text-red-200">
+                        ✓ {correctCount}/{closedInFilter.length} ტესტური
+                      </span>
+                      {openInFilter.length > 0 && (
+                        <span className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-[11px] font-mono text-purple-200">
+                          ✍️ {openInFilter.length} ღია
                         </span>
-
-                        <div className="inline-flex p-0.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
-                          <button
-                            onClick={() => {
-                              soundEffects.click();
-                              setQuizDisplayMode('card');
-                            }}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
-                              quizDisplayMode === 'card'
-                                ? 'bg-white/15 text-white font-bold'
-                                : 'text-[#a8a495]'
-                            }`}
-                          >
-                            1-ბარათი
-                          </button>
-                          <button
-                            onClick={() => {
-                              soundEffects.click();
-                              setQuizDisplayMode('list');
-                            }}
-                            className={`px-2 py-1 rounded-lg text-[10px] font-mono cursor-pointer ${
-                              quizDisplayMode === 'list'
-                                ? 'bg-white/15 text-white font-bold'
-                                : 'text-[#a8a495]'
-                            }`}
-                          >
-                            სია
-                          </button>
-                        </div>
-
-                        <button
-                          onClick={handleResetQuiz}
-                          className="p-1.5 rounded-xl border border-[#f5f2eb]/15 bg-white/5 hover:bg-white/10 text-[#dedacb] cursor-pointer"
-                          title="თავიდან დაწყება"
-                        >
-                          <RotateCcw className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
+                      )}
                     </div>
-                  )}
+
+                    <div className="inline-flex p-0.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/10">
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setQuizDisplayMode('card');
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-mono cursor-pointer transition-all ${
+                          quizDisplayMode === 'card'
+                            ? 'bg-white/15 text-white font-bold'
+                            : 'text-[#a8a495] hover:text-white'
+                        }`}
+                      >
+                        1-ბარათი
+                      </button>
+                      <button
+                        onClick={() => {
+                          soundEffects.click();
+                          setQuizDisplayMode('list');
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[10px] font-mono cursor-pointer transition-all ${
+                          quizDisplayMode === 'list'
+                            ? 'bg-white/15 text-white font-bold'
+                            : 'text-[#a8a495] hover:text-white'
+                        }`}
+                      >
+                        სია
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={handleResetQuiz}
+                      className="p-1.5 rounded-xl border border-[#f5f2eb]/15 bg-white/5 hover:bg-white/10 text-[#dedacb] cursor-pointer"
+                      title="თავიდან დაწყება"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                {/* Body: Open Questions Section OR Closed Multiple Choice Engine */}
-                {quizKindTab === 'open' ? (
-                  <OpenQuestionsSection
-                    topicId={selectedPoemId}
-                    topicTitle={activePoem.title}
-                    onSelectTopic={newId => setSelectedPoemId(newId)}
-                  />
-                ) : (
-                  <>
-                    {/* Single-Question Card Mode (Fits 100% on phone screen without scrolling!) */}
-                {quizDisplayMode === 'card' && currentQuizQuestion ? (
-                  <div className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300">
-                        კითხვა {safeQuestionIdx + 1} / {filteredQuestions.length} &bull;{' '}
-                        {currentQuizQuestion.category}
-                      </span>
-                    </div>
+                {/* 1-Card Mode */}
+                {quizDisplayMode === 'card' && currentUnifiedQuestion ? (
+                  <div className="space-y-3">
+                    {currentUnifiedQuestion.kind === 'open' ? (
+                      <OpenQuestionCard
+                        key={currentUnifiedQuestion.id}
+                        question={currentUnifiedQuestion.data}
+                        orderNum={safeUnifiedIdx + 1}
+                      />
+                    ) : (
+                      <div className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-3">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-red-500/15 border border-red-500/30 text-red-300">
+                            კითხვა {safeUnifiedIdx + 1} / {unifiedQuestions.length} &bull;{' '}
+                            {currentUnifiedQuestion.data.category}
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-[#f5f2eb]/10 text-[#c5c1b2]">
+                            🔘 ტესტური
+                          </span>
+                        </div>
 
-                    <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7] leading-relaxed">
-                      {currentQuizQuestion.question}
-                    </h4>
+                        <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7] leading-relaxed">
+                          {currentUnifiedQuestion.data.question}
+                        </h4>
 
-                    <div className="grid grid-cols-1 gap-2">
-                      {currentQuizQuestion.options.map((opt, optIdx) => {
-                        const userChoice = selectedAnswers[currentQuizQuestion.id];
-                        const isAnswered = userChoice !== undefined;
-                        const isSelected = userChoice === optIdx;
-                        const isCorrectOption = currentQuizQuestion.correctIndex === optIdx;
+                        <div className="grid grid-cols-1 gap-2">
+                          {currentUnifiedQuestion.data.options.map((opt, optIdx) => {
+                            const userChoice = selectedAnswers[currentUnifiedQuestion.id];
+                            const isAnswered = userChoice !== undefined;
+                            const isSelected = userChoice === optIdx;
+                            const isCorrectOption = currentUnifiedQuestion.data.correctIndex === optIdx;
 
-                        let btnStyle =
-                          'bg-[#12131d] border-[#f5f2eb]/12 text-[#dedacb] hover:border-[#f5f2eb]/30';
-                        if (isAnswered) {
-                          if (isCorrectOption) {
-                            btnStyle = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200';
-                          } else if (isSelected && !isCorrectOption) {
-                            btnStyle = 'bg-red-500/20 border-red-500/50 text-red-200';
-                          }
-                        }
+                            let btnStyle =
+                              'bg-[#12131d] border-[#f5f2eb]/12 text-[#dedacb] hover:border-[#f5f2eb]/30';
+                            if (isAnswered) {
+                              if (isCorrectOption) {
+                                btnStyle = 'bg-emerald-500/20 border-emerald-500/50 text-emerald-200';
+                              } else if (isSelected && !isCorrectOption) {
+                                btnStyle = 'bg-red-500/20 border-red-500/50 text-red-200';
+                              }
+                            }
 
-                        return (
-                          <button
-                            key={optIdx}
-                            onClick={() => handleSelectAnswer(currentQuizQuestion.id, optIdx)}
-                            className={`w-full p-3 rounded-xl border text-left text-xs font-medium transition-all flex items-center justify-between gap-2 cursor-pointer ${btnStyle}`}
-                          >
-                            <span className="leading-snug">{opt}</span>
-                            {isAnswered && isCorrectOption && (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                            )}
-                            {isAnswered && isSelected && !isCorrectOption && (
-                              <XCircle className="w-4 h-4 text-red-400 shrink-0" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                            return (
+                              <button
+                                key={optIdx}
+                                onClick={() => handleSelectAnswer(currentUnifiedQuestion.id, optIdx)}
+                                className={`w-full p-3 rounded-xl border text-left text-xs font-medium transition-all flex items-center justify-between gap-2 cursor-pointer ${btnStyle}`}
+                              >
+                                <span className="leading-snug">{opt}</span>
+                                {isAnswered && isCorrectOption && (
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                                )}
+                                {isAnswered && isSelected && !isCorrectOption && (
+                                  <XCircle className="w-4 h-4 text-red-400 shrink-0" />
+                                )}
+                              </button>
+                            );
+                          })}
+                        </div>
 
-                    {showExplanations[currentQuizQuestion.id] && (
-                      <div className="p-3 rounded-xl bg-white/5 border border-[#f5f2eb]/10 text-[11px] text-[#d4d1c5] leading-relaxed">
-                        <strong className="text-emerald-300">განმარტება: </strong>
-                        {currentQuizQuestion.explanation}
+                        {showExplanations[currentUnifiedQuestion.id] && (
+                          <div className="p-3 rounded-xl bg-white/5 border border-[#f5f2eb]/10 text-[11px] text-[#d4d1c5] leading-relaxed">
+                            <strong className="text-emerald-300">განმარტება: </strong>
+                            {currentUnifiedQuestion.data.explanation}
+                          </div>
+                        )}
                       </div>
                     )}
 
+                    {/* Stepper Navigation */}
                     <div className="flex items-center justify-between pt-1">
                       <button
                         onClick={() => {
                           soundEffects.click();
                           setActiveQuestionIdx(prev =>
-                            prev === 0 ? filteredQuestions.length - 1 : prev - 1
+                            prev === 0 ? unifiedQuestions.length - 1 : prev - 1
                           );
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-[#12131d] border border-[#f5f2eb]/15 text-xs font-semibold text-[#dedacb] cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-[#12131d] border border-[#f5f2eb]/15 text-xs font-semibold text-[#dedacb] cursor-pointer hover:bg-white/5 transition-all"
                       >
                         &larr; წინა
                       </button>
 
                       {/* Question Dots */}
-                      <div className="flex items-center gap-1 overflow-x-auto max-w-[180px] scrollbar-none">
-                        {filteredQuestions.map((q, idx) => {
-                          const ans = selectedAnswers[q.id];
-                          const isCurr = idx === safeQuestionIdx;
+                      <div className="flex items-center gap-1 overflow-x-auto max-w-[220px] scrollbar-none py-1 px-1">
+                        {unifiedQuestions.map((q, idx) => {
+                          const isCurr = idx === safeUnifiedIdx;
                           let dotColor = 'bg-white/20';
-                          if (ans !== undefined) {
-                            dotColor =
-                              ans === q.correctIndex ? 'bg-emerald-400' : 'bg-red-400';
+                          if (q.kind === 'closed') {
+                            const ans = selectedAnswers[q.data.id];
+                            if (ans !== undefined) {
+                              dotColor =
+                                ans === q.data.correctIndex ? 'bg-emerald-400' : 'bg-red-400';
+                            }
+                          } else {
+                            dotColor = 'bg-purple-400/80';
                           }
                           return (
                             <button
@@ -3414,6 +3424,7 @@ export const QuizPrepSection: React.FC = () => {
                               className={`h-2 rounded-full transition-all cursor-pointer shrink-0 ${
                                 isCurr ? 'w-5 bg-red-500' : `w-2 ${dotColor}`
                               }`}
+                              title={`#${idx + 1} (${q.kind === 'open' ? 'ღია' : 'ტესტური'})`}
                               aria-label={`კითხვა ${idx + 1}`}
                             />
                           );
@@ -3423,34 +3434,49 @@ export const QuizPrepSection: React.FC = () => {
                       <button
                         onClick={() => {
                           soundEffects.click();
-                          setActiveQuestionIdx(prev => (prev + 1) % filteredQuestions.length);
+                          setActiveQuestionIdx(prev => (prev + 1) % unifiedQuestions.length);
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold cursor-pointer"
+                        className="px-3.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold cursor-pointer shadow-md transition-all"
                       >
                         შემდეგი &rarr;
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[58vh] overflow-y-auto pr-1">
-                    {filteredQuestions.map((q, qIndex) => {
-                      const userChoice = selectedAnswers[q.id];
+                  /* List Mode: Sequential interleaved cards */
+                  <div className="space-y-3.5 max-h-[65vh] overflow-y-auto pr-1">
+                    {unifiedQuestions.map((q, qIndex) => {
+                      if (q.kind === 'open') {
+                        return (
+                          <OpenQuestionCard
+                            key={q.id}
+                            question={q.data}
+                            orderNum={qIndex + 1}
+                          />
+                        );
+                      }
+
+                      // Closed Question Card in List Mode
+                      const userChoice = selectedAnswers[q.data.id];
                       const isAnswered = userChoice !== undefined;
                       return (
                         <div
                           key={q.id}
                           className="p-4 rounded-2xl bg-[#181928] border border-[#f5f2eb]/12 space-y-3"
                         >
-                          <div className="text-[10px] font-mono text-red-300">
-                            #{qIndex + 1} &bull; {q.category}
+                          <div className="flex items-center justify-between text-[10px] font-mono text-red-300">
+                            <span>#{qIndex + 1} &bull; {q.data.category}</span>
+                            <span className="px-2 py-0.5 rounded-full bg-white/5 text-[#c5c1b2] border border-[#f5f2eb]/10">
+                              🔘 ტესტური
+                            </span>
                           </div>
                           <h4 className="text-xs font-bold text-[#fcfbf7] leading-relaxed">
-                            {q.question}
+                            {q.data.question}
                           </h4>
                           <div className="space-y-1.5">
-                            {q.options.map((opt, optIdx) => {
+                            {q.data.options.map((opt, optIdx) => {
                               const isSelected = userChoice === optIdx;
-                              const isCorrectOption = q.correctIndex === optIdx;
+                              const isCorrectOption = q.data.correctIndex === optIdx;
                               let btnStyle =
                                 'bg-[#12131d] border-[#f5f2eb]/10 text-[#dedacb]';
                               if (isAnswered) {
@@ -3464,21 +3490,31 @@ export const QuizPrepSection: React.FC = () => {
                               return (
                                 <button
                                   key={optIdx}
-                                  onClick={() => handleSelectAnswer(q.id, optIdx)}
+                                  onClick={() => handleSelectAnswer(q.data.id, optIdx)}
                                   className={`w-full p-2.5 rounded-xl border text-left text-[11px] flex items-center justify-between gap-2 cursor-pointer ${btnStyle}`}
                                 >
                                   <span>{opt}</span>
+                                  {isAnswered && isCorrectOption && (
+                                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                  )}
+                                  {isAnswered && isSelected && !isCorrectOption && (
+                                    <XCircle className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                                  )}
                                 </button>
                               );
                             })}
                           </div>
+                          {isAnswered && q.data.explanation && (
+                            <div className="p-2.5 rounded-xl bg-white/5 border border-[#f5f2eb]/10 text-[10.5px] text-[#d4d1c5] leading-relaxed">
+                              <strong className="text-emerald-300">განმარტება: </strong>
+                              {q.data.explanation}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                 )}
-                    </>
-                  )}
               </div>
             )}
 
