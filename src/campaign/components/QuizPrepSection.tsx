@@ -1270,117 +1270,76 @@ export const QuizPrepSection: React.FC = () => {
   };
 
   return (
-    <section className="max-w-5xl mx-auto px-3 sm:px-6 py-2 sm:py-4 space-y-2.5 sm:space-y-3.5">
-      {/* 1. ULTRA-COMPACT TOP STATUS BAR (Hidden Extras Tucked into iOS Sheet) */}
-      <div className="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl bg-[#141522]/90 border border-red-500/30 backdrop-blur-xl">
-        <div className="flex items-center gap-2 min-w-0">
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-red-500 text-white text-[10px] sm:text-xs font-extrabold uppercase tracking-wider shrink-0 shadow-[0_0_12px_rgba(239,68,68,0.5)]">
-            <Flame className="w-3 h-3 fill-current" />
-            <span>ორშაბათი</span>
-          </span>
-          <h1 className="text-xs sm:text-sm font-extrabold text-[#fcfbf7] truncate">
-            ქართულის I ქვიზი
-          </h1>
-          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 border border-[#f5f2eb]/10 text-[10px] font-mono text-[#c5c1b2] shrink-0">
-            <Clock className="w-3 h-3 text-red-300" />
-            <span>120 წთ</span>
-          </span>
+    <section className="max-w-5xl mx-auto px-2.5 sm:px-6 py-1.5 sm:py-3 space-y-2">
+      {/* COMPACT 2-ROW CONTROL DOCK: ROW 1 = POEM SELECTOR + HIDDEN EXTRAS, ROW 2 = SWIPEABLE MATERIAL TABS */}
+      <div className="rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 sm:p-2 space-y-1.5 shadow-lg backdrop-blur-xl">
+        {/* Row 1: Compact Poem Selector Pills + Discreet Icon Triggers */}
+        <div className="flex items-center justify-between gap-1.5">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5 flex-1 min-w-0">
+            {PROGRAM_TOPICS_AND_POEMS.map(poem => {
+              const isSelected = poem.id === selectedPoemId;
+              return (
+                <button
+                  key={poem.id}
+                  onClick={() => handleSelectPoem(poem.id)}
+                  className={`relative shrink-0 px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer select-none ${
+                    isSelected ? 'text-white' : 'text-[#b8b5a8] hover:text-[#fcfbf7]'
+                  }`}
+                >
+                  {isSelected && (
+                    <motion.div
+                      layoutId="activePoemSelectorPill"
+                      transition={IOS_QUICK_SPRING}
+                      className="absolute inset-0 rounded-xl bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] will-change-transform"
+                    />
+                  )}
+                  <span className="relative z-10 whitespace-nowrap">
+                    {SHORT_POEM_LABELS[poem.id]}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0 pl-1 border-l border-[#f5f2eb]/10">
+            <button
+              onClick={() => {
+                soundEffects.click();
+                setShowPoemPickerSheet(true);
+              }}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/12 text-[#dedacb] cursor-pointer"
+              title="ყველა ლექსის სია"
+              aria-label="ყველა ლექსის სია"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-red-300" />
+            </button>
+            <button
+              onClick={() => {
+                soundEffects.click();
+                setShowSyllabusModal(true);
+              }}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/12 text-[#dedacb] cursor-pointer"
+              title="ოფიციალური პროგრამის ფოტო"
+              aria-label="ოფიციალური პროგრამის ფოტო"
+            >
+              <ImageIcon className="w-3.5 h-3.5 text-red-300" />
+            </button>
+            <button
+              onClick={() => {
+                soundEffects.click();
+                setShowResourcesSheet(true);
+              }}
+              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/12 text-[#dedacb] cursor-pointer"
+              title="დამატებითი ფაილები და NotebookLM"
+              aria-label="დამატებითი ფაილები და NotebookLM"
+            >
+              <MoreHorizontal className="w-3.5 h-3.5 text-red-300" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            onClick={() => {
-              soundEffects.click();
-              setShowSyllabusModal(true);
-            }}
-            className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[11px] font-semibold text-[#dedacb] flex items-center gap-1.5 cursor-pointer"
-            title="ოფიციალური პროგრამის ფოტო"
-          >
-            <ImageIcon className="w-3.5 h-3.5 text-red-300" />
-            <span className="hidden xs:inline">პროგრამა</span>
-          </button>
-
-          <button
-            onClick={() => {
-              soundEffects.click();
-              setShowResourcesSheet(true);
-            }}
-            className="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/15 text-[11px] font-semibold text-[#dedacb] flex items-center gap-1 cursor-pointer"
-            title="დამატებითი ფაილები და NotebookLM"
-          >
-            <MoreHorizontal className="w-3.5 h-3.5 text-red-300" />
-            <span className="text-[10px] font-mono">რესურსები</span>
-          </button>
-        </div>
-      </div>
-
-      {/* 2. SMART COMPACT POEM SELECTOR AT THE TOP OF THE PAGE */}
-      <div className="rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-2 sm:p-2.5 space-y-2 shadow-lg backdrop-blur-xl">
-        {/* Horizontal Pill Strip of the 6 Poems */}
-        <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none pb-0.5">
-          {PROGRAM_TOPICS_AND_POEMS.map(poem => {
-            const isSelected = poem.id === selectedPoemId;
-            return (
-              <button
-                key={poem.id}
-                onClick={() => handleSelectPoem(poem.id)}
-                className={`relative shrink-0 px-3 py-1.5 rounded-xl text-[11px] sm:text-xs font-bold transition-colors cursor-pointer select-none ${
-                  isSelected ? 'text-white' : 'text-[#b8b5a8] hover:text-[#fcfbf7]'
-                }`}
-              >
-                {isSelected && (
-                  <motion.div
-                    layoutId="activePoemSelectorPill"
-                    transition={IOS_QUICK_SPRING}
-                    className="absolute inset-0 rounded-xl bg-red-500 shadow-[0_0_16px_rgba(239,68,68,0.4)] will-change-transform"
-                  />
-                )}
-                <span className="relative z-10 whitespace-nowrap">
-                  {SHORT_POEM_LABELS[poem.id]}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Active Poem Compact Bar with Prev/Next Arrows & Quick Drawer Trigger */}
-        <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-xl bg-[#181928]/90 border border-[#f5f2eb]/10">
-          <button
-            onClick={() => handleStepPoem(-1)}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#dedacb] shrink-0 cursor-pointer active:scale-95 transition-transform"
-            aria-label="წინა ლექსი"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={() => {
-              soundEffects.click();
-              setShowPoemPickerSheet(true);
-            }}
-            className="min-w-0 flex-1 text-center px-1 cursor-pointer group"
-          >
-            <div className="text-[10px] font-mono text-red-300 truncate">
-              {activePoem.numberLabel} &bull; {activePoem.author}
-            </div>
-            <div className="text-xs sm:text-sm font-extrabold text-[#fcfbf7] truncate group-hover:text-red-200 transition-colors">
-              {activePoem.title} <span className="text-[10px] opacity-60">▾</span>
-            </div>
-          </button>
-
-          <button
-            onClick={() => handleStepPoem(1)}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#dedacb] shrink-0 cursor-pointer active:scale-95 transition-transform"
-            aria-label="შემდეგი ლექსი"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-
-      {/* 3. SEGMENTED MATERIAL MENU BAR (Tap OR Swipe Left/Right) */}
-      <div className="rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 shadow-md backdrop-blur-xl">
-        <div className="grid grid-cols-6 gap-1">
+        {/* Row 2: Segmented Material Menu Bar (Tap or Swipe Left/Right) */}
+        <div className="grid grid-cols-6 gap-1 pt-1 border-t border-[#f5f2eb]/10">
           {STUDIO_TAB_LIST.map(tab => {
             const Icon = tab.icon;
             const isActive = activeStudioTab === tab.id;
@@ -1388,7 +1347,7 @@ export const QuizPrepSection: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => handleSwitchStudioTab(tab.id)}
-                className={`relative py-2 px-1 sm:px-2.5 rounded-xl flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-1.5 text-center transition-colors cursor-pointer select-none ${
+                className={`relative py-1.5 px-1 sm:px-2 rounded-xl flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-1.5 text-center transition-colors cursor-pointer select-none ${
                   isActive ? 'text-white' : 'text-[#a8a495] hover:text-[#fcfbf7]'
                 }`}
               >
@@ -1396,28 +1355,17 @@ export const QuizPrepSection: React.FC = () => {
                   <motion.div
                     layoutId="activeMaterialMenuTab"
                     transition={IOS_QUICK_SPRING}
-                    className="absolute inset-0 rounded-xl bg-red-500/90 border border-red-400/50 shadow-[0_0_14px_rgba(239,68,68,0.35)] will-change-transform"
+                    className="absolute inset-0 rounded-xl bg-red-500/90 border border-red-400/50 shadow-[0_0_12px_rgba(239,68,68,0.3)] will-change-transform"
                   />
                 )}
-                <Icon className="relative z-10 w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-                <span className="relative z-10 text-[10px] sm:text-xs font-bold leading-tight truncate max-w-full">
+                <Icon className="relative z-10 w-3.5 h-3.5 shrink-0" />
+                <span className="relative z-10 text-[9.5px] sm:text-xs font-bold leading-tight truncate max-w-full">
                   <span className="sm:hidden">{tab.shortLabel}</span>
                   <span className="hidden sm:inline">{tab.label}</span>
                 </span>
               </button>
             );
           })}
-        </div>
-
-        {/* Subtle Swipe Indicator Bar */}
-        <div className="flex items-center justify-between px-2.5 pt-1.5 pb-0.5 text-[10px] font-mono text-[#a8a495]">
-          <span>
-            {activeTabIndex + 1}/{STUDIO_TAB_LIST.length} &bull;{' '}
-            {STUDIO_TAB_LIST[activeTabIndex]?.label}
-          </span>
-          <span className="flex items-center gap-1">
-            <span>&larr; გაუსვი თითი (Swipe) &rarr;</span>
-          </span>
         </div>
       </div>
 
