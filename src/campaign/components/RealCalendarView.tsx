@@ -210,7 +210,7 @@ export const RealCalendarView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
           <div className="text-[11px] sm:text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80">
-            ინტერაქტიული კალენდარი &bull; 11/5 DIRECTION
+            ინტერაქტიული კალენდარი &bull; 11/5 <span className="text-[9px] font-normal lowercase opacity-75 mx-0.5">class</span> PLATFORM
           </div>
           <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
             სასკოლო &amp; აკადემიური კალენდარი

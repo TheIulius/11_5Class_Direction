@@ -51,7 +51,7 @@ export const HomeworkSection: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80">
-            სასწავლო დავალებები &bull; 11/5 DIRECTION
+            სასწავლო დავალებები &bull; 11/5 <span className="text-[9px] font-normal lowercase opacity-75 mx-0.5">class</span> PLATFORM
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
             საშინაო დავალებების ცენტრი &amp; ცხრილი

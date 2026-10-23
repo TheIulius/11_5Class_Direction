@@ -23,7 +23,7 @@ export const ClubFastTrackSection: React.FC = () => {
       category: clubCategory,
       lead: 'თქვენ და კლასელები',
       room: clubRoom,
-      summary: `დამტკიცებულია ${clubRoom}-ის გამოყენება 11/5 Direction-ის წესდებით.`,
+      summary: `დამტკიცებულია ${clubRoom}-ის გამოყენება 11/5 Platform-ის წესდებით.`,
       charterId: `CHARTER-2026-${Math.floor(100 + Math.random() * 900)}`
     };
 
@@ -37,7 +37,7 @@ export const ClubFastTrackSection: React.FC = () => {
     soundEffects.click();
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(
-        `11/5 Direction კლუბის წესდება: ${activeCharter.name} (დამტკიცებულია ${activeCharter.room}-ში) - ტოკენი: ${activeCharter.charterId}`
+        `11/5 Platform კლუბის წესდება: ${activeCharter.name} (დამტკიცებულია ${activeCharter.room}-ში) - ტოკენი: ${activeCharter.charterId}`
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -49,7 +49,7 @@ export const ClubFastTrackSection: React.FC = () => {
       {/* Section Header */}
       <div>
         <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1.5 opacity-80">
-          სასკოლო ინიციატივები &bull; 11/5 DIRECTION
+          სასკოლო ინიციატივები &bull; 11/5 <span className="text-[9px] font-normal lowercase opacity-75 mx-0.5">class</span> PLATFORM
         </div>
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
           კლუბების სწრაფი დამტკიცება (&quot;მწვანე შუქი&quot;)
@@ -158,7 +158,9 @@ export const ClubFastTrackSection: React.FC = () => {
               className="relative w-full max-w-sm bg-[#131420] border border-[#f5f2eb]/20 rounded-2xl p-6 z-10 text-[#f5f2eb] space-y-4 shadow-2xl"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-[#dedacb]">11/5 Direction წესდება</span>
+                <span className="text-xs font-mono text-[#dedacb]">
+                  11/5 <span className="text-[9px] opacity-75 mx-0.5">class</span> Platform წესდება
+                </span>
                 <button
                   onClick={() => setActiveCharter(null)}
                   className="p-1 text-zinc-400 hover:text-white"

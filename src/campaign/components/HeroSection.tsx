@@ -30,7 +30,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#f5f2eb]/15 bg-[#171825]/60 text-xs font-mono text-[#dedacb] backdrop-blur-xl shadow-sm"
       >
         <span className="w-1.5 h-1.5 rounded-full bg-[#f5f2eb] animate-pulse" />
-        <span>11/5 DIRECTION &bull; საპრეზიდენტო პლატფორმა 2026</span>
+        <span>11/5 <span className="text-[9px] font-normal lowercase opacity-75 mx-0.5">class</span> PLATFORM &bull; საპრეზიდენტო პლატფორმა 2026</span>
       </motion.div>
 
       {/* Main Title */}
@@ -41,7 +41,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
           transition={{ duration: 0.4, delay: 0.05 }}
           className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#fcfbf7] uppercase"
         >
-          11/5 DIRECTION
+          11/5 <span className="text-2xl sm:text-4xl lg:text-5xl font-normal lowercase tracking-normal opacity-75 align-middle mx-1">class</span> PLATFORM
         </motion.h1>
 
         <motion.p
@@ -238,7 +238,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
                 <div className="flex items-center gap-2.5">
                   <span className="w-2 h-2 rounded-full bg-[#fcfbf7] animate-pulse" />
                   <h3 className="text-sm sm:text-base font-bold text-[#fcfbf7]">
-                    რატომ უნდა ამირჩიოთ — 11/5 Direction
+                    რატომ უნდა ამირჩიოთ — 11/5 <span className="text-xs font-normal opacity-75 mx-0.5">class</span> Platform
                   </h3>
                 </div>
                 <div className="flex items-center gap-3">
