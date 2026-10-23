@@ -24,6 +24,7 @@ import {
   evaluateOpenAnswer
 } from '../data/testsData';
 import { soundEffects } from '../utils/soundEffects';
+import { trackOpenQuestionSubmit } from '../services/analytics';
 
 interface OpenQuestionsSectionProps {
   topicId: string;
@@ -153,6 +154,9 @@ export const OpenQuestionsSection: React.FC<OpenQuestionsSectionProps> = ({
       try {
         localStorage.setItem(`11_5_open_eval_${item.id}`, JSON.stringify(result));
       } catch {}
+
+      const cleanWords = textToEvaluate.trim().split(/\s+/).filter(Boolean).length;
+      trackOpenQuestionSubmit(item.topicId, item.id, cleanWords, result.status, result.score);
 
       if (result.status === 'correct') {
         soundEffects.success();

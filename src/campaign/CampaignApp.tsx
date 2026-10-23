@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, Flame } from 'lucide-react';
+import { Eye, Flame, BarChart3 } from 'lucide-react';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { RealCalendarView } from './components/RealCalendarView';
@@ -10,6 +10,7 @@ import { IdeaBoardSection } from './components/IdeaBoardSection';
 import { ClubFastTrackSection } from './components/ClubFastTrackSection';
 import { StudyMatcherSection } from './components/StudyMatcherSection';
 import { BackgroundClassPhotos } from './components/BackgroundClassPhotos';
+import { AnalyticsDashboardModal } from './components/AnalyticsDashboardModal';
 import { usePlatformAnalytics, recordQuizClick } from './services/analytics';
 
 interface CampaignAppProps {
@@ -21,6 +22,7 @@ const LOCKED_TABS: ActiveTab[] = ['homework', 'opportunities', 'ideas', 'clubs']
 export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('hero');
   const analytics = usePlatformAnalytics();
+  const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
       const saved = localStorage.getItem('color-scheme');
@@ -250,10 +252,26 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
                   {analytics.quizClicks.toLocaleString()}
                 </span>
               </div>
+
+              {/* Detailed Analytics Modal Trigger */}
+              <button
+                onClick={() => setIsAnalyticsModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 border border-purple-500/35 text-purple-700 dark:text-purple-300 shadow-sm backdrop-blur-md transition-all cursor-pointer font-bold text-xs"
+                title="სრული ანალიტიკის ნახვა: ტაბები, ტესტები, ღია პასუხების ხარისხი და მოსმენა"
+              >
+                <BarChart3 className="w-3.5 h-3.5 text-purple-500 dark:text-purple-400" />
+                <span>სრული ანალიტიკა 📊</span>
+              </button>
             </div>
           </div>
         </div>
       </footer>
+
+      {/* Analytics Dashboard Modal */}
+      <AnalyticsDashboardModal
+        isOpen={isAnalyticsModalOpen}
+        onClose={() => setIsAnalyticsModalOpen(false)}
+      />
     </div>
   );
 };

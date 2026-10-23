@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema } from './db';
+import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData } from './db';
 import { calculateGameweekSquadPoints, calculatePlayerPoints } from '../src/engine/scoring';
 import { applyTransferAccountingToManager } from '../src/engine/transferAccounting';
 import { DEFAULT_SQUAD_PLAYER_IDS } from '../src/data/seedPlayers';
@@ -43,48 +43,204 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-// 1b. Live Platform Analytics (Site Visits & Quiz Clicks) synced directly to GitHub data branch
+// Helper to initialize and sanitize detailed analytics structure
+function initAnalytics(data: DatabaseSchema): DetailedAnalyticsData {
+  if (!data.analytics) {
+    data.analytics = { visits: 1, quizClicks: 1 };
+  }
+  const a = data.analytics;
+  a.visits = a.visits || 1;
+  a.quizClicks = a.quizClicks || 1;
+  a.lastUpdated = a.lastUpdated || new Date().toISOString();
+  a.tabClicks = a.tabClicks || { overview: 0, poem: 0, analysis: 0, quiz: 0, open: 0, flashcards: 0 };
+  a.topicViews = a.topicViews || { 'edemi': 0, 'visac-gsurt': 0, 'vah-droni': 0, 'gogcha': 0, 'sagamo': 0, 'tamar-mefe': 0 };
+  a.tests = a.tests || { totalAnswered: 0, correctAnswers: 0, incorrectAnswers: 0, quizzesCompleted: 0, byTopic: {} };
+  a.openQuestions = a.openQuestions || {
+    totalSubmitted: 0,
+    meaningfulSubmissions: 0,
+    totalWords: 0,
+    averageWordCount: 0,
+    statusBreakdown: { correct: 0, partial: 0, needs_work: 0 },
+    byTopic: {}
+  };
+  a.podcastStats = a.podcastStats || {
+    totalPlays: 0,
+    totalCompletes: 0,
+    totalSeconds: 0,
+    averageSeconds: 0,
+    milestones: { reached25: 0, reached50: 0, reached75: 0, reached100: 0 },
+    byEpisode: {}
+  };
+  a.videoStats = a.videoStats || {
+    totalPlays: 0,
+    totalCompletes: 0,
+    totalSeconds: 0,
+    averageSeconds: 0,
+    milestones: { reached25: 0, reached50: 0, reached75: 0, reached100: 0 },
+    byVideo: {}
+  };
+  return a;
+}
+
+// 1b. Live Platform Analytics synced directly to GitHub data branch
 app.get('/api/analytics', (req: Request, res: Response) => {
   const data = db.getData();
-  if (!data.analytics) {
-    data.analytics = { visits: 1, quizClicks: 1, lastUpdated: new Date().toISOString() };
-    db.saveSilent();
-  }
-  res.json({
-    visits: data.analytics.visits || 1,
-    quizClicks: data.analytics.quizClicks || 1,
-    lastUpdated: data.analytics.lastUpdated
-  });
+  const analytics = initAnalytics(data);
+  res.json(analytics);
 });
 
 app.post('/api/analytics/visit', (req: Request, res: Response) => {
   const data = db.getData();
-  if (!data.analytics) {
-    data.analytics = { visits: 1, quizClicks: 1, lastUpdated: new Date().toISOString() };
-  }
-  data.analytics.visits = (data.analytics.visits || 0) + 1;
-  data.analytics.lastUpdated = new Date().toISOString();
+  const a = initAnalytics(data);
+  a.visits = (a.visits || 0) + 1;
+  a.lastUpdated = new Date().toISOString();
   db.save('Analytics: new site visit');
   scheduleAutoSyncToGitHub('Analytics: new site visit');
-  res.json({
-    visits: data.analytics.visits,
-    quizClicks: data.analytics.quizClicks
-  });
+  res.json(a);
 });
 
 app.post('/api/analytics/quiz-click', (req: Request, res: Response) => {
   const data = db.getData();
-  if (!data.analytics) {
-    data.analytics = { visits: 1, quizClicks: 1, lastUpdated: new Date().toISOString() };
-  }
-  data.analytics.quizClicks = (data.analytics.quizClicks || 0) + 1;
-  data.analytics.lastUpdated = new Date().toISOString();
+  const a = initAnalytics(data);
+  a.quizClicks = (a.quizClicks || 0) + 1;
+  a.lastUpdated = new Date().toISOString();
   db.save('Analytics: quiz click');
   scheduleAutoSyncToGitHub('Analytics: quiz click');
-  res.json({
-    visits: data.analytics.visits,
-    quizClicks: data.analytics.quizClicks
-  });
+  res.json(a);
+});
+
+app.post('/api/analytics/event', (req: Request, res: Response) => {
+  const data = db.getData();
+  const a = initAnalytics(data);
+  const { event, payload } = req.body || {};
+
+  try {
+    if (event === 'tab_click' && payload?.tab) {
+      if (!a.tabClicks) a.tabClicks = {};
+      a.tabClicks[payload.tab] = (a.tabClicks[payload.tab] || 0) + 1;
+    } else if (event === 'topic_view' && payload?.topicId) {
+      if (!a.topicViews) a.topicViews = {};
+      a.topicViews[payload.topicId] = (a.topicViews[payload.topicId] || 0) + 1;
+    } else if (event === 'test_answer') {
+      if (!a.tests) a.tests = { totalAnswered: 0, correctAnswers: 0, incorrectAnswers: 0, quizzesCompleted: 0 };
+      a.tests.totalAnswered += 1;
+      if (payload?.isCorrect) {
+        a.tests.correctAnswers += 1;
+      } else {
+        a.tests.incorrectAnswers += 1;
+      }
+      if (payload?.topicId) {
+        if (!a.tests.byTopic) a.tests.byTopic = {};
+        const t = a.tests.byTopic[payload.topicId] || { answered: 0, correct: 0 };
+        t.answered += 1;
+        if (payload.isCorrect) t.correct += 1;
+        a.tests.byTopic[payload.topicId] = t;
+      }
+    } else if (event === 'quiz_complete') {
+      if (!a.tests) a.tests = { totalAnswered: 0, correctAnswers: 0, incorrectAnswers: 0, quizzesCompleted: 0 };
+      a.tests.quizzesCompleted += 1;
+    } else if (event === 'open_question_submit') {
+      if (!a.openQuestions) {
+        a.openQuestions = {
+          totalSubmitted: 0,
+          meaningfulSubmissions: 0,
+          totalWords: 0,
+          averageWordCount: 0,
+          statusBreakdown: { correct: 0, partial: 0, needs_work: 0 },
+          byTopic: {}
+        };
+      }
+      const w = typeof payload?.wordCount === 'number' ? Math.max(0, payload.wordCount) : 0;
+      a.openQuestions.totalSubmitted += 1;
+      a.openQuestions.totalWords += w;
+      a.openQuestions.averageWordCount = Math.round(a.openQuestions.totalWords / a.openQuestions.totalSubmitted);
+      if (w >= 10) {
+        a.openQuestions.meaningfulSubmissions += 1;
+      }
+      const st = payload?.status;
+      if (st && a.openQuestions.statusBreakdown && st in a.openQuestions.statusBreakdown) {
+        (a.openQuestions.statusBreakdown as any)[st] += 1;
+      }
+      if (payload?.topicId) {
+        if (!a.openQuestions.byTopic) a.openQuestions.byTopic = {};
+        a.openQuestions.byTopic[payload.topicId] = (a.openQuestions.byTopic[payload.topicId] || 0) + 1;
+      }
+    } else if (event === 'podcast_progress') {
+      if (!a.podcastStats) {
+        a.podcastStats = {
+          totalPlays: 0,
+          totalCompletes: 0,
+          totalSeconds: 0,
+          averageSeconds: 0,
+          milestones: { reached25: 0, reached50: 0, reached75: 0, reached100: 0 },
+          byEpisode: {}
+        };
+      }
+      const sec = typeof payload?.seconds === 'number' ? Math.max(0, payload.seconds) : 0;
+      const isNew = Boolean(payload?.isNewPlay);
+      const ep = payload?.episode || 'general';
+
+      if (isNew) a.podcastStats.totalPlays += 1;
+      if (sec > 0) a.podcastStats.totalSeconds += sec;
+      if (a.podcastStats.totalPlays > 0) {
+        a.podcastStats.averageSeconds = Math.round(a.podcastStats.totalSeconds / a.podcastStats.totalPlays);
+      }
+      if (payload?.milestone === 25 && a.podcastStats.milestones) a.podcastStats.milestones.reached25 += 1;
+      if (payload?.milestone === 50 && a.podcastStats.milestones) a.podcastStats.milestones.reached50 += 1;
+      if (payload?.milestone === 75 && a.podcastStats.milestones) a.podcastStats.milestones.reached75 += 1;
+      if ((payload?.completed || payload?.milestone === 100) && a.podcastStats.milestones) {
+        a.podcastStats.milestones.reached100 += 1;
+        a.podcastStats.totalCompletes += 1;
+      }
+      if (!a.podcastStats.byEpisode) a.podcastStats.byEpisode = {};
+      const eStat = a.podcastStats.byEpisode[ep] || { plays: 0, completes: 0, totalSeconds: 0 };
+      if (isNew) eStat.plays += 1;
+      eStat.totalSeconds += sec;
+      if (payload?.completed) eStat.completes += 1;
+      a.podcastStats.byEpisode[ep] = eStat;
+    } else if (event === 'video_progress') {
+      if (!a.videoStats) {
+        a.videoStats = {
+          totalPlays: 0,
+          totalCompletes: 0,
+          totalSeconds: 0,
+          averageSeconds: 0,
+          milestones: { reached25: 0, reached50: 0, reached75: 0, reached100: 0 },
+          byVideo: {}
+        };
+      }
+      const sec = typeof payload?.seconds === 'number' ? Math.max(0, payload.seconds) : 0;
+      const isNew = Boolean(payload?.isNewPlay);
+      const vid = payload?.video || 'general';
+
+      if (isNew) a.videoStats.totalPlays += 1;
+      if (sec > 0) a.videoStats.totalSeconds += sec;
+      if (a.videoStats.totalPlays > 0) {
+        a.videoStats.averageSeconds = Math.round(a.videoStats.totalSeconds / a.videoStats.totalPlays);
+      }
+      if (payload?.milestone === 25 && a.videoStats.milestones) a.videoStats.milestones.reached25 += 1;
+      if (payload?.milestone === 50 && a.videoStats.milestones) a.videoStats.milestones.reached50 += 1;
+      if (payload?.milestone === 75 && a.videoStats.milestones) a.videoStats.milestones.reached75 += 1;
+      if ((payload?.completed || payload?.milestone === 100) && a.videoStats.milestones) {
+        a.videoStats.milestones.reached100 += 1;
+        a.videoStats.totalCompletes += 1;
+      }
+      if (!a.videoStats.byVideo) a.videoStats.byVideo = {};
+      const vStat = a.videoStats.byVideo[vid] || { plays: 0, completes: 0, totalSeconds: 0 };
+      if (isNew) vStat.plays += 1;
+      vStat.totalSeconds += sec;
+      if (payload?.completed) vStat.completes += 1;
+      a.videoStats.byVideo[vid] = vStat;
+    }
+
+    a.lastUpdated = new Date().toISOString();
+    db.save('Analytics event: ' + (event || 'unknown'));
+    scheduleAutoSyncToGitHub('Analytics event: ' + (event || 'unknown'));
+  } catch (err) {
+    console.error('[Analytics Event Error]', err);
+  }
+
+  res.json(a);
 });
 
 function isDeadlinePassed(data: any): boolean {
@@ -2507,6 +2663,64 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
       local.analytics.quizClicks = maxQuiz;
       local.analytics.lastUpdated = new Date().toISOString();
       changed = true;
+    }
+
+    if (remote.analytics.tabClicks) {
+      if (!local.analytics.tabClicks) local.analytics.tabClicks = {};
+      for (const [k, v] of Object.entries(remote.analytics.tabClicks)) {
+        local.analytics.tabClicks[k] = Math.max(local.analytics.tabClicks[k] || 0, v as number);
+      }
+    }
+
+    if (remote.analytics.topicViews) {
+      if (!local.analytics.topicViews) local.analytics.topicViews = {};
+      for (const [k, v] of Object.entries(remote.analytics.topicViews)) {
+        local.analytics.topicViews[k] = Math.max(local.analytics.topicViews[k] || 0, v as number);
+      }
+    }
+
+    if (remote.analytics.tests) {
+      if (!local.analytics.tests) local.analytics.tests = { totalAnswered: 0, correctAnswers: 0, incorrectAnswers: 0, quizzesCompleted: 0 };
+      local.analytics.tests.totalAnswered = Math.max(local.analytics.tests.totalAnswered || 0, remote.analytics.tests.totalAnswered || 0);
+      local.analytics.tests.correctAnswers = Math.max(local.analytics.tests.correctAnswers || 0, remote.analytics.tests.correctAnswers || 0);
+      local.analytics.tests.incorrectAnswers = Math.max(local.analytics.tests.incorrectAnswers || 0, remote.analytics.tests.incorrectAnswers || 0);
+      local.analytics.tests.quizzesCompleted = Math.max(local.analytics.tests.quizzesCompleted || 0, remote.analytics.tests.quizzesCompleted || 0);
+    }
+
+    if (remote.analytics.openQuestions) {
+      if (!local.analytics.openQuestions) {
+        local.analytics.openQuestions = { totalSubmitted: 0, meaningfulSubmissions: 0, totalWords: 0, averageWordCount: 0 };
+      }
+      local.analytics.openQuestions.totalSubmitted = Math.max(local.analytics.openQuestions.totalSubmitted || 0, remote.analytics.openQuestions.totalSubmitted || 0);
+      local.analytics.openQuestions.meaningfulSubmissions = Math.max(local.analytics.openQuestions.meaningfulSubmissions || 0, remote.analytics.openQuestions.meaningfulSubmissions || 0);
+      local.analytics.openQuestions.totalWords = Math.max(local.analytics.openQuestions.totalWords || 0, remote.analytics.openQuestions.totalWords || 0);
+      if (local.analytics.openQuestions.totalSubmitted > 0) {
+        local.analytics.openQuestions.averageWordCount = Math.round(local.analytics.openQuestions.totalWords / local.analytics.openQuestions.totalSubmitted);
+      }
+    }
+
+    if (remote.analytics.podcastStats) {
+      if (!local.analytics.podcastStats) {
+        local.analytics.podcastStats = { totalPlays: 0, totalCompletes: 0, totalSeconds: 0, averageSeconds: 0 };
+      }
+      local.analytics.podcastStats.totalPlays = Math.max(local.analytics.podcastStats.totalPlays || 0, remote.analytics.podcastStats.totalPlays || 0);
+      local.analytics.podcastStats.totalCompletes = Math.max(local.analytics.podcastStats.totalCompletes || 0, remote.analytics.podcastStats.totalCompletes || 0);
+      local.analytics.podcastStats.totalSeconds = Math.max(local.analytics.podcastStats.totalSeconds || 0, remote.analytics.podcastStats.totalSeconds || 0);
+      if (local.analytics.podcastStats.totalPlays > 0) {
+        local.analytics.podcastStats.averageSeconds = Math.round(local.analytics.podcastStats.totalSeconds / local.analytics.podcastStats.totalPlays);
+      }
+    }
+
+    if (remote.analytics.videoStats) {
+      if (!local.analytics.videoStats) {
+        local.analytics.videoStats = { totalPlays: 0, totalCompletes: 0, totalSeconds: 0, averageSeconds: 0 };
+      }
+      local.analytics.videoStats.totalPlays = Math.max(local.analytics.videoStats.totalPlays || 0, remote.analytics.videoStats.totalPlays || 0);
+      local.analytics.videoStats.totalCompletes = Math.max(local.analytics.videoStats.totalCompletes || 0, remote.analytics.videoStats.totalCompletes || 0);
+      local.analytics.videoStats.totalSeconds = Math.max(local.analytics.videoStats.totalSeconds || 0, remote.analytics.videoStats.totalSeconds || 0);
+      if (local.analytics.videoStats.totalPlays > 0) {
+        local.analytics.videoStats.averageSeconds = Math.round(local.analytics.videoStats.totalSeconds / local.analytics.videoStats.totalPlays);
+      }
     }
   }
 

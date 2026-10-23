@@ -35,6 +35,14 @@ import { soundEffects } from '../utils/soundEffects';
 import { OpenQuestionsSection } from './OpenQuestionsSection';
 import { OpenQuestionCard } from './OpenQuestionCard';
 import { OFFICIAL_QUIZ_QUESTIONS, OFFICIAL_OPEN_QUESTIONS, OpenQuestionItem } from '../data/testsData';
+import {
+  trackTabClick,
+  trackTopicView,
+  trackTestAnswer,
+  trackQuizComplete,
+  trackPodcastProgress,
+  trackVideoProgress
+} from '../services/analytics';
 
 type StudioTab = 'media' | 'text' | 'analysis' | 'open_essay' | 'quiz' | 'flash_ai';
 
@@ -2120,6 +2128,12 @@ export const QuizPrepSection: React.FC = () => {
   ]);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
 
+  // Audio & Video Analytics Listen Tracking Refs
+  const audioPlayedRef = useRef<Record<string, boolean>>({});
+  const audioMilestonesRef = useRef<Record<string, Record<number, boolean>>>({});
+  const videoPlayedRef = useRef<Record<string, boolean>>({});
+  const videoMilestonesRef = useRef<Record<string, Record<number, boolean>>>({});
+
   const activePoemIndex = PROGRAM_TOPICS_AND_POEMS.findIndex(p => p.id === selectedPoemId);
   const activePoem =
     PROGRAM_TOPICS_AND_POEMS[activePoemIndex >= 0 ? activePoemIndex : 0];
@@ -2227,6 +2241,7 @@ export const QuizPrepSection: React.FC = () => {
     setSelectedWordInfo(null);
     setExpandedStanzas({});
     setActiveQuestionIdx(0);
+    trackTopicView(poemId);
   };
   const handleSelectWord = (id: string, word: string, meaning: string, stanzaNum?: number) => {
     soundEffects.click();
@@ -2395,6 +2410,7 @@ export const QuizPrepSection: React.FC = () => {
     setSelectedWordInfo(null);
     setSwipeDirection(nextIdx > currentIdx ? 1 : -1);
     setActiveStudioTab(nextTab);
+    trackTabClick(nextTab);
   };
 
   const handleHorizontalSwipeEnd = (
@@ -2431,8 +2447,15 @@ export const QuizPrepSection: React.FC = () => {
 
   const handleSelectAnswer = (qId: string, optionIdx: number) => {
     soundEffects.click();
+    const isAlreadyAnswered = selectedAnswers[qId] !== undefined;
     setSelectedAnswers(prev => ({ ...prev, [qId]: optionIdx }));
     setShowExplanations(prev => ({ ...prev, [qId]: true }));
+
+    if (!isAlreadyAnswered) {
+      const q = TEACHER_QUIZ_BANK.find(item => item.id === qId);
+      const isCorrect = q ? q.correctIndex === optionIdx : false;
+      trackTestAnswer(selectedPoemId, qId, isCorrect);
+    }
   };
 
   const handleResetQuiz = () => {
@@ -2782,6 +2805,49 @@ export const QuizPrepSection: React.FC = () => {
                         playsInline
                         preload="metadata"
                         className="w-full h-full object-contain"
+                        onPlay={() => {
+                          if (!videoPlayedRef.current[activePoem.id]) {
+                            videoPlayedRef.current[activePoem.id] = true;
+                            trackVideoProgress({
+                              video: activePoem.id,
+                              seconds: 0,
+                              percent: 0,
+                              isNewPlay: true
+                            });
+                          }
+                        }}
+                        onTimeUpdate={(e) => {
+                          const vid = e.currentTarget;
+                          if (!vid.duration || isNaN(vid.duration)) return;
+                          const current = vid.currentTime;
+                          const percent = (current / vid.duration) * 100;
+                          if (!videoMilestonesRef.current[activePoem.id]) {
+                            videoMilestonesRef.current[activePoem.id] = {};
+                          }
+                          const m = videoMilestonesRef.current[activePoem.id];
+                          if (percent >= 25 && !m[25]) {
+                            m[25] = true;
+                            trackVideoProgress({ video: activePoem.id, seconds: Math.round(current), percent: 25, milestone: 25 });
+                          }
+                          if (percent >= 50 && !m[50]) {
+                            m[50] = true;
+                            trackVideoProgress({ video: activePoem.id, seconds: Math.round(current), percent: 50, milestone: 50 });
+                          }
+                          if (percent >= 75 && !m[75]) {
+                            m[75] = true;
+                            trackVideoProgress({ video: activePoem.id, seconds: Math.round(current), percent: 75, milestone: 75 });
+                          }
+                        }}
+                        onEnded={(e) => {
+                          const vid = e.currentTarget;
+                          trackVideoProgress({
+                            video: activePoem.id,
+                            seconds: Math.round(vid.duration || 0),
+                            percent: 100,
+                            completed: true,
+                            milestone: 100
+                          });
+                        }}
                       >
                         თქვენი ბრაუზერი ვერ ხსნის ვიდეოს.
                       </video>
@@ -2821,6 +2887,49 @@ export const QuizPrepSection: React.FC = () => {
                         controls
                         preload="metadata"
                         className="w-full h-10 rounded-lg"
+                        onPlay={() => {
+                          if (!audioPlayedRef.current[activePoem.id]) {
+                            audioPlayedRef.current[activePoem.id] = true;
+                            trackPodcastProgress({
+                              episode: activePoem.id,
+                              seconds: 0,
+                              percent: 0,
+                              isNewPlay: true
+                            });
+                          }
+                        }}
+                        onTimeUpdate={(e) => {
+                          const audio = e.currentTarget;
+                          if (!audio.duration || isNaN(audio.duration)) return;
+                          const current = audio.currentTime;
+                          const percent = (current / audio.duration) * 100;
+                          if (!audioMilestonesRef.current[activePoem.id]) {
+                            audioMilestonesRef.current[activePoem.id] = {};
+                          }
+                          const m = audioMilestonesRef.current[activePoem.id];
+                          if (percent >= 25 && !m[25]) {
+                            m[25] = true;
+                            trackPodcastProgress({ episode: activePoem.id, seconds: Math.round(current), percent: 25, milestone: 25 });
+                          }
+                          if (percent >= 50 && !m[50]) {
+                            m[50] = true;
+                            trackPodcastProgress({ episode: activePoem.id, seconds: Math.round(current), percent: 50, milestone: 50 });
+                          }
+                          if (percent >= 75 && !m[75]) {
+                            m[75] = true;
+                            trackPodcastProgress({ episode: activePoem.id, seconds: Math.round(current), percent: 75, milestone: 75 });
+                          }
+                        }}
+                        onEnded={(e) => {
+                          const audio = e.currentTarget;
+                          trackPodcastProgress({
+                            episode: activePoem.id,
+                            seconds: Math.round(audio.duration || 0),
+                            percent: 100,
+                            completed: true,
+                            milestone: 100
+                          });
+                        }}
                       />
                     </div>
 

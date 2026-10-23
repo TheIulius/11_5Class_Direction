@@ -59,6 +59,59 @@ export interface ActivationCode {
   usedAt?: string;
 }
 
+export interface DetailedAnalyticsData {
+  visits: number;
+  quizClicks: number;
+  lastUpdated?: string;
+  tabClicks?: Record<string, number>;
+  topicViews?: Record<string, number>;
+  tests?: {
+    totalAnswered: number;
+    correctAnswers: number;
+    incorrectAnswers: number;
+    quizzesCompleted: number;
+    byTopic?: Record<string, { answered: number; correct: number }>;
+  };
+  openQuestions?: {
+    totalSubmitted: number;
+    meaningfulSubmissions: number;
+    totalWords: number;
+    averageWordCount: number;
+    statusBreakdown?: {
+      correct: number;
+      partial: number;
+      needs_work: number;
+    };
+    byTopic?: Record<string, number>;
+  };
+  podcastStats?: {
+    totalPlays: number;
+    totalCompletes: number;
+    totalSeconds: number;
+    averageSeconds: number;
+    milestones?: {
+      reached25: number;
+      reached50: number;
+      reached75: number;
+      reached100: number;
+    };
+    byEpisode?: Record<string, { plays: number; completes: number; totalSeconds: number }>;
+  };
+  videoStats?: {
+    totalPlays: number;
+    totalCompletes: number;
+    totalSeconds: number;
+    averageSeconds: number;
+    milestones?: {
+      reached25: number;
+      reached50: number;
+      reached75: number;
+      reached100: number;
+    };
+    byVideo?: Record<string, { plays: number; completes: number; totalSeconds: number }>;
+  };
+}
+
 export interface DatabaseSchema {
   currentGW: number;
   players: Record<string, Player>;
@@ -73,11 +126,7 @@ export interface DatabaseSchema {
   deadline?: { gameweek: number; deadlineTime: string } | null;
   lineupVisibility?: 'auto' | 'always_show' | 'always_hide';
   pendingPhotos?: import('../src/types/fpl').PendingPlayerPhoto[];
-  analytics?: {
-    visits: number;
-    quizClicks: number;
-    lastUpdated?: string;
-  };
+  analytics?: DetailedAnalyticsData;
 }
 
 export function hashPassword(password: string, salt?: string): { hash: string; salt: string } {

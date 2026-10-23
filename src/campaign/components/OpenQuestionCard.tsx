@@ -20,6 +20,7 @@ import {
   evaluateOpenAnswer
 } from '../data/testsData';
 import { soundEffects } from '../utils/soundEffects';
+import { trackOpenQuestionSubmit } from '../services/analytics';
 
 interface OpenQuestionCardProps {
   question: OpenQuestionItem;
@@ -129,6 +130,9 @@ export const OpenQuestionCard: React.FC<OpenQuestionCardProps> = ({
       try {
         localStorage.setItem(`11_5_open_eval_${question.id}`, JSON.stringify(result));
       } catch {}
+
+      const cleanWords = textToEvaluate.trim().split(/\s+/).filter(Boolean).length;
+      trackOpenQuestionSubmit(question.topicId, question.id, cleanWords, result.status, result.score);
 
       if (result.status === 'correct') {
         soundEffects.success();
