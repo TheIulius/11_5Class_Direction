@@ -37,7 +37,7 @@ export const IOSSegmentedToggle: React.FC<IOSSegmentedToggleProps> = ({
   return (
     <motion.div
       onPanEnd={handlePanEnd}
-      className={`relative inline-flex items-center p-[3px] rounded-full bg-[#EAE6DE] dark:bg-[#141522] border border-[#D6D1C4] dark:border-[#f5f2eb]/20 shadow-inner select-none touch-none ${className}`}
+      className={`relative inline-flex items-center shrink-0 p-[3px] rounded-full bg-[#EAE6DE] dark:bg-[#141522] border border-[#D6D1C4] dark:border-[#f5f2eb]/20 shadow-inner select-none touch-none ${className}`}
       title={value === 'card' ? '1-ბარათის ხედვა' : 'სიის ხედვა'}
     >
       {/* Slot 1: Card View Button */}
