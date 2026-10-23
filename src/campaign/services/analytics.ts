@@ -77,17 +77,37 @@ function updateStats(newVisits?: number, newQuizClicks?: number, loading = false
   }
 }
 
-async function fetchWithTimeout(url: string, timeoutMs = 3500): Promise<Response> {
+async function fetchWithTimeout(url: string, timeoutMs = 3500, init?: RequestInit): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(url, { ...init, signal: controller.signal });
     clearTimeout(id);
     return res;
   } catch (e) {
     clearTimeout(id);
     throw e;
   }
+}
+
+// 0. Primary backend persistence (Express db.json synced to GitHub data branch)
+async function fetchBackendAnalytics(action: 'get' | 'visit' | 'quiz-click'): Promise<{ visits?: number; quizClicks?: number } | null> {
+  try {
+    const isPost = action !== 'get';
+    const endpoint = action === 'get' ? '/api/analytics' : `/api/analytics/${action}`;
+    const res = await fetchWithTimeout(endpoint, 3500, {
+      method: isPost ? 'POST' : 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        visits: typeof data?.visits === 'number' ? data.visits : undefined,
+        quizClicks: typeof data?.quizClicks === 'number' ? data.quizClicks : undefined,
+      };
+    }
+  } catch {}
+  return null;
 }
 
 // 1. Fetch value via Abacus with Fallback to MilesHilliard
@@ -125,6 +145,7 @@ let hasInitializedSession = false;
 /**
  * Initializes and records a website visit on first page load in a browser session.
  * Subsequent refreshes in the same tab only fetch current counts without inflating visits.
+ * Persists to GitHub 'data' branch via server API and mirrors to cloud counter.
  */
 export async function recordSiteVisit(): Promise<PlatformAnalyticsStats> {
   let isNewSession = false;
@@ -142,18 +163,28 @@ export async function recordSiteVisit(): Promise<PlatformAnalyticsStats> {
 
   try {
     const visitAction = isNewSession ? 'hit' : 'get';
-    const [visitsResult, quizResult] = await Promise.allSettled([
+    const [backendRes, cloudVisitsRes, cloudQuizRes] = await Promise.allSettled([
+      fetchBackendAnalytics(isNewSession ? 'visit' : 'get'),
       fetchMetric(visitAction, 'site_visits'),
       fetchMetric('get', 'quiz_clicks')
     ]);
 
-    const visits = visitsResult.status === 'fulfilled' && visitsResult.value !== null
-      ? visitsResult.value
-      : currentStats.visits;
+    const backendData = backendRes.status === 'fulfilled' ? backendRes.value : null;
+    const cloudVisits = cloudVisitsRes.status === 'fulfilled' ? cloudVisitsRes.value : null;
+    const cloudQuiz = cloudQuizRes.status === 'fulfilled' ? cloudQuizRes.value : null;
 
-    const quizClicks = quizResult.status === 'fulfilled' && quizResult.value !== null
-      ? quizResult.value
-      : currentStats.quizClicks;
+    // Use highest counts to ensure no regressions across redeployments/restarts
+    const visits = Math.max(
+      currentStats.visits,
+      backendData?.visits ?? 0,
+      cloudVisits ?? 0
+    );
+
+    const quizClicks = Math.max(
+      currentStats.quizClicks,
+      backendData?.quizClicks ?? 0,
+      cloudQuiz ?? 0
+    );
 
     updateStats(visits, quizClicks, false);
   } catch {
@@ -167,6 +198,7 @@ let lastQuizClickTime = 0;
 
 /**
  * Increments the Quiz button click counter whenever someone clicks the Quiz button.
+ * Commits to GitHub 'data' branch via server API and syncs to cloud counter.
  */
 export async function recordQuizClick(): Promise<void> {
   const now = Date.now();
@@ -179,10 +211,21 @@ export async function recordQuizClick(): Promise<void> {
   updateStats(currentStats.visits, currentStats.quizClicks + 1, false);
 
   try {
-    const freshQuizClicks = await fetchMetric('hit', 'quiz_clicks');
-    if (freshQuizClicks !== null) {
-      updateStats(undefined, freshQuizClicks, false);
-    }
+    const [backendRes, freshQuizClicksRes] = await Promise.allSettled([
+      fetchBackendAnalytics('quiz-click'),
+      fetchMetric('hit', 'quiz_clicks')
+    ]);
+
+    const backendData = backendRes.status === 'fulfilled' ? backendRes.value : null;
+    const cloudQuiz = freshQuizClicksRes.status === 'fulfilled' ? freshQuizClicksRes.value : null;
+
+    const highestQuiz = Math.max(
+      currentStats.quizClicks,
+      backendData?.quizClicks ?? 0,
+      cloudQuiz ?? 0
+    );
+
+    updateStats(undefined, highestQuiz, false);
   } catch (err) {
     console.warn('[Analytics] Failed to register quiz click to remote counter:', err);
   }

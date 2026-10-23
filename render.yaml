@@ -15,4 +15,4 @@ services:
       - key: GITHUB_REPO
         value: 11_5Class_Direction
       - key: GITHUB_BRANCH
-        value: main
+        value: data

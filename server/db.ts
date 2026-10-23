@@ -73,6 +73,11 @@ export interface DatabaseSchema {
   deadline?: { gameweek: number; deadlineTime: string } | null;
   lineupVisibility?: 'auto' | 'always_show' | 'always_hide';
   pendingPhotos?: import('../src/types/fpl').PendingPlayerPhoto[];
+  analytics?: {
+    visits: number;
+    quizClicks: number;
+    lastUpdated?: string;
+  };
 }
 
 export function hashPassword(password: string, salt?: string): { hash: string; salt: string } {

@@ -43,6 +43,50 @@ app.get('/api/health', (req: Request, res: Response) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
+// 1b. Live Platform Analytics (Site Visits & Quiz Clicks) synced directly to GitHub data branch
+app.get('/api/analytics', (req: Request, res: Response) => {
+  const data = db.getData();
+  if (!data.analytics) {
+    data.analytics = { visits: 1, quizClicks: 1, lastUpdated: new Date().toISOString() };
+    db.saveSilent();
+  }
+  res.json({
+    visits: data.analytics.visits || 1,
+    quizClicks: data.analytics.quizClicks || 1,
+    lastUpdated: data.analytics.lastUpdated
+  });
+});
+
+app.post('/api/analytics/visit', (req: Request, res: Response) => {
+  const data = db.getData();
+  if (!data.analytics) {
+    data.analytics = { visits: 1, quizClicks: 1, lastUpdated: new Date().toISOString() };
+  }
+  data.analytics.visits = (data.analytics.visits || 0) + 1;
+  data.analytics.lastUpdated = new Date().toISOString();
+  db.save('Analytics: new site visit');
+  scheduleAutoSyncToGitHub('Analytics: new site visit');
+  res.json({
+    visits: data.analytics.visits,
+    quizClicks: data.analytics.quizClicks
+  });
+});
+
+app.post('/api/analytics/quiz-click', (req: Request, res: Response) => {
+  const data = db.getData();
+  if (!data.analytics) {
+    data.analytics = { visits: 1, quizClicks: 1, lastUpdated: new Date().toISOString() };
+  }
+  data.analytics.quizClicks = (data.analytics.quizClicks || 0) + 1;
+  data.analytics.lastUpdated = new Date().toISOString();
+  db.save('Analytics: quiz click');
+  scheduleAutoSyncToGitHub('Analytics: quiz click');
+  res.json({
+    visits: data.analytics.visits,
+    quizClicks: data.analytics.quizClicks
+  });
+});
+
 function isDeadlinePassed(data: any): boolean {
   if (!data.deadline || !data.deadline.deadlineTime) return false;
   return new Date() >= new Date(data.deadline.deadlineTime);
@@ -2449,6 +2493,21 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
   const fixturesSynced = syncAllFinishedFixturesStats(local);
   if (fixturesSynced) {
     changed = true;
+  }
+
+  // Merge analytics metrics taking the highest counts so they never regress
+  if (remote.analytics && typeof remote.analytics === 'object') {
+    if (!local.analytics) {
+      local.analytics = { visits: 1, quizClicks: 1 };
+    }
+    const maxVisits = Math.max(local.analytics.visits || 0, remote.analytics.visits || 0);
+    const maxQuiz = Math.max(local.analytics.quizClicks || 0, remote.analytics.quizClicks || 0);
+    if (maxVisits !== local.analytics.visits || maxQuiz !== local.analytics.quizClicks) {
+      local.analytics.visits = maxVisits;
+      local.analytics.quizClicks = maxQuiz;
+      local.analytics.lastUpdated = new Date().toISOString();
+      changed = true;
+    }
   }
 
   return changed;
