@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   Sparkles,
@@ -2100,6 +2100,95 @@ export const QuizPrepSection: React.FC = () => {
   const activePoem =
     PROGRAM_TOPICS_AND_POEMS[activePoemIndex >= 0 ? activePoemIndex : 0];
 
+  // Mouse & Wheel horizontal scroll handling for Poem Selector Bar
+  const poemBarScrollRef = useRef<HTMLDivElement>(null);
+  const isPoemDragRef = useRef(false);
+  const startXRef = useRef(0);
+  const scrollLeftRef = useRef(0);
+  const hasDraggedRef = useRef(false);
+  const [canScrollPoemLeft, setCanScrollPoemLeft] = useState(false);
+  const [canScrollPoemRight, setCanScrollPoemRight] = useState(false);
+
+  const checkPoemBarScroll = () => {
+    const el = poemBarScrollRef.current;
+    if (!el) return;
+    setCanScrollPoemLeft(el.scrollLeft > 6);
+    setCanScrollPoemRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 6);
+  };
+
+  useEffect(() => {
+    const el = poemBarScrollRef.current;
+    if (!el) return;
+
+    // Convert mouse vertical wheel (deltaY) to horizontal scroll
+    const onWheel = (e: WheelEvent) => {
+      if (e.deltaY !== 0) {
+        const maxScroll = el.scrollWidth - el.clientWidth;
+        if (maxScroll > 0) {
+          el.scrollLeft += e.deltaY;
+          e.preventDefault();
+          checkPoemBarScroll();
+        }
+      }
+    };
+
+    el.addEventListener('wheel', onWheel, { passive: false });
+    el.addEventListener('scroll', checkPoemBarScroll, { passive: true });
+    window.addEventListener('resize', checkPoemBarScroll);
+    checkPoemBarScroll();
+
+    return () => {
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('scroll', checkPoemBarScroll);
+      window.removeEventListener('resize', checkPoemBarScroll);
+    };
+  }, []);
+
+  // Auto-scroll selected poem pill into view
+  useEffect(() => {
+    const el = poemBarScrollRef.current;
+    if (!el) return;
+    const selectedBtn = el.querySelector<HTMLElement>('[data-selected="true"]');
+    if (selectedBtn) {
+      selectedBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+    setTimeout(checkPoemBarScroll, 300);
+  }, [selectedPoemId]);
+
+  const scrollPoemBar = (direction: 'left' | 'right') => {
+    soundEffects.click();
+    const el = poemBarScrollRef.current;
+    if (!el) return;
+    const offset = direction === 'left' ? -180 : 180;
+    el.scrollBy({ left: offset, behavior: 'smooth' });
+    setTimeout(checkPoemBarScroll, 200);
+  };
+
+  const handlePoemMouseDown = (e: React.MouseEvent) => {
+    const el = poemBarScrollRef.current;
+    if (!el) return;
+    isPoemDragRef.current = true;
+    hasDraggedRef.current = false;
+    startXRef.current = e.pageX - el.offsetLeft;
+    scrollLeftRef.current = el.scrollLeft;
+  };
+
+  const handlePoemMouseMove = (e: React.MouseEvent) => {
+    if (!isPoemDragRef.current || !poemBarScrollRef.current) return;
+    const el = poemBarScrollRef.current;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXRef.current) * 1.5;
+    if (Math.abs(walk) > 4) {
+      hasDraggedRef.current = true;
+    }
+    el.scrollLeft = scrollLeftRef.current - walk;
+    checkPoemBarScroll();
+  };
+
+  const handlePoemMouseUpOrLeave = () => {
+    isPoemDragRef.current = false;
+  };
+
   const handleSelectPoem = (poemId: Exclude<QuizCategoryFilter, 'all'>) => {
     soundEffects.click();
     setSelectedPoemId(poemId);
@@ -2434,14 +2523,38 @@ export const QuizPrepSection: React.FC = () => {
       {/* COMPACT 2-ROW CONTROL DOCK: IDENTICAL COMPACT SHORT LABELS ON MOBILE & DESKTOP */}
       <div className="max-w-2xl mx-auto rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 space-y-1.5 shadow-lg backdrop-blur-xl">
         {/* Row 1: Compact Poem Selector Pills + Discreet Icon Triggers */}
-        <div className="flex items-center justify-between gap-1.5">
-          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5 flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-1">
+          {/* Scroll Left Button (Mouse click navigation) */}
+          {canScrollPoemLeft && (
+            <button
+              onClick={() => scrollPoemBar('left')}
+              className="p-1 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/10 text-[#d4d1c5] hover:text-white transition-all shrink-0 cursor-pointer shadow-sm"
+              title="მარცხნივ გადახვევა"
+              aria-label="მარცხნივ გადახვევა"
+            >
+              <ChevronLeft className="w-3.5 h-3.5 text-red-300" />
+            </button>
+          )}
+
+          <div
+            ref={poemBarScrollRef}
+            onMouseDown={handlePoemMouseDown}
+            onMouseMove={handlePoemMouseMove}
+            onMouseUp={handlePoemMouseUpOrLeave}
+            onMouseLeave={handlePoemMouseUpOrLeave}
+            className="flex items-center gap-1 overflow-x-auto scrollbar-none py-0.5 flex-1 min-w-0 cursor-grab active:cursor-grabbing select-none"
+          >
             {PROGRAM_TOPICS_AND_POEMS.map(poem => {
               const isSelected = poem.id === selectedPoemId;
               return (
                 <button
                   key={poem.id}
-                  onClick={() => handleSelectPoem(poem.id)}
+                  data-selected={isSelected}
+                  onClick={() => {
+                    if (!hasDraggedRef.current) {
+                      handleSelectPoem(poem.id);
+                    }
+                  }}
                   className={`relative shrink-0 px-2.5 py-1 rounded-xl text-[11px] font-bold transition-colors cursor-pointer select-none ${
                     isSelected ? 'text-white' : 'text-[#b8b5a8] hover:text-[#fcfbf7]'
                   }`}
@@ -2460,6 +2573,18 @@ export const QuizPrepSection: React.FC = () => {
               );
             })}
           </div>
+
+          {/* Scroll Right Button (Mouse click navigation) */}
+          {canScrollPoemRight && (
+            <button
+              onClick={() => scrollPoemBar('right')}
+              className="p-1 rounded-xl bg-white/5 hover:bg-white/10 border border-[#f5f2eb]/10 text-[#d4d1c5] hover:text-white transition-all shrink-0 cursor-pointer shadow-sm"
+              title="მარჯვნივ გადახვევა"
+              aria-label="მარჯვნივ გადახვევა"
+            >
+              <ChevronRight className="w-3.5 h-3.5 text-red-300" />
+            </button>
+          )}
 
           <div className="flex items-center gap-1 shrink-0 pl-1 border-l border-[#f5f2eb]/10">
             <button
