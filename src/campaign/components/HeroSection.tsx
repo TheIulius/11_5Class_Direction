@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, BookOpen, Compass, MessageSquare, Rocket, Play, X, Flame, Lock } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
+import { recordQuizClick } from '../services/analytics';
 
 interface HeroSectionProps {
   onNavigateTab: (tab: 'calendar' | 'quiz' | 'homework' | 'opportunities' | 'ideas' | 'clubs') => void;
@@ -91,6 +92,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab }) => {
         <button
           onClick={() => {
             soundEffects.click();
+            recordQuizClick();
             onNavigateTab('quiz');
           }}
           className="px-5 py-2.5 rounded-xl border border-red-500/50 bg-red-500/20 hover:bg-red-500/30 text-red-200 font-bold text-xs sm:text-sm backdrop-blur-xl transition-all cursor-pointer shadow-[0_0_20px_rgba(239,68,68,0.3)] flex items-center gap-2"

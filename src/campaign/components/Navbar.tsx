@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sun, Moon, Lock } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
+import { recordQuizClick } from '../services/analytics';
 
 export type ActiveTab = 'hero' | 'calendar' | 'quiz' | 'homework' | 'opportunities' | 'ideas' | 'clubs';
 
@@ -38,6 +39,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   const handleClick = (id: ActiveTab) => {
     soundEffects.click();
+    if (id === 'quiz') {
+      recordQuizClick();
+    }
     onSelectTab(id);
     setMobileMenuOpen(false);
   };

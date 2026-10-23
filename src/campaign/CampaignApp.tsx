@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Eye, Flame } from 'lucide-react';
 import { Navbar, ActiveTab } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { RealCalendarView } from './components/RealCalendarView';
@@ -9,6 +10,7 @@ import { IdeaBoardSection } from './components/IdeaBoardSection';
 import { ClubFastTrackSection } from './components/ClubFastTrackSection';
 import { StudyMatcherSection } from './components/StudyMatcherSection';
 import { BackgroundClassPhotos } from './components/BackgroundClassPhotos';
+import { usePlatformAnalytics, recordQuizClick } from './services/analytics';
 
 interface CampaignAppProps {
   onSwitchToFantasy?: () => void;
@@ -18,6 +20,7 @@ const LOCKED_TABS: ActiveTab[] = ['homework', 'opportunities', 'ideas', 'clubs']
 
 export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('hero');
+  const analytics = usePlatformAnalytics();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
       const saved = localStorage.getItem('color-scheme');
@@ -99,6 +102,9 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
   }, [isCurrentTabLocked]);
 
   const handleSelectTab = (tab: ActiveTab) => {
+    if (tab === 'quiz') {
+      recordQuizClick();
+    }
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -175,40 +181,76 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
         )}
       </main>
 
-      {/* Minimalist Footer in Georgian */}
-      <footer className="relative z-10 w-full border-t border-[#f5f2eb]/10 py-8 px-4 sm:px-6 text-xs text-[#a8a495] bg-[#0c0d14]/80 backdrop-blur-xl">
-        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-            <span className="font-semibold text-[#fcfbf7] flex items-center">
-              <span className="inline-flex items-end">
-                <span>11/5</span>
-                <span className="text-[9px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-0.5">
-                  class
+      {/* Minimalist Footer in Georgian with Live Analytics */}
+      <footer className="relative z-10 w-full border-t border-black/10 dark:border-[#f5f2eb]/10 py-7 px-4 sm:px-6 text-xs text-stone-600 dark:text-[#a8a495] bg-[#f2ede1]/90 dark:bg-[#0c0d14]/80 backdrop-blur-xl">
+        <div className="max-w-4xl mx-auto flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+              <span className="font-semibold text-stone-900 dark:text-[#fcfbf7] flex items-center">
+                <span className="inline-flex items-end">
+                  <span>11/5</span>
+                  <span className="text-[9px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-0.5">
+                    class
+                  </span>
                 </span>
+                <span className="ml-1">Platform</span>
               </span>
-              <span className="ml-1">Platform</span>
-            </span>
-            <span>&bull;</span>
-            <span>მე-11 კლასის საპრეზიდენტო პლატფორმა</span>
-            <span className="text-[#7c796e]/60">&bull;</span>
-            <span className="text-[11px] font-mono text-[#7c796e]/85 select-none">
-              &copy; made by Theiulius
-            </span>
+              <span>&bull;</span>
+              <span>მე-11 კლასის საპრეზიდენტო პლატფორმა</span>
+              <span className="text-[#7c796e]/60">&bull;</span>
+              <span className="text-[11px] font-mono text-[#7c796e]/85 select-none">
+                &copy; made by Theiulius
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4 text-[11px] font-mono">
+              <span className="text-[#7c796e]/70 select-none">made by Theiulius</span>
+              {onSwitchToFantasy && (
+                <>
+                  <span className="text-[#7c796e]/50">&bull;</span>
+                  <button
+                    onClick={onSwitchToFantasy}
+                    className="text-stone-600 dark:text-[#a8a495] hover:text-stone-900 dark:hover:text-[#fcfbf7] transition-colors cursor-pointer"
+                  >
+                    საქველმოქმედო ლიგა &rarr;
+                  </button>
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center gap-4 text-[11px] font-mono">
-            <span className="text-[#7c796e]/70 select-none">made by Theiulius</span>
-            {onSwitchToFantasy && (
-              <>
-                <span className="text-[#7c796e]/50">&bull;</span>
-                <button
-                  onClick={onSwitchToFantasy}
-                  className="text-[#a8a495] hover:text-[#fcfbf7] transition-colors cursor-pointer"
-                >
-                  საქველმოქმედო ლიგა &rarr;
-                </button>
-              </>
-            )}
+          {/* Live Visitor & Quiz Button Counters */}
+          <div className="pt-3.5 border-t border-black/10 dark:border-[#f5f2eb]/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+            <div className="flex items-center gap-2 text-stone-700 dark:text-[#a8a495] font-mono text-[11px]">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span>ლაივ აქტივობა:</span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2 sm:gap-3">
+              {/* Site Visits Counter */}
+              <div
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/75 dark:bg-white/5 border border-stone-300/80 dark:border-[#f5f2eb]/10 text-stone-800 dark:text-[#dedacb] shadow-sm backdrop-blur-md"
+                title="საიტზე შემოსვლების (ვიზიტების) ჯამური რაოდენობა"
+              >
+                <Eye className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
+                <span className="text-[11px] text-stone-600 dark:text-[#a8a495]">საიტზე ვიზიტები:</span>
+                <span className="font-mono font-bold text-xs text-stone-900 dark:text-[#fcfbf7] bg-stone-200/70 dark:bg-white/10 px-2 py-0.5 rounded-md">
+                  {analytics.visits.toLocaleString()}
+                </span>
+              </div>
+
+              {/* Quiz Clicks Counter */}
+              <div
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-red-100/70 dark:bg-red-500/10 border border-red-300/80 dark:border-red-500/25 text-red-800 dark:text-red-200 shadow-sm backdrop-blur-md"
+                title="„ქვიზი“-ს ღილაკზე დაჭერების ჯამური რაოდენობა"
+              >
+                <Flame className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />
+                <span className="text-[11px] text-red-800 dark:text-red-300">„ქვიზი“-ს ნახვები:</span>
+                <span className="font-mono font-bold text-xs text-red-950 dark:text-white bg-red-200 dark:bg-red-500/40 px-2 py-0.5 rounded-md">
+                  {analytics.quizClicks.toLocaleString()}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
