@@ -340,3 +340,48 @@
 .safe-top {
   padding-top: max(8px, env(safe-area-inset-top));
 }
+
+/* ==========================================================================
+   ZERO-LAG COMPOSITOR PARALLAX FOR BACKGROUND CLASS PHOTOS
+   ========================================================================== */
+@keyframes campaign-parallax {
+  from {
+    transform: translate3d(0, var(--parallax-offset, 90px), 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@supports ((animation-timeline: view()) and (animation-range: entry)) {
+  .campaign-parallax-wrapper {
+    view-timeline: --campaign-wrapper;
+  }
+
+  .campaign-parallax-layer {
+    animation: campaign-parallax linear both;
+    animation-timeline: --campaign-wrapper;
+  }
+
+  .campaign-parallax-layer:nth-child(1) {
+    --parallax-offset: 60px;
+    animation-range: entry 25% exit 55%;
+  }
+
+  .campaign-parallax-layer:nth-child(2) {
+    --parallax-offset: 95px;
+    animation-range: entry 25% exit 78%;
+  }
+
+  .campaign-parallax-layer:nth-child(3) {
+    --parallax-offset: 130px;
+    animation-range: entry 25% exit 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campaign-parallax-layer {
+    animation: none !important;
+    transform: none !important;
+  }
+}

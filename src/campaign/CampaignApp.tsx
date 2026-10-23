@@ -114,7 +114,7 @@ export const CampaignApp: React.FC<CampaignAppProps> = ({ onSwitchToFantasy }) =
 
   return (
     <div
-      className={`relative ${
+      className={`campaign-parallax-wrapper relative ${
         isCurrentTabLocked ? 'h-dvh overflow-hidden' : 'min-h-screen'
       } w-full ${
         theme === 'light'
