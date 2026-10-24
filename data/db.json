@@ -33286,10 +33286,16 @@
       "tamar-mefe": 0
     },
     "tests": {
-      "totalAnswered": 0,
+      "totalAnswered": 1,
       "correctAnswers": 0,
-      "incorrectAnswers": 0,
-      "quizzesCompleted": 0
+      "incorrectAnswers": 1,
+      "quizzesCompleted": 0,
+      "byTopic": {
+        "edemi": {
+          "answered": 1,
+          "correct": 0
+        }
+      }
     },
     "openQuestions": {
       "totalSubmitted": 0,
@@ -33309,6 +33315,6 @@
       "totalSeconds": 0,
       "averageSeconds": 0
     },
-    "lastUpdated": "2026-10-24T04:25:34.201Z"
+    "lastUpdated": "2026-10-24T04:25:42.004Z"
   }
 }
