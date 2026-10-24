@@ -33273,13 +33273,14 @@
       "overview": 0,
       "poem": 0,
       "analysis": 0,
-      "quiz": 3,
+      "quiz": 4,
       "open": 0,
-      "flashcards": 0
+      "flashcards": 0,
+      "open_essay": 1
     },
     "topicViews": {
       "edemi": 0,
-      "visac-gsurt": 0,
+      "visac-gsurt": 1,
       "vah-droni": 0,
       "gogcha": 0,
       "sagamo": 0,
@@ -33315,6 +33316,6 @@
       "totalSeconds": 0,
       "averageSeconds": 0
     },
-    "lastUpdated": "2026-10-24T04:25:42.004Z"
+    "lastUpdated": "2026-10-24T04:25:48.609Z"
   }
 }
