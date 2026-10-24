@@ -33261,12 +33261,13 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 1,
+    "visits": 2,
     "quizClicks": 1,
     "uniqueIps": [
-      "5c61fec660696b24"
+      "5c61fec660696b24",
+      "268c988fe1b0e477"
     ],
-    "uniqueIpsCount": 1,
+    "uniqueIpsCount": 2,
     "tabClicks": {
       "overview": 0,
       "poem": 0,
@@ -33307,6 +33308,6 @@
       "totalSeconds": 0,
       "averageSeconds": 0
     },
-    "lastUpdated": "2026-10-23T22:21:13.126Z"
+    "lastUpdated": "2026-10-24T03:34:31.336Z"
   }
 }
