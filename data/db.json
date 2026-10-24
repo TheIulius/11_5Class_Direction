@@ -33273,7 +33273,7 @@
       "overview": 0,
       "poem": 0,
       "analysis": 0,
-      "quiz": 1,
+      "quiz": 2,
       "open": 0,
       "flashcards": 0
     },
@@ -33309,6 +33309,6 @@
       "totalSeconds": 0,
       "averageSeconds": 0
     },
-    "lastUpdated": "2026-10-24T04:25:14.580Z"
+    "lastUpdated": "2026-10-24T04:25:28.567Z"
   }
 }
