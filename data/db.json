@@ -33313,11 +33313,18 @@
       "averageSeconds": 0
     },
     "videoStats": {
-      "totalPlays": 0,
+      "totalPlays": 1,
       "totalCompletes": 0,
       "totalSeconds": 0,
-      "averageSeconds": 0
+      "averageSeconds": 0,
+      "byVideo": {
+        "edemi": {
+          "plays": 1,
+          "completes": 0,
+          "totalSeconds": 0
+        }
+      }
     },
-    "lastUpdated": "2026-10-24T17:23:45.357Z"
+    "lastUpdated": "2026-10-24T17:23:55.735Z"
   }
 }
