@@ -33282,7 +33282,7 @@
       "open": 0,
       "flashcards": 0,
       "open_essay": 3,
-      "text": 2,
+      "text": 3,
       "media": 2,
       "flash_ai": 1
     },
@@ -33290,7 +33290,7 @@
       "edemi": 0,
       "visac-gsurt": 3,
       "vah-droni": 0,
-      "gogcha": 0,
+      "gogcha": 1,
       "sagamo": 0,
       "tamar-mefe": 0
     },
@@ -33335,6 +33335,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T12:46:41.610Z"
+    "lastUpdated": "2026-10-25T12:48:21.465Z"
   }
 }
