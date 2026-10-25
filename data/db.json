@@ -33276,7 +33276,7 @@
       "overview": 0,
       "poem": 0,
       "analysis": 1,
-      "quiz": 8,
+      "quiz": 9,
       "open": 0,
       "flashcards": 0,
       "open_essay": 2,
@@ -33285,7 +33285,7 @@
     },
     "topicViews": {
       "edemi": 0,
-      "visac-gsurt": 2,
+      "visac-gsurt": 3,
       "vah-droni": 0,
       "gogcha": 0,
       "sagamo": 0,
@@ -33332,6 +33332,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T10:52:05.481Z"
+    "lastUpdated": "2026-10-25T10:52:10.461Z"
   }
 }
