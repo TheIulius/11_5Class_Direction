@@ -33278,17 +33278,17 @@
       "overview": 0,
       "poem": 0,
       "analysis": 2,
-      "quiz": 12,
+      "quiz": 13,
       "open": 0,
       "flashcards": 0,
       "open_essay": 3,
-      "text": 3,
+      "text": 4,
       "media": 2,
       "flash_ai": 1
     },
     "topicViews": {
       "edemi": 0,
-      "visac-gsurt": 4,
+      "visac-gsurt": 5,
       "vah-droni": 0,
       "gogcha": 1,
       "sagamo": 0,
@@ -33335,6 +33335,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T16:36:05.400Z"
+    "lastUpdated": "2026-10-25T16:36:15.972Z"
   }
 }
