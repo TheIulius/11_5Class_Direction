@@ -33279,7 +33279,7 @@
       "overview": 0,
       "poem": 0,
       "analysis": 3,
-      "quiz": 13,
+      "quiz": 14,
       "open": 0,
       "flashcards": 0,
       "open_essay": 4,
@@ -33289,7 +33289,7 @@
     },
     "topicViews": {
       "edemi": 1,
-      "visac-gsurt": 6,
+      "visac-gsurt": 7,
       "vah-droni": 3,
       "gogcha": 3,
       "sagamo": 3,
@@ -33297,8 +33297,8 @@
       "iarali": 1
     },
     "tests": {
-      "totalAnswered": 34,
-      "correctAnswers": 33,
+      "totalAnswered": 35,
+      "correctAnswers": 34,
       "incorrectAnswers": 1,
       "quizzesCompleted": 0,
       "byTopic": {
@@ -33307,8 +33307,8 @@
           "correct": 5
         },
         "visac-gsurt": {
-          "answered": 12,
-          "correct": 12
+          "answered": 13,
+          "correct": 13
         },
         "vah-droni": {
           "answered": 4,
@@ -33353,6 +33353,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T19:56:26.646Z"
+    "lastUpdated": "2026-10-25T20:19:56.405Z"
   }
 }
