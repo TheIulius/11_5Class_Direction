@@ -33280,7 +33280,8 @@
       "open": 0,
       "flashcards": 0,
       "open_essay": 2,
-      "text": 1
+      "text": 1,
+      "media": 1
     },
     "topicViews": {
       "edemi": 0,
@@ -33331,6 +33332,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T10:51:27.933Z"
+    "lastUpdated": "2026-10-25T10:52:05.481Z"
   }
 }
