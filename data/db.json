@@ -33296,8 +33296,8 @@
       "tamar-mefe": 1
     },
     "tests": {
-      "totalAnswered": 22,
-      "correctAnswers": 21,
+      "totalAnswered": 23,
+      "correctAnswers": 22,
       "incorrectAnswers": 1,
       "quizzesCompleted": 0,
       "byTopic": {
@@ -33312,6 +33312,10 @@
         "vah-droni": {
           "answered": 4,
           "correct": 4
+        },
+        "gogcha": {
+          "answered": 1,
+          "correct": 1
         }
       }
     },
@@ -33340,6 +33344,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T16:46:11.088Z"
+    "lastUpdated": "2026-10-25T16:46:15.761Z"
   }
 }
