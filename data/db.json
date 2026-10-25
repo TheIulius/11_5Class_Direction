@@ -33274,8 +33274,8 @@
     "tabClicks": {
       "overview": 0,
       "poem": 0,
-      "analysis": 0,
-      "quiz": 4,
+      "analysis": 1,
+      "quiz": 5,
       "open": 0,
       "flashcards": 0,
       "open_essay": 1,
@@ -33326,6 +33326,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T08:43:44.772Z"
+    "lastUpdated": "2026-10-25T08:43:57.621Z"
   }
 }
