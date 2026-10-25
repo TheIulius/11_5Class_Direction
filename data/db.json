@@ -33282,7 +33282,7 @@
       "quiz": 13,
       "open": 0,
       "flashcards": 0,
-      "open_essay": 3,
+      "open_essay": 4,
       "text": 4,
       "media": 2,
       "flash_ai": 1
@@ -33336,6 +33336,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T16:37:26.511Z"
+    "lastUpdated": "2026-10-25T16:37:37.320Z"
   }
 }
