@@ -33279,7 +33279,7 @@
       "quiz": 7,
       "open": 0,
       "flashcards": 0,
-      "open_essay": 1,
+      "open_essay": 2,
       "text": 1
     },
     "topicViews": {
@@ -33331,6 +33331,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T10:50:53.745Z"
+    "lastUpdated": "2026-10-25T10:51:12.184Z"
   }
 }
