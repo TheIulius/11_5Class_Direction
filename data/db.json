@@ -33296,8 +33296,8 @@
       "tamar-mefe": 1
     },
     "tests": {
-      "totalAnswered": 25,
-      "correctAnswers": 24,
+      "totalAnswered": 26,
+      "correctAnswers": 25,
       "incorrectAnswers": 1,
       "quizzesCompleted": 0,
       "byTopic": {
@@ -33314,8 +33314,8 @@
           "correct": 4
         },
         "gogcha": {
-          "answered": 3,
-          "correct": 3
+          "answered": 4,
+          "correct": 4
         }
       }
     },
@@ -33344,6 +33344,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T16:46:46.943Z"
+    "lastUpdated": "2026-10-25T16:46:59.761Z"
   }
 }
