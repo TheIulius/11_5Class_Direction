@@ -33262,7 +33262,7 @@
   "pendingPhotos": [],
   "analytics": {
     "visits": 7,
-    "quizClicks": 4,
+    "quizClicks": 5,
     "uniqueIps": [
       "5c61fec660696b24",
       "268c988fe1b0e477",
@@ -33313,18 +33313,18 @@
       "averageSeconds": 0
     },
     "videoStats": {
-      "totalPlays": 1,
+      "totalPlays": 2,
       "totalCompletes": 0,
       "totalSeconds": 0,
       "averageSeconds": 0,
       "byVideo": {
         "edemi": {
-          "plays": 1,
+          "plays": 2,
           "completes": 0,
           "totalSeconds": 0
         }
       }
     },
-    "lastUpdated": "2026-10-25T08:43:12.188Z"
+    "lastUpdated": "2026-10-25T08:43:31.983Z"
   }
 }
