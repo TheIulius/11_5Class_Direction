@@ -33292,8 +33292,8 @@
       "tamar-mefe": 0
     },
     "tests": {
-      "totalAnswered": 9,
-      "correctAnswers": 8,
+      "totalAnswered": 11,
+      "correctAnswers": 10,
       "incorrectAnswers": 1,
       "quizzesCompleted": 0,
       "byTopic": {
@@ -33302,8 +33302,8 @@
           "correct": 4
         },
         "visac-gsurt": {
-          "answered": 4,
-          "correct": 4
+          "answered": 6,
+          "correct": 6
         }
       }
     },
@@ -33332,6 +33332,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T10:59:04.388Z"
+    "lastUpdated": "2026-10-25T11:25:54.809Z"
   }
 }
