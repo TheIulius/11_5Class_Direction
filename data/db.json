@@ -33276,7 +33276,7 @@
       "overview": 0,
       "poem": 0,
       "analysis": 1,
-      "quiz": 9,
+      "quiz": 10,
       "open": 0,
       "flashcards": 0,
       "open_essay": 2,
@@ -33332,6 +33332,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T11:25:54.809Z"
+    "lastUpdated": "2026-10-25T11:31:47.588Z"
   }
 }
