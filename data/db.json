@@ -33291,14 +33291,14 @@
       "tamar-mefe": 0
     },
     "tests": {
-      "totalAnswered": 2,
-      "correctAnswers": 1,
+      "totalAnswered": 3,
+      "correctAnswers": 2,
       "incorrectAnswers": 1,
       "quizzesCompleted": 0,
       "byTopic": {
         "edemi": {
-          "answered": 1,
-          "correct": 0
+          "answered": 2,
+          "correct": 1
         },
         "visac-gsurt": {
           "answered": 1,
@@ -33331,6 +33331,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T10:49:59.575Z"
+    "lastUpdated": "2026-10-25T10:50:09.441Z"
   }
 }
