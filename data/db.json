@@ -33261,8 +33261,8 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 12,
-    "quizClicks": 9,
+    "visits": 13,
+    "quizClicks": 10,
     "uniqueIps": [
       "5c61fec660696b24",
       "268c988fe1b0e477",
@@ -33271,9 +33271,10 @@
       "4a8a360b8e384b83",
       "03d4ccda7b7ed9b6",
       "d81088059ea77067",
-      "619d81c5529880cb"
+      "619d81c5529880cb",
+      "dd75ddabf7580289"
     ],
-    "uniqueIpsCount": 8,
+    "uniqueIpsCount": 9,
     "tabClicks": {
       "overview": 0,
       "poem": 0,
@@ -33323,18 +33324,18 @@
       "averageSeconds": 0
     },
     "videoStats": {
-      "totalPlays": 3,
+      "totalPlays": 4,
       "totalCompletes": 0,
       "totalSeconds": 0,
       "averageSeconds": 0,
       "byVideo": {
         "edemi": {
-          "plays": 3,
+          "plays": 4,
           "completes": 0,
           "totalSeconds": 0
         }
       }
     },
-    "lastUpdated": "2026-10-25T16:36:15.972Z"
+    "lastUpdated": "2026-10-25T16:36:55.978Z"
   }
 }
