@@ -33281,7 +33281,7 @@
       "quiz": 10,
       "open": 0,
       "flashcards": 0,
-      "open_essay": 2,
+      "open_essay": 3,
       "text": 2,
       "media": 1
     },
@@ -33334,6 +33334,6 @@
         }
       }
     },
-    "lastUpdated": "2026-10-25T12:45:08.371Z"
+    "lastUpdated": "2026-10-25T12:45:15.398Z"
   }
 }
