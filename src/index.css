@@ -4,42 +4,48 @@
 
 @layer base {
   :root {
-    /* Refined Light Mode: Subtle cream, ivory, and warm stone */
+    /* Refined Light Mode: Subtle cream, ivory, and warm stone with translucent liquid glass */
     --bg-page: #F5F1E8;
-    --surface-card: #FCF9F3;
-    --surface-third: #ECE8DE;
-    --surface-elevated: #FFFFFF;
+    --surface-card: rgba(252, 249, 243, 0.78);
+    --surface-card-solid: #FCF9F3;
+    --surface-third: rgba(41, 45, 50, 0.05);
+    --surface-third-solid: #ECE8DE;
+    --surface-elevated: rgba(255, 255, 255, 0.88);
     --text-primary: #292D32;
     --text-secondary: #62666A;
     --text-muted: #82878D;
     --primary-action: #326CAD;
     --primary-action-hover: #285B94;
     --primary-action-light: rgba(50, 108, 173, 0.12);
-    --border-subtle: rgba(41, 45, 50, 0.06);
+    --border-subtle: rgba(41, 45, 50, 0.08);
     --border-glass: rgba(41, 45, 50, 0.08);
-    --glass-bg: rgba(245, 241, 232, 0.88);
-    --glass-sheet-bg: rgba(252, 249, 243, 0.96);
-    --shadow-soft: 0 1px 4px rgba(41, 45, 50, 0.04), 0 4px 12px rgba(41, 45, 50, 0.02);
+    --glass-bg: rgba(245, 241, 232, 0.74);
+    --glass-sheet-bg: rgba(252, 249, 243, 0.82);
+    --shadow-soft: 0 2px 10px rgba(41, 45, 50, 0.04), 0 8px 24px rgba(41, 45, 50, 0.03);
+    --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.7);
     color-scheme: light;
   }
 
   .dark {
-    /* Refined Dark Mode: Deep ink blue, navy, and blue-petrol */
+    /* Refined Dark Mode: Deep ink blue, navy, and blue-petrol with translucent liquid glass */
     --bg-page: #0B1422;
-    --surface-card: #111F33;
-    --surface-third: #182C40;
-    --surface-elevated: #16273F;
+    --surface-card: rgba(14, 25, 42, 0.76);
+    --surface-card-solid: #111F33;
+    --surface-third: rgba(233, 238, 244, 0.06);
+    --surface-third-solid: #182C40;
+    --surface-elevated: rgba(22, 39, 63, 0.85);
     --text-primary: #E9EEF4;
     --text-secondary: #A5B3C4;
     --text-muted: #7E8F9F;
     --primary-action: #367BC4;
     --primary-action-hover: #458ADA;
     --primary-action-light: rgba(54, 123, 196, 0.18);
-    --border-subtle: rgba(233, 238, 244, 0.06);
+    --border-subtle: rgba(233, 238, 244, 0.08);
     --border-glass: rgba(233, 238, 244, 0.10);
-    --glass-bg: rgba(11, 20, 34, 0.88);
-    --glass-sheet-bg: rgba(17, 31, 51, 0.96);
-    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.28), 0 6px 20px rgba(0, 0, 0, 0.18);
+    --glass-bg: rgba(11, 20, 34, 0.72);
+    --glass-sheet-bg: rgba(14, 25, 42, 0.82);
+    --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.35), 0 10px 30px rgba(0, 0, 0, 0.25);
+    --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.09);
     color-scheme: dark;
   }
 
@@ -86,58 +92,88 @@
 }
 
 /* ==========================================================================
-   LIQUID GLASS & BORDERLESS REFINED SURFACES
+   LIQUID GLASS & TRANSLUCENT REFINED SURFACES
    ========================================================================== */
 
 .glass-nav {
   background-color: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border-bottom: 1px solid var(--border-glass);
+  box-shadow: var(--glass-highlight);
 }
 
 .glass-pill {
   background-color: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   border: 1px solid var(--border-glass);
+  box-shadow: var(--glass-highlight);
 }
 
 .glass-panel {
-  background-color: var(--glass-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: var(--surface-card);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--glass-highlight), var(--shadow-soft);
 }
 
 .glass-sheet {
   background-color: var(--glass-sheet-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border-top: 1px solid var(--border-glass);
+  box-shadow: var(--glass-highlight), 0 -8px 32px rgba(0, 0, 0, 0.25);
 }
 
 /* Fallback for browsers that don't support backdrop-filter */
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .card-surface,
+  .glass-panel {
+    background-color: var(--surface-card-solid);
+  }
   .glass-nav {
     background-color: var(--bg-page);
   }
-  .glass-pill {
-    background-color: var(--surface-card);
-  }
+  .glass-pill,
   .glass-sheet {
-    background-color: var(--surface-card);
+    background-color: var(--surface-card-solid);
   }
 }
 
-/* Cards: Reduced borders, clear surface separation */
+@media (prefers-reduced-transparency: reduce) {
+  .card-surface,
+  .glass-panel {
+    background-color: var(--surface-card-solid) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .glass-nav,
+  .glass-pill {
+    background-color: var(--bg-page) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  .glass-sheet {
+    background-color: var(--surface-card-solid) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* Cards: Translucent liquid glass with top edge highlight and fine depth */
 .card-surface {
   background-color: var(--surface-card);
-  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-subtle);
+  box-shadow: var(--glass-highlight), var(--shadow-soft);
 }
 
 .card-third {
   background-color: var(--surface-third);
+  /* Nested row/card: light tonal overlay without duplicate blur layer */
 }
 
 .card-hover {

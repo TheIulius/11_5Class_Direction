@@ -27,6 +27,7 @@ import {
   formatGeorgianDate,
   LESSON_PERIOD_TIMES,
 } from '../utils/tbilisiDate';
+import { getCategoryStyle } from '../utils/calendarCategories';
 
 interface HeroSectionProps {
   onNavigateTab: (tab: ActiveTab) => void;
@@ -295,7 +296,11 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   >
                     <div className="space-y-1 min-w-0">
                       <div className="flex items-center gap-2 text-[11px]">
-                        <span className="font-semibold text-rose-600 dark:text-rose-400">{ev.category}</span>
+                        <span
+                          className="w-1.5 h-1.5 rounded-full shrink-0"
+                          style={{ backgroundColor: getCategoryStyle(ev.category).dotColor }}
+                        />
+                        <span className="font-semibold text-[var(--text-primary)]">{ev.category}</span>
                         <span className="text-[var(--text-muted)]">&bull;</span>
                         <span className="font-mono text-[var(--text-secondary)]">
                           {formatGeorgianDate(ev.date, true)}

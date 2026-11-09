@@ -3,28 +3,25 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   ChevronLeft,
   ChevronRight,
-  Calendar as CalendarIcon,
   Clock,
   MapPin,
   User,
   SlidersHorizontal,
   X,
   Plus,
-  Edit3,
   Trash2,
   ChevronDown,
   Sparkles,
-  BookOpen,
-  CheckCircle2,
   List,
   Grid3X3,
-  CalendarDays
+  CalendarDays,
+  Calendar as CalendarIcon,
+  Tag
 } from 'lucide-react';
 import {
   MainCategory,
   CalendarCategory,
   CalendarEvent,
-  MAIN_CATEGORIES,
   CALENDAR_FILTERS,
   INITIAL_CALENDAR_EVENTS
 } from '../data/campaignData';
@@ -33,6 +30,11 @@ import { usePlatform } from '../context/PlatformContext';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
 import { getTbilisiNow, formatGeorgianDate } from '../utils/tbilisiDate';
+import {
+  getCategoryStyle,
+  getCategoryInlineStyle,
+  CATEGORY_PALETTE
+} from '../utils/calendarCategories';
 
 const GEORGIAN_MONTHS = [
   'იანვარი',
@@ -51,19 +53,15 @@ const GEORGIAN_MONTHS = [
 
 const WEEKDAYS_SHORT = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
 
-const CATEGORY_DOT_COLORS: Record<string, string> = {
-  შემაჯამებელი: 'bg-rose-500',
-  დამოუკიდებელი: 'bg-amber-500',
-  გამოკითხვა: 'bg-pink-500',
-  დავალებები: 'bg-yellow-400',
-  სკოლა: 'bg-[var(--primary-action)]',
-  ჩემპიონატები: 'bg-emerald-600',
-  'ჰაკათონები/იდეათონები': 'bg-emerald-400',
-  აქტივობები: 'bg-sky-500',
-  'პრე-აქსელერაციის პროგრამები': 'bg-sky-400',
-  მოხალისეობრივი: 'bg-yellow-500',
-  ოლიმპიადები: 'bg-teal-500',
-};
+const PRIMARY_FILTER_TABS = [
+  'ყველა',
+  'შემაჯამებელი',
+  'დამოუკიდებელი',
+  'გამოკითხვა',
+  'შეჯიბრებები',
+  'ოლიმპიადები',
+  'აქტივობები',
+];
 
 interface RealCalendarViewProps {
   onOpenQuiz?: () => void;
@@ -73,14 +71,14 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
   const { isAdmin, platform, addCalendarEvent, updateCalendarEvent, deleteCalendarEvent } =
     usePlatform();
 
-  // Mobile layout switch: 'agenda' | 'week' | 'month' (defaulting to agenda on mobile for fast, zero-overflow scanning)
-  const [mobileView, setMobileView] = useState<'agenda' | 'week' | 'month'>('agenda');
+  // Mobile layout switch: 'agenda' | 'week' | 'month'
+  const [mobileView, setMobileView] = useState<'agenda' | 'week' | 'month'>('month');
 
   // Filter state
   const [selectedCategory, setSelectedCategory] = useState<string>('ყველა');
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
-  // Real Tbilisi Date & Time initialized from local school time
+  // Real Tbilisi Date & Time
   const tbilisiNow = useMemo(() => getTbilisiNow(), []);
   const [currentDate, setCurrentDate] = useState<Date>(
     () => new Date(tbilisiNow.year, tbilisiNow.month - 1, 1)
@@ -88,6 +86,24 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
   const [selectedDate, setSelectedDate] = useState<string>(() => tbilisiNow.dateString);
   const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null);
   const [isAiExpanded, setIsAiExpanded] = useState(false);
+
+  // Reactive theme detection for high-contrast category rendering
+  const [isDark, setIsDark] = useState(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const updateTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    updateTheme();
+    const observer = new MutationObserver(updateTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Admin Modal
   const [showEventForm, setShowEventForm] = useState(false);
@@ -120,13 +136,13 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
   }, [allEvents, selectedCategory]);
 
   const isEventOnDate = (evt: CalendarEvent, dateStr: string) => {
-    if (evt.endDate) {
+    if (evt.endDate && evt.endDate >= evt.date) {
       return dateStr >= evt.date && dateStr <= evt.endDate;
     }
     return evt.date === dateStr;
   };
 
-  // Month Grid Calculation
+  // Month Grid Calculation (split into full 7-day week rows)
   const calendarGrid = useMemo(() => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const firstDayIndex = new Date(year, month, 1).getDay();
@@ -150,7 +166,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
       grid.push({ dayNumber: d, isCurrentMonth: true, dateString: dateStr });
     }
 
-    // Pad next month to complete 35 or 42 cells
+    // Pad next month to complete full weeks (35 or 42 cells)
     const targetLength = grid.length > 35 ? 42 : 35;
     const remaining = targetLength - grid.length;
     for (let d = 1; d <= remaining; d++) {
@@ -162,6 +178,15 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
 
     return grid;
   }, [year, month]);
+
+  // Group cells into 7-day week rows
+  const calendarWeeks = useMemo(() => {
+    const weeks: (typeof calendarGrid)[] = [];
+    for (let i = 0; i < calendarGrid.length; i += 7) {
+      weeks.push(calendarGrid.slice(i, i + 7));
+    }
+    return weeks;
+  }, [calendarGrid]);
 
   // Selected Day Events
   const selectedDateEvents = useMemo(() => {
@@ -231,7 +256,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
   const openCreateModal = () => {
     setEditingEventId(null);
     setFormTitle('');
-    setFormDate(selectedDate || '2026-10-15');
+    setFormDate(selectedDate || tbilisiNow.dateString);
     setFormEndDate('');
     setFormTime('10:00 - 10:45');
     setFormMainCategory('სკოლა');
@@ -280,11 +305,11 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
           ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             კალენდარი
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            შემაჯამებლები, დამოუკიდებლები, გამოკითხვები და ოლიმპიადები.
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5">
+            შემაჯამებლები, დავალებები, ტესტები, გამოკითხვები და მრავალდღიანი შეჯიბრებები.
           </p>
         </div>
 
@@ -304,17 +329,17 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
           <div className="inline-flex items-center gap-1 p-1 rounded-xl glass-pill">
             <button
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-primary)] transition-colors cursor-pointer"
               aria-label="წინა თვე"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-2 text-xs font-semibold text-slate-900 dark:text-slate-100 min-w-[100px] text-center">
+            <span className="px-2 text-xs font-semibold text-[var(--text-primary)] min-w-[110px] text-center font-mono">
               {GEORGIAN_MONTHS[month]} {year}
             </span>
             <button
               onClick={handleNextMonth}
-              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-primary)] transition-colors cursor-pointer"
               aria-label="შემდეგი თვე"
             >
               <ChevronRight className="w-4 h-4" />
@@ -330,40 +355,66 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
       </div>
 
       {/* =========================================================================
-          FILTER PILLS & MOBILE VIEW SWITCHER
+          CATEGORY FILTER CHIPS & COLOR LEGEND
           ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
-        {/* Concise Primary Filters */}
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none min-w-0">
-          {['ყველა', 'შემაჯამებელი', 'დამოუკიდებელი', 'გამოკითხვა', 'შეჯიბრებები'].map((cat) => {
+          {PRIMARY_FILTER_TABS.map((cat) => {
             const isSelected = selectedCategory === cat;
+            const catStyle = getCategoryStyle(cat);
             return (
               <button
                 key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                onClick={() => {
+                  soundEffects.click();
+                  setSelectedCategory(cat);
+                }}
+                style={
+                  isSelected && cat !== 'ყველა'
+                    ? {
+                        backgroundColor: isDark ? catStyle.bgDark : catStyle.bgLight,
+                        borderColor: isDark ? catStyle.borderDark : catStyle.borderLight,
+                        color: isDark ? catStyle.textDark : catStyle.textLight,
+                      }
+                    : undefined
+                }
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border ${
                   isSelected
-                    ? 'btn-primary shadow-xs'
-                    : 'card-third text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    ? cat === 'ყველა'
+                      ? 'btn-primary border-transparent shadow-xs'
+                      : 'border shadow-2xs font-bold'
+                    : 'card-third border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                {cat}
+                {cat !== 'ყველა' && (
+                  <span
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ backgroundColor: catStyle.dotColor }}
+                  />
+                )}
+                <span>{cat}</span>
               </button>
             );
           })}
           <button
-            onClick={() => setIsFilterSheetOpen(true)}
-            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 shrink-0 cursor-pointer"
+            onClick={() => {
+              soundEffects.click();
+              setIsFilterSheetOpen(true);
+            }}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 shrink-0 cursor-pointer card-third border border-transparent"
           >
             <SlidersHorizontal className="w-3 h-3" />
-            <span>ფილტრები</span>
+            <span>სხვა ფილტრები</span>
           </button>
         </div>
 
         {/* Mobile View Toggle: Agenda | Week | Month */}
         <div className="sm:hidden flex items-center p-1 rounded-xl card-third border border-[var(--border-subtle)] self-start">
           <button
-            onClick={() => setMobileView('agenda')}
+            onClick={() => {
+              soundEffects.click();
+              setMobileView('agenda');
+            }}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
               mobileView === 'agenda'
                 ? 'card-surface text-[var(--text-primary)] font-bold shadow-xs'
@@ -374,7 +425,10 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
             <span>სია</span>
           </button>
           <button
-            onClick={() => setMobileView('week')}
+            onClick={() => {
+              soundEffects.click();
+              setMobileView('week');
+            }}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
               mobileView === 'week'
                 ? 'card-surface text-[var(--text-primary)] font-bold shadow-xs'
@@ -385,7 +439,10 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
             <span>კვირა</span>
           </button>
           <button
-            onClick={() => setMobileView('month')}
+            onClick={() => {
+              soundEffects.click();
+              setMobileView('month');
+            }}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
               mobileView === 'month'
                 ? 'card-surface text-[var(--text-primary)] font-bold shadow-xs'
@@ -399,50 +456,65 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
       </div>
 
       {/* =========================================================================
-          VIEW MODE 1: MOBILE AGENDA VIEW (Fast, Clean, Zero Overflow)
+          VIEW MODE 1: MOBILE AGENDA VIEW
           ========================================================================= */}
       {mobileView === 'agenda' && (
         <div className="sm:hidden space-y-3 min-w-0">
-          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center justify-between">
+          <div className="text-xs font-semibold text-[var(--text-secondary)] flex items-center justify-between">
             <span>დაგეგმილი მოვლენები ({agendaEvents.length})</span>
-            <span>{selectedCategory}</span>
+            <span className="text-[var(--primary-action)] font-bold">{selectedCategory}</span>
           </div>
 
           <div className="space-y-2.5">
             {agendaEvents.map((evt) => {
-              const dotColor = CATEGORY_DOT_COLORS[evt.category] || 'bg-slate-400';
+              const catStyle = getCategoryStyle(evt.category);
+              const isMulti = evt.endDate && evt.endDate > evt.date;
               return (
                 <div
                   key={evt.id}
-                  onClick={() => setActiveEvent(evt)}
-                  className="card-surface p-4 space-y-2 cursor-pointer active:scale-[0.99] transition-transform"
+                  onClick={() => {
+                    soundEffects.click();
+                    setActiveEvent(evt);
+                  }}
+                  className="card-surface p-4 space-y-2 cursor-pointer active:scale-[0.99] transition-transform rounded-2xl border border-[var(--border-subtle)]"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${dotColor}`} />
-                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: catStyle.dotColor }}
+                      />
+                      <span
+                        style={getCategoryInlineStyle(evt.category, isDark)}
+                        className="text-[10px] font-bold px-2 py-0.5 rounded-md border"
+                      >
                         {evt.category}
                       </span>
+                      {isMulti && (
+                        <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-[var(--primary-action-light)] text-[var(--primary-action)]">
+                          მრავალდღიანი
+                        </span>
+                      )}
                     </div>
-                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                      {evt.date}
+                    <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                      {isMulti ? `${evt.date} — ${evt.endDate}` : evt.date}
                     </span>
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                  <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug">
                     {evt.title}
                   </h3>
 
-                  <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                  <div className="flex items-center gap-3 text-[11px] text-[var(--text-muted)]">
                     {evt.time && (
                       <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                        <Clock className="w-3 h-3 text-[var(--primary-action)]" />
                         {evt.time}
                       </span>
                     )}
                     {evt.teacher && (
                       <span className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
+                        <User className="w-3 h-3 text-[var(--primary-action)]" />
                         {evt.teacher}
                       </span>
                     )}
@@ -459,13 +531,16 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
           ========================================================================= */}
       {mobileView === 'week' && (
         <div className="sm:hidden space-y-4 min-w-0">
-          <div className="grid grid-cols-7 gap-1 card-surface p-2 shadow-sm min-w-0">
+          <div className="grid grid-cols-7 gap-1 card-surface p-2 shadow-sm rounded-2xl min-w-0 border border-[var(--border-subtle)]">
             {weekDays.map((d) => {
               const isSelected = d.dateStr === selectedDate;
               return (
                 <button
                   key={d.dateStr}
-                  onClick={() => setSelectedDate(d.dateStr)}
+                  onClick={() => {
+                    soundEffects.click();
+                    setSelectedDate(d.dateStr);
+                  }}
                   className={`py-2 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
                     isSelected
                       ? 'btn-primary font-bold shadow-xs'
@@ -477,7 +552,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   {d.hasEvents && (
                     <span
                       className={`w-1.5 h-1.5 rounded-full mt-1 ${
-                        isSelected ? 'bg-white' : 'bg-rose-500'
+                        isSelected ? 'bg-white' : 'bg-[var(--primary-action)]'
                       }`}
                     />
                   )}
@@ -494,11 +569,17 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               selectedDateEvents.map((evt) => (
                 <div
                   key={evt.id}
-                  onClick={() => setActiveEvent(evt)}
-                  className="card-surface p-4 space-y-1.5 cursor-pointer"
+                  onClick={() => {
+                    soundEffects.click();
+                    setActiveEvent(evt);
+                  }}
+                  className="card-surface p-4 space-y-1.5 cursor-pointer rounded-2xl border border-[var(--border-subtle)]"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--primary-action-light)] text-[var(--primary-action)]">
+                    <span
+                      style={getCategoryInlineStyle(evt.category, isDark)}
+                      className="text-[10px] font-bold px-2 py-0.5 rounded-md border"
+                    >
                       {evt.category}
                     </span>
                     <span className="text-[11px] font-mono text-[var(--text-muted)]">
@@ -514,173 +595,404 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                 </div>
               ))
             ) : (
-              <p className="text-xs text-[var(--text-muted)] py-3 text-center">ამ დღეს მოვლენა არ არის.</p>
+              <p className="text-xs text-[var(--text-muted)] py-3 text-center">
+                ამ დღეს მოვლენა არ არის.
+              </p>
             )}
           </div>
         </div>
       )}
 
       {/* =========================================================================
-          VIEW MODE 3: MONTH GRID (Desktop Always Visible, Mobile when mobileView === 'month')
+          VIEW MODE 3: MONTH GRID WITH CONTINUOUS MULTI-DAY BARS
           ========================================================================= */}
-      <div className={`space-y-4 min-w-0 ${mobileView === 'month' ? 'block' : 'hidden sm:block'}`}>
-          <div className="card-surface p-2 sm:p-5 shadow-sm overflow-hidden min-w-0">
-            {/* Weekday Row */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center min-w-0">
-              {WEEKDAYS_SHORT.map((day) => (
-                <div
-                  key={day}
-                  className="text-[10px] sm:text-xs font-semibold text-[var(--text-muted)] py-1"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
+      <div className={`space-y-5 min-w-0 ${mobileView === 'month' ? 'block' : 'hidden sm:block'}`}>
+        <div className="card-surface p-2 sm:p-5 shadow-sm rounded-3xl border border-[var(--border-subtle)] overflow-hidden min-w-0">
+          {/* Weekday Labels Header */}
+          <div className="grid grid-cols-7 mb-2 text-center min-w-0 border-b border-[var(--border-subtle)] pb-2">
+            {WEEKDAYS_SHORT.map((day) => (
+              <div
+                key={day}
+                className="text-[11px] sm:text-xs font-semibold text-[var(--text-muted)] py-0.5"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
 
-            {/* Days Matrix: Min-w-0 on everything to prevent any 720px blowout! */}
-            <div className="grid grid-cols-7 gap-1 sm:gap-2 min-w-0">
-              {calendarGrid.map((cell, idx) => {
-                const dayEvents = filteredEvents.filter((e) => isEventOnDate(e, cell.dateString));
-                const isSelectedDay = cell.dateString === selectedDate;
-                const isToday = cell.dateString === tbilisiNow.dateString;
+          {/* Month Weeks Container */}
+          <div className="space-y-1.5 sm:space-y-2 min-w-0">
+            {calendarWeeks.map((week, weekIdx) => {
+              const weekStartStr = week[0].dateString;
+              const weekEndStr = week[6].dateString;
+
+              // 1. Identify multi-day events that span into this week row
+              const intersectingMultiDay = filteredEvents.filter((e) => {
+                const isMulti = e.endDate && e.endDate > e.date;
+                if (!isMulti) return false;
+                return e.date <= weekEndStr && (e.endDate as string) >= weekStartStr;
+              });
+
+              // Sort by duration descending, then start date for clean packing
+              intersectingMultiDay.sort((a, b) => {
+                const durA = (a.endDate || a.date).localeCompare(a.date);
+                const durB = (b.endDate || b.date).localeCompare(b.date);
+                return durB - durA || a.date.localeCompare(b.date);
+              });
+
+              // Assign lanes to multi-day segments
+              const lanes: boolean[][] = [];
+              const multiDaySegments: {
+                event: CalendarEvent;
+                startCol: number;
+                endCol: number;
+                isTrueStart: boolean;
+                isTrueEnd: boolean;
+                lane: number;
+              }[] = [];
+
+              for (const evt of intersectingMultiDay) {
+                const segStart = evt.date < weekStartStr ? weekStartStr : evt.date;
+                const segEnd =
+                  (evt.endDate as string) > weekEndStr ? weekEndStr : (evt.endDate as string);
+
+                const startCol = week.findIndex((c) => c.dateString === segStart);
+                const endCol = week.findIndex((c) => c.dateString === segEnd);
+
+                if (startCol === -1 || endCol === -1 || endCol < startCol) continue;
+
+                let targetLane = 0;
+                while (true) {
+                  if (!lanes[targetLane]) {
+                    lanes[targetLane] = [false, false, false, false, false, false, false];
+                  }
+                  let fits = true;
+                  for (let c = startCol; c <= endCol; c++) {
+                    if (lanes[targetLane][c]) {
+                      fits = false;
+                      break;
+                    }
+                  }
+                  if (fits) {
+                    for (let c = startCol; c <= endCol; c++) {
+                      lanes[targetLane][c] = true;
+                    }
+                    break;
+                  }
+                  targetLane++;
+                }
+
+                multiDaySegments.push({
+                  event: evt,
+                  startCol,
+                  endCol,
+                  isTrueStart: evt.date === segStart,
+                  isTrueEnd: evt.endDate === segEnd,
+                  lane: targetLane,
+                });
+              }
+
+              const laneCount = lanes.length;
+
+              return (
+                <div
+                  key={`week-${weekIdx}`}
+                  className="rounded-2xl border border-[var(--border-subtle)] card-third/40 overflow-hidden relative"
+                >
+                  {/* Top: Day cells grid (dates, active selection, cell bounds) */}
+                  <div className="grid grid-cols-7 divide-x divide-[var(--border-subtle)]">
+                    {week.map((cell, colIdx) => {
+                      const isSelectedDay = cell.dateString === selectedDate;
+                      const isToday = cell.dateString === tbilisiNow.dateString;
+                      const dayAllEvents = filteredEvents.filter((e) =>
+                        isEventOnDate(e, cell.dateString)
+                      );
+
+                      return (
+                        <div
+                          key={cell.dateString}
+                          onClick={() => {
+                            soundEffects.click();
+                            setSelectedDate(cell.dateString);
+                            if (dayAllEvents.length > 0 && window.innerWidth < 640) {
+                              setActiveEvent(dayAllEvents[0]);
+                            }
+                          }}
+                          className={`p-1 sm:p-2 flex items-center justify-between cursor-pointer transition-colors ${
+                            cell.isCurrentMonth ? '' : 'opacity-35'
+                          } ${
+                            isSelectedDay
+                              ? 'bg-[var(--primary-action-light)]'
+                              : 'hover:bg-black/5 dark:hover:bg-white/5'
+                          }`}
+                        >
+                          <div className="flex items-center gap-1">
+                            {isToday ? (
+                              <span className="w-5 h-5 rounded-full btn-primary flex items-center justify-center text-[10px] font-bold shadow-xs">
+                                {cell.dayNumber}
+                              </span>
+                            ) : (
+                              <span
+                                className={`text-[11px] sm:text-xs font-semibold ${
+                                  isSelectedDay
+                                    ? 'text-[var(--primary-action)] font-bold'
+                                    : 'text-[var(--text-primary)]'
+                                }`}
+                              >
+                                {cell.dayNumber}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Mobile: Compact Colored Dots */}
+                          <div className="sm:hidden flex items-center gap-0.5">
+                            {dayAllEvents.slice(0, 2).map((e) => (
+                              <span
+                                key={e.id}
+                                className="w-1.5 h-1.5 rounded-full shrink-0"
+                                style={{
+                                  backgroundColor: getCategoryStyle(e.category).dotColor,
+                                }}
+                              />
+                            ))}
+                            {dayAllEvents.length > 2 && (
+                              <span className="text-[9px] text-[var(--text-muted)] font-mono">
+                                +
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Desktop: Event count badge */}
+                          {dayAllEvents.length > 0 && (
+                            <span className="hidden sm:inline text-[10px] font-mono text-[var(--text-muted)]">
+                              {dayAllEvents.length}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Middle: Continuous Multi-Day Event Bars Layer (Desktop Only) */}
+                  {laneCount > 0 && (
+                    <div className="hidden sm:grid grid-cols-7 gap-y-1 px-1 py-1 border-t border-[var(--border-subtle)]/60">
+                      {multiDaySegments.map((seg) => {
+                        const catStyle = getCategoryStyle(seg.event.category);
+                        return (
+                          <div
+                            key={`seg-${seg.event.id}-${weekIdx}`}
+                            onClick={(ev) => {
+                              ev.stopPropagation();
+                              soundEffects.click();
+                              setActiveEvent(seg.event);
+                            }}
+                            style={{
+                              gridColumnStart: seg.startCol + 1,
+                              gridColumnEnd: seg.endCol + 2,
+                              gridRowStart: seg.lane + 1,
+                              ...getCategoryInlineStyle(seg.event.category, isDark),
+                            }}
+                            className={`h-6 px-2 flex items-center justify-between text-[11px] font-semibold border shadow-2xs cursor-pointer select-none transition-all hover:brightness-105 active:scale-[0.99] ${
+                              seg.isTrueStart
+                                ? 'rounded-l-lg ml-0.5'
+                                : 'rounded-l-none border-l-0 pl-1.5'
+                            } ${
+                              seg.isTrueEnd
+                                ? 'rounded-r-lg mr-0.5'
+                                : 'rounded-r-none border-r-0 pr-1.5'
+                            }`}
+                            title={`${seg.event.title} (${seg.event.date} — ${seg.event.endDate})`}
+                          >
+                            <div className="flex items-center gap-1.5 truncate min-w-0">
+                              {!seg.isTrueStart && (
+                                <span className="text-[9px] opacity-75 shrink-0">◀</span>
+                              )}
+                              <span
+                                className="w-1.5 h-1.5 rounded-full shrink-0"
+                                style={{ backgroundColor: catStyle.dotColor }}
+                              />
+                              <span className="truncate">{seg.event.title}</span>
+                            </div>
+                            {!seg.isTrueEnd && (
+                              <span className="text-[9px] opacity-75 shrink-0 ml-1">▶</span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Bottom: Single-day events rows (Desktop Only) */}
+                  <div className="hidden sm:grid grid-cols-7 divide-x divide-[var(--border-subtle)] min-h-[50px] border-t border-[var(--border-subtle)]/40">
+                    {week.map((cell, colIdx) => {
+                      const singleDayEvents = filteredEvents.filter(
+                        (e) => (!e.endDate || e.endDate <= e.date) && e.date === cell.dateString
+                      );
+
+                      // Multi-day events covering this specific day column
+                      const multiDayForCell = multiDaySegments.filter(
+                        (s) => colIdx >= s.startCol && colIdx <= s.endCol
+                      );
+
+                      const isSelectedDay = cell.dateString === selectedDate;
+                      const maxSingleToShow = laneCount > 0 ? 1 : 2;
+                      const overflowCount = Math.max(0, singleDayEvents.length - maxSingleToShow);
+
+                      return (
+                        <div
+                          key={`single-${cell.dateString}`}
+                          onClick={() => {
+                            soundEffects.click();
+                            setSelectedDate(cell.dateString);
+                          }}
+                          className={`p-1 space-y-1 cursor-pointer transition-colors ${
+                            isSelectedDay ? 'bg-[var(--primary-action-light)]/40' : ''
+                          }`}
+                        >
+                          {singleDayEvents.slice(0, maxSingleToShow).map((e) => {
+                            const catStyle = getCategoryStyle(e.category);
+                            return (
+                              <div
+                                key={e.id}
+                                onClick={(ev) => {
+                                  ev.stopPropagation();
+                                  soundEffects.click();
+                                  setActiveEvent(e);
+                                }}
+                                style={getCategoryInlineStyle(e.category, isDark)}
+                                className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-md text-[10.5px] font-medium truncate border shadow-2xs hover:brightness-105 transition-all"
+                                title={`${e.title} (${e.category})`}
+                              >
+                                <span
+                                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: catStyle.dotColor }}
+                                />
+                                <span className="truncate">{e.title}</span>
+                              </div>
+                            );
+                          })}
+
+                          {overflowCount > 0 && (
+                            <div
+                              onClick={(ev) => {
+                                ev.stopPropagation();
+                                soundEffects.click();
+                                setSelectedDate(cell.dateString);
+                              }}
+                              className="text-[10px] font-semibold text-[var(--primary-action)] hover:underline px-1 py-0.5 cursor-pointer"
+                            >
+                              +{overflowCount} კიდევ
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Day Agenda View (Persistent below month grid) */}
+        <div className="card-surface p-4 sm:p-6 space-y-4 shadow-sm rounded-3xl border border-[var(--border-subtle)] min-w-0">
+          <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2">
+              <CalendarIcon className="w-4 h-4 text-[var(--primary-action)]" />
+              <h2 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
+                თარიღის დღის წესრიგი: {selectedDate}
+              </h2>
+            </div>
+            <span className="text-xs font-mono text-[var(--text-secondary)]">
+              {selectedDateEvents.length} მოვლენა
+            </span>
+          </div>
+
+          {selectedDateEvents.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-w-0">
+              {selectedDateEvents.map((evt) => {
+                const catStyle = getCategoryStyle(evt.category);
+                const isMulti = evt.endDate && evt.endDate > evt.date;
 
                 return (
                   <div
-                    key={idx}
+                    key={evt.id}
                     onClick={() => {
                       soundEffects.click();
-                      setSelectedDate(cell.dateString);
-                      if (dayEvents.length > 0 && window.innerWidth < 640) {
-                        setActiveEvent(dayEvents[0]);
-                      }
+                      setActiveEvent(evt);
                     }}
-                    className={`min-h-[52px] sm:min-h-[105px] p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition-all flex flex-col justify-between cursor-pointer min-w-0 ${
-                      cell.isCurrentMonth
-                        ? 'card-third/60 border-[var(--border-subtle)] hover:border-[var(--primary-action)]/30'
-                        : 'bg-transparent border-transparent opacity-30'
-                    } ${
-                      isSelectedDay
-                        ? 'ring-2 ring-[var(--primary-action)] bg-[var(--primary-action-light)]'
-                        : ''
-                    }`}
+                    className="p-4 rounded-2xl card-third border border-[var(--border-subtle)] hover:border-[var(--primary-action)]/30 transition-all cursor-pointer flex flex-col justify-between gap-3 shadow-2xs hover:shadow-xs"
                   >
-                    <div className="flex items-center justify-between">
-                      {isToday ? (
-                        <span className="w-5 h-5 rounded-full btn-primary flex items-center justify-center text-[10px] font-bold shadow-xs">
-                          {cell.dayNumber}
-                        </span>
-                      ) : (
-                        <span
-                          className={`text-[11px] sm:text-xs font-semibold ${
-                            isSelectedDay
-                              ? 'text-[var(--primary-action)] font-bold'
-                              : 'text-[var(--text-primary)]'
-                          }`}
-                        >
-                          {cell.dayNumber}
-                        </span>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="w-2 h-2 rounded-full shrink-0"
+                            style={{ backgroundColor: catStyle.dotColor }}
+                          />
+                          <span
+                            style={getCategoryInlineStyle(evt.category, isDark)}
+                            className="text-[10.5px] font-bold px-2 py-0.5 rounded-md border"
+                          >
+                            {evt.category}
+                          </span>
+                          {isMulti && (
+                            <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-[var(--primary-action-light)] text-[var(--primary-action)]">
+                              {evt.date} — {evt.endDate} (მიმდინარე)
+                            </span>
+                          )}
+                        </div>
+
+                        {evt.time && (
+                          <span className="text-[11px] font-mono text-[var(--text-muted)] flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-[var(--primary-action)]" />
+                            {evt.time}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug">
+                        {evt.title}
+                      </h3>
+
+                      {evt.teacher && (
+                        <div className="text-[11px] text-[var(--text-muted)] flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          <span>{evt.teacher}</span>
+                        </div>
                       )}
 
-                      {/* Desktop event counter */}
-                      {dayEvents.length > 0 && (
-                        <span className="hidden sm:inline text-[10px] font-mono text-[var(--text-muted)]">
-                          {dayEvents.length}
-                        </span>
+                      {evt.description && (
+                        <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                          {evt.description}
+                        </p>
                       )}
                     </div>
 
-                    {/* Mobile: Clean dots view (Zero text blowout!) */}
-                    <div className="sm:hidden flex items-center justify-center gap-1 py-1">
-                      {dayEvents.slice(0, 3).map((e) => (
-                        <span
-                          key={e.id}
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            CATEGORY_DOT_COLORS[e.category] || 'bg-[var(--primary-action)]'
-                          }`}
-                        />
-                      ))}
-                      {dayEvents.length > 3 && (
-                        <span className="text-[9px] font-mono text-[var(--text-muted)]">+</span>
-                      )}
-                    </div>
-
-                    {/* Desktop: Clear readable event pills with +N more */}
-                    <div className="hidden sm:block space-y-1 mt-1 overflow-hidden min-w-0">
-                      {dayEvents.slice(0, 2).map((e) => (
-                        <div
-                          key={e.id}
-                          onClick={(ev) => {
-                            ev.stopPropagation();
-                            setActiveEvent(e);
-                          }}
-                          className="px-1.5 py-0.5 rounded text-[11px] font-medium truncate card-surface text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--primary-action)]/40 transition-colors"
-                          title={e.title}
-                        >
-                          {e.title}
-                        </div>
-                      ))}
-                      {dayEvents.length > 2 && (
-                        <div className="text-[10px] text-[var(--primary-action)] font-semibold px-1">
-                          +{dayEvents.length - 2} კიდევ
-                        </div>
+                    <div className="flex items-center justify-between pt-1 border-t border-[var(--border-subtle)]/60 text-xs font-semibold text-[var(--primary-action)]">
+                      <span>დეტალები &rarr;</span>
+                      {evt.aiAnalysis?.difficultyScore && (
+                        <span className="text-[10px] text-[var(--text-muted)] font-normal">
+                          სირთულე: {evt.aiAnalysis.difficultyScore}
+                        </span>
                       )}
                     </div>
                   </div>
                 );
               })}
             </div>
-          </div>
-
-          {/* Desktop Selected Day Details Bar */}
-          <div className="hidden sm:block card-surface p-5 space-y-3 shadow-sm min-w-0">
-            <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
-                <span>თარიღი: {selectedDate}</span>
-                <span className="text-xs text-[var(--text-muted)] font-normal">
-                  ({selectedDateEvents.length} მოვლენა)
-                </span>
-              </h2>
-            </div>
-
-            {selectedDateEvents.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-w-0">
-                {selectedDateEvents.map((evt) => (
-                  <div
-                    key={evt.id}
-                    onClick={() => setActiveEvent(evt)}
-                    className="p-3.5 rounded-xl card-third border border-[var(--border-subtle)] hover:border-[var(--primary-action)]/30 transition-all cursor-pointer flex flex-col justify-between gap-2"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--primary-action-light)] text-[var(--primary-action)]">
-                          {evt.category}
-                        </span>
-                        {evt.teacher && (
-                          <span className="text-[11px] text-[var(--text-muted)]">
-                            • {evt.teacher}
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug">
-                        {evt.title}
-                      </h3>
-                      <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2">
-                        {evt.description}
-                      </p>
-                    </div>
-                    <span className="text-xs font-semibold text-[var(--primary-action)]">
-                      დეტალები &rarr;
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-[var(--text-muted)] py-2">
-                ამ დღეს დაგეგმილი შემაჯამებელი ან აქტივობა არ არის.
+          ) : (
+            <div className="p-6 rounded-2xl card-third text-center space-y-1 border border-dashed border-[var(--border-subtle)]">
+              <p className="text-xs font-medium text-[var(--text-primary)]">
+                ამ დღეს დაგეგმილი აქტივობა ან შემაჯამებელი არ არის
               </p>
-            )}
-          </div>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                აირჩიეთ სხვა დღე კალენდარში ან დაამატეთ ახალი მოვლენა.
+              </p>
+            </div>
+          )}
         </div>
+      </div>
 
       {/* =========================================================================
           DEEP EVENT DETAIL BOTTOM SHEET (Accessible & Fluid Gesture)
@@ -711,17 +1023,26 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               className="relative z-10 glass-sheet rounded-t-3xl max-w-2xl mx-auto w-full p-5 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto space-y-5 pb-[max(2rem,env(safe-area-inset-bottom))]"
             >
               {/* Drag Handle Capsule */}
-              <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto" />
+              <div className="w-12 h-1.5 bg-slate-400/40 rounded-full mx-auto" />
 
               {/* Header */}
               <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--primary-action-light)] text-[var(--primary-action)] border border-[var(--primary-action)]/20">
-                      {activeEvent.category}
+                    <span
+                      style={getCategoryInlineStyle(activeEvent.category, isDark)}
+                      className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border shadow-2xs flex items-center gap-1.5"
+                    >
+                      <span
+                        className="w-1.5 h-1.5 rounded-full"
+                        style={{ backgroundColor: getCategoryStyle(activeEvent.category).dotColor }}
+                      />
+                      <span>{activeEvent.category}</span>
                     </span>
                     <span className="text-xs font-mono text-[var(--text-muted)]">
-                      {activeEvent.date}
+                      {activeEvent.endDate && activeEvent.endDate > activeEvent.date
+                        ? `${activeEvent.date} — ${activeEvent.endDate}`
+                        : activeEvent.date}
                     </span>
                   </div>
                   <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
@@ -781,7 +1102,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                 </p>
               </div>
 
-              {/* AI Study Assistance — Collapsed by default & clearly labeled as unofficial */}
+              {/* AI Study Assistance */}
               {activeEvent.aiAnalysis && (
                 <div className="rounded-2xl border border-[var(--primary-action)]/20 overflow-hidden bg-[var(--primary-action-light)]/30">
                   <button
@@ -814,7 +1135,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               )}
 
               {/* Resources & Study Notes Section */}
-              <div className="pt-2 border-t border-slate-200/70 dark:border-white/10">
+              <div className="pt-2 border-t border-[var(--border-subtle)]">
                 <ResourceSection
                   targetType="event"
                   targetId={activeEvent.id}
@@ -823,7 +1144,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               </div>
 
               {/* Comments Thread Section */}
-              <div className="pt-2 border-t border-slate-200/70 dark:border-white/10">
+              <div className="pt-2 border-t border-[var(--border-subtle)]">
                 <CommentsThread targetType="event" targetId={activeEvent.id} />
               </div>
             </motion.div>
@@ -853,12 +1174,12 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               className="relative z-10 glass-sheet rounded-t-3xl p-5 space-y-4 max-w-md mx-auto w-full pb-[max(2rem,env(safe-area-inset-bottom))]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  კალენდრის ფილტრები
+                <span className="text-sm font-bold text-[var(--text-primary)]">
+                  კალენდრის ყველა კატეგორია
                 </span>
                 <button
                   onClick={() => setIsFilterSheetOpen(false)}
-                  className="p-1 text-slate-400 hover:text-slate-700"
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -867,20 +1188,35 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               <div className="grid grid-cols-2 gap-2">
                 {CALENDAR_FILTERS.map((f) => {
                   const isSelected = selectedCategory === f.id;
+                  const catStyle = getCategoryStyle(f.id);
                   return (
                     <button
                       key={f.id}
                       onClick={() => {
+                        soundEffects.click();
                         setSelectedCategory(f.id);
                         setIsFilterSheetOpen(false);
                       }}
-                      className={`p-2.5 rounded-xl text-xs font-semibold text-left transition-colors ${
+                      style={
                         isSelected
-                          ? 'btn-primary shadow-xs'
-                          : 'card-third text-[var(--text-secondary)]'
+                          ? {
+                              backgroundColor: isDark ? catStyle.bgDark : catStyle.bgLight,
+                              borderColor: isDark ? catStyle.borderDark : catStyle.borderLight,
+                              color: isDark ? catStyle.textDark : catStyle.textLight,
+                            }
+                          : undefined
+                      }
+                      className={`p-2.5 rounded-xl text-xs font-semibold text-left transition-colors flex items-center gap-2 border ${
+                        isSelected
+                          ? 'border shadow-2xs font-bold'
+                          : 'card-third border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                       }`}
                     >
-                      {f.label}
+                      <span
+                        className="w-2 h-2 rounded-full shrink-0"
+                        style={{ backgroundColor: catStyle.dotColor }}
+                      />
+                      <span className="truncate">{f.label}</span>
                     </button>
                   );
                 })}
@@ -889,16 +1225,20 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               <div className="pt-2 flex justify-between">
                 <button
                   onClick={() => {
+                    soundEffects.click();
                     setSelectedCategory('ყველა');
                     setIsFilterSheetOpen(false);
                   }}
-                  className="text-xs font-bold text-rose-500"
+                  className="text-xs font-bold text-rose-500 cursor-pointer"
                 >
                   ყველას გასუფთავება
                 </button>
                 <button
-                  onClick={() => setIsFilterSheetOpen(false)}
-                  className="px-4 py-2 rounded-xl btn-primary text-xs font-bold"
+                  onClick={() => {
+                    soundEffects.click();
+                    setIsFilterSheetOpen(false);
+                  }}
+                  className="px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer"
                 >
                   მზადაა
                 </button>
@@ -925,15 +1265,15 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative z-10 w-full max-w-md rounded-3xl bg-white dark:bg-[#141522] border border-slate-200/80 dark:border-white/10 p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+              className="relative z-10 w-full max-w-md rounded-3xl card-surface border border-[var(--border-subtle)] p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base font-bold text-[var(--text-primary)]">
                   {editingEventId ? 'მოვლენის რედაქტირება' : 'ახალი მოვლენის დამატება'}
                 </h3>
                 <button
                   onClick={() => setShowEventForm(false)}
-                  className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -941,7 +1281,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
 
               <form onSubmit={handleSaveEvent} className="space-y-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                     სათაური
                   </label>
                   <input
@@ -950,13 +1290,13 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                     value={formTitle}
                     onChange={(e) => setFormTitle(e.target.value)}
                     placeholder="მაგ. მათემატიკის შემაჯამებელი"
-                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    className="w-full card-third border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                       თარიღი
                     </label>
                     <input
@@ -964,33 +1304,35 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                       required
                       value={formDate}
                       onChange={(e) => setFormDate(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      className="w-full card-third border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                       დასრულება (სურვილისამებრ)
                     </label>
                     <input
                       type="date"
                       value={formEndDate}
                       onChange={(e) => setFormEndDate(e.target.value)}
-                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      className="w-full card-third border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                       კატეგორია
                     </label>
                     <select
                       value={formCategory}
                       onChange={(e) => setFormCategory(e.target.value as CalendarCategory)}
-                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      className="w-full card-third border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
                     >
                       <option value="შემაჯამებელი">შემაჯამებელი</option>
+                      <option value="დავალება">დავალება</option>
+                      <option value="ტესტი">ტესტი</option>
                       <option value="დამოუკიდებელი">დამოუკიდებელი</option>
                       <option value="გამოკითხვა">გამოკითხვა</option>
                       <option value="სკოლა">სასკოლო პროცესი</option>
@@ -1000,7 +1342,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                       დრო
                     </label>
                     <input
@@ -1008,13 +1350,13 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                       value={formTime}
                       onChange={(e) => setFormTime(e.target.value)}
                       placeholder="10:00 - 10:45"
-                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                      className="w-full card-third border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                     მასწავლებელი / ორგანიზატორი
                   </label>
                   <input
@@ -1022,12 +1364,12 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                     value={formTeacher}
                     onChange={(e) => setFormTeacher(e.target.value)}
                     placeholder="მაგ. ნანა ჯაფარიძე"
-                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    className="w-full card-third border border-[var(--border-subtle)] rounded-xl px-3 py-2 text-xs text-[var(--text-primary)] focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                  <label className="block text-xs font-medium text-[var(--text-secondary)] mb-1">
                     მოთხოვნები & აღწერა
                   </label>
                   <textarea
@@ -1035,7 +1377,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                     value={formDescription}
                     onChange={(e) => setFormDescription(e.target.value)}
                     placeholder="შინაარსი, საკითხები, მოსამზადებელი პარაგრაფები..."
-                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl p-3 text-xs text-slate-900 dark:text-white resize-none"
+                    className="w-full card-third border border-[var(--border-subtle)] rounded-xl p-3 text-xs text-[var(--text-primary)] resize-none focus:outline-none"
                   />
                 </div>
 
@@ -1043,7 +1385,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   <button
                     type="button"
                     onClick={() => setShowEventForm(false)}
-                    className="px-3.5 py-2 rounded-xl text-xs text-slate-500 hover:text-slate-800"
+                    className="px-3.5 py-2 rounded-xl text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                   >
                     გაუქმება
                   </button>
