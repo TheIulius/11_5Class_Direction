@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
+import { motion, useScroll, useSpring, useTransform, useReducedMotion } from 'framer-motion';
 import { ActiveTab } from './Navbar';
 
 export interface BackgroundClassPhotosProps {
@@ -11,20 +12,9 @@ interface ScatteredPhoto {
   topPx: number;
   left?: string;
   right?: string;
-  baseRotate: number;
+  rotate: number;
   scale: number;
   depthTier: 0 | 1 | 2;
-  mobileVisible: boolean;
-  // Per-photo spring & parallax physics parameters
-  parallaxFactor: number;
-  stiffness: number;
-  damping: number;
-  mass: number;
-  rotStiffness: number;
-  rotDamping: number;
-  rotMass: number;
-  wobbleDirection: number;
-  swayFactor: number;
 }
 
 const PHOTO_SOURCES = [
@@ -47,7 +37,7 @@ const PHOTO_SOURCES = [
   '/class-photos/566540435_1801019863866461_6743571529053003991_n.jpg.webp',
 ];
 
-// Deterministic PRNG in [0, 1) so random scatter is organic and 100% stable across renders
+// Deterministic PRNG in [0, 1) so random scatter is organic and stable across renders
 function createRng(seed: number) {
   let s = seed >>> 0;
   return () => {
@@ -56,346 +46,176 @@ function createRng(seed: number) {
   };
 }
 
-export const BackgroundClassPhotos: React.FC<BackgroundClassPhotosProps> = ({ activeTab }) => {
-  const photoRefs = useRef<(HTMLDivElement | null)[]>([]);
+export const BackgroundClassPhotos: React.FC<BackgroundClassPhotosProps> = () => {
+  const prefersReducedMotion = useReducedMotion();
+  const { scrollY } = useScroll();
 
-  const photos = useMemo<ScatteredPhoto[]>(() => {
+  // Original multi-layer spring-smoothed scroll values for smooth vertical jiggle/parallax inertia
+  const smoothScrollDeep = useSpring(scrollY, {
+    stiffness: 55,
+    damping: 24,
+    mass: 0.75,
+    restDelta: 0.1,
+  });
+  const smoothScrollMid = useSpring(scrollY, {
+    stiffness: 70,
+    damping: 26,
+    mass: 0.6,
+    restDelta: 0.1,
+  });
+  const smoothScrollNear = useSpring(scrollY, {
+    stiffness: 85,
+    damping: 28,
+    mass: 0.5,
+    restDelta: 0.1,
+  });
+
+  // Photos move up slower than foreground scroll speed (0.20x, 0.32x, 0.45x) without rolling
+  const yDeep = useTransform(smoothScrollDeep, (v) => (prefersReducedMotion ? 0 : -v * 0.2));
+  const yMid = useTransform(smoothScrollMid, (v) => (prefersReducedMotion ? 0 : -v * 0.32));
+  const yNear = useTransform(smoothScrollNear, (v) => (prefersReducedMotion ? 0 : -v * 0.45));
+
+  const { deepPhotos, midPhotos, nearPhotos } = useMemo(() => {
     const rng = createRng(11052026);
     const generated: ScatteredPhoto[] = [];
-    const placed: {
-      xPct: number;
-      yPx: number;
-      src: string;
-      mobileVisible: boolean;
-    }[] = [];
 
-    // 2D Poisson-disc rejection sampling across the continuous background canvas
-    // Slightly less dense than the previous 84-photo layout (~50 photos across 1650px)
-    const canvasHeightPx = 1650;
-    const minHorizontalDistPct = 10.4; // prevents side-by-side overlap
-    const minVerticalDistPx = 122; // prevents top-to-bottom overlap even during parallax shifts
-    const targetCount = 50;
+    // True 2D Poisson-disc rejection sampling carried out independently on Left & Right wings
+    // (from commit 7c16153 / fde8038, tuned to be slightly less dense and cover tall scroll heights)
+    const canvasHeightPx = 1800;
+    const minHorizontalDistPct = 7.0; // prevents side-by-side overlap
+    const minVerticalDistPx = 122; // prevents top-to-bottom overlap even with parallax shift
 
-    let attempts = 0;
-    while (placed.length < targetCount && attempts < 10000) {
-      attempts++;
+    const populateWing = (side: 'left' | 'right', targetCount: number) => {
+      const placed: { xPct: number; yPx: number; src: string }[] = [];
+      let attempts = 0;
 
-      // Continuous horizontal distribution across the entire viewport (1.2% to 94.5%),
-      // gently weighted toward the outer wings while keeping a continuous field across the page
-      const bandRoll = rng();
-      let xPct: number;
-      if (bandRoll < 0.33) {
-        xPct = 1.2 + rng() * 23.0; // Left wing (1.2%..24.2%)
-      } else if (bandRoll < 0.66) {
-        xPct = 71.8 + rng() * 22.7; // Right wing (71.8%..94.5%)
-      } else {
-        xPct = 24.2 + rng() * 47.6; // Continuous center field (24.2%..71.8%)
-      }
+      while (placed.length < targetCount && attempts < 6000) {
+        attempts++;
+        // Continuous random horizontal position between 0.6% and 22.5% from screen edge
+        const xPct = 0.6 + rng() * 21.9;
+        // Continuous random vertical position across the canvas
+        const yPx = 18 + rng() * (canvasHeightPx - 36);
 
-      const yPx = 22 + rng() * (canvasHeightPx - 44);
-
-      // Elliptical minimum distance check against all already-placed photos
-      let tooClose = false;
-      for (const p of placed) {
-        const dx = (xPct - p.xPct) / minHorizontalDistPct;
-        const dy = (yPx - p.yPx) / minVerticalDistPx;
-        if (dx * dx + dy * dy < 1.0) {
-          tooClose = true;
-          break;
+        // Check elliptical minimum distance against all already-placed photos on this side
+        let tooClose = false;
+        for (const p of placed) {
+          const dx = (xPct - p.xPct) / minHorizontalDistPct;
+          const dy = (yPx - p.yPx) / minVerticalDistPx;
+          if (dx * dx + dy * dy < 1.0) {
+            tooClose = true;
+            break;
+          }
         }
-      }
-      if (tooClose) continue;
+        if (tooClose) continue;
 
-      // Mobile spacing check so narrow viewports stay clean and never overlap
-      let mobileTooClose = false;
-      for (const p of placed) {
-        if (!p.mobileVisible) continue;
-        const dx = (xPct - p.xPct) / 24.0;
-        const dy = (yPx - p.yPx) / 142.0;
-        if (dx * dx + dy * dy < 1.0) {
-          mobileTooClose = true;
-          break;
+        // Avoid picking the exact same photo source as a nearby neighbor
+        const startIdx = Math.floor(rng() * PHOTO_SOURCES.length);
+        let chosenSrc = PHOTO_SOURCES[startIdx];
+        for (let s = 0; s < PHOTO_SOURCES.length; s++) {
+          const candidate = PHOTO_SOURCES[(startIdx + s) % PHOTO_SOURCES.length];
+          const neighborHasSame = placed.some(
+            (p) =>
+              p.src === candidate &&
+              Math.abs(p.yPx - yPx) < 260 &&
+              Math.abs(p.xPct - xPct) < 14
+          );
+          if (!neighborHasSame) {
+            chosenSrc = candidate;
+            break;
+          }
         }
+
+        const idx = generated.length;
+        const depthTier = (idx % 3) as 0 | 1 | 2;
+        // Organic tilt (-6.5 deg to +6.5 deg) and varied scale (0.86 to 1.10)
+        const rotate = (rng() - 0.5) * 13;
+        const scale = 0.86 + rng() * 0.24;
+
+        placed.push({ xPct, yPx, src: chosenSrc });
+        generated.push({
+          id: `bg-class-photo-${side}-${placed.length}`,
+          src: chosenSrc,
+          topPx: Math.round(yPx),
+          ...(side === 'left'
+            ? { left: `${xPct.toFixed(2)}%` }
+            : { right: `${xPct.toFixed(2)}%` }),
+          rotate,
+          scale,
+          depthTier,
+        });
       }
-      const mobileVisible = !mobileTooClose;
+    };
 
-      // Avoid picking the exact same photo source as a nearby neighbor
-      const startIdx = Math.floor(rng() * PHOTO_SOURCES.length);
-      let chosenSrc = PHOTO_SOURCES[startIdx];
-      for (let s = 0; s < PHOTO_SOURCES.length; s++) {
-        const candidate = PHOTO_SOURCES[(startIdx + s) % PHOTO_SOURCES.length];
-        const neighborHasSame = placed.some(
-          (p) =>
-            p.src === candidate &&
-            Math.abs(p.yPx - yPx) < 300 &&
-            Math.abs(p.xPct - xPct) < 26
-        );
-        if (!neighborHasSame) {
-          chosenSrc = candidate;
-          break;
-        }
-      }
+    populateWing('left', 36);
+    populateWing('right', 36);
 
-      const idx = generated.length;
-      const depthTier = (idx % 3) as 0 | 1 | 2;
-
-      // Varied organic resting rotation (-6.5 deg to +6.5 deg) and natural scale (0.86 to 1.10)
-      const baseRotate = (rng() - 0.5) * 13;
-      const scale = 0.86 + depthTier * 0.05 + rng() * 0.14;
-
-      // Per-photo depth & spring characteristics so photos move with individual life
-      const parallaxFactor =
-        depthTier === 0
-          ? 0.16 + rng() * 0.05 // Deep layer: 0.16x - 0.21x
-          : depthTier === 1
-          ? 0.26 + rng() * 0.06 // Mid layer: 0.26x - 0.32x
-          : 0.37 + rng() * 0.07; // Near layer: 0.37x - 0.44x
-
-      const stiffness =
-        depthTier === 0
-          ? 210 + rng() * 40
-          : depthTier === 1
-          ? 255 + rng() * 45
-          : 300 + rng() * 55;
-      const mass =
-        depthTier === 0
-          ? 0.48 + rng() * 0.07
-          : depthTier === 1
-          ? 0.42 + rng() * 0.06
-          : 0.36 + rng() * 0.05;
-      // Underdamped ratio zeta in [0.62, 0.70] gives responsive tracking + gentle spring overshoot on stop
-      const zeta = 0.62 + rng() * 0.08;
-      const damping = 2 * zeta * Math.sqrt(stiffness * mass);
-
-      // Rotational wobble spring parameters
-      const rotStiffness = 225 + rng() * 65;
-      const rotMass = 0.38 + rng() * 0.08;
-      const rotZeta = 0.58 + rng() * 0.08;
-      const rotDamping = 2 * rotZeta * Math.sqrt(rotStiffness * rotMass);
-      const wobbleDirection = (idx % 2 === 0 ? 1 : -1) * (0.75 + rng() * 0.55);
-      const swayFactor = (rng() - 0.5) * 1.5;
-
-      placed.push({ xPct, yPx, src: chosenSrc, mobileVisible });
-
-      // Position relative to left or right edge so photos never cause horizontal overflow
-      const useRightEdge = xPct > 52;
-      const edgeOffsetPct = useRightEdge ? Math.max(1.2, 100 - xPct - 4.5) : xPct;
-
-      generated.push({
-        id: `bg-class-photo-${idx}`,
-        src: chosenSrc,
-        topPx: Math.round(yPx),
-        ...(useRightEdge
-          ? { right: `${edgeOffsetPct.toFixed(2)}%` }
-          : { left: `${edgeOffsetPct.toFixed(2)}%` }),
-        baseRotate,
-        scale,
-        depthTier,
-        mobileVisible,
-        parallaxFactor,
-        stiffness,
-        damping,
-        mass,
-        rotStiffness,
-        rotDamping,
-        rotMass,
-        wobbleDirection,
-        swayFactor,
-      });
-    }
-
-    return generated;
+    return {
+      deepPhotos: generated.filter((p) => p.depthTier === 0),
+      midPhotos: generated.filter((p) => p.depthTier === 1),
+      nearPhotos: generated.filter((p) => p.depthTier === 2),
+    };
   }, []);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const getScrollY = () =>
-      window.scrollY ||
-      document.documentElement.scrollTop ||
-      document.body.scrollTop ||
-      0;
-
-    const mediaQuery = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    let reducedMotion = Boolean(mediaQuery?.matches);
-
-    const isMobileViewport = () => window.innerWidth < 640;
-
-    // Initialize per-photo physics state at the current scroll position
-    const initialScrollY = getScrollY();
-    const states = photos.map((p) => ({
-      y: reducedMotion ? 0 : -initialScrollY * p.parallaxFactor,
-      vy: 0,
-      rotOffset: 0,
-      vrot: 0,
-    }));
-
-    const applyRestingTransforms = (scrollPos: number) => {
-      const mobileScaleFactor = isMobileViewport() ? 0.65 : 1.0;
-      for (let i = 0; i < photos.length; i++) {
-        const el = photoRefs.current[i];
-        if (!el) continue;
-        const p = photos[i];
-        const targetY = reducedMotion ? 0 : -scrollPos * p.parallaxFactor * mobileScaleFactor;
-        states[i].y = targetY;
-        states[i].vy = 0;
-        states[i].rotOffset = 0;
-        states[i].vrot = 0;
-        el.style.transform = `translate3d(0px, ${targetY.toFixed(2)}px, 0) rotate(${p.baseRotate.toFixed(2)}deg) scale(${p.scale.toFixed(3)})`;
-      }
-    };
-
-    applyRestingTransforms(initialScrollY);
-
-    let rafId: number | null = null;
-    let lastFrameTime = performance.now();
-    let prevScrollY = initialScrollY;
-    let smoothScrollVel = 0;
-
-    const tick = (now: number) => {
-      const dt = Math.min(0.032, Math.max(0.004, (now - lastFrameTime) / 1000));
-      lastFrameTime = now;
-
-      const currentScrollY = getScrollY();
-      const rawScrollVel = (currentScrollY - prevScrollY) / dt;
-      prevScrollY = currentScrollY;
-
-      // Fast-reacting low-pass filter on scroll velocity
-      smoothScrollVel += (rawScrollVel - smoothScrollVel) * Math.min(1, dt * 22);
-      const mobileFactor = isMobileViewport() ? 0.65 : 1.0;
-      const clampedVel = Math.max(-1900, Math.min(1900, smoothScrollVel)) * mobileFactor;
-
-      let anyActive = Math.abs(smoothScrollVel) > 1.0;
-
-      for (let i = 0; i < photos.length; i++) {
-        const el = photoRefs.current[i];
-        if (!el) continue;
-
-        const p = photos[i];
-        const s = states[i];
-
-        const targetY = -currentScrollY * p.parallaxFactor * mobileFactor;
-        const fy = (targetY - s.y) * p.stiffness - s.vy * p.damping;
-        s.vy += (fy / p.mass) * dt;
-        s.y += s.vy * dt;
-
-        // Rotational wobble responds to scroll velocity + spring velocity for lively directional jiggle
-        const targetRot =
-          (clampedVel / 400) * p.wobbleDirection +
-          Math.max(-1.8, Math.min(1.8, (s.vy / 280) * p.wobbleDirection));
-        const frot = (targetRot - s.rotOffset) * p.rotStiffness - s.vrot * p.rotDamping;
-        s.vrot += (frot / p.rotMass) * dt;
-        s.rotOffset += s.vrot * dt;
-
-        const xOffset = s.rotOffset * p.swayFactor;
-        const totalRot = p.baseRotate + s.rotOffset;
-
-        el.style.transform = `translate3d(${xOffset.toFixed(2)}px, ${s.y.toFixed(2)}px, 0) rotate(${totalRot.toFixed(2)}deg) scale(${p.scale.toFixed(3)})`;
-
-        if (
-          Math.abs(targetY - s.y) > 0.08 ||
-          Math.abs(s.vy) > 0.15 ||
-          Math.abs(s.rotOffset) > 0.025 ||
-          Math.abs(s.vrot) > 0.08
-        ) {
-          anyActive = true;
-        }
-      }
-
-      if (anyActive && !reducedMotion) {
-        rafId = window.requestAnimationFrame(tick);
-      } else {
-        // Snap cleanly to exact resting positions and hibernate loop
-        for (let i = 0; i < photos.length; i++) {
-          const el = photoRefs.current[i];
-          if (!el) continue;
-          const p = photos[i];
-          const restY = reducedMotion ? 0 : -currentScrollY * p.parallaxFactor * mobileFactor;
-          states[i].y = restY;
-          states[i].vy = 0;
-          states[i].rotOffset = 0;
-          states[i].vrot = 0;
-          el.style.transform = `translate3d(0px, ${restY.toFixed(2)}px, 0) rotate(${p.baseRotate.toFixed(2)}deg) scale(${p.scale.toFixed(3)})`;
-        }
-        rafId = null;
-      }
-    };
-
-    const onScroll = () => {
-      if (reducedMotion) return;
-      if (rafId === null) {
-        lastFrameTime = performance.now() - 16;
-        rafId = window.requestAnimationFrame(tick);
-      }
-    };
-
-    const onMotionPrefChange = (e: MediaQueryListEvent) => {
-      reducedMotion = e.matches;
-      if (reducedMotion && rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-        rafId = null;
-      }
-      applyRestingTransforms(getScrollY());
-    };
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    mediaQuery?.addEventListener?.('change', onMotionPrefChange);
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      mediaQuery?.removeEventListener?.('change', onMotionPrefChange);
-      if (rafId !== null) {
-        window.cancelAnimationFrame(rafId);
-      }
-    };
-  }, [photos]);
-
-  // Subtle focus reduction on dense study tabs while keeping consistent visibility
-  const containerOpacityClass =
-    activeTab === 'materials' || activeTab === 'calendar'
-      ? 'opacity-85'
-      : 'opacity-100';
+  const renderPhotoCard = (photo: ScatteredPhoto, opacityClass: string) => (
+    <div
+      key={photo.id}
+      style={{
+        top: `${photo.topPx}px`,
+        left: photo.left,
+        right: photo.right,
+        transform: `rotate(${photo.rotate.toFixed(1)}deg) scale(${photo.scale.toFixed(2)})`,
+      }}
+      className={`absolute w-12 sm:w-16 md:w-[4.5rem] lg:w-20 p-[3px] rounded-lg bg-[#f5f2eb]/[0.09] border border-[#f5f2eb]/[0.16] shadow-sm ${opacityClass}`}
+    >
+      <img
+        src={photo.src}
+        alt=""
+        decoding="async"
+        className="w-full aspect-[4/3] rounded-[5px] object-cover brightness-[0.97] contrast-[0.96] saturate-[0.90]"
+      />
+    </div>
+  );
 
   return (
     <div
-      className={`fixed inset-0 pointer-events-none overflow-hidden z-0 select-none transition-opacity duration-300 ${containerOpacityClass}`}
+      style={{
+        WebkitMaskImage:
+          'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 14%, rgba(0,0,0,0.52) 24%, rgba(0,0,0,0.12) 34%, rgba(0,0,0,0.12) 66%, rgba(0,0,0,0.52) 76%, rgba(0,0,0,0.92) 86%, rgba(0,0,0,1) 100%)',
+        maskImage:
+          'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 14%, rgba(0,0,0,0.52) 24%, rgba(0,0,0,0.12) 34%, rgba(0,0,0,0.12) 66%, rgba(0,0,0,0.52) 76%, rgba(0,0,0,0.92) 86%, rgba(0,0,0,1) 100%)',
+      }}
+      className="fixed inset-0 pointer-events-none overflow-clip z-0 select-none"
       aria-hidden="true"
     >
-      {photos.map((photo, index) => {
-        const tierOpacityClass =
-          photo.depthTier === 0
-            ? 'opacity-[0.13] dark:opacity-[0.18]'
-            : photo.depthTier === 1
-            ? 'opacity-[0.15] dark:opacity-[0.21]'
-            : 'opacity-[0.17] dark:opacity-[0.24]';
+      {/* Deep Parallax Layer (Slowest: 0.20x scroll speed) */}
+      <motion.div
+        style={{ y: yDeep }}
+        className="absolute inset-x-0 -top-12 h-[1850px] will-change-transform"
+      >
+        {deepPhotos.map((photo) =>
+          renderPhotoCard(photo, 'opacity-[0.18] sm:opacity-[0.21] md:opacity-[0.24]')
+        )}
+      </motion.div>
 
-        const mobileVisibilityClass = photo.mobileVisible
-          ? 'block'
-          : 'hidden sm:block';
+      {/* Mid Parallax Layer (Medium: 0.32x scroll speed) */}
+      <motion.div
+        style={{ y: yMid }}
+        className="absolute inset-x-0 -top-12 h-[1850px] will-change-transform"
+      >
+        {midPhotos.map((photo) =>
+          renderPhotoCard(photo, 'opacity-[0.21] sm:opacity-[0.25] md:opacity-[0.28]')
+        )}
+      </motion.div>
 
-        return (
-          <div
-            key={photo.id}
-            ref={(el) => {
-              photoRefs.current[index] = el;
-            }}
-            style={{
-              top: `${photo.topPx}px`,
-              left: photo.left,
-              right: photo.right,
-              transform: `translate3d(0px, 0px, 0) rotate(${photo.baseRotate.toFixed(2)}deg) scale(${photo.scale.toFixed(3)})`,
-            }}
-            className={`absolute w-14 sm:w-16 md:w-20 lg:w-[88px] will-change-transform ${tierOpacityClass} ${mobileVisibilityClass}`}
-          >
-            <img
-              src={photo.src}
-              alt=""
-              decoding="async"
-              className="w-full h-auto max-h-24 rounded-md object-cover brightness-[0.95] contrast-[0.95] saturate-[0.84]"
-            />
-          </div>
-        );
-      })}
+      {/* Near Parallax Layer (Faster: 0.45x scroll speed) */}
+      <motion.div
+        style={{ y: yNear }}
+        className="absolute inset-x-0 -top-12 h-[1850px] will-change-transform"
+      >
+        {nearPhotos.map((photo) =>
+          renderPhotoCard(photo, 'opacity-[0.24] sm:opacity-[0.28] md:opacity-[0.31]')
+        )}
+      </motion.div>
     </div>
   );
 };
