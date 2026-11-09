@@ -23,6 +23,7 @@ import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
+import { getTbilisiNow, formatGeorgianDate } from '../utils/tbilisiDate';
 
 const DAY_NAMES_BY_INDEX = [
   'კვირა',
@@ -72,8 +73,45 @@ export const HomeworkSection: React.FC = () => {
     openAuthModal,
   } = usePlatform();
 
+  const tbilisiNow = useMemo(() => getTbilisiNow(), []);
+  const todayString = tbilisiNow.dateString;
+
+  // Calculate current school week Monday through Friday
+  const baseWeekDays = useMemo(() => {
+    const currentW = tbilisiNow.weekday; // 1 (Mon) .. 7 (Sun)
+    const offsetToMonday = 1 - currentW;
+    const nowRef = new Date(tbilisiNow.year, tbilisiNow.month - 1, tbilisiNow.day);
+
+    const days: { date: string; label: string; dayName: string; shortDay: string }[] = [];
+    const DAY_NAMES = ['ორშაბათი', 'სამშაბათი', 'ოთხშაბათი', 'ხუთშაბათი', 'პარასკევი'];
+    const DAY_SHORTS = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ'];
+    const MONTH_SHORTS = ['იანვ', 'თებ', 'მარტ', 'აპრ', 'მაის', 'ივნ', 'ივლ', 'აგვ', 'სექტ', 'ოქტ', 'ნოემ', 'დეკ'];
+
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(nowRef);
+      d.setDate(nowRef.getDate() + offsetToMonday + i);
+      const y = d.getFullYear();
+      const m = d.getMonth() + 1;
+      const dayNum = d.getDate();
+      const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
+      days.push({
+        date: dateStr,
+        label: `${dayNum} ${MONTH_SHORTS[d.getMonth()]}`,
+        dayName: DAY_NAMES[i],
+        shortDay: DAY_SHORTS[i],
+      });
+    }
+    return days;
+  }, [tbilisiNow]);
+
   const [viewMode, setViewMode] = useState<'homework' | 'timetable'>('homework');
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-13');
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    if (tbilisiNow.weekday >= 1 && tbilisiNow.weekday <= 5) {
+      return tbilisiNow.dateString;
+    }
+    return baseWeekDays[0]?.date || tbilisiNow.dateString;
+  });
+
   const [completedMap, setCompletedMap] = useState<Record<string, boolean>>(() => {
     try {
       const saved = localStorage.getItem('class11_5_hw_completed_v1');
@@ -87,7 +125,7 @@ export const HomeworkSection: React.FC = () => {
 
   // Add Homework Modal
   const [isAddHwOpen, setIsAddHwOpen] = useState(false);
-  const [hwDate, setHwDate] = useState('2026-10-13');
+  const [hwDate, setHwDate] = useState(() => tbilisiNow.dateString);
   const [hwSubject, setHwSubject] = useState('მათემატიკა');
   const [hwTeacher, setHwTeacher] = useState('ნანა ჯაფარიძე');
   const [hwTitle, setHwTitle] = useState('');
@@ -95,7 +133,11 @@ export const HomeworkSection: React.FC = () => {
   const [submitBanner, setSubmitBanner] = useState<string | null>(null);
 
   // Mobile timetable selected day tab
-  const [mobileTimetableDay, setMobileTimetableDay] = useState<string>('სამშაბათი');
+  const [mobileTimetableDay, setMobileTimetableDay] = useState<string>(() => {
+    return tbilisiNow.weekday >= 1 && tbilisiNow.weekday <= 5
+      ? tbilisiNow.weekdayGeorgian
+      : 'ორშაბათი';
+  });
 
   // Admin Timetable Editing
   const [isEditingTimetable, setIsEditingTimetable] = useState(false);
@@ -114,15 +156,6 @@ export const HomeworkSection: React.FC = () => {
       return updated;
     });
   };
-
-  // Weekdays buttons for current school week
-  const baseWeekDays = [
-    { date: '2026-10-12', label: '12 ოქტ', dayName: 'ორშაბათი', shortDay: 'ორშ' },
-    { date: '2026-10-13', label: '13 ოქტ', dayName: 'სამშაბათი', shortDay: 'სამ' },
-    { date: '2026-10-14', label: '14 ოქტ', dayName: 'ოთხშაბათი', shortDay: 'ოთხ' },
-    { date: '2026-10-15', label: '15 ოქტ', dayName: 'ხუთშაბათი', shortDay: 'ხუთ' },
-    { date: '2026-10-16', label: '16 ოქტ', dayName: 'პარასკევი', shortDay: 'პარ' },
-  ];
 
   const currentSelectedFormatted = formatGeoDate(selectedDate);
   const currentSelectedDayInfo =
@@ -144,6 +177,11 @@ export const HomeworkSection: React.FC = () => {
   const activeDayHomeworks = useMemo(() => {
     return visibleHomeworks.filter((h) => h.date === selectedDate);
   }, [visibleHomeworks, selectedDate]);
+
+  // Separate overdue homework from upcoming work with persistent completion state
+  const overdueHomeworks = useMemo(() => {
+    return visibleHomeworks.filter((h) => h.date < todayString && !completedMap[h.id]);
+  }, [visibleHomeworks, todayString, completedMap]);
 
   const activeDaySchedule = timetable.find((d) => d.dayId === currentSelectedDayInfo.dayName);
 
@@ -263,7 +301,7 @@ export const HomeworkSection: React.FC = () => {
                 setHwDate(selectedDate);
                 setIsAddHwOpen(true);
               }}
-              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer"
+              className="px-3 py-1.5 rounded-xl btn-primary text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>დამატება</span>
@@ -319,10 +357,49 @@ export const HomeworkSection: React.FC = () => {
           ========================================================================= */}
       {viewMode === 'homework' && (
         <div className="space-y-6 min-w-0">
+          {/* Overdue Homework Banner (Separated from upcoming work with persistent state) */}
+          {overdueHomeworks.length > 0 && (
+            <div className="card-surface p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 space-y-2.5">
+              <div className="flex items-center justify-between text-xs font-bold text-rose-600 dark:text-rose-400">
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5" />
+                  <span>ვადაგასული დავალებები ({overdueHomeworks.length})</span>
+                </span>
+                <span className="text-[11px] font-normal text-[var(--text-muted)]">
+                  გთხოვთ მონიშნოთ დასრულებისას
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                {overdueHomeworks.map((hw) => (
+                  <div
+                    key={hw.id}
+                    className="flex items-center justify-between py-2 px-3 rounded-xl card-third text-xs gap-2"
+                  >
+                    <div className="flex items-center gap-2 truncate">
+                      <span className="font-bold text-rose-600 dark:text-rose-400 text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 shrink-0">
+                        {hw.subject}
+                      </span>
+                      <span className="truncate text-[var(--text-primary)] font-medium">{hw.title}</span>
+                      <span className="text-[10px] font-mono text-[var(--text-muted)] shrink-0">
+                        {hw.displayDate}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleToggleComplete(hw.id)}
+                      className="px-2.5 py-1 rounded-lg btn-primary text-[10px] font-bold shrink-0 cursor-pointer"
+                    >
+                      დასრულება
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Weekday Strip + Date Control */}
           <div className="card-surface p-3 sm:p-4 space-y-2.5 shadow-sm min-w-0">
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
+            <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+              <span className="font-semibold text-[var(--text-primary)]">
                 აირჩიეთ თარიღი:
               </span>
               <input
@@ -331,7 +408,7 @@ export const HomeworkSection: React.FC = () => {
                 onChange={(e) => {
                   if (e.target.value) setSelectedDate(e.target.value);
                 }}
-                className="bg-transparent text-xs font-mono text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 rounded-lg px-2 py-0.5"
+                className="bg-transparent text-xs font-mono text-[var(--text-secondary)] border border-[var(--border-subtle)] rounded-lg px-2 py-0.5"
               />
             </div>
 
@@ -348,8 +425,8 @@ export const HomeworkSection: React.FC = () => {
                     }}
                     className={`p-2 sm:p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center relative min-w-0 ${
                       isSelected
-                        ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-sm'
-                        : 'bg-slate-50 dark:bg-white/5 border-slate-200/70 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-indigo-400/30'
+                        ? 'btn-primary font-bold shadow-xs border-[var(--primary-action)]'
+                        : 'card-third border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--primary-action)]/30'
                     }`}
                   >
                     <span className="text-[10px] font-mono opacity-80">{day.shortDay}</span>
@@ -482,10 +559,10 @@ export const HomeworkSection: React.FC = () => {
                       </div>
 
                       {/* Expandable Resource & Comment Bar */}
-                      <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
+                      <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
                         <button
                           onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
-                          className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-3 cursor-pointer"
+                          className="font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-3 cursor-pointer"
                         >
                           <span className="flex items-center gap-1">
                             <FileText className="w-3.5 h-3.5" />
@@ -597,8 +674,8 @@ export const HomeworkSection: React.FC = () => {
                     onClick={() => setMobileTimetableDay(day.dayId)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                       isSelected
-                        ? 'bg-indigo-600 text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+                        ? 'btn-primary shadow-xs'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     {day.dayId}
@@ -850,7 +927,7 @@ export const HomeworkSection: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white cursor-pointer"
+                    className="px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer"
                   >
                     დამატება
                   </button>

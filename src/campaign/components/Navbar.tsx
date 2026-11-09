@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Home,
   Calendar,
   CheckSquare,
   FolderOpen,
@@ -15,9 +14,8 @@ import {
   Compass,
   MessageSquare,
   Rocket,
-  Info,
+  Play,
   X,
-  Play
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
@@ -57,12 +55,12 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleTheme,
   onOpenVideo,
 }) => {
-  const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
   const { user, isAdmin, pendingCounts, openAuthModal, openAdminModal, logout } = usePlatform();
+  const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
 
-  const handleNavClick = (id: ActiveTab) => {
+  const handleNavClick = (tab: ActiveTab) => {
     soundEffects.click();
-    onSelectTab(id);
+    onSelectTab(tab);
     setIsMoreSheetOpen(false);
   };
 
@@ -75,7 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       case 'homework':
         return 'დავალებები & ცხრილი';
       case 'materials':
-        return 'სასწავლო მასალები';
+        return 'მასალები & არქივი';
       case 'opportunities':
         return 'შესაძლებლობები';
       case 'ideas':
@@ -92,7 +90,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <>
       {/* =========================================================================
-          DESKTOP & MOBILE TOP HEADER
+          DESKTOP & MOBILE TOP HEADER (Edge-to-edge full width glass)
           ========================================================================= */}
       <header className="sticky top-0 z-40 w-full glass-nav transition-colors">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-3">
@@ -102,21 +100,21 @@ export const Navbar: React.FC<NavbarProps> = ({
             className="flex items-center gap-2.5 text-left group cursor-pointer shrink-0"
             aria-label="მთავარ გვერდზე გადასვლა"
           >
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-mono font-bold text-xs shadow-sm shadow-indigo-600/20 group-hover:bg-indigo-500 transition-colors">
+            <div className="w-7 h-7 rounded-lg btn-primary flex items-center justify-center font-mono font-bold text-xs shadow-xs group-hover:opacity-90 transition-opacity">
               11/5
             </div>
             <div className="flex flex-col">
-              <span className="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
+              <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-1.5">
                 <span>კომაროვი</span>
-                <span className="hidden sm:inline text-[11px] font-normal text-slate-500 dark:text-slate-400">
-                  • 11/5 კლასი
+                <span className="hidden sm:inline text-[11px] font-normal text-[var(--text-muted)]">
+                  &bull; 11/5 კლასი
                 </span>
               </span>
             </div>
           </button>
 
           {/* Mobile Current Section Title (Center) */}
-          <div className="lg:hidden text-xs font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[160px]">
+          <div className="lg:hidden text-xs font-semibold text-[var(--text-primary)] truncate max-w-[160px]">
             {getActiveTabTitle()}
           </div>
 
@@ -130,8 +128,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   onClick={() => handleNavClick(link.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer relative whitespace-nowrap ${
                     isActive
-                      ? 'bg-indigo-600 text-white font-semibold shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'btn-primary font-semibold shadow-xs'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
                   {link.label}
@@ -145,24 +143,24 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Theme Toggle Button */}
             <button
               onClick={onToggleTheme}
-              className="p-2 rounded-xl text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 dark:hover:bg-white/5 transition-colors cursor-pointer"
+              className="p-2 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
               aria-label={theme === 'dark' ? 'ღია თემაზე გადართვა' : 'მუქ თემაზე გადართვა'}
               title={theme === 'dark' ? 'ღია თემა' : 'მუქი თემა'}
             >
-              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4" />}
             </button>
 
             {/* Admin Badge & Quick Access (If Admin) */}
             {isAdmin && (
               <button
                 onClick={() => openAdminModal('approvals')}
-                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-400/15 text-amber-600 dark:text-amber-300 border border-amber-400/30 text-xs font-semibold hover:bg-amber-400/25 transition-colors cursor-pointer"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 text-xs font-semibold hover:bg-amber-500/25 transition-colors cursor-pointer"
                 title="ადმინ პანელი"
               >
-                <Shield className="w-3.5 h-3.5 text-amber-500" />
+                <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>ადმინი</span>
                 {pendingCounts.total > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  <span className="w-4 h-4 rounded-full bg-amber-600 text-white text-[10px] font-bold flex items-center justify-center">
                     {pendingCounts.total}
                   </span>
                 )}
@@ -174,15 +172,15 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => openAdminModal('users')}
-                  className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-800 dark:text-slate-200 text-xs font-medium hover:bg-slate-200 dark:hover:bg-white/15 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-2.5 py-1 rounded-xl card-third text-[var(--text-primary)] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer"
                   title="აქაუნთი"
                 >
-                  <User className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
+                  <User className="w-3.5 h-3.5 text-[var(--text-muted)]" />
                   <span className="max-w-[100px] truncate">{user.fullName || user.username}</span>
                 </button>
                 <button
                   onClick={logout}
-                  className="p-1.5 rounded-xl text-slate-500 hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                  className="p-1.5 rounded-xl text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                   title="გამოსვლა"
                   aria-label="გამოსვლა"
                 >
@@ -192,7 +190,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 onClick={() => openAuthModal('login')}
-                className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer"
+                className="px-3.5 py-1.5 rounded-xl btn-primary text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>შესვლა</span>
@@ -209,17 +207,23 @@ export const Navbar: React.FC<NavbarProps> = ({
         aria-label="მობილური ნავიგაცია"
         className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-sheet pb-[max(0.5rem,env(safe-area-inset-bottom))] transition-colors"
       >
-        <div className="grid grid-cols-5 h-14 max-w-md mx-auto px-2">
+        <div className="grid grid-cols-5 h-14 items-center px-1">
           {/* Tab 1: Home */}
           <button
             onClick={() => handleNavClick('home')}
             className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === 'home'
-                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'text-[var(--primary-action)] font-semibold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <Home className="w-4 h-4" />
+            <div
+              className={`w-4 h-4 rounded flex items-center justify-center text-[10px] font-bold ${
+                activeTab === 'home' ? 'btn-primary text-white' : 'card-third text-[var(--text-secondary)]'
+              }`}
+            >
+              11
+            </div>
             <span className="text-[10px]">მთავარი</span>
           </button>
 
@@ -228,8 +232,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleNavClick('calendar')}
             className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === 'calendar'
-                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'text-[var(--primary-action)] font-semibold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <Calendar className="w-4 h-4" />
@@ -241,8 +245,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleNavClick('homework')}
             className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === 'homework'
-                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'text-[var(--primary-action)] font-semibold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <CheckSquare className="w-4 h-4" />
@@ -254,8 +258,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => handleNavClick('materials')}
             className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer ${
               activeTab === 'materials'
-                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'text-[var(--primary-action)] font-semibold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <FolderOpen className="w-4 h-4" />
@@ -274,8 +278,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               activeTab === 'ideas' ||
               activeTab === 'clubs' ||
               activeTab === 'about'
-                ? 'text-indigo-600 dark:text-indigo-400 font-semibold'
-                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                ? 'text-[var(--primary-action)] font-semibold'
+                : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
             }`}
           >
             <MoreHorizontal className="w-4 h-4" />
@@ -298,7 +302,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMoreSheetOpen(false)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
               aria-hidden="true"
             />
 
@@ -309,57 +313,58 @@ export const Navbar: React.FC<NavbarProps> = ({
               transition={{ type: 'spring', stiffness: 400, damping: 38 }}
               className="relative z-10 glass-sheet rounded-t-3xl p-5 pb-[max(2rem,env(safe-area-inset-bottom))] shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto"
             >
-              {/* Handle Capsule */}
-              <div className="w-10 h-1 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto" />
+              {/* Sheet Drag Handle */}
+              <div className="w-10 h-1 rounded-full bg-slate-300 dark:bg-slate-700 mx-auto" />
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  სხვა განყოფილებები
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+                  საზოგადოება &bull; 11/5
                 </span>
                 <button
                   onClick={() => setIsMoreSheetOpen(false)}
-                  className="p-1.5 rounded-full hover:bg-slate-200/60 dark:hover:bg-white/10 text-slate-500"
+                  className="p-1 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              {/* Grid of secondary destinations */}
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleNavClick('opportunities')}
-                  className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-left flex flex-col gap-1.5 hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer"
+                  className="p-3.5 rounded-2xl card-surface text-left flex flex-col gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                  <Compass className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  <Compass className="w-5 h-5 text-[var(--primary-action)]" />
+                  <span className="text-xs font-bold text-[var(--text-primary)]">
                     შესაძლებლობები
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                    Zoom ალუმნებთან
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    ალუმნები & ვებინარები
                   </span>
                 </button>
 
                 <button
                   onClick={() => handleNavClick('ideas')}
-                  className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-left flex flex-col gap-1.5 hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer"
+                  className="p-3.5 rounded-2xl card-surface text-left flex flex-col gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                  <MessageSquare className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  <MessageSquare className="w-5 h-5 text-[var(--primary-action)]" />
+                  <span className="text-xs font-bold text-[var(--text-primary)]">
                     იდეების დაფა
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] text-[var(--text-muted)]">
                     წინადადებები & ხმები
                   </span>
                 </button>
 
                 <button
                   onClick={() => handleNavClick('clubs')}
-                  className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-left flex flex-col gap-1.5 hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer"
+                  className="p-3.5 rounded-2xl card-surface text-left flex flex-col gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                  <Rocket className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  <Rocket className="w-5 h-5 text-[var(--primary-action)]" />
+                  <span className="text-xs font-bold text-[var(--text-primary)]">
                     კლუბები & ჯგუფები
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] text-[var(--text-muted)]">
                     სივრცეები & მეცადინეობა
                   </span>
                 </button>
@@ -369,13 +374,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setIsMoreSheetOpen(false);
                     if (onOpenVideo) onOpenVideo();
                   }}
-                  className="p-3.5 rounded-2xl bg-white/70 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 text-left flex flex-col gap-1.5 hover:bg-white dark:hover:bg-white/10 transition-colors cursor-pointer"
+                  className="p-3.5 rounded-2xl card-surface text-left flex flex-col gap-1.5 hover:opacity-90 transition-opacity cursor-pointer"
                 >
-                  <Play className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                  <Play className="w-5 h-5 text-[var(--primary-action)]" />
+                  <span className="text-xs font-bold text-[var(--text-primary)]">
                     რატომ ავირჩიოთ
                   </span>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] text-[var(--text-muted)]">
                     ვიდეო მიმართვა
                   </span>
                 </button>
@@ -383,20 +388,20 @@ export const Navbar: React.FC<NavbarProps> = ({
 
               {/* Admin Dashboard Entry in More menu */}
               {isAdmin && (
-                <div className="pt-2 border-t border-slate-200/70 dark:border-white/10">
+                <div className="pt-2 border-t border-[var(--border-subtle)]">
                   <button
                     onClick={() => {
                       setIsMoreSheetOpen(false);
                       openAdminModal('approvals');
                     }}
-                    className="w-full p-3 rounded-2xl bg-amber-400/15 border border-amber-400/30 text-amber-700 dark:text-amber-300 font-semibold text-xs flex items-center justify-between cursor-pointer"
+                    className="w-full p-3 rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold text-xs flex items-center justify-between cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-amber-500" />
+                      <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                       <span>ადმინ პანელი (დადასტურებები & მართვა)</span>
                     </div>
                     {pendingCounts.total > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-bold">
                         {pendingCounts.total}
                       </span>
                     )}

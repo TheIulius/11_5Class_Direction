@@ -13,42 +13,25 @@ import {
   ChevronRight,
   User,
   GraduationCap,
-  MessageSquare
+  MessageSquare,
+  AlertCircle,
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
 import { ActiveTab } from './Navbar';
-import { CalendarEvent } from '../data/campaignData';
+import { CalendarEvent, HomeworkAssignment } from '../data/campaignData';
+import {
+  getTbilisiNow,
+  getTbilisiTodayString,
+  getCurrentActivePeriod,
+  formatGeorgianDate,
+  LESSON_PERIOD_TIMES,
+} from '../utils/tbilisiDate';
 
 interface HeroSectionProps {
   onNavigateTab: (tab: ActiveTab) => void;
   onOpenVideo?: () => void;
 }
-
-const GEORGIAN_DAYS = [
-  'კვირა',
-  'ორშაბათი',
-  'სამშაბათი',
-  'ოთხშაბათი',
-  'ხუთშაბათი',
-  'პარასკევი',
-  'შაბათი',
-];
-
-const GEORGIAN_MONTHS = [
-  'იანვარი',
-  'თებერვალი',
-  'მარტი',
-  'აპრილი',
-  'მაისი',
-  'ივნისი',
-  'ივლისი',
-  'აგვისტო',
-  'სექტემბერი',
-  'ოქტომბერი',
-  'ნოემბერი',
-  'დეკემბერი',
-];
 
 // Curated class photos for a quiet, authentic memory strip
 const CURATED_CLASS_PHOTOS = [
@@ -63,6 +46,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
+  // Real Tbilisi Date & Time (auto-refreshes every 30s or on visibilitychange)
+  const [tbilisiTime, setTbilisiTime] = useState(() => getTbilisiNow());
+  const [completedHw, setCompletedHw] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('class11_5_completed_homework');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
+  useEffect(() => {
+    const handleRefresh = () => setTbilisiTime(getTbilisiNow());
+    const interval = setInterval(handleRefresh, 30000);
+    window.addEventListener('focus', handleRefresh);
+    document.addEventListener('visibilitychange', handleRefresh);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleRefresh);
+      document.removeEventListener('visibilitychange', handleRefresh);
+    };
+  }, []);
+
   useEffect(() => {
     if (isVideoOpen && videoRef.current) {
       videoRef.current.currentTime = 0;
@@ -70,398 +76,429 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
     }
   }, [isVideoOpen]);
 
-  // Today's real local date
-  const now = useMemo(() => new Date(), []);
-  const todayDayName = GEORGIAN_DAYS[now.getDay()];
-  const todayFormatted = `${now.getDate()} ${GEORGIAN_MONTHS[now.getMonth()]}, ${todayDayName}`;
+  const toggleHomeworkComplete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    soundEffects.success();
+    setCompletedHw((prev) => {
+      const next = { ...prev, [id]: !prev[id] };
+      try {
+        localStorage.setItem('class11_5_completed_homework', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
 
-  // Find today's timetable or default to Monday/Tuesday
+  const todayString = tbilisiTime.dateString;
+  const activePeriod = getCurrentActivePeriod();
+
+  // Find today's timetable based on real weekday in Tbilisi
+  // If weekend (Sat=6, Sun=7), default to Monday (dayId: 'ორშაბათი')
+  const timetableDayId = tbilisiTime.weekday >= 1 && tbilisiTime.weekday <= 5
+    ? tbilisiTime.weekdayGeorgian
+    : 'ორშაბათი';
+
   const todaySchedule = useMemo(() => {
-    const match = platform.timetable.find((d) => d.dayId === todayDayName);
-    return match || platform.timetable[1] || platform.timetable[0]; // fallback to Tuesday (contains Math Nana)
-  }, [platform.timetable, todayDayName]);
+    const match = platform.timetable.find((d) => d.dayId === timetableDayId);
+    return match || platform.timetable[0];
+  }, [platform.timetable, timetableDayId]);
 
-  // Upcoming Assessments (შემაჯამებელი / დამოუკიდებელი)
+  // Real Upcoming Assessments (შემაჯამებელი / დამოუკიდებელი)
+  // Strictly filter by date >= today in Tbilisi. Never show past events as upcoming!
   const upcomingAssessments = useMemo(() => {
-    const items = platform.calendarEvents.filter(
-      (e) => e.category === 'შემაჯამებელი' || e.category === 'დამოუკიდებელი'
-    );
-    // Sort by date
+    const items = platform.calendarEvents
+      .filter((e) => {
+        const isAssessment = e.category === 'შემაჯამებელი' || e.category === 'დამოუკიდებელი';
+        return isAssessment && e.date >= todayString;
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
     return items.slice(0, 3);
-  }, [platform.calendarEvents]);
+  }, [platform.calendarEvents, todayString]);
 
-  // Active/Recent Homework items
+  // Active / Upcoming Homework items (due today or in future)
   const activeHomeworks = useMemo(() => {
-    return platform.homeworks.filter((h) => h.status !== 'rejected').slice(0, 3);
+    return platform.homeworks
+      .filter((h) => h.status !== 'rejected')
+      .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
+      .slice(0, 3);
   }, [platform.homeworks]);
 
-  // Next Alumni / Opportunity session
+  // Next Alumni Session (if in future)
   const nextOpportunity = useMemo(() => {
-    return platform.opportunities[0] || null;
-  }, [platform.opportunities]);
+    const upcoming = platform.opportunities.filter((o) => (o.date || '') >= todayString);
+    return upcoming[0] || platform.opportunities[0] || null;
+  }, [platform.opportunities, todayString]);
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
       {/* =========================================================================
-          TOP BAR: COMPACT GREETING & DATE
+          TOP BAR: COMPACT GREETING & REAL DATE IN TBILISI
           ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200/70 dark:border-white/10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
         <div className="space-y-0.5">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-              {todayFormatted}
+            <span className="text-xs font-semibold text-[var(--text-secondary)]">
+              {tbilisiTime.formattedDisplay}
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             კომაროვის 11/5 კლასი
           </h1>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
-          <button
-            onClick={() => {
-              soundEffects.click();
-              if (onOpenVideo) {
-                onOpenVideo();
-              } else {
-                setIsVideoOpen(true);
-              }
-            }}
-            className="px-3.5 py-1.5 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Play className="w-3.5 h-3.5 fill-current text-indigo-600 dark:text-indigo-400" />
-            <span>რატომ ავირჩიოთ</span>
-          </button>
-        </div>
+        <button
+          onClick={() => {
+            soundEffects.click();
+            if (onOpenVideo) onOpenVideo();
+            else setIsVideoOpen(true);
+          }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl card-third text-xs font-semibold text-[var(--text-primary)] hover:opacity-90 transition-opacity self-start sm:self-auto cursor-pointer"
+        >
+          <Play className="w-3.5 h-3.5 text-[var(--primary-action)] fill-[var(--primary-action)]" />
+          <span>რატომ ავირჩიოთ</span>
+        </button>
       </div>
 
       {/* =========================================================================
-          MAIN ASYMMETRIC GRID: ACADEMIC CORE (LEFT) vs SCHEDULE & COMMUNITY (RIGHT)
+          MAIN COMMAND CENTER GRID (2 COLUMNS)
           ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* =======================================================================
-            LEFT COLUMN (8 cols desktop): HOMEWORK, ASSESSMENTS, STUDY WORKSPACE
-            ======================================================================= */}
+        {/* =====================================================================
+            LEFT COLUMN (7 COLS): DAILY TASKS & UPCOMING ASSESSMENTS
+            ===================================================================== */}
         <div className="lg:col-span-7 space-y-6">
-          {/* Section: Today's Homework */}
-          <div className="card-surface p-5 sm:p-6 space-y-4 shadow-sm">
+          {/* Card 1: Today's Homework */}
+          <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl card-third flex items-center justify-center text-[var(--primary-action)]">
                   <BookOpen className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                    საშინაო დავალებები
-                  </h2>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    მიმდინარე დავალებები კალენდრით
-                  </p>
+                  <h2 className="text-sm font-bold text-[var(--text-primary)]">საშინაო დავალებები</h2>
+                  <p className="text-[11px] text-[var(--text-muted)]">მიმდინარე დავალებები კალენდრით</p>
                 </div>
               </div>
+
               <button
-                onClick={() => onNavigateTab('homework')}
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+                onClick={() => {
+                  soundEffects.click();
+                  onNavigateTab('homework');
+                }}
+                className="text-xs font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <span>სრულად</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            {activeHomeworks.length > 0 ? (
-              <div className="space-y-2.5">
-                {activeHomeworks.map((hw) => (
-                  <div
-                    key={hw.id}
-                    onClick={() => onNavigateTab('homework')}
-                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 hover:border-indigo-400/30 transition-all cursor-pointer flex items-start justify-between gap-3"
-                  >
-                    <div className="space-y-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                          {hw.subject}
-                        </span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                          {hw.displayDate}
-                        </span>
-                        {hw.teacher && (
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
-                            • {hw.teacher}
-                          </span>
-                        )}
+            {/* Homework List using third tonal surface instead of nested borders */}
+            <div className="space-y-2.5">
+              {activeHomeworks.length === 0 ? (
+                <div className="p-4 rounded-xl card-third text-center text-xs text-[var(--text-muted)]">
+                  დავალებები ამჟამად არ არის დამატებული.
+                </div>
+              ) : (
+                activeHomeworks.map((hw) => {
+                  const isDone = Boolean(completedHw[hw.id]);
+                  return (
+                    <div
+                      key={hw.id}
+                      onClick={() => onNavigateTab('homework')}
+                      className={`p-3.5 rounded-xl card-third transition-all cursor-pointer ${
+                        isDone ? 'opacity-60' : 'hover:opacity-95'
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <button
+                          type="button"
+                          onClick={(e) => toggleHomeworkComplete(hw.id, e)}
+                          className={`mt-0.5 w-4 h-4 rounded-md flex items-center justify-center transition-colors ${
+                            isDone
+                              ? 'bg-emerald-600 text-white'
+                              : 'border border-[var(--text-muted)] hover:border-[var(--primary-action)]'
+                          }`}
+                          aria-label={isDone ? 'მონიშვნის მოხსნა' : 'შესრულებულად მონიშვნა'}
+                        >
+                          {isDone && <CheckCircle2 className="w-3.5 h-3.5" />}
+                        </button>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] mb-0.5">
+                            <span className="font-semibold text-[var(--primary-action)]">{hw.subject}</span>
+                            <span>&bull;</span>
+                            <span>{hw.displayDate || formatGeorgianDate(hw.date)}</span>
+                            {hw.teacher && (
+                              <>
+                                <span>&bull;</span>
+                                <span className="truncate">{hw.teacher}</span>
+                              </>
+                            )}
+                          </div>
+                          <h3
+                            className={`text-xs font-bold text-[var(--text-primary)] truncate ${
+                              isDone ? 'line-through text-[var(--text-muted)]' : ''
+                            }`}
+                          >
+                            {hw.title}
+                          </h3>
+                          {hw.notes && (
+                            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-1">
+                              {hw.notes}
+                            </p>
+                          )}
+                        </div>
+
+                        <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0 self-center" />
                       </div>
-                      <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 leading-snug">
-                        {hw.title}
-                      </h3>
-                      {hw.notes && (
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                          {hw.notes}
-                        </p>
-                      )}
                     </div>
-                    <ArrowRight className="w-4 h-4 text-slate-400 shrink-0 mt-1" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs text-slate-500 dark:text-slate-400 py-3 text-center">
-                აქტიური დავალება არ არის.
-              </p>
-            )}
+                  );
+                })
+              )}
+            </div>
           </div>
 
-          {/* Section: Upcoming Assessments */}
-          <div className="card-surface p-5 sm:p-6 space-y-4 shadow-sm">
+          {/* Card 2: Upcoming Assessments (Real dynamic date filtering) */}
+          <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl card-third flex items-center justify-center text-amber-600 dark:text-amber-400">
                   <CalendarIcon className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                    მოახლოებული შემაჯამებლები
-                  </h2>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    აკადემიური კალენდრის შეფასებები
-                  </p>
+                  <h2 className="text-sm font-bold text-[var(--text-primary)]">მოახლოებული შემაჯამებლები</h2>
+                  <p className="text-[11px] text-[var(--text-muted)]">აკადემიური კალენდრის შეფასებები</p>
                 </div>
               </div>
+
               <button
-                onClick={() => onNavigateTab('calendar')}
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+                onClick={() => {
+                  soundEffects.click();
+                  onNavigateTab('calendar');
+                }}
+                className="text-xs font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <span>კალენდარი</span>
                 <ChevronRight className="w-3.5 h-3.5" />
               </button>
             </div>
 
+            {/* Assessment items or honest empty state */}
             <div className="space-y-2.5">
-              {upcomingAssessments.map((evt) => (
-                <div
-                  key={evt.id}
-                  onClick={() => onNavigateTab('calendar')}
-                  className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 hover:border-rose-400/30 transition-all cursor-pointer flex items-start justify-between gap-3"
-                >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20">
-                        {evt.category}
-                      </span>
-                      <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                        {evt.date}
-                      </span>
-                      {evt.teacher && (
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">
-                          • {evt.teacher}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                      {evt.title}
-                    </h3>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                      {evt.description}
-                    </p>
-                  </div>
-                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 shrink-0 mt-1">
-                    ნახვა
-                  </span>
+              {upcomingAssessments.length === 0 ? (
+                <div className="p-5 rounded-xl card-third text-center space-y-1">
+                  <p className="text-xs font-medium text-[var(--text-primary)]">
+                    ამ ეტაპზე მოახლოებული შემაჯამებელი არ არის
+                  </p>
+                  <p className="text-[11px] text-[var(--text-muted)]">
+                    ახალი შემაჯამებლები და დამოუკიდებლები გამოჩნდება მასწავლებლების მიერ დანიშვნისთანავე.
+                  </p>
                 </div>
-              ))}
-            </div>
-          </div>
+              ) : (
+                upcomingAssessments.map((ev) => (
+                  <div
+                    key={ev.id}
+                    onClick={() => onNavigateTab('calendar')}
+                    className="p-3.5 rounded-xl card-third hover:opacity-95 transition-opacity cursor-pointer flex items-center justify-between gap-3"
+                  >
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex items-center gap-2 text-[11px]">
+                        <span className="font-semibold text-rose-600 dark:text-rose-400">{ev.category}</span>
+                        <span className="text-[var(--text-muted)]">&bull;</span>
+                        <span className="font-mono text-[var(--text-secondary)]">
+                          {formatGeorgianDate(ev.date, true)}
+                        </span>
+                        {ev.teacher && (
+                          <>
+                            <span className="text-[var(--text-muted)]">&bull;</span>
+                            <span className="text-[var(--text-muted)] truncate">{ev.teacher}</span>
+                          </>
+                        )}
+                      </div>
+                      <h3 className="text-xs font-bold text-[var(--text-primary)] truncate">{ev.title}</h3>
+                    </div>
 
-          {/* Section: Featured Study Module */}
-          <div className="card-surface p-5 sm:p-6 bg-gradient-to-br from-indigo-50/60 via-white to-slate-50 dark:from-indigo-950/20 dark:via-[#131826] dark:to-[#131826] border-indigo-200/80 dark:border-indigo-500/20 space-y-4 shadow-sm">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">
-                  სასწავლო მოდული
-                </span>
-                <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                  ქართული ლიტერატურა
-                </span>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100">
-                ქართული რომანტიზმი — სრული მოსამზადებელი
-              </h2>
-              <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">
-                7 საკვანძო ლექსი, ლექსიკონი, ანალიზი, ტესტები, აუდიო პოდკასტი და ვიდეო მიმოხილვა.
-              </p>
-            </div>
-
-            <div className="pt-1 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => onNavigateTab('materials')}
-                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer"
-              >
-                <span>მასალების გახსნა</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
+                    <span className="text-xs font-semibold text-[var(--primary-action)] shrink-0">
+                      ნახვა
+                    </span>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
 
-        {/* =======================================================================
-            RIGHT COLUMN (4 cols desktop): TIMETABLE, ALUMNI & CLASS IDENTITY
-            ======================================================================= */}
+        {/* =====================================================================
+            RIGHT COLUMN (5 COLS): TODAY'S LESSONS & FEATURED STUDY MODULE
+            ===================================================================== */}
         <div className="lg:col-span-5 space-y-6">
-          {/* Today's Timetable Card */}
-          <div className="card-surface p-5 space-y-3.5 shadow-sm">
+          {/* Card 3: Today's Timetable with REAL active lesson highlight */}
+          <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl card-third flex items-center justify-center text-[var(--primary-action)]">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                    {todaySchedule.dayId}ს განრიგი
+                  <h2 className="text-sm font-bold text-[var(--text-primary)]">
+                    {timetableDayId}ის განრიგი
                   </h2>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                    გაკვეთილების თანმიმდევრობა
+                  <p className="text-[11px] text-[var(--text-muted)]">
+                    {tbilisiTime.weekday >= 1 && tbilisiTime.weekday <= 5
+                      ? 'მიმდინარე დღის გაკვეთილები'
+                      : 'ორშაბათის საგაკვეთილო ცხრილი'}
                   </p>
                 </div>
               </div>
+
               <button
-                onClick={() => onNavigateTab('homework')}
-                className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                onClick={() => {
+                  soundEffects.click();
+                  onNavigateTab('homework');
+                }}
+                className="text-xs font-semibold text-[var(--primary-action)] hover:underline cursor-pointer"
               >
                 ცხრილი
               </button>
             </div>
 
-            <div className="divide-y divide-slate-100 dark:divide-white/5">
-              {todaySchedule.slots.map((slot) => (
-                <div
-                  key={`${todaySchedule.dayId}-${slot.period}`}
-                  className="py-2 flex items-center justify-between gap-2"
-                >
-                  <div className="min-w-0">
-                    <div className="text-xs font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                      <span className="font-mono text-slate-400 text-[11px]">{slot.period}.</span>
+            {/* Lessons List */}
+            <div className="space-y-1.5">
+              {todaySchedule.slots.map((slot) => {
+                const isCurrentLesson = activePeriod === slot.period;
+                const periodTime = LESSON_PERIOD_TIMES.find((p) => p.period === slot.period);
+
+                return (
+                  <div
+                    key={slot.period}
+                    className={`px-3 py-2 rounded-xl flex items-center justify-between text-xs transition-colors ${
+                      isCurrentLesson
+                        ? 'btn-primary font-bold shadow-xs'
+                        : 'card-third text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="font-mono text-[11px] opacity-75 shrink-0">
+                        {slot.period}.
+                      </span>
                       <span className="truncate">{slot.subject}</span>
+                      {isCurrentLesson && (
+                        <span className="px-1.5 py-0.2 rounded text-[10px] bg-white text-[var(--primary-action)] font-black uppercase">
+                          მიმდინარე
+                        </span>
+                      )}
                     </div>
-                    {slot.teacher && (
-                      <div className="text-[10px] text-slate-500 dark:text-slate-400 pl-4">
-                        {slot.teacher}
-                      </div>
-                    )}
+                    <span className="font-mono text-[10px] opacity-75 shrink-0 ml-2">
+                      {periodTime?.timeRange || ''}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded shrink-0">
-                    {slot.time}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
-          {/* Next Alumni Session Card */}
-          {nextOpportunity && (
-            <div className="card-surface p-5 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
-                  ალუმნების შეხვედრა
-                </span>
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                  {nextOpportunity.date}
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {nextOpportunity.speaker}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  {nextOpportunity.university}
-                </p>
-                <p className="text-xs text-slate-600 dark:text-slate-300 mt-2 line-clamp-2 leading-relaxed">
-                  {nextOpportunity.description}
-                </p>
-              </div>
-
-              <div className="pt-1">
-                <button
-                  onClick={() => onNavigateTab('opportunities')}
-                  className="w-full py-2 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-slate-900 dark:text-slate-100 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <Compass className="w-3.5 h-3.5" />
-                  <span>დეტალები & კითხვები</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Curated Class Photo Strip (Tasteful & Compact) */}
-          <div className="card-surface p-4 space-y-2.5 shadow-sm">
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-              <span className="font-semibold text-slate-700 dark:text-slate-300">
-                11/5 კლასი • 2026
+          {/* Card 4: Featured Study Resource (Links to Literature Module) */}
+          <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-[11px] font-semibold text-[var(--primary-action)]">
+                სასწავლო მოდული &bull; არქივი
               </span>
-              <span>კომაროვი</span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full card-third text-[var(--text-secondary)]">
+                ქართული ლიტერატურა
+              </span>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
-              {CURATED_CLASS_PHOTOS.map((photo, i) => (
-                <div
-                  key={i}
-                  className="aspect-square rounded-xl overflow-hidden bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10"
-                >
-                  <img
-                    src={photo.src}
-                    alt={photo.caption}
-                    loading="lazy"
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              ))}
+            <div>
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                ქართული რომანტიზმი &bull; 6 თემა
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
+                დაკარგული ედემი, გოგჩა, ვაჰ დრონი, საღამო გამოსალმებისა. ლექსიკონი, ტესტები და პოდკასტი.
+              </p>
             </div>
+
+            <button
+              onClick={() => {
+                soundEffects.click();
+                onNavigateTab('materials');
+              }}
+              className="w-full py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>მოდულის გახსნა</span>
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Video Modal ("რატომ ავირჩიოთ") */}
+      {/* =========================================================================
+          CURATED 4-PHOTO MEMORY STRIP
+          ========================================================================= */}
+      <div className="pt-4 border-t border-[var(--border-subtle)] space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
+            ჩვენი კლასის ფოტოები
+          </span>
+          <span className="text-xs text-[var(--text-muted)] font-mono">11/5 &bull; 2025–2026</span>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {CURATED_CLASS_PHOTOS.map((photo, i) => (
+            <div
+              key={i}
+              className="group relative rounded-xl overflow-hidden card-surface aspect-4/3 transition-all"
+            >
+              <img
+                src={photo.src}
+                alt={photo.caption}
+                loading="lazy"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-2.5">
+                <span className="text-[11px] font-medium text-white/90 truncate">
+                  {photo.caption}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Video Modal */}
       <AnimatePresence>
         {isVideoOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsVideoOpen(false)}
-              className="fixed inset-0 bg-black/75 backdrop-blur-md"
+              className="fixed inset-0 bg-black/80 backdrop-blur-md"
             />
-
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative z-10 w-full max-w-4xl bg-slate-900 border border-white/15 rounded-3xl overflow-hidden shadow-2xl"
+              className="relative w-full max-w-2xl card-surface rounded-2xl overflow-hidden z-10 shadow-2xl"
             >
-              <div className="flex items-center justify-between px-5 py-3.5 bg-slate-950/80 border-b border-white/10">
-                <span className="text-xs font-bold text-white">რატომ ავირჩიოთ — 11/5 კლასი</span>
+              <div className="p-4 flex items-center justify-between border-b border-[var(--border-subtle)]">
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">
+                  რატომ უნდა ამირჩიოთ &bull; ვიდეო მიმართვა
+                </h3>
                 <button
                   onClick={() => setIsVideoOpen(false)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white"
-                  aria-label="დახურვა"
+                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
-              <div className="bg-black aspect-video w-full flex items-center justify-center">
+              <div className="aspect-video bg-black">
                 <video
                   ref={videoRef}
-                  src="/videos/why-vote.mp4?v=2"
                   controls
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-contain"
-                >
-                  თქვენი ბრაუზერი ვერ ხსნის ვიდეოს.
-                </video>
+                  className="w-full h-full"
+                  src="/class-photos/574221162_1170889274945417_3289060677592474946_n.mp4"
+                />
               </div>
             </motion.div>
           </div>

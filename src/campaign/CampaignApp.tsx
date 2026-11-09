@@ -11,6 +11,9 @@ import { ArchiveSection } from './components/ArchiveSection';
 import { AuthModal } from './components/AuthModal';
 import { AdminDashboardModal } from './components/AdminDashboardModal';
 import { PlatformProvider, usePlatform } from './context/PlatformContext';
+import { ScatteredClassPhotos } from './components/ScatteredClassPhotos';
+import { LockedSectionPreview } from './components/LockedSectionPreview';
+import { isSectionLocked } from './config/features';
 import { Megaphone, Shield } from 'lucide-react';
 
 export interface CampaignAppProps {
@@ -115,12 +118,15 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
     }
   };
 
+  const isLegacyWelcome =
+    platform.announcement?.text?.includes('კეთილი იყოს თქვენი მობრძანება') ||
+    platform.announcement?.text?.includes('საიტზე ყველა მასალის ნახვა');
+
   return (
-    <div
-      className={`min-h-screen font-sans flex flex-col justify-between transition-colors duration-300 ${
-        theme === 'light' ? 'theme-light bg-[#f8f9fa] text-slate-900' : 'theme-dark bg-[#0b0e17] text-[#f5f2eb]'
-      }`}
-    >
+    <div className="relative min-h-screen font-sans flex flex-col justify-between transition-colors duration-300 bg-[var(--bg-page)] text-[var(--text-primary)]">
+      {/* Subtle scattered class photography layer (continuous background) */}
+      <ScatteredClassPhotos activeTab={activeTab} />
+
       <div className="relative z-10 flex-1">
         <Navbar
           activeTab={activeTab}
@@ -129,15 +135,15 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
           onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
         />
 
-        {/* Site-wide Admin Announcement Banner */}
-        {platform.announcement?.active && platform.announcement?.text && (
+        {/* Site-wide Admin Announcement Banner (filtered if legacy default text) */}
+        {platform.announcement?.active && platform.announcement?.text && !isLegacyWelcome && (
           <div
             className={`border-b px-4 py-2 text-xs font-semibold transition-colors ${
               platform.announcement.type === 'urgent'
                 ? 'bg-rose-600 text-white border-rose-500'
                 : platform.announcement.type === 'success'
                 ? 'bg-emerald-600 text-white border-emerald-500'
-                : 'bg-indigo-600 text-white border-indigo-500'
+                : 'bg-[var(--primary-action)] text-white border-[var(--primary-action-hover)]'
             }`}
           >
             <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
@@ -207,7 +213,11 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                <OpportunitiesSection />
+                {isSectionLocked('opportunities') ? (
+                  <LockedSectionPreview sectionType="opportunities" />
+                ) : (
+                  <OpportunitiesSection />
+                )}
               </motion.div>
             )}
 
@@ -220,7 +230,11 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                <IdeaBoardSection />
+                {isSectionLocked('ideas') ? (
+                  <LockedSectionPreview sectionType="ideas" />
+                ) : (
+                  <IdeaBoardSection />
+                )}
               </motion.div>
             )}
 
@@ -233,7 +247,11 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                <CommunityHubSection />
+                {isSectionLocked('clubs') ? (
+                  <LockedSectionPreview sectionType="clubs" />
+                ) : (
+                  <CommunityHubSection />
+                )}
               </motion.div>
             )}
 
@@ -254,13 +272,13 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
       </div>
 
       {/* Quiet, refined footer */}
-      <footer className="relative z-10 border-t border-slate-200/80 dark:border-white/10 py-6 px-4 sm:px-6 bg-white/40 dark:bg-black/20 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+      <footer className="relative z-10 border-t border-[var(--border-subtle)] py-6 px-4 sm:px-6 bg-[var(--surface-card)]/60 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-slate-800 dark:text-slate-200">11/5 კლასი</span>
-            <span className="text-slate-300 dark:text-slate-600">&bull;</span>
+            <span className="font-semibold text-[var(--text-primary)]">11/5 კლასი</span>
+            <span>&bull;</span>
             <span>კომაროვის სკოლა</span>
-            <span className="text-slate-300 dark:text-slate-600">&bull;</span>
+            <span>&bull;</span>
             <span className="font-mono text-[11px] opacity-70">2025–2026</span>
           </div>
 
@@ -269,7 +287,7 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
               <button
                 type="button"
                 onClick={() => openAdminModal('analytics')}
-                className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+                className="text-[11px] font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5" />
                 <span>ადმინ პანელი &amp; ანალიტიკა</span>

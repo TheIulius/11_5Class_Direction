@@ -8,6 +8,24 @@ export default {
   theme: {
     extend: {
       colors: {
+        brand: {
+          action: '#326CAD',
+          actionDark: '#367BC4',
+          actionHover: '#285B94',
+          actionHoverDark: '#458ADA',
+          page: '#F5F1E8',
+          pageDark: '#0B1422',
+          surface: '#FCF9F3',
+          surfaceDark: '#111F33',
+          third: '#ECE8DE',
+          thirdDark: '#182C40',
+          elevated: '#FFFFFF',
+          elevatedDark: '#16273F',
+          text: '#292D32',
+          textDark: '#E9EEF4',
+          muted: '#62666A',
+          mutedDark: '#A5B3C4',
+        },
         pl: {
           purple: '#37003c',
           'purple-dark': '#240027',

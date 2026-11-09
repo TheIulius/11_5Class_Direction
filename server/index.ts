@@ -4502,8 +4502,8 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
     data.platform = {
       updatedAt: Date.now(),
       announcement: {
-        text: 'კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.',
-        active: true,
+        text: '',
+        active: false,
         type: 'info',
         updatedAt: new Date().toISOString(),
       },
@@ -5392,86 +5392,17 @@ app.delete('/api/platform/opportunities/:id', (req: Request, res: Response) => {
   res.json({ success: true, opportunities: p.opportunities });
 });
 
-app.post('/api/platform/opportunities/:id/rsvp', (req: Request, res: Response) => {
-  const auth = getPlatformAuthUser(req);
-  const { id } = req.params;
-  const data = db.getData();
-  const p = initPlatformCMS(data);
-  const opp = p.opportunities.find((o: any) => o.id === id);
-  if (!opp) return res.status(404).json({ error: 'სესია ვერ მოიძებნა.' });
-
-  const userKey = auth ? auth.user.username : getClientIp(req);
-  if (!Array.isArray(opp.rsvpUsers)) opp.rsvpUsers = [];
-  if (opp.rsvpUsers.includes(userKey)) {
-    opp.rsvpUsers = opp.rsvpUsers.filter((u: string) => u !== userKey);
-    opp.rsvpCount = Math.max(0, (opp.rsvpCount || 1) - 1);
-  } else {
-    opp.rsvpUsers.push(userKey);
-    opp.rsvpCount = (opp.rsvpCount || 0) + 1;
-  }
-  savePlatformCMS(data, `Opportunity RSVP toggled: ${opp.speaker}`);
-  res.json({ success: true, opportunities: p.opportunities });
+app.post('/api/platform/opportunities/:id/rsvp', (_req: Request, res: Response) => {
+  return res.status(403).json({ error: 'coming soon!' });
 });
 
-app.post('/api/platform/opportunities/:id/question', (req: Request, res: Response) => {
-  const auth = getPlatformAuthUser(req);
-  const { id } = req.params;
-  const { question } = req.body || {};
-  if (!question || !String(question).trim()) {
-    return res.status(400).json({ error: 'კითხვის ტექსტი სავალდებულოა.' });
-  }
-  const data = db.getData();
-  const p = initPlatformCMS(data);
-  const opp = p.opportunities.find((o: any) => o.id === id);
-  if (!opp) return res.status(404).json({ error: 'სესია ვერ მოიძებნა.' });
-
-  const qItem = {
-    id: 'oppq_' + Date.now(),
-    opportunityId: id,
-    speaker: opp.speaker,
-    authorName: auth ? auth.user.realName || auth.user.managerName || auth.user.username : 'მოსწავლე (სტუმარი)',
-    authorUsername: auth ? auth.user.username : 'guest',
-    question: String(question).trim(),
-    createdAt: new Date().toISOString(),
-  };
-  p.opportunityQuestions.unshift(qItem);
-  savePlatformCMS(data, `Question submitted for speaker ${opp.speaker}`);
-  res.json({ success: true, opportunityQuestions: p.opportunityQuestions });
+app.post('/api/platform/opportunities/:id/question', (_req: Request, res: Response) => {
+  return res.status(403).json({ error: 'coming soon!' });
 });
 
-// 12. Ideas Board CRUD & Upvote
-app.post('/api/platform/ideas', (req: Request, res: Response) => {
-  const auth = getPlatformAuthUser(req);
-  const body = req.body || {};
-  const ideaContent = String(body.content || body.description || '').trim();
-  if (!body.title) {
-    return res.status(400).json({ error: 'სათაური სავალდებულოა.' });
-  }
-  const data = db.getData();
-  const p = initPlatformCMS(data);
-
-  const authorDisplay = body.isAnonymous
-    ? 'ანონიმური მოსწავლე'
-    : auth
-    ? `${auth.user.realName || auth.user.username} (11/5)`
-    : body.author || 'მოსწავლე 11/5';
-
-  const newIdea = {
-    id: 'idea_' + Date.now(),
-    title: String(body.title).trim(),
-    content: ideaContent,
-    author: authorDisplay,
-    category: body.category || 'სასკოლო რეფორმა',
-    upvotes: 1,
-    upvotedBy: auth ? [auth.user.id] : [],
-    statusLabel: body.statusLabel || 'განხილვაშია',
-    timestamp: 'ახლახან',
-    commentsCount: 0,
-    comments: [],
-  };
-  p.ideas.unshift(newIdea);
-  savePlatformCMS(data, `New idea submitted: ${newIdea.title}`);
-  res.json({ success: true, idea: newIdea, ideas: p.ideas });
+// 12. Ideas Board CRUD & Upvote (Section Locked: coming soon!)
+app.post('/api/platform/ideas', (_req: Request, res: Response) => {
+  return res.status(403).json({ error: 'coming soon!' });
 });
 
 app.put('/api/platform/ideas/:id', (req: Request, res: Response) => {
@@ -5502,50 +5433,13 @@ app.delete('/api/platform/ideas/:id', (req: Request, res: Response) => {
   res.json({ success: true, ideas: p.ideas });
 });
 
-app.post('/api/platform/ideas/:id/upvote', (req: Request, res: Response) => {
-  const auth = getPlatformAuthUser(req);
-  const { id } = req.params;
-  const data = db.getData();
-  const p = initPlatformCMS(data);
-  const idea = p.ideas.find((i: any) => i.id === id);
-  if (!idea) return res.status(404).json({ error: 'იდეა ვერ მოიძებნა.' });
-
-  const voterKey = auth ? auth.user.id : getClientIp(req);
-  if (!Array.isArray(idea.upvotedBy)) idea.upvotedBy = [];
-  if (idea.upvotedBy.includes(voterKey)) {
-    idea.upvotedBy = idea.upvotedBy.filter((u: string) => u !== voterKey);
-    idea.upvotes = Math.max(0, (idea.upvotes || 1) - 1);
-  } else {
-    idea.upvotedBy.push(voterKey);
-    idea.upvotes = (idea.upvotes || 0) + 1;
-  }
-  savePlatformCMS(data, `Idea upvoted: ${idea.title}`);
-  res.json({ success: true, ideas: p.ideas });
+app.post('/api/platform/ideas/:id/upvote', (_req: Request, res: Response) => {
+  return res.status(403).json({ error: 'coming soon!' });
 });
 
-// 13. Clubs & Initiatives CRUD
-app.post('/api/platform/clubs', (req: Request, res: Response) => {
-  const auth = getPlatformAuthUser(req);
-  const body = req.body || {};
-  if (!body.name) {
-    return res.status(400).json({ error: 'კლუბის სახელი სავალდებულოა.' });
-  }
-  const data = db.getData();
-  const p = initPlatformCMS(data);
-  const room = String(body.room || body.roomNeeded || 'ოთახი 304').trim();
-  const newClub = {
-    id: 'club_' + Date.now(),
-    name: String(body.name).trim(),
-    category: String(body.category || 'ტექნოლოგიები').trim(),
-    lead: String(body.lead || body.founder || (auth ? auth.user.realName || auth.user.username : '11/5 მოსწავლე')).trim(),
-    room,
-    summary: String(body.summary || body.goal || `დამტკიცებულია ${room}-ის გამოყენება 11/5 Platform-ის წესდებით.`).trim(),
-    charterId: body.charterId || `CHARTER-2026-${Math.floor(100 + Math.random() * 900)}`,
-    status: auth?.isAdmin ? 'მწვანე შუქი მიღებულია' : 'განხილვაშია',
-  };
-  p.clubs.unshift(newClub);
-  savePlatformCMS(data, `Club submitted: ${newClub.name}`);
-  res.json({ success: true, club: newClub, clubs: p.clubs });
+// 13. Clubs & Initiatives CRUD (Section Locked: coming soon!)
+app.post('/api/platform/clubs', (_req: Request, res: Response) => {
+  return res.status(403).json({ error: 'coming soon!' });
 });
 
 app.put('/api/platform/clubs/:id', (req: Request, res: Response) => {
@@ -5576,51 +5470,13 @@ app.delete('/api/platform/clubs/:id', (req: Request, res: Response) => {
   res.json({ success: true, clubs: p.clubs });
 });
 
-// 14. Study Pods (მეცადინეობის ჯგუფები) CRUD & Join
-app.post('/api/platform/study-pods', (req: Request, res: Response) => {
-  const auth = getPlatformAuthUser(req);
-  const body = req.body || {};
-  if (!body.subject || !body.topic) {
-    return res.status(400).json({ error: 'საგანი და თემა სავალდებულოა.' });
-  }
-  const data = db.getData();
-  const p = initPlatformCMS(data);
-  const host = String(body.host || body.hostName || (auth ? auth.user.realName || auth.user.username : '11/5 მოსწავლე')).trim();
-  const newPod = {
-    id: 'pod_' + Date.now(),
-    subject: String(body.subject).trim(),
-    topic: String(body.topic).trim(),
-    host,
-    time: String(body.time || body.date || 'ამ კვირაში').trim(),
-    location: String(body.location || body.format || 'ბიბლიოთეკა / Zoom').trim(),
-    maxSpots: Number(body.maxSpots || body.maxParticipants) || 8,
-    currentSpots: 1,
-    participants: [host],
-  };
-  p.studyPods.unshift(newPod);
-  savePlatformCMS(data, `Study pod created: ${newPod.topic}`);
-  res.json({ success: true, studyPods: p.studyPods });
+// 14. Study Pods (Section Locked: coming soon!)
+app.post('/api/platform/study-pods', (_req: Request, res: Response) => {
+  return res.status(403).json({ error: 'coming soon!' });
 });
 
-app.post('/api/platform/study-pods/:id/join', (req: Request, res: Response) => {
-  const auth = getPlatformAuthUser(req);
-  const { id } = req.params;
-  const data = db.getData();
-  const p = initPlatformCMS(data);
-  const pod = p.studyPods.find((s: any) => s.id === id);
-  if (!pod) return res.status(404).json({ error: 'ჯგუფი ვერ მოიძებნა.' });
-
-  const memberKey = auth ? auth.user.username : getClientIp(req);
-  if (!Array.isArray(pod.participants)) pod.participants = [];
-  if (pod.participants.includes(memberKey)) {
-    pod.participants = pod.participants.filter((m: string) => m !== memberKey);
-    pod.currentSpots = Math.max(0, (pod.currentSpots || 1) - 1);
-  } else if ((pod.currentSpots || 0) < (pod.maxSpots || 8)) {
-    pod.participants.push(memberKey);
-    pod.currentSpots = (pod.currentSpots || 0) + 1;
-  }
-  savePlatformCMS(data, `Study pod join toggled: ${pod.topic}`);
-  res.json({ success: true, studyPods: p.studyPods });
+app.post('/api/platform/study-pods/:id/join', (_req: Request, res: Response) => {
+  return res.status(403).json({ error: 'coming soon!' });
 });
 
 app.delete('/api/platform/study-pods/:id', (req: Request, res: Response) => {

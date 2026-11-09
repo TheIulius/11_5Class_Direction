@@ -4,34 +4,42 @@
 
 @layer base {
   :root {
-    --bg-page: #f8f9fa;
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #64748b;
-    --surface-card: #ffffff;
-    --surface-elevated: #f1f5f9;
-    --border-subtle: rgba(15, 23, 42, 0.08);
-    --border-glass: rgba(15, 23, 42, 0.09);
-    --glass-bg: rgba(255, 255, 255, 0.82);
-    --glass-sheet-bg: rgba(255, 255, 255, 0.94);
-    --accent: #4f46e5;
-    --accent-light: #eef2ff;
-    color-scheme: light dark;
+    /* Refined Light Mode: Subtle cream, ivory, and warm stone */
+    --bg-page: #F5F1E8;
+    --surface-card: #FCF9F3;
+    --surface-third: #ECE8DE;
+    --surface-elevated: #FFFFFF;
+    --text-primary: #292D32;
+    --text-secondary: #62666A;
+    --text-muted: #82878D;
+    --primary-action: #326CAD;
+    --primary-action-hover: #285B94;
+    --primary-action-light: rgba(50, 108, 173, 0.12);
+    --border-subtle: rgba(41, 45, 50, 0.06);
+    --border-glass: rgba(41, 45, 50, 0.08);
+    --glass-bg: rgba(245, 241, 232, 0.88);
+    --glass-sheet-bg: rgba(252, 249, 243, 0.96);
+    --shadow-soft: 0 1px 4px rgba(41, 45, 50, 0.04), 0 4px 12px rgba(41, 45, 50, 0.02);
+    color-scheme: light;
   }
 
   .dark {
-    --bg-page: #0b0e17;
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
-    --surface-card: #131826;
-    --surface-elevated: #1a2236;
-    --border-subtle: rgba(255, 255, 255, 0.08);
-    --border-glass: rgba(255, 255, 255, 0.12);
-    --glass-bg: rgba(14, 18, 30, 0.82);
-    --glass-sheet-bg: rgba(14, 18, 30, 0.95);
-    --accent: #6366f1;
-    --accent-light: rgba(99, 102, 241, 0.15);
+    /* Refined Dark Mode: Deep ink blue, navy, and blue-petrol */
+    --bg-page: #0B1422;
+    --surface-card: #111F33;
+    --surface-third: #182C40;
+    --surface-elevated: #16273F;
+    --text-primary: #E9EEF4;
+    --text-secondary: #A5B3C4;
+    --text-muted: #7E8F9F;
+    --primary-action: #367BC4;
+    --primary-action-hover: #458ADA;
+    --primary-action-light: rgba(54, 123, 196, 0.18);
+    --border-subtle: rgba(233, 238, 244, 0.06);
+    --border-glass: rgba(233, 238, 244, 0.10);
+    --glass-bg: rgba(11, 20, 34, 0.88);
+    --glass-sheet-bg: rgba(17, 31, 51, 0.96);
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.28), 0 6px 20px rgba(0, 0, 0, 0.18);
     color-scheme: dark;
   }
 
@@ -78,7 +86,7 @@
 }
 
 /* ==========================================================================
-   LIQUID GLASS & COMPONENT UTILITIES
+   LIQUID GLASS & BORDERLESS REFINED SURFACES
    ========================================================================== */
 
 .glass-nav {
@@ -99,84 +107,91 @@
   background-color: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-glass);
 }
 
 .glass-sheet {
   background-color: var(--glass-sheet-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border-top: 1px solid var(--border-glass);
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
 }
 
-/* Fallback for browsers without backdrop-filter support */
-@supports not ((-webkit-backdrop-filter: blur(10px)) or (backdrop-filter: blur(10px))) {
-  .glass-nav,
-  .glass-pill,
-  .glass-panel,
+/* Fallback for browsers that don't support backdrop-filter */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .glass-nav {
+    background-color: var(--bg-page);
+  }
+  .glass-pill {
+    background-color: var(--surface-card);
+  }
   .glass-sheet {
-    background-color: var(--surface-card) !important;
+    background-color: var(--surface-card);
   }
 }
 
+/* Cards: Reduced borders, clear surface separation */
 .card-surface {
   background-color: var(--surface-card);
+  box-shadow: var(--shadow-soft);
   border: 1px solid var(--border-subtle);
-  border-radius: 20px;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card-third {
+  background-color: var(--surface-third);
+}
+
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
 
 .dark .card-hover:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
-  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* Custom Scrollbar */
+/* Action Button Utilities */
+.btn-primary {
+  background-color: var(--primary-action);
+  color: #FFFFFF;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-action-hover);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Scrollbar refinement */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(120, 130, 145, 0.25);
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: rgba(120, 130, 145, 0.45);
 }
 
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-.scrollbar-none::-webkit-scrollbar {
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-
-/* Safe area insets for mobile iOS / Android */
-.safe-bottom {
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-}
-
-.safe-top {
-  padding-top: max(8px, env(safe-area-inset-top));
-}
-
-/* Fantasy view pitch stripes fallback */
-.pitch-stripes {
-  background-color: #156d31;
-  background-image: repeating-linear-gradient(
-    0deg,
-    #13662d,
-    #13662d 38px,
-    #177536 38px,
-    #177536 76px
-  );
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

@@ -32,6 +32,7 @@ import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
+import { getTbilisiNow, formatGeorgianDate } from '../utils/tbilisiDate';
 
 const GEORGIAN_MONTHS = [
   'იანვარი',
@@ -55,10 +56,10 @@ const CATEGORY_DOT_COLORS: Record<string, string> = {
   დამოუკიდებელი: 'bg-amber-500',
   გამოკითხვა: 'bg-pink-500',
   დავალებები: 'bg-yellow-400',
-  სკოლა: 'bg-indigo-500',
+  სკოლა: 'bg-[var(--primary-action)]',
   ჩემპიონატები: 'bg-emerald-600',
   'ჰაკათონები/იდეათონები': 'bg-emerald-400',
-  აქტივობები: 'bg-purple-500',
+  აქტივობები: 'bg-sky-500',
   'პრე-აქსელერაციის პროგრამები': 'bg-sky-400',
   მოხალისეობრივი: 'bg-yellow-500',
   ოლიმპიადები: 'bg-teal-500',
@@ -79,9 +80,12 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
   const [selectedCategory, setSelectedCategory] = useState<string>('ყველა');
   const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
 
-  // Default month: October 2026 (or today if events exist)
-  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 9, 1));
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-13');
+  // Real Tbilisi Date & Time initialized from local school time
+  const tbilisiNow = useMemo(() => getTbilisiNow(), []);
+  const [currentDate, setCurrentDate] = useState<Date>(
+    () => new Date(tbilisiNow.year, tbilisiNow.month - 1, 1)
+  );
+  const [selectedDate, setSelectedDate] = useState<string>(() => tbilisiNow.dateString);
   const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null);
   const [isAiExpanded, setIsAiExpanded] = useState(false);
 
@@ -89,7 +93,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [formTitle, setFormTitle] = useState('');
-  const [formDate, setFormDate] = useState('2026-10-15');
+  const [formDate, setFormDate] = useState(() => tbilisiNow.dateString);
   const [formEndDate, setFormEndDate] = useState('');
   const [formTime, setFormTime] = useState('10:00 - 10:45');
   const [formMainCategory, setFormMainCategory] = useState<MainCategory>('სკოლა');
@@ -195,19 +199,27 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
 
   const handlePrevMonth = () => {
     soundEffects.click();
-    setCurrentDate(new Date(year, month - 1, 1));
+    setCurrentDate((prev) => {
+      const y = prev.getFullYear();
+      const m = prev.getMonth();
+      return m === 0 ? new Date(y - 1, 11, 1) : new Date(y, m - 1, 1);
+    });
   };
 
   const handleNextMonth = () => {
     soundEffects.click();
-    setCurrentDate(new Date(year, month + 1, 1));
+    setCurrentDate((prev) => {
+      const y = prev.getFullYear();
+      const m = prev.getMonth();
+      return m === 11 ? new Date(y + 1, 0, 1) : new Date(y, m + 1, 1);
+    });
   };
 
   const handleToday = () => {
     soundEffects.click();
-    const t = new Date(2026, 9, 13); // Class term reference date
-    setCurrentDate(new Date(t.getFullYear(), t.getMonth(), 1));
-    setSelectedDate('2026-10-13');
+    const now = getTbilisiNow();
+    setCurrentDate(new Date(now.year, now.month - 1, 1));
+    setSelectedDate(now.dateString);
   };
 
   const handleDragEnd = (_: any, info: PanInfo) => {
@@ -309,7 +321,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
             </button>
             <button
               onClick={handleToday}
-              className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-colors cursor-pointer"
+              className="px-2.5 py-1 text-[11px] font-semibold rounded-lg btn-primary transition-colors cursor-pointer"
             >
               დღეს
             </button>
@@ -331,8 +343,8 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-indigo-600 text-white shadow-sm'
-                    : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
+                    ? 'btn-primary shadow-xs'
+                    : 'card-third text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 {cat}
@@ -341,7 +353,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
           })}
           <button
             onClick={() => setIsFilterSheetOpen(true)}
-            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 shrink-0 cursor-pointer"
+            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] flex items-center gap-1 shrink-0 cursor-pointer"
           >
             <SlidersHorizontal className="w-3 h-3" />
             <span>ფილტრები</span>
@@ -349,13 +361,13 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
         </div>
 
         {/* Mobile View Toggle: Agenda | Week | Month */}
-        <div className="sm:hidden flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 self-start">
+        <div className="sm:hidden flex items-center p-1 rounded-xl card-third border border-[var(--border-subtle)] self-start">
           <button
             onClick={() => setMobileView('agenda')}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
               mobileView === 'agenda'
-                ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
-                : 'text-slate-500 dark:text-slate-400'
+                ? 'card-surface text-[var(--text-primary)] font-bold shadow-xs'
+                : 'text-[var(--text-muted)]'
             }`}
           >
             <List className="w-3.5 h-3.5" />
@@ -365,8 +377,8 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
             onClick={() => setMobileView('week')}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
               mobileView === 'week'
-                ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
-                : 'text-slate-500 dark:text-slate-400'
+                ? 'card-surface text-[var(--text-primary)] font-bold shadow-xs'
+                : 'text-[var(--text-muted)]'
             }`}
           >
             <CalendarDays className="w-3.5 h-3.5" />
@@ -376,8 +388,8 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
             onClick={() => setMobileView('month')}
             className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
               mobileView === 'month'
-                ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
-                : 'text-slate-500 dark:text-slate-400'
+                ? 'card-surface text-[var(--text-primary)] font-bold shadow-xs'
+                : 'text-[var(--text-muted)]'
             }`}
           >
             <Grid3X3 className="w-3.5 h-3.5" />
@@ -456,8 +468,8 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   onClick={() => setSelectedDate(d.dateStr)}
                   className={`py-2 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-indigo-600 text-white font-bold shadow-sm'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5'
+                      ? 'btn-primary font-bold shadow-xs'
+                      : 'text-[var(--text-secondary)] hover:bg-black/5 dark:hover:bg-white/5'
                   }`}
                 >
                   <span className="text-[10px] font-mono">{d.shortDay}</span>
@@ -475,7 +487,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
           </div>
 
           <div className="space-y-2">
-            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            <div className="text-xs font-semibold text-[var(--text-muted)]">
               {selectedDate}: {selectedDateEvents.length} მოვლენა
             </div>
             {selectedDateEvents.length > 0 ? (
@@ -486,40 +498,39 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   className="card-surface p-4 space-y-1.5 cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--primary-action-light)] text-[var(--primary-action)]">
                       {evt.category}
                     </span>
-                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                    <span className="text-[11px] font-mono text-[var(--text-muted)]">
                       {evt.time || evt.date}
                     </span>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  <h3 className="text-sm font-bold text-[var(--text-primary)]">
                     {evt.title}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                  <p className="text-xs text-[var(--text-secondary)] line-clamp-2">
                     {evt.description}
                   </p>
                 </div>
               ))
             ) : (
-              <p className="text-xs text-slate-500 py-3 text-center">ამ დღეს მოვლენა არ არის.</p>
+              <p className="text-xs text-[var(--text-muted)] py-3 text-center">ამ დღეს მოვლენა არ არის.</p>
             )}
           </div>
         </div>
       )}
 
       {/* =========================================================================
-          VIEW MODE 3: MONTH GRID (Desktop Full View & Mobile Compact Dots View)
+          VIEW MODE 3: MONTH GRID (Desktop Always Visible, Mobile when mobileView === 'month')
           ========================================================================= */}
-      {(mobileView === 'month' || typeof window === 'undefined') && (
-        <div className="block space-y-4 min-w-0">
+      <div className={`space-y-4 min-w-0 ${mobileView === 'month' ? 'block' : 'hidden sm:block'}`}>
           <div className="card-surface p-2 sm:p-5 shadow-sm overflow-hidden min-w-0">
             {/* Weekday Row */}
             <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center min-w-0">
               {WEEKDAYS_SHORT.map((day) => (
                 <div
                   key={day}
-                  className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 py-1"
+                  className="text-[10px] sm:text-xs font-semibold text-[var(--text-muted)] py-1"
                 >
                   {day}
                 </div>
@@ -531,6 +542,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               {calendarGrid.map((cell, idx) => {
                 const dayEvents = filteredEvents.filter((e) => isEventOnDate(e, cell.dateString));
                 const isSelectedDay = cell.dateString === selectedDate;
+                const isToday = cell.dateString === tbilisiNow.dateString;
 
                 return (
                   <div
@@ -544,28 +556,34 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                     }}
                     className={`min-h-[52px] sm:min-h-[105px] p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition-all flex flex-col justify-between cursor-pointer min-w-0 ${
                       cell.isCurrentMonth
-                        ? 'bg-slate-50/70 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/5 hover:border-indigo-400/30'
+                        ? 'card-third/60 border-[var(--border-subtle)] hover:border-[var(--primary-action)]/30'
                         : 'bg-transparent border-transparent opacity-30'
                     } ${
                       isSelectedDay
-                        ? 'ring-2 ring-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/30'
+                        ? 'ring-2 ring-[var(--primary-action)] bg-[var(--primary-action-light)]'
                         : ''
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span
-                        className={`text-[11px] sm:text-xs font-semibold ${
-                          isSelectedDay
-                            ? 'text-indigo-600 dark:text-indigo-400 font-bold'
-                            : 'text-slate-700 dark:text-slate-300'
-                        }`}
-                      >
-                        {cell.dayNumber}
-                      </span>
+                      {isToday ? (
+                        <span className="w-5 h-5 rounded-full btn-primary flex items-center justify-center text-[10px] font-bold shadow-xs">
+                          {cell.dayNumber}
+                        </span>
+                      ) : (
+                        <span
+                          className={`text-[11px] sm:text-xs font-semibold ${
+                            isSelectedDay
+                              ? 'text-[var(--primary-action)] font-bold'
+                              : 'text-[var(--text-primary)]'
+                          }`}
+                        >
+                          {cell.dayNumber}
+                        </span>
+                      )}
 
                       {/* Desktop event counter */}
                       {dayEvents.length > 0 && (
-                        <span className="hidden sm:inline text-[10px] font-mono text-slate-400">
+                        <span className="hidden sm:inline text-[10px] font-mono text-[var(--text-muted)]">
                           {dayEvents.length}
                         </span>
                       )}
@@ -577,12 +595,12 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                         <span
                           key={e.id}
                           className={`w-1.5 h-1.5 rounded-full ${
-                            CATEGORY_DOT_COLORS[e.category] || 'bg-indigo-500'
+                            CATEGORY_DOT_COLORS[e.category] || 'bg-[var(--primary-action)]'
                           }`}
                         />
                       ))}
                       {dayEvents.length > 3 && (
-                        <span className="text-[9px] font-mono text-slate-400">+</span>
+                        <span className="text-[9px] font-mono text-[var(--text-muted)]">+</span>
                       )}
                     </div>
 
@@ -595,14 +613,14 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                             ev.stopPropagation();
                             setActiveEvent(e);
                           }}
-                          className="px-1.5 py-0.5 rounded text-[11px] font-medium truncate bg-white dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200/70 dark:border-white/10 hover:border-indigo-400/40 transition-colors"
+                          className="px-1.5 py-0.5 rounded text-[11px] font-medium truncate card-surface text-[var(--text-primary)] border border-[var(--border-subtle)] hover:border-[var(--primary-action)]/40 transition-colors"
                           title={e.title}
                         >
                           {e.title}
                         </div>
                       ))}
                       {dayEvents.length > 2 && (
-                        <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1">
+                        <div className="text-[10px] text-[var(--primary-action)] font-semibold px-1">
                           +{dayEvents.length - 2} კიდევ
                         </div>
                       )}
@@ -616,9 +634,9 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
           {/* Desktop Selected Day Details Bar */}
           <div className="hidden sm:block card-surface p-5 space-y-3 shadow-sm min-w-0">
             <div className="flex items-center justify-between">
-              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <span>თარიღი: {selectedDate}</span>
-                <span className="text-xs text-slate-400 font-normal">
+                <span className="text-xs text-[var(--text-muted)] font-normal">
                   ({selectedDateEvents.length} მოვლენა)
                 </span>
               </h2>
@@ -630,40 +648,39 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   <div
                     key={evt.id}
                     onClick={() => setActiveEvent(evt)}
-                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 hover:border-indigo-400/30 transition-all cursor-pointer flex flex-col justify-between gap-2"
+                    className="p-3.5 rounded-xl card-third border border-[var(--border-subtle)] hover:border-[var(--primary-action)]/30 transition-all cursor-pointer flex flex-col justify-between gap-2"
                   >
                     <div>
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--primary-action-light)] text-[var(--primary-action)]">
                           {evt.category}
                         </span>
                         {evt.teacher && (
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                          <span className="text-[11px] text-[var(--text-muted)]">
                             • {evt.teacher}
                           </span>
                         )}
                       </div>
-                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                      <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug">
                         {evt.title}
                       </h3>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                      <p className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-2">
                         {evt.description}
                       </p>
                     </div>
-                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                    <span className="text-xs font-semibold text-[var(--primary-action)]">
                       დეტალები &rarr;
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-500 py-2">
+              <p className="text-xs text-[var(--text-muted)] py-2">
                 ამ დღეს დაგეგმილი შემაჯამებელი ან აქტივობა არ არის.
               </p>
             )}
           </div>
         </div>
-      )}
 
       {/* =========================================================================
           DEEP EVENT DETAIL BOTTOM SHEET (Accessible & Fluid Gesture)
@@ -700,14 +717,14 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/20">
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[var(--primary-action-light)] text-[var(--primary-action)] border border-[var(--primary-action)]/20">
                       {activeEvent.category}
                     </span>
-                    <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                    <span className="text-xs font-mono text-[var(--text-muted)]">
                       {activeEvent.date}
                     </span>
                   </div>
-                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                  <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
                     {activeEvent.title}
                   </h2>
                 </div>
@@ -724,7 +741,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   )}
                   <button
                     onClick={() => setActiveEvent(null)}
-                    className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                    className="p-2 rounded-xl text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
                     aria-label="დახურვა"
                   >
                     <X className="w-5 h-5" />
@@ -733,22 +750,22 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               </div>
 
               {/* Authoritative Information: Metadata grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-white/5 p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-[var(--text-secondary)] card-third p-3.5 rounded-2xl border border-[var(--border-subtle)]">
                 {activeEvent.time && (
                   <div className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <Clock className="w-3.5 h-3.5 text-[var(--primary-action)]" />
                     <span>დრო: {activeEvent.time}</span>
                   </div>
                 )}
                 {activeEvent.teacher && (
                   <div className="flex items-center gap-2">
-                    <User className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <User className="w-3.5 h-3.5 text-[var(--primary-action)]" />
                     <span>მასწავლებელი: {activeEvent.teacher}</span>
                   </div>
                 )}
                 {activeEvent.location && (
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <MapPin className="w-3.5 h-3.5 text-[var(--primary-action)]" />
                     <span>ადგილი: {activeEvent.location}</span>
                   </div>
                 )}
@@ -756,23 +773,23 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
 
               {/* Requirements & Description */}
               <div className="space-y-1.5">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
                   მოთხოვნები & პროგრამა
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed bg-white dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-200/80 dark:border-white/10">
+                <p className="text-xs sm:text-sm text-[var(--text-primary)] leading-relaxed card-surface p-4 rounded-2xl border border-[var(--border-subtle)]">
                   {activeEvent.description}
                 </p>
               </div>
 
               {/* AI Study Assistance — Collapsed by default & clearly labeled as unofficial */}
               {activeEvent.aiAnalysis && (
-                <div className="rounded-2xl border border-indigo-200/60 dark:border-indigo-500/20 overflow-hidden bg-indigo-50/30 dark:bg-indigo-950/10">
+                <div className="rounded-2xl border border-[var(--primary-action)]/20 overflow-hidden bg-[var(--primary-action-light)]/30">
                   <button
                     onClick={() => setIsAiExpanded((prev) => !prev)}
-                    className="w-full px-4 py-3 text-left flex items-center justify-between text-xs font-semibold text-indigo-900 dark:text-indigo-300 cursor-pointer"
+                    className="w-full px-4 py-3 text-left flex items-center justify-between text-xs font-semibold text-[var(--primary-action)] cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <Sparkles className="w-4 h-4 text-[var(--primary-action)]" />
                       <span>AI სასწავლო რჩევა (დამხმარე)</span>
                     </div>
                     <ChevronDown
@@ -781,7 +798,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   </button>
 
                   {isAiExpanded && (
-                    <div className="px-4 pb-4 pt-1 space-y-2 text-xs text-slate-600 dark:text-slate-300 border-t border-indigo-200/40 dark:border-indigo-500/20">
+                    <div className="px-4 pb-4 pt-1 space-y-2 text-xs text-[var(--text-secondary)] border-t border-[var(--primary-action)]/20">
                       <div className="flex items-center gap-4 text-[11px]">
                         <span>სავარაუდო სირთულე: {activeEvent.aiAnalysis.difficultyScore}</span>
                         <span>საჭირო დრო: {activeEvent.aiAnalysis.estimatedHours}</span>
@@ -859,8 +876,8 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                       }}
                       className={`p-2.5 rounded-xl text-xs font-semibold text-left transition-colors ${
                         isSelected
-                          ? 'bg-indigo-600 text-white shadow-sm'
-                          : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300'
+                          ? 'btn-primary shadow-xs'
+                          : 'card-third text-[var(--text-secondary)]'
                       }`}
                     >
                       {f.label}
@@ -881,7 +898,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                 </button>
                 <button
                   onClick={() => setIsFilterSheetOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold"
+                  className="px-4 py-2 rounded-xl btn-primary text-xs font-bold"
                 >
                   მზადაა
                 </button>
@@ -1032,7 +1049,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white cursor-pointer"
+                    className="px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer"
                   >
                     შენახვა
                   </button>

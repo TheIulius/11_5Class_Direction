@@ -80,12 +80,12 @@ export const ArchiveSection: React.FC = () => {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 flex items-center justify-between">
             <button
               onClick={() => setActivePackId(null)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--primary-action)] hover:underline cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>ყველა მასალაზე დაბრუნება</span>
             </button>
-            <span className="text-xs text-slate-500 font-medium">{selectedPack.title}</span>
+            <span className="text-xs text-[var(--text-muted)] font-medium">{selectedPack.title}</span>
           </div>
           <QuizPrepSection onBack={() => setActivePackId(null)} />
         </div>
@@ -97,7 +97,7 @@ export const ArchiveSection: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
         <button
           onClick={() => setActivePackId(null)}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--primary-action)] hover:underline cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>ყველა მასალაზე დაბრუნება</span>
@@ -105,23 +105,23 @@ export const ArchiveSection: React.FC = () => {
 
         <div className="card-surface p-6 sm:p-8 space-y-4 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold btn-primary">
               {selectedPack.subject}
             </span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">{selectedPack.date}</span>
+            <span className="text-xs text-[var(--text-muted)]">{selectedPack.date}</span>
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--text-primary)]">
             {selectedPack.title}
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
             {selectedPack.description}
           </p>
 
           {selectedPack.content && (
             <div className="pt-2">
-              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap text-slate-800 dark:text-slate-200 font-sans">
+              <div className="p-4 rounded-2xl card-third border border-[var(--border-subtle)] text-xs sm:text-sm leading-relaxed whitespace-pre-wrap text-[var(--text-primary)] font-sans">
                 {selectedPack.content}
               </div>
             </div>
@@ -133,7 +133,7 @@ export const ArchiveSection: React.FC = () => {
                 href={selectedPack.linkUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl btn-primary text-xs font-semibold transition-colors"
               >
                 <span>გახსნა ბმულით</span>
                 <ExternalLink className="w-3.5 h-3.5" />
@@ -169,7 +169,7 @@ export const ArchiveSection: React.FC = () => {
           {isAdmin && (
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-colors"
+              className="px-3.5 py-1.5 rounded-xl btn-primary text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>მოდულის დამატება (Admin)</span>
@@ -180,13 +180,13 @@ export const ArchiveSection: React.FC = () => {
 
       {/* Search Input */}
       <div className="relative">
-        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="მოძებნეთ მასალა სათაურით ან საგნით..."
-          className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
+          className="w-full card-surface border border-[var(--border-subtle)] rounded-2xl pl-10 pr-4 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
         />
       </div>
 
@@ -201,27 +201,27 @@ export const ArchiveSection: React.FC = () => {
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/20">
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[var(--primary-action-light)] text-[var(--primary-action)] border border-[var(--primary-action)]/20">
                     {pack.subject}
                   </span>
                   {pack.badge && (
-                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                    <span className="text-[11px] font-medium text-[var(--text-muted)]">
                       {pack.badge}
                     </span>
                   )}
                 </div>
 
-                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
+                <h2 className="text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--primary-action)] transition-colors leading-snug">
                   {pack.title}
                 </h2>
 
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
                   {pack.description}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/5 text-xs">
-                <span className="text-[11px] text-slate-400">
+              <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)] text-xs">
+                <span className="text-[11px] text-[var(--text-muted)]">
                   {pack.teacher ? `მასწავლებელი: ${pack.teacher}` : pack.date}
                 </span>
 
@@ -232,13 +232,13 @@ export const ArchiveSection: React.FC = () => {
                         e.stopPropagation();
                         deleteArchivePack(pack.id);
                       }}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 cursor-pointer"
+                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 cursor-pointer"
                       title="წაშლა"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
-                  <span className="font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                  <span className="font-semibold text-[var(--primary-action)] flex items-center gap-1">
                     <span>გახსნა</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </span>
@@ -329,7 +329,7 @@ export const ArchiveSection: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold"
+                  className="px-4 py-2 rounded-xl btn-primary text-xs font-bold"
                 >
                   დამატება
                 </button>

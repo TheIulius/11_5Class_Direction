@@ -2615,7 +2615,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
               title="მარცხნივ გადახვევა"
               aria-label="მარცხნივ გადახვევა"
             >
-              <ChevronLeft className="w-3.5 h-3.5 text-indigo-400" />
+              <ChevronLeft className="w-3.5 h-3.5 text-[var(--primary-action)]" />
             </button>
           )}
 
@@ -2646,7 +2646,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                     <motion.div
                       layoutId="activePoemSelectorPill"
                       transition={IOS_QUICK_SPRING}
-                      className="absolute inset-0 rounded-xl bg-indigo-600 shadow-sm will-change-transform"
+                      className="absolute inset-0 rounded-xl bg-[var(--primary-action)] shadow-sm will-change-transform"
                     />
                   )}
                   <span className="relative z-10 whitespace-nowrap">
@@ -2665,7 +2665,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
               title="მარჯვნივ გადახვევა"
               aria-label="მარჯვნივ გადახვევა"
             >
-              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
+              <ChevronRight className="w-3.5 h-3.5 text-[var(--primary-action)]" />
             </button>
           )}
 
@@ -2679,7 +2679,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
               title="ყველა ლექსის სია"
               aria-label="ყველა ლექსის სია"
             >
-              <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
+              <BookOpen className="w-3.5 h-3.5 text-[var(--primary-action)]" />
             </button>
             <button
               onClick={() => {
@@ -2690,7 +2690,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
               title="ოფიციალური პროგრამის ფოტო"
               aria-label="ოფიციალური პროგრამის ფოტო"
             >
-              <ImageIcon className="w-3.5 h-3.5 text-indigo-400" />
+              <ImageIcon className="w-3.5 h-3.5 text-[var(--primary-action)]" />
             </button>
             <button
               onClick={() => {
@@ -2701,7 +2701,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
               title="დამატებითი ფაილები და NotebookLM"
               aria-label="დამატებითი ფაილები და NotebookLM"
             >
-              <MoreHorizontal className="w-3.5 h-3.5 text-indigo-400" />
+              <MoreHorizontal className="w-3.5 h-3.5 text-[var(--primary-action)]" />
             </button>
           </div>
         </div>
@@ -2724,7 +2724,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                   <motion.div
                     layoutId="activeMaterialMenuTab"
                     transition={IOS_QUICK_SPRING}
-                    className="absolute inset-0 rounded-xl bg-indigo-600 border border-indigo-400/40 shadow-sm will-change-transform"
+                    className="absolute inset-0 rounded-xl bg-[var(--primary-action)] border border-[var(--primary-action)]/40 shadow-sm will-change-transform"
                   />
                 )}
                 <Icon className="relative z-10 w-3.5 h-3.5 shrink-0" />
@@ -3361,7 +3361,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                         ✓ {correctCount}/{closedInFilter.length} ტესტური
                       </span>
                       {openInFilter.length > 0 && (
-                        <span className="px-2.5 py-1 rounded-xl bg-purple-500/15 border border-purple-500/30 text-[11px] font-mono text-purple-200">
+                        <span className="px-2.5 py-1 rounded-xl bg-sky-500/15 border border-sky-500/30 text-[11px] font-mono text-sky-200">
                           ✍️ {openInFilter.length} ღია
                         </span>
                       )}
@@ -3477,7 +3477,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                                 ans === q.data.correctIndex ? 'bg-emerald-400' : 'bg-red-400';
                             }
                           } else {
-                            dotColor = 'bg-purple-400/80';
+                            dotColor = 'bg-sky-400/80';
                           }
                           return (
                             <button
