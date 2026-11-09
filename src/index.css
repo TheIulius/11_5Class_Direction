@@ -63,7 +63,7 @@
     color: var(--text-primary);
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
-    overflow-x: hidden;
+    overflow-x: clip;
     transition: background-color 0.2s ease, color 0.2s ease;
   }
 
@@ -74,7 +74,7 @@
     flex-direction: column;
     background-color: var(--bg-page);
     transition: background-color 0.2s ease;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* Prevent iOS auto-zoom on inputs */

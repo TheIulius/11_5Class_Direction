@@ -33,14 +33,6 @@ interface HeroSectionProps {
   onOpenVideo?: () => void;
 }
 
-// Curated class photos for a quiet, authentic memory strip
-const CURATED_CLASS_PHOTOS = [
-  { src: '/class-photos/image1.png', caption: '11/5 კლასი' },
-  { src: '/class-photos/image2.png', caption: 'კომაროვი' },
-  { src: '/class-photos/IMG_3480.png', caption: 'გაკვეთილებზე' },
-  { src: '/class-photos/image3.png', caption: '2026' },
-];
-
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenVideo }) => {
   const { platform } = usePlatform();
   const [isVideoOpen, setIsVideoOpen] = useState(false);
@@ -428,39 +420,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
               <span>მოდულის გახსნა</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* =========================================================================
-          CURATED 4-PHOTO MEMORY STRIP
-          ========================================================================= */}
-      <div className="pt-4 border-t border-[var(--border-subtle)] space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">
-            ჩვენი კლასის ფოტოები
-          </span>
-          <span className="text-xs text-[var(--text-muted)] font-mono">11/5 &bull; 2025–2026</span>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {CURATED_CLASS_PHOTOS.map((photo, i) => (
-            <div
-              key={i}
-              className="group relative rounded-xl overflow-hidden card-surface aspect-4/3 transition-all"
-            >
-              <img
-                src={photo.src}
-                alt={photo.caption}
-                loading="lazy"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-2.5">
-                <span className="text-[11px] font-medium text-white/90 truncate">
-                  {photo.caption}
-                </span>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 

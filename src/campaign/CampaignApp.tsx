@@ -11,7 +11,7 @@ import { ArchiveSection } from './components/ArchiveSection';
 import { AuthModal } from './components/AuthModal';
 import { AdminDashboardModal } from './components/AdminDashboardModal';
 import { PlatformProvider, usePlatform } from './context/PlatformContext';
-import { ScatteredClassPhotos } from './components/ScatteredClassPhotos';
+import { BackgroundClassPhotos } from './components/BackgroundClassPhotos';
 import { LockedSectionPreview } from './components/LockedSectionPreview';
 import { isSectionLocked } from './config/features';
 import { Megaphone, Shield } from 'lucide-react';
@@ -124,8 +124,8 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
 
   return (
     <div className="relative min-h-screen font-sans flex flex-col justify-between transition-colors duration-300 bg-[var(--bg-page)] text-[var(--text-primary)]">
-      {/* Subtle scattered class photography layer (continuous background) */}
-      <ScatteredClassPhotos activeTab={activeTab} />
+      {/* Restored animated springy scattered class photography layer (continuous background) */}
+      <BackgroundClassPhotos activeTab={activeTab} />
 
       <div className="relative z-10 flex-1">
         <Navbar
