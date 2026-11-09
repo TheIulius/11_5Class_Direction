@@ -15,8 +15,17 @@ import {
   KeyRound,
   Crown,
   ExternalLink,
+  BarChart3,
+  RefreshCw,
+  Eye,
+  Globe,
+  Headphones,
+  Video,
+  PenTool,
+  Sparkles,
 } from 'lucide-react';
 import { usePlatform } from '../context/PlatformContext';
+import { usePlatformAnalytics, refreshAnalytics } from '../services/analytics';
 
 interface ManagedUser {
   id: string;
@@ -44,9 +53,11 @@ export const AdminDashboardModal: React.FC = () => {
     updateAnnouncement,
   } = usePlatform();
 
-  const [activeTab, setActiveTab] = useState<'approvals' | 'users' | 'announcement'>(adminModalTab);
+  const [activeTab, setActiveTab] = useState<'approvals' | 'users' | 'announcement' | 'analytics'>(adminModalTab);
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const analyticsStats = usePlatformAnalytics();
+  const [isRefreshingAnalytics, setIsRefreshingAnalytics] = useState(false);
 
   // Create new account state
   const [newUsername, setNewUsername] = useState('');
@@ -273,6 +284,19 @@ export const AdminDashboardModal: React.FC = () => {
           >
             <Megaphone className="w-4 h-4" />
             მთავარი განცხადების ზოლი
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('analytics')}
+            className={`px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+              activeTab === 'analytics'
+                ? 'border-indigo-600 text-indigo-700 bg-white'
+                : 'border-transparent text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <BarChart3 className="w-4 h-4" />
+            სტატისტიკა &amp; ვიზიტორები
           </button>
         </div>
 
@@ -729,6 +753,153 @@ export const AdminDashboardModal: React.FC = () => {
                 </p>
               )}
             </form>
+          )}
+
+          {activeTab === 'analytics' && (
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-slate-900 text-white">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/20 border border-indigo-400/40 flex items-center justify-center text-indigo-300">
+                    <BarChart3 className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-bold">პლატფორმის ლაივ ანალიტიკა</h3>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        LIVE
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-300">
+                      ვიზიტორთა რაოდენობა, უნიკალური IP-ები და საგანმანათლებლო ჩართულობა
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  disabled={isRefreshingAnalytics}
+                  onClick={async () => {
+                    setIsRefreshingAnalytics(true);
+                    await refreshAnalytics();
+                    setIsRefreshingAnalytics(false);
+                  }}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${isRefreshingAnalytics ? 'animate-spin' : ''}`} />
+                  <span>განახლება</span>
+                </button>
+              </div>
+
+              {/* Primary Stat Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span>უნიკალური IP</span>
+                    <Globe className="w-4 h-4 text-emerald-600" />
+                  </div>
+                  <div className="text-2xl font-black text-slate-900">
+                    {analyticsStats.uniqueIpsCount || 1}
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">უნიკალური ქსელი/მოწყობილობა</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span>საიტის ნახვები</span>
+                    <Eye className="w-4 h-4 text-indigo-600" />
+                  </div>
+                  <div className="text-2xl font-black text-slate-900">
+                    {analyticsStats.visits}
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">სულ ჩატვირთვა</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span>არქივი / ქვიზი</span>
+                    <BookOpen className="w-4 h-4 text-amber-600" />
+                  </div>
+                  <div className="text-2xl font-black text-slate-900">
+                    {analyticsStats.quizClicks}
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">სასწავლო მოდულების გახსნა</div>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between text-xs text-slate-500 mb-1">
+                    <span>ტესტების პასუხები</span>
+                    <CheckCircle2 className="w-4 h-4 text-rose-600" />
+                  </div>
+                  <div className="text-2xl font-black text-slate-900">
+                    {analyticsStats.tests.totalAnswered}
+                  </div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">
+                    {analyticsStats.tests.totalAnswered > 0
+                      ? `${Math.round((analyticsStats.tests.correctAnswers / analyticsStats.tests.totalAnswered) * 100)}% სისწორე`
+                      : '0% სისწორე'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Media & Open Questions Analytics */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Audio & Video stats */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                    <Headphones className="w-4 h-4 text-indigo-600" />
+                    პოდკასტი და ვიდეო მიმოხილვები
+                  </h4>
+
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200/60">
+                      <span className="text-slate-600">პოდკასტის მოსმენები:</span>
+                      <span className="font-bold text-slate-900">
+                        {analyticsStats.podcastStats.totalPlays} ჩართვა &bull; {analyticsStats.podcastStats.totalCompletes} ბოლომდე
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200/60">
+                      <span className="text-slate-600">ვიდეო მიმოხილვები:</span>
+                      <span className="font-bold text-slate-900">
+                        {analyticsStats.videoStats.totalPlays} ყურება &bull; {analyticsStats.videoStats.totalCompletes} ბოლომდე
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Open questions stats */}
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
+                    <PenTool className="w-4 h-4 text-indigo-600" />
+                    ღია კითხვები &amp; AI შეფასება
+                  </h4>
+
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200/60">
+                      <span className="text-slate-600">სულ გამოგზავნილი პასუხი:</span>
+                      <span className="font-bold text-slate-900">
+                        {analyticsStats.openQuestions.totalSubmitted}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200/60">
+                      <span className="text-slate-600">საშუალო სიტყვების რაოდენობა:</span>
+                      <span className="font-bold text-slate-900">
+                        {analyticsStats.openQuestions.averageWordCount} სიტყვა
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-center p-2 rounded-xl bg-white border border-slate-200/60">
+                      <span className="text-slate-600">შინაარსიანი პასუხები (≥10 სიტყვა):</span>
+                      <span className="font-bold text-indigo-600">
+                        {analyticsStats.openQuestions.meaningfulSubmissions}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </div>

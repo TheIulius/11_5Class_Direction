@@ -94,8 +94,8 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Impact', 'Arial Black', 'Trebuchet MS', 'sans-serif'],
+        sans: ['"Noto Sans Georgian"', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['"Noto Sans Georgian"', 'Inter', 'sans-serif'],
       },
       boxShadow: {
         'subtle': '0 2px 8px rgba(0, 0, 0, 0.06)',

@@ -1,31 +1,32 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon, 
-  Sparkles, 
-  Clock, 
-  MapPin, 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
+  Clock,
+  MapPin,
   User,
-  Layers,
   SlidersHorizontal,
   X,
-  Bot,
-  RotateCcw,
   Plus,
   Edit3,
   Trash2,
-  FileText,
-  MessageSquare
+  ChevronDown,
+  Sparkles,
+  BookOpen,
+  CheckCircle2,
+  List,
+  Grid3X3,
+  CalendarDays
 } from 'lucide-react';
-import { 
+import {
   MainCategory,
-  CalendarCategory, 
-  CalendarEvent, 
+  CalendarCategory,
+  CalendarEvent,
   MAIN_CATEGORIES,
-  CALENDAR_FILTERS, 
-  INITIAL_CALENDAR_EVENTS 
+  CALENDAR_FILTERS,
+  INITIAL_CALENDAR_EVENTS
 } from '../data/campaignData';
 import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
@@ -33,29 +34,58 @@ import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
 
 const GEORGIAN_MONTHS = [
-  'იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი',
-  'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'
+  'იანვარი',
+  'თებერვალი',
+  'მარტი',
+  'აპრილი',
+  'მაისი',
+  'ივნისი',
+  'ივლისი',
+  'აგვისტო',
+  'სექტემბერი',
+  'ოქტომბერი',
+  'ნოემბერი',
+  'დეკემბერი',
 ];
 
-const WEEKDAYS = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
+const WEEKDAYS_SHORT = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
+
+const CATEGORY_DOT_COLORS: Record<string, string> = {
+  შემაჯამებელი: 'bg-rose-500',
+  დამოუკიდებელი: 'bg-amber-500',
+  გამოკითხვა: 'bg-pink-500',
+  დავალებები: 'bg-yellow-400',
+  სკოლა: 'bg-indigo-500',
+  ჩემპიონატები: 'bg-emerald-600',
+  'ჰაკათონები/იდეათონები': 'bg-emerald-400',
+  აქტივობები: 'bg-purple-500',
+  'პრე-აქსელერაციის პროგრამები': 'bg-sky-400',
+  მოხალისეობრივი: 'bg-yellow-500',
+  ოლიმპიადები: 'bg-teal-500',
+};
 
 interface RealCalendarViewProps {
   onOpenQuiz?: () => void;
 }
 
 export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }) => {
-  const { isAdmin, platform, addCalendarEvent, updateCalendarEvent, deleteCalendarEvent } = usePlatform();
+  const { isAdmin, platform, addCalendarEvent, updateCalendarEvent, deleteCalendarEvent } =
+    usePlatform();
 
-  // Main Category state (Top Level)
-  const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory | 'ყველა'>('ყველა');
-  // Specific Filter state (Sub Level)
-  const [selectedFilter, setSelectedFilter] = useState<CalendarCategory | 'ყველა'>('ყველა');
+  // Mobile layout switch: 'agenda' | 'week' | 'month' (defaulting to agenda on mobile for fast, zero-overflow scanning)
+  const [mobileView, setMobileView] = useState<'agenda' | 'week' | 'month'>('agenda');
 
-  // Target current view to October 2026
-  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 9, 1)); // 9 = October
+  // Filter state
+  const [selectedCategory, setSelectedCategory] = useState<string>('ყველა');
+  const [isFilterSheetOpen, setIsFilterSheetOpen] = useState(false);
+
+  // Default month: October 2026 (or today if events exist)
+  const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 9, 1));
+  const [selectedDate, setSelectedDate] = useState<string>('2026-10-13');
   const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null);
+  const [isAiExpanded, setIsAiExpanded] = useState(false);
 
-  // Admin Add/Edit Modal State
+  // Admin Modal
   const [showEventForm, setShowEventForm] = useState(false);
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   const [formTitle, setFormTitle] = useState('');
@@ -67,85 +97,9 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
   const [formTeacher, setFormTeacher] = useState('');
   const [formLocation, setFormLocation] = useState('კომაროვი, 11/5 აუდიტორია');
   const [formDescription, setFormDescription] = useState('');
-  const [formDifficulty, setFormDifficulty] = useState('7/10 (საშუალოზე მაღალი)');
-  const [formHours, setFormHours] = useState('2.5 - 3 საათი');
-  const [formStrategy, setFormStrategy] = useState('');
-  const [formKeyPoints, setFormKeyPoints] = useState('');
-  const [formRecommendation, setFormRecommendation] = useState('');
 
-  const openCreateEventModal = (defaultDate?: string) => {
-    setEditingEventId(null);
-    setFormTitle('');
-    setFormDate(defaultDate || selectedDate || '2026-10-15');
-    setFormEndDate('');
-    setFormTime('10:00 - 10:45');
-    setFormMainCategory('სკოლა');
-    setFormCategory('შემაჯამებელი');
-    setFormTeacher('');
-    setFormLocation('კომაროვი, 11/5 აუდიტორია');
-    setFormDescription('');
-    setFormDifficulty('7/10 (საშუალოზე მაღალი)');
-    setFormHours('2.5 - 3 საათი');
-    setFormStrategy('');
-    setFormKeyPoints('');
-    setFormRecommendation('');
-    setShowEventForm(true);
-  };
-
-  const openEditEventModal = (evt: CalendarEvent) => {
-    setEditingEventId(evt.id);
-    setFormTitle(evt.title);
-    setFormDate(evt.date);
-    setFormEndDate(evt.endDate || '');
-    setFormTime(evt.time || '');
-    setFormMainCategory(evt.mainCategory);
-    setFormCategory(evt.category);
-    setFormTeacher(evt.teacher || evt.organizer || '');
-    setFormLocation(evt.location || '');
-    setFormDescription(evt.description);
-    setFormDifficulty(evt.aiAnalysis?.difficultyScore || '7/10');
-    setFormHours(evt.aiAnalysis?.estimatedHours || '2 საათი');
-    setFormStrategy(evt.aiAnalysis?.strategy || '');
-    setFormKeyPoints((evt.aiAnalysis?.keyPoints || []).join('\n'));
-    setFormRecommendation(evt.aiAnalysis?.recommendation || '');
-    setShowEventForm(true);
-  };
-
-  const handleSaveEvent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formTitle.trim() || !formDate) return;
-    const payload: any = {
-      title: formTitle.trim(),
-      date: formDate,
-      endDate: formEndDate.trim() || undefined,
-      time: formTime.trim() || undefined,
-      mainCategory: formMainCategory,
-      category: formCategory,
-      teacher: formTeacher.trim() || undefined,
-      location: formLocation.trim() || undefined,
-      description: formDescription.trim(),
-      aiAnalysis: {
-        difficultyScore: formDifficulty.trim() || '7/10',
-        estimatedHours: formHours.trim() || '2 საათი',
-        strategy: formStrategy.trim() || formDescription.trim(),
-        keyPoints: formKeyPoints
-          .split('\n')
-          .map((s) => s.trim())
-          .filter(Boolean),
-        recommendation:
-          formRecommendation.trim() ||
-          'გადახედეთ მიმაგრებულ კონსპექტებს და დასვით კითხვები კომენტარებში.',
-      },
-    };
-
-    if (editingEventId) {
-      await updateCalendarEvent(editingEventId, payload);
-      setActiveEvent(null);
-    } else {
-      await addCalendarEvent(payload);
-    }
-    setShowEventForm(false);
-  };
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
 
   const allEvents = useMemo(() => {
     return platform.calendarEvents && platform.calendarEvents.length > 0
@@ -153,59 +107,28 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
       : INITIAL_CALENDAR_EVENTS;
   }, [platform.calendarEvents]);
 
-  // Typewriter effect state for AI evaluation
-  const [typedText, setTypedText] = useState<string>('');
-  const [isTyping, setIsTyping] = useState<boolean>(false);
-
-  // Filters that belong to the active main category (or all if 'ყველა')
-  const visibleFilters = useMemo(() => {
-    if (selectedMainCategory === 'ყველა') return CALENDAR_FILTERS;
-    return CALENDAR_FILTERS.filter(f => f.parentCategory === selectedMainCategory);
-  }, [selectedMainCategory]);
-
-  // When main category changes, reset filter to 'ყველა' if it doesn't belong
-  const handleSelectMainCategory = (cat: MainCategory | 'ყველა') => {
-    soundEffects.click();
-    setSelectedMainCategory(cat);
-    if (cat !== 'ყველა') {
-      const match = CALENDAR_FILTERS.find(f => f.id === selectedFilter && f.parentCategory === cat);
-      if (!match) setSelectedFilter('ყველა');
-    }
-  };
-
-  const handleSelectFilter = (filter: CalendarCategory | 'ყველა') => {
-    soundEffects.click();
-    setSelectedFilter(filter);
-  };
-
-  // Filter events based on both Main Category and Specific Filter
+  // Filtered Events
   const filteredEvents = useMemo(() => {
-    return allEvents.filter(evt => {
-      // Check main category
-      if (selectedMainCategory !== 'ყველა' && evt.mainCategory !== selectedMainCategory) {
-        return false;
-      }
-      // Check sub-filter
-      if (selectedFilter !== 'ყველა' && evt.category !== selectedFilter) {
-        return false;
-      }
-      return true;
-    });
-  }, [allEvents, selectedMainCategory, selectedFilter]);
+    if (selectedCategory === 'ყველა') return allEvents;
+    return allEvents.filter(
+      (e) => e.category === selectedCategory || e.mainCategory === selectedCategory
+    );
+  }, [allEvents, selectedCategory]);
 
-  // Calendar matrix calculations
-  const year = currentDate.getFullYear();
-  const month = currentDate.getMonth();
+  const isEventOnDate = (evt: CalendarEvent, dateStr: string) => {
+    if (evt.endDate) {
+      return dateStr >= evt.date && dateStr <= evt.endDate;
+    }
+    return evt.date === dateStr;
+  };
 
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
-  const firstDayIndex = new Date(year, month, 1).getDay(); // 0 is Sunday
-  // Convert to Monday-first (0 = Monday, 6 = Sunday)
-  const startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
-
-  // Previous month days to pad
-  const prevMonthDays = new Date(year, month, 0).getDate();
-
+  // Month Grid Calculation
   const calendarGrid = useMemo(() => {
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayIndex = new Date(year, month, 1).getDay();
+    const startDay = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+    const prevMonthDays = new Date(year, month, 0).getDate();
+
     const grid: { dayNumber: number; isCurrentMonth: boolean; dateString: string }[] = [];
 
     // Pad previous month
@@ -223,8 +146,9 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
       grid.push({ dayNumber: d, isCurrentMonth: true, dateString: dateStr });
     }
 
-    // Pad next month
-    const remaining = 42 - grid.length;
+    // Pad next month to complete 35 or 42 cells
+    const targetLength = grid.length > 35 ? 42 : 35;
+    const remaining = targetLength - grid.length;
     for (let d = 1; d <= remaining; d++) {
       const nextM = month === 11 ? 0 : month + 1;
       const nextY = month === 11 ? year + 1 : year;
@@ -233,40 +157,41 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
     }
 
     return grid;
-  }, [year, month, startDay, prevMonthDays, daysInMonth]);
+  }, [year, month]);
 
-  // Typewriter effect when activeEvent changes
-  useEffect(() => {
-    if (!activeEvent) {
-      setTypedText('');
-      setIsTyping(false);
-      return;
+  // Selected Day Events
+  const selectedDateEvents = useMemo(() => {
+    return filteredEvents.filter((e) => isEventOnDate(e, selectedDate));
+  }, [filteredEvents, selectedDate]);
+
+  // Agenda items: all future / active events sorted by date
+  const agendaEvents = useMemo(() => {
+    return [...filteredEvents].sort((a, b) => a.date.localeCompare(b.date));
+  }, [filteredEvents]);
+
+  // Week view dates (surrounding selected date)
+  const weekDays = useMemo(() => {
+    const sel = new Date(selectedDate + 'T12:00:00');
+    if (isNaN(sel.getTime())) return [];
+    const dayOfWeek = sel.getDay();
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const monday = new Date(sel);
+    monday.setDate(sel.getDate() + mondayOffset);
+
+    const days: { dateStr: string; dayNum: number; shortDay: string; hasEvents: boolean }[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      const str = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      days.push({
+        dateStr: str,
+        dayNum: d.getDate(),
+        shortDay: WEEKDAYS_SHORT[i],
+        hasEvents: filteredEvents.some((e) => isEventOnDate(e, str)),
+      });
     }
-
-    const fullAnalysis = 
-`[11/5 AI საგანმანათლებლო ანალიზი]:
-• სირთულე: ${activeEvent.aiAnalysis.difficultyScore}
-• საჭირო დრო: ${activeEvent.aiAnalysis.estimatedHours}
-• სტრატეგია: ${activeEvent.aiAnalysis.strategy}
-• რეკომენდაცია: ${activeEvent.aiAnalysis.recommendation}`;
-
-    setIsTyping(true);
-    setTypedText('');
-    let index = 0;
-
-    const interval = setInterval(() => {
-      index += 2;
-      if (index >= fullAnalysis.length) {
-        setTypedText(fullAnalysis);
-        setIsTyping(false);
-        clearInterval(interval);
-      } else {
-        setTypedText(fullAnalysis.slice(0, index));
-      }
-    }, 20);
-
-    return () => clearInterval(interval);
-  }, [activeEvent]);
+    return days;
+  }, [selectedDate, filteredEvents]);
 
   const handlePrevMonth = () => {
     soundEffects.click();
@@ -278,858 +203,845 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
-  const handleResetToOctober = () => {
+  const handleToday = () => {
     soundEffects.click();
-    setCurrentDate(new Date(2026, 9, 1));
+    const t = new Date(2026, 9, 13); // Class term reference date
+    setCurrentDate(new Date(t.getFullYear(), t.getMonth(), 1));
+    setSelectedDate('2026-10-13');
   };
 
-  // Drag down to close handler for iOS fluid gesture drawer
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y > 120 || info.velocity.y > 400) {
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    if (info.offset.y > 100 || info.velocity.y > 400) {
       setActiveEvent(null);
     }
   };
 
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-13');
+  const openCreateModal = () => {
+    setEditingEventId(null);
+    setFormTitle('');
+    setFormDate(selectedDate || '2026-10-15');
+    setFormEndDate('');
+    setFormTime('10:00 - 10:45');
+    setFormMainCategory('სკოლა');
+    setFormCategory('შემაჯამებელი');
+    setFormTeacher('');
+    setFormLocation('კომაროვი, 11/5 აუდიტორია');
+    setFormDescription('');
+    setShowEventForm(true);
+  };
 
-  // Helper to check if event falls on given date string (supports intervals)
-  const isEventOnDate = (evt: CalendarEvent, dateStr: string) => {
-    if (evt.endDate) {
-      return dateStr >= evt.date && dateStr <= evt.endDate;
+  const handleSaveEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formTitle.trim() || !formDate) return;
+    const payload: any = {
+      title: formTitle.trim(),
+      date: formDate,
+      endDate: formEndDate.trim() || undefined,
+      time: formTime.trim() || undefined,
+      mainCategory: formMainCategory,
+      category: formCategory,
+      teacher: formTeacher.trim() || undefined,
+      location: formLocation.trim() || undefined,
+      description: formDescription.trim(),
+      aiAnalysis: {
+        difficultyScore: '7/10',
+        estimatedHours: '2 საათი',
+        strategy: formDescription.trim(),
+        keyPoints: [],
+        recommendation: 'გადახედეთ მასალებს და დასვით კითხვები კომენტარებში.',
+      },
+    };
+
+    if (editingEventId) {
+      await updateCalendarEvent(editingEventId, payload);
+      setActiveEvent(null);
+    } else {
+      await addCalendarEvent(payload);
     }
-    return evt.date === dateStr;
+    setShowEventForm(false);
   };
-
-  // Concise mobile badge text so narrow phone calendar cells show a readable word instead of "ბი..."
-  const getMobileShortLabel = (evt: CalendarEvent): string => {
-    if (evt.title.includes('მათემატიკ')) return 'მათემ.';
-    if (evt.title.includes('ბიოლოგია')) return 'ბიოლ.';
-    if (evt.title.includes('რუსული')) return 'რუსული';
-    if (evt.title.includes('Hacktober')) return 'ჰაკათონი';
-    if (evt.title.includes('გვანცა')) return 'გვანცა';
-    if (evt.title.includes('ლუკა')) return 'ლუკა';
-    return evt.title.split(' ')[0].slice(0, 7);
-  };
-
-  const selectedDateEvents = useMemo(
-    () => filteredEvents.filter(e => isEventOnDate(e, selectedDate)),
-    [filteredEvents, selectedDate]
-  );
 
   return (
-    <div className="space-y-5 sm:space-y-6 max-w-5xl mx-auto px-2.5 sm:px-6 py-4 sm:py-8">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 min-w-0">
+      {/* =========================================================================
+          PAGE HEADER: TITLE & CONTROLS
+          ========================================================================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
         <div>
-          <div className="text-[11px] sm:text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80 flex items-center flex-wrap">
-            <span>ინტერაქტიული კალენდარი &bull;&nbsp;</span>
-            <span className="inline-flex items-end">
-              <span>11/5</span>
-              <span className="text-[8px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-[1px]">
-                class
-              </span>
-            </span>
-            <span className="ml-1">PLATFORM</span>
-          </div>
-          <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
-            სასკოლო &amp; აკადემიური კალენდარი
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            კალენდარი
           </h1>
-          <p className="text-xs sm:text-sm text-[#b8b5a8] mt-1">
-            შემაჯამებლები, დამოუკიდებლები, გამოკითხვები, ოლიმპიადები და ჩემპიონატები.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            შემაჯამებლები, დამოუკიდებლები, გამოკითხვები და ოლიმპიადები.
           </p>
         </div>
 
-        {/* Month Navigation Controls */}
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-[#161722]/80 border border-[#f5f2eb]/15 backdrop-blur-xl self-start sm:self-end">
-          <button
-            onClick={handlePrevMonth}
-            className="p-1.5 rounded-lg text-[#e8e5d8] hover:bg-white/10 transition-colors cursor-pointer"
-            aria-label="წინა თვე"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-
-          <span className="px-2.5 sm:px-3 py-1 text-xs font-semibold font-mono text-[#fcfbf7] whitespace-nowrap min-w-[120px] sm:min-w-[130px] text-center">
-            {GEORGIAN_MONTHS[month]} {year}
-          </span>
-
-          <button
-            onClick={handleNextMonth}
-            className="p-1.5 rounded-lg text-[#e8e5d8] hover:bg-white/10 transition-colors cursor-pointer"
-            aria-label="შემდეგი თვე"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={handleResetToOctober}
-            className="ml-0.5 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-[#f5f2eb]/10 hover:bg-[#f5f2eb]/20 text-[#fcfbf7] transition-colors cursor-pointer"
-          >
-            მიმდინარე
-          </button>
-        </div>
-      </div>
-
-      {/* DUAL-LEVEL HIERARCHICAL BAR: CATEGORIES (LARGE) + FILTERS (COLORED) */}
-      <div className="rounded-2xl bg-[#141520]/85 border border-[#f5f2eb]/12 backdrop-blur-2xl p-2.5 sm:p-4 space-y-3 shadow-xl">
-        {/* ROW 1: REAL CATEGORIES (უფრო დიდი ზომა და ნაკლები კატეგორია) */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-2 text-[11px] font-mono text-[#a8a495] uppercase tracking-wider">
-            <Layers className="w-3.5 h-3.5 text-[#e6e2d3]" />
-            <span>კატეგორიები:</span>
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Admin Create Event Action */}
+          {isAdmin && (
             <button
-              onClick={() => handleSelectMainCategory('ყველა')}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
-                selectedMainCategory === 'ყველა'
-                  ? 'bg-[#f5f2eb] text-[#0c0d12] shadow-md scale-102'
-                  : 'text-[#d4d1c5] hover:text-white bg-[#191a27] border border-white/5 hover:bg-white/5'
-              }`}
+              onClick={openCreateModal}
+              className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm hover:bg-amber-300 transition-colors"
             >
-              ყველა კატეგორია
+              <Plus className="w-3.5 h-3.5" />
+              <span>დამატება (Admin)</span>
             </button>
+          )}
 
-            {MAIN_CATEGORIES.map(cat => {
-              const isSelected = selectedMainCategory === cat.id;
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => handleSelectMainCategory(cat.id)}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                    isSelected
-                      ? 'bg-[#f5f2eb] text-[#0c0d12] shadow-md scale-102 font-bold'
-                      : 'bg-[#181a28]/70 text-[#c2bfae] hover:text-white border border-[#f5f2eb]/10 hover:bg-white/5'
-                  }`}
-                  title={cat.description}
-                >
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* DIVIDER */}
-        <div className="border-t border-white/5 pt-1.5" />
-
-        {/* ROW 2: FILTERS (ფილტრები — შემაჯამებელი წითლად, ჩემპიონატები, და ა.შ.) */}
-        <div>
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-1.5 text-[11px] font-mono text-[#a8a495] uppercase tracking-wider">
-              <SlidersHorizontal className="w-3.5 h-3.5 text-[#e6e2d3]" />
-              <span>ფილტრები:</span>
-            </div>
-            <span className="text-[10px] font-mono text-[#a8a495]">
-              ნაპოვნია: {filteredEvents.length} მოვლენა
+          {/* Month Navigation Controls */}
+          <div className="inline-flex items-center gap-1 p-1 rounded-xl glass-pill">
+            <button
+              onClick={handlePrevMonth}
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+              aria-label="წინა თვე"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="px-2 text-xs font-semibold text-slate-900 dark:text-slate-100 min-w-[100px] text-center">
+              {GEORGIAN_MONTHS[month]} {year}
             </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none">
             <button
-              onClick={() => handleSelectFilter('ყველა')}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                selectedFilter === 'ყველა'
-                  ? 'bg-[#f5f2eb]/90 text-[#0c0d12] shadow-sm'
-                  : 'text-[#c2bfae] hover:text-white bg-white/5 border border-white/5'
-              }`}
+              onClick={handleNextMonth}
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+              aria-label="შემდეგი თვე"
             >
-              ყველა ფილტრი
+              <ChevronRight className="w-4 h-4" />
             </button>
-
-            {visibleFilters.map(flt => {
-              const isSelected = selectedFilter === flt.id;
-              return (
-                <button
-                  key={flt.id}
-                  onClick={() => handleSelectFilter(flt.id)}
-                  className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer border ${
-                    isSelected
-                      ? `${flt.bgClass} ${flt.textClass} ${flt.borderClass} font-bold shadow-sm ring-1 ring-white/20`
-                      : 'bg-[#191b29]/60 border-[#f5f2eb]/10 text-[#bab6a5] hover:text-white'
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${flt.dotClass}`} />
-                  <span>{flt.label}</span>
-                </button>
-              );
-            })}
+            <button
+              onClick={handleToday}
+              className="px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-colors cursor-pointer"
+            >
+              დღეს
+            </button>
           </div>
         </div>
       </div>
 
-      {/* CALENDAR GRID */}
-      <div className="rounded-2xl sm:rounded-3xl bg-[#12131d]/75 border border-[#f5f2eb]/10 backdrop-blur-2xl p-1.5 sm:p-5 shadow-2xl overflow-hidden">
-        {/* Weekday Labels */}
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-2 mb-1.5 sm:mb-2 text-center">
-          {WEEKDAYS.map(day => (
-            <div key={day} className="text-[10px] sm:text-xs font-mono font-semibold text-[#a8a495] py-1">
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Days Matrix */}
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-2">
-          {calendarGrid.map((cell, idx) => {
-            const dayIntervalEvents = filteredEvents.filter(
-              e => e.category === 'ჩემპიონატები' && Boolean(e.endDate) && isEventOnDate(e, cell.dateString)
-            );
-            const daySingleEvents = filteredEvents.filter(
-              e => e.category !== 'ჩემპიონატები' && isEventOnDate(e, cell.dateString)
-            );
-            const totalDayCount = dayIntervalEvents.length + daySingleEvents.length;
-            const isToday = cell.dateString === '2026-10-13';
-            const isSelectedDay = cell.dateString === selectedDate;
-            const isRowStart = idx % 7 === 0;
-            const isRowEnd = idx % 7 === 6;
-
+      {/* =========================================================================
+          FILTER PILLS & MOBILE VIEW SWITCHER
+          ========================================================================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
+        {/* Concise Primary Filters */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none min-w-0">
+          {['ყველა', 'შემაჯამებელი', 'დამოუკიდებელი', 'გამოკითხვა', 'შეჯიბრებები'].map((cat) => {
+            const isSelected = selectedCategory === cat;
             return (
-              <div
-                key={idx}
-                onClick={() => {
-                  soundEffects.click();
-                  setSelectedDate(cell.dateString);
-                }}
-                className={`min-h-[68px] sm:min-h-[118px] p-1 sm:p-2 rounded-lg sm:rounded-2xl border transition-all flex flex-col relative cursor-pointer ${
-                  cell.isCurrentMonth
-                    ? 'bg-[#171825]/50 hover:bg-[#1f2133]/60 border-[#f5f2eb]/10'
-                    : 'bg-[#0f1018]/30 border-white/5 opacity-40'
-                } ${
-                  isSelectedDay
-                    ? 'ring-2 ring-[#f5f2eb]/70 bg-[#222436]/75'
-                    : isToday
-                    ? 'ring-1 ring-[#f5f2eb]/40 bg-[#222436]/50'
-                    : ''
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  isSelected
+                    ? 'bg-indigo-600 text-white shadow-sm'
+                    : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-white/10'
                 }`}
               >
-                {/* Day Header */}
-                <div className="flex items-center justify-between h-4 sm:h-5 shrink-0">
-                  <span
-                    className={`text-[10px] sm:text-xs font-mono font-medium ${
-                      cell.isCurrentMonth
-                        ? isToday
-                          ? 'text-white font-bold bg-[#f5f2eb]/20 px-1 sm:px-1.5 py-0.2 rounded'
-                          : 'text-[#dedacb]'
-                        : 'text-zinc-600'
-                    }`}
-                  >
-                    {cell.dayNumber}
-                  </span>
-
-                  {totalDayCount > 0 && (
-                    <span className="text-[9px] sm:text-[10px] font-mono text-[#dedacb]/60 hidden sm:inline">
-                      {totalDayCount}
-                    </span>
-                  )}
-                </div>
-
-                {/* CONTINUOUS SUBTLE DARK GREEN INTERVAL LINE (FIXED VERTICAL ALIGNMENT) */}
-                {dayIntervalEvents.map(evt => {
-                  const isStart = cell.dateString === evt.date;
-                  const isEnd = cell.dateString === evt.endDate;
-
-                  const leftPos = isStart
-                    ? 'left-1 sm:left-1.5 rounded-l-full'
-                    : isRowStart
-                    ? 'left-0.5 sm:left-1 rounded-l-full'
-                    : '-left-[2px] sm:-left-[5px]';
-
-                  const rightPos = isEnd
-                    ? 'right-1 sm:right-1.5 rounded-r-full'
-                    : isRowEnd
-                    ? 'right-0.5 sm:right-1 rounded-r-full'
-                    : '-right-[2px] sm:-right-[5px]';
-
-                  return (
-                    <React.Fragment key={`interval-${evt.id}-${cell.dateString}`}>
-                      <div
-                        onClick={e => {
-                          e.stopPropagation();
-                          soundEffects.click();
-                          setSelectedDate(cell.dateString);
-                          setActiveEvent(evt);
-                        }}
-                        title={`${evt.title} (${evt.date} — ${evt.endDate})`}
-                        className={`absolute top-[20px] sm:top-[25px] h-[3px] bg-[#345440]/85 hover:bg-[#487358] transition-colors cursor-pointer z-20 ${leftPos} ${rightPos}`}
-                      />
-                      {isStart && (
-                        <div
-                          onClick={e => {
-                            e.stopPropagation();
-                            soundEffects.click();
-                            setActiveEvent(evt);
-                          }}
-                          className="hidden sm:block absolute top-[31px] left-1.5 right-1.5 text-[9px] font-mono text-[#7c9987] truncate cursor-pointer hover:text-[#9cbba7] transition-colors"
-                        >
-                          პინგ-პონგი
-                        </div>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-
-                {/* Single-day Event indicators / chips inside cell */}
-                <div className="space-y-0.5 sm:space-y-1 mt-2 sm:mt-3 flex-1 overflow-hidden">
-                  {daySingleEvents.slice(0, 2).map(evt => {
-                    const fltMeta = CALENDAR_FILTERS.find(c => c.id === evt.category);
-
-                    return (
-                      <button
-                        key={evt.id}
-                        onClick={e => {
-                          e.stopPropagation();
-                          soundEffects.click();
-                          setSelectedDate(cell.dateString);
-                          setActiveEvent(evt);
-                        }}
-                        className={`w-full text-center sm:text-left px-0.5 sm:px-1.5 py-0.5 rounded text-[8.5px] sm:text-[11px] leading-[1.15] sm:leading-normal font-semibold sm:font-medium border transition-all cursor-pointer block ${
-                          fltMeta
-                            ? `${fltMeta.bgClass} ${fltMeta.textClass} ${fltMeta.borderClass}`
-                            : 'bg-white/10 text-white'
-                        }`}
-                        title={`${evt.title} ${evt.teacher ? `(${evt.teacher})` : ''}`}
-                      >
-                        <span className="sm:hidden block overflow-hidden whitespace-nowrap">
-                          {getMobileShortLabel(evt)}
-                        </span>
-                        <span className="hidden sm:block truncate">
-                          {evt.title}
-                        </span>
-                      </button>
-                    );
-                  })}
-
-                  {daySingleEvents.length > 2 && (
-                    <button
-                      onClick={e => {
-                        e.stopPropagation();
-                        soundEffects.click();
-                        setSelectedDate(cell.dateString);
-                        setActiveEvent(daySingleEvents[0]);
-                      }}
-                      className="text-[8.5px] sm:text-[10px] font-mono text-[#dedacb]/80 hover:text-white px-0.5 sm:px-1 block cursor-pointer"
-                    >
-                      +{daySingleEvents.length - 2}
-                    </button>
-                  )}
-                </div>
-              </div>
+                {cat}
+              </button>
             );
           })}
+          <button
+            onClick={() => setIsFilterSheetOpen(true)}
+            className="px-2.5 py-1.5 rounded-xl text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 shrink-0 cursor-pointer"
+          >
+            <SlidersHorizontal className="w-3 h-3" />
+            <span>ფილტრები</span>
+          </button>
+        </div>
+
+        {/* Mobile View Toggle: Agenda | Week | Month */}
+        <div className="sm:hidden flex items-center p-1 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 self-start">
+          <button
+            onClick={() => setMobileView('agenda')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+              mobileView === 'agenda'
+                ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
+                : 'text-slate-500 dark:text-slate-400'
+            }`}
+          >
+            <List className="w-3.5 h-3.5" />
+            <span>სია</span>
+          </button>
+          <button
+            onClick={() => setMobileView('week')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+              mobileView === 'week'
+                ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
+                : 'text-slate-500 dark:text-slate-400'
+            }`}
+          >
+            <CalendarDays className="w-3.5 h-3.5" />
+            <span>კვირა</span>
+          </button>
+          <button
+            onClick={() => setMobileView('month')}
+            className={`px-2.5 py-1 rounded-lg text-xs font-medium flex items-center gap-1 transition-all ${
+              mobileView === 'month'
+                ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
+                : 'text-slate-500 dark:text-slate-400'
+            }`}
+          >
+            <Grid3X3 className="w-3.5 h-3.5" />
+            <span>თვე</span>
+          </button>
         </div>
       </div>
 
-      {/* SELECTED DAY FULL READABLE PANEL (ESPECIALLY HELPFUL ON MOBILE) */}
-      <div className="p-3.5 sm:p-4 rounded-2xl bg-[#161724]/80 border border-[#f5f2eb]/15 backdrop-blur-2xl space-y-2.5 shadow-lg">
-        <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#fcfbf7]" />
-            <h3 className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
-              არჩეული თარიღი: {selectedDate}
-            </h3>
+      {/* =========================================================================
+          VIEW MODE 1: MOBILE AGENDA VIEW (Fast, Clean, Zero Overflow)
+          ========================================================================= */}
+      {mobileView === 'agenda' && (
+        <div className="sm:hidden space-y-3 min-w-0">
+          <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center justify-between">
+            <span>დაგეგმილი მოვლენები ({agendaEvents.length})</span>
+            <span>{selectedCategory}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[11px] font-mono text-[#a8a495]">
-              {selectedDateEvents.length} მოვლენა
-            </span>
-            {isAdmin && (
-              <button
-                type="button"
-                onClick={() => openCreateEventModal(selectedDate)}
-                className="px-3 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                ამ დღეს დამატება
-              </button>
-            )}
-          </div>
-        </div>
 
-        {selectedDateEvents.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {selectedDateEvents.map(evt => {
-              const fltMeta = CALENDAR_FILTERS.find(c => c.id === evt.category);
+          <div className="space-y-2.5">
+            {agendaEvents.map((evt) => {
+              const dotColor = CATEGORY_DOT_COLORS[evt.category] || 'bg-slate-400';
               return (
                 <div
-                  key={`sel-${evt.id}`}
-                  onClick={() => {
-                    soundEffects.click();
-                    setActiveEvent(evt);
-                  }}
-                  className="p-3 rounded-xl bg-[#1a1c2d]/80 hover:bg-[#222438]/90 border border-[#f5f2eb]/12 transition-all cursor-pointer flex items-start justify-between gap-2.5"
+                  key={evt.id}
+                  onClick={() => setActiveEvent(evt)}
+                  className="card-surface p-4 space-y-2 cursor-pointer active:scale-[0.99] transition-transform"
                 >
-                  <div className="space-y-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${fltMeta?.bgClass} ${fltMeta?.textClass} ${fltMeta?.borderClass}`}
-                      >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${dotColor}`} />
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">
                         {evt.category}
                       </span>
-                      {evt.teacher && (
-                        <span className="text-[11px] font-mono text-[#dedacb]">
-                          • {evt.teacher}
-                        </span>
-                      )}
                     </div>
-                    <h4 className="text-xs sm:text-sm font-bold text-[#fcfbf7] leading-snug">
-                      {evt.title}
-                    </h4>
-                    <p className="text-[11px] text-[#b8b5a8] leading-relaxed">
-                      {evt.description}
-                    </p>
+                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                      {evt.date}
+                    </span>
                   </div>
-                  <span className="text-[10px] font-mono text-[#e6e2d3] shrink-0 px-2 py-1 rounded-lg bg-white/5 border border-white/10">
-                    AI &rarr;
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p className="text-xs text-[#a8a495] py-1">
-            ამ დღეს დაგეგმილი შემაჯამებელი ან აქტივობა არ არის. დააჭირეთ კალენდარში მონიშნულ ნებისმიერ დღეს დეტალების სანახავად.
-          </p>
-        )}
-      </div>
 
-      {/* QUICK UPCOMING LIST BELOW GRID */}
-      <div className="p-3.5 sm:p-5 rounded-2xl bg-[#12131d]/60 border border-[#f5f2eb]/10 backdrop-blur-xl">
-        <h3 className="text-sm font-semibold text-[#fcfbf7] mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CalendarIcon className="w-4 h-4 text-[#e6e2d3]" />
-            <span>აღნიშნული მოვლენები ({filteredEvents.length})</span>
-          </div>
-          <span className="text-[10px] font-mono font-normal text-[#7c796e]/65 select-none">
-            made by Theiulius
-          </span>
-        </h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                    {evt.title}
+                  </h3>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          {filteredEvents.slice(0, 6).map(evt => {
-            const fltMeta = CALENDAR_FILTERS.find(c => c.id === evt.category);
-            return (
-              <div
-                key={evt.id}
-                onClick={() => {
-                  soundEffects.click();
-                  setActiveEvent(evt);
-                }}
-                className="p-3 rounded-xl bg-[#171825]/60 hover:bg-[#1e2030]/70 border border-[#f5f2eb]/10 transition-colors cursor-pointer flex items-start justify-between gap-3"
-              >
-                <div className="min-w-0 space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-mono text-[#a8a495]">
-                      {evt.endDate ? `${evt.date} - ${evt.endDate}` : evt.date}
-                    </span>
-                    <span className={`text-[10px] font-medium px-2 py-0.2 rounded-full border ${fltMeta?.bgClass} ${fltMeta?.textClass} ${fltMeta?.borderClass}`}>
-                      {evt.category}
-                    </span>
+                  <div className="flex items-center gap-3 text-[11px] text-slate-500 dark:text-slate-400">
+                    {evt.time && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {evt.time}
+                      </span>
+                    )}
                     {evt.teacher && (
-                      <span className="text-[10px] font-mono text-[#dedacb]/80">
+                      <span className="flex items-center gap-1">
+                        <User className="w-3 h-3" />
                         {evt.teacher}
                       </span>
                     )}
                   </div>
-                  <h4 className="text-xs sm:text-sm font-semibold text-white leading-snug">{evt.title}</h4>
-                  <p className="text-[11px] text-[#b8b5a8] line-clamp-2 leading-relaxed">{evt.description}</p>
                 </div>
-                <span className="text-[10px] text-[#e6e2d3] font-mono shrink-0 underline">
-                  დეტალები &rarr;
-                </span>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* DEEP EVENT DETAIL DRAWER WITH AI EVALUATION AND TYPEWRITER ANIMATION (@ios-fluid-gestures) */}
+      {/* =========================================================================
+          VIEW MODE 2: MOBILE WEEK VIEW
+          ========================================================================= */}
+      {mobileView === 'week' && (
+        <div className="sm:hidden space-y-4 min-w-0">
+          <div className="grid grid-cols-7 gap-1 card-surface p-2 shadow-sm min-w-0">
+            {weekDays.map((d) => {
+              const isSelected = d.dateStr === selectedDate;
+              return (
+                <button
+                  key={d.dateStr}
+                  onClick={() => setSelectedDate(d.dateStr)}
+                  className={`py-2 rounded-xl flex flex-col items-center justify-center transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-indigo-600 text-white font-bold shadow-sm'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5'
+                  }`}
+                >
+                  <span className="text-[10px] font-mono">{d.shortDay}</span>
+                  <span className="text-xs font-semibold mt-0.5">{d.dayNum}</span>
+                  {d.hasEvents && (
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full mt-1 ${
+                        isSelected ? 'bg-white' : 'bg-rose-500'
+                      }`}
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {selectedDate}: {selectedDateEvents.length} მოვლენა
+            </div>
+            {selectedDateEvents.length > 0 ? (
+              selectedDateEvents.map((evt) => (
+                <div
+                  key={evt.id}
+                  onClick={() => setActiveEvent(evt)}
+                  className="card-surface p-4 space-y-1.5 cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+                      {evt.category}
+                    </span>
+                    <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                      {evt.time || evt.date}
+                    </span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {evt.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                    {evt.description}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-500 py-3 text-center">ამ დღეს მოვლენა არ არის.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          VIEW MODE 3: MONTH GRID (Desktop Full View & Mobile Compact Dots View)
+          ========================================================================= */}
+      {(mobileView === 'month' || typeof window === 'undefined') && (
+        <div className="block space-y-4 min-w-0">
+          <div className="card-surface p-2 sm:p-5 shadow-sm overflow-hidden min-w-0">
+            {/* Weekday Row */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center min-w-0">
+              {WEEKDAYS_SHORT.map((day) => (
+                <div
+                  key={day}
+                  className="text-[10px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 py-1"
+                >
+                  {day}
+                </div>
+              ))}
+            </div>
+
+            {/* Days Matrix: Min-w-0 on everything to prevent any 720px blowout! */}
+            <div className="grid grid-cols-7 gap-1 sm:gap-2 min-w-0">
+              {calendarGrid.map((cell, idx) => {
+                const dayEvents = filteredEvents.filter((e) => isEventOnDate(e, cell.dateString));
+                const isSelectedDay = cell.dateString === selectedDate;
+
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => {
+                      soundEffects.click();
+                      setSelectedDate(cell.dateString);
+                      if (dayEvents.length > 0 && window.innerWidth < 640) {
+                        setActiveEvent(dayEvents[0]);
+                      }
+                    }}
+                    className={`min-h-[52px] sm:min-h-[105px] p-1 sm:p-2 rounded-xl sm:rounded-2xl border transition-all flex flex-col justify-between cursor-pointer min-w-0 ${
+                      cell.isCurrentMonth
+                        ? 'bg-slate-50/70 dark:bg-white/[0.03] border-slate-200/80 dark:border-white/5 hover:border-indigo-400/30'
+                        : 'bg-transparent border-transparent opacity-30'
+                    } ${
+                      isSelectedDay
+                        ? 'ring-2 ring-indigo-600 bg-indigo-50/40 dark:bg-indigo-950/30'
+                        : ''
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span
+                        className={`text-[11px] sm:text-xs font-semibold ${
+                          isSelectedDay
+                            ? 'text-indigo-600 dark:text-indigo-400 font-bold'
+                            : 'text-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        {cell.dayNumber}
+                      </span>
+
+                      {/* Desktop event counter */}
+                      {dayEvents.length > 0 && (
+                        <span className="hidden sm:inline text-[10px] font-mono text-slate-400">
+                          {dayEvents.length}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Mobile: Clean dots view (Zero text blowout!) */}
+                    <div className="sm:hidden flex items-center justify-center gap-1 py-1">
+                      {dayEvents.slice(0, 3).map((e) => (
+                        <span
+                          key={e.id}
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            CATEGORY_DOT_COLORS[e.category] || 'bg-indigo-500'
+                          }`}
+                        />
+                      ))}
+                      {dayEvents.length > 3 && (
+                        <span className="text-[9px] font-mono text-slate-400">+</span>
+                      )}
+                    </div>
+
+                    {/* Desktop: Clear readable event pills with +N more */}
+                    <div className="hidden sm:block space-y-1 mt-1 overflow-hidden min-w-0">
+                      {dayEvents.slice(0, 2).map((e) => (
+                        <div
+                          key={e.id}
+                          onClick={(ev) => {
+                            ev.stopPropagation();
+                            setActiveEvent(e);
+                          }}
+                          className="px-1.5 py-0.5 rounded text-[11px] font-medium truncate bg-white dark:bg-white/10 text-slate-800 dark:text-slate-200 border border-slate-200/70 dark:border-white/10 hover:border-indigo-400/40 transition-colors"
+                          title={e.title}
+                        >
+                          {e.title}
+                        </div>
+                      ))}
+                      {dayEvents.length > 2 && (
+                        <div className="text-[10px] text-indigo-600 dark:text-indigo-400 font-semibold px-1">
+                          +{dayEvents.length - 2} კიდევ
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Desktop Selected Day Details Bar */}
+          <div className="hidden sm:block card-surface p-5 space-y-3 shadow-sm min-w-0">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span>თარიღი: {selectedDate}</span>
+                <span className="text-xs text-slate-400 font-normal">
+                  ({selectedDateEvents.length} მოვლენა)
+                </span>
+              </h2>
+            </div>
+
+            {selectedDateEvents.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 min-w-0">
+                {selectedDateEvents.map((evt) => (
+                  <div
+                    key={evt.id}
+                    onClick={() => setActiveEvent(evt)}
+                    className="p-3.5 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 hover:border-indigo-400/30 transition-all cursor-pointer flex flex-col justify-between gap-2"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300">
+                          {evt.category}
+                        </span>
+                        {evt.teacher && (
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                            • {evt.teacher}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
+                        {evt.title}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                        {evt.description}
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                      დეტალები &rarr;
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 py-2">
+                ამ დღეს დაგეგმილი შემაჯამებელი ან აქტივობა არ არის.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          DEEP EVENT DETAIL BOTTOM SHEET (Accessible & Fluid Gesture)
+          ========================================================================= */}
       <AnimatePresence>
         {activeEvent && (
-          <>
-            {/* iOS Backdrop */}
+          <div className="fixed inset-0 z-50 flex flex-col justify-end">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setActiveEvent(null)}
-              className="fixed inset-0 bg-black/60 backdrop-blur-md z-40"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
               aria-hidden="true"
             />
 
-            {/* iOS Bottom Sheet with GPU spring animation */}
             <motion.div
               role="dialog"
               aria-modal="true"
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{
-                type: 'spring',
-                stiffness: 400,
-                damping: 40,
-                mass: 1
-              }}
+              transition={{ type: 'spring', stiffness: 400, damping: 38 }}
               drag="y"
               dragConstraints={{ top: 0, bottom: 0 }}
-              dragElastic={{ top: 0.08, bottom: 0.65 }}
+              dragElastic={{ top: 0.05, bottom: 0.5 }}
               onDragEnd={handleDragEnd}
-              className="fixed bottom-0 inset-x-0 max-w-xl mx-auto bg-[#13141f]/95 backdrop-blur-2xl border-t border-[#f5f2eb]/20 rounded-t-[28px] shadow-2xl z-50 will-change-transform flex flex-col max-h-[90vh] pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+              className="relative z-10 glass-sheet rounded-t-3xl max-w-2xl mx-auto w-full p-5 sm:p-7 shadow-2xl max-h-[90vh] overflow-y-auto space-y-5 pb-[max(2rem,env(safe-area-inset-bottom))]"
             >
               {/* Drag Handle Capsule */}
-              <div className="w-full pt-3 pb-2 touch-none cursor-grab active:cursor-grabbing select-none flex flex-col items-center">
-                <div className="w-12 h-1 bg-white/20 rounded-full" />
-              </div>
+              <div className="w-12 h-1.5 bg-slate-300 dark:bg-slate-700 rounded-full mx-auto" />
 
-              {/* Scrollable Content inside sheet */}
-              <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-2 space-y-4 overscroll-contain text-[#f5f2eb]">
-                {/* Header row */}
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                      <span className="text-xs font-mono text-[#b8b5a8]">
-                        {activeEvent.endDate 
-                          ? `${activeEvent.date} — ${activeEvent.endDate}` 
-                          : `${activeEvent.date} ${activeEvent.time ? `• ${activeEvent.time}` : ''}`}
-                      </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 border border-white/10 text-white">
-                        {activeEvent.category}
-                      </span>
-                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#f5f2eb]/10 text-[#fcfbf7]">
-                        {activeEvent.mainCategory}
-                      </span>
-                    </div>
-                    <h2 className="text-lg sm:text-xl font-bold text-white leading-snug">
-                      {activeEvent.title}
-                    </h2>
-                  </div>
-
-                  <div className="flex items-center gap-1.5">
-                    {isAdmin && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => openEditEventModal(activeEvent)}
-                          title="რედაქტირება"
-                          className="p-1.5 rounded-full bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 transition-colors cursor-pointer"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={async () => {
-                            if (window.confirm(`ნამდვილად გსურთ წაშალოთ "${activeEvent.title}"?`)) {
-                              await deleteCalendarEvent(activeEvent.id);
-                              setActiveEvent(null);
-                            }
-                          }}
-                          title="წაშლა"
-                          className="p-1.5 rounded-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => setActiveEvent(null)}
-                      className="p-1.5 rounded-full bg-white/10 hover:bg-white/15 text-zinc-300 hover:text-white transition-colors cursor-pointer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Logistics */}
-                <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-[#1a1b28]/60 p-3 rounded-xl border border-white/5">
-                  <div>
-                    <span className="text-[#a8a495] block text-[10px]">მასწავლებელი / პასუხისმგებელი:</span>
-                    <span className="text-white font-medium">{activeEvent.teacher || activeEvent.organizer || '11/5 კლასი'}</span>
-                  </div>
-                  <div>
-                    <span className="text-[#a8a495] block text-[10px]">ადგილმდებარეობა:</span>
-                    <span className="text-white font-medium">{activeEvent.location || 'სკოლა'}</span>
-                  </div>
-                </div>
-
-                {/* Description */}
+              {/* Header */}
+              <div className="flex items-start justify-between gap-4">
                 <div className="space-y-1">
-                  <h4 className="text-xs font-semibold text-[#dedacb] uppercase tracking-wider">აღწერა:</h4>
-                  <p className="text-xs sm:text-sm text-[#d4d1c5] leading-relaxed">
-                    {activeEvent.description}
-                  </p>
-                </div>
-
-                {/* AI EVALUATION SECTION WITH REALISTIC TYPEWRITING ANIMATION */}
-                <div className="p-4 rounded-2xl bg-[#1b1c2b]/80 border border-[#f5f2eb]/15 backdrop-blur-xl space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-lg bg-[#f5f2eb]/10 flex items-center justify-center text-[#fcfbf7]">
-                        <Bot className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-mono font-semibold text-[#fcfbf7]">
-                        11/5 AI საგანმანათლებლო ასისტენტი
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        soundEffects.click();
-                        setTypedText('');
-                        setIsTyping(true);
-                      }}
-                      className="text-[10px] font-mono text-[#c2bfae] hover:text-white flex items-center gap-1 cursor-pointer"
-                    >
-                      <RotateCcw className="w-3 h-3" />
-                      <span>თავიდან გაანალიზება</span>
-                    </button>
-                  </div>
-
-                  {/* Typing Output Container */}
-                  <div className="p-3 rounded-xl bg-black/40 border border-white/5 font-mono text-xs leading-relaxed text-[#eae7da] min-h-[110px] whitespace-pre-wrap">
-                    {typedText}
-                    {isTyping && <span className="inline-block w-1.5 h-3.5 bg-[#f5f2eb] ml-0.5 animate-pulse" />}
-                  </div>
-
-                  {/* Key structured points */}
-                  <div className="space-y-1.5 pt-1">
-                    <span className="text-[11px] font-medium text-[#c2bfae] uppercase tracking-wider block">
-                      საკვანძო ასპექტები:
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/20">
+                      {activeEvent.category}
                     </span>
-                    <div className="space-y-1">
-                      {(activeEvent.aiAnalysis?.keyPoints || []).map((pt, pIdx) => (
-                        <div key={pIdx} className="flex items-start gap-2 text-xs text-[#dedacb]">
-                          <span className="text-emerald-400 mt-0.5">✓</span>
-                          <span>{pt}</span>
-                        </div>
-                      ))}
-                    </div>
+                    <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
+                      {activeEvent.date}
+                    </span>
                   </div>
+                  <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                    {activeEvent.title}
+                  </h2>
                 </div>
 
-                {/* ATTACHED STUDY RESOURCES / კონსპექტები (Students can upload, Admins approve!) */}
-                <div className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 space-y-4">
-                  <ResourceSection
-                    targetType="event"
-                    targetId={activeEvent.id}
-                    targetTitle={activeEvent.title}
-                    defaultSubject={activeEvent.title.split(' ')[0]}
-                    title="ამ აქტივობაზე მიბმული კონსპექტები & რესურსები"
-                  />
-                </div>
-
-                {/* COMMENTS ON THIS CALENDAR EVENT */}
-                <div className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 space-y-4">
-                  <CommentsThread
-                    targetType="event"
-                    targetId={activeEvent.id}
-                    title="კომენტარები & კითხვები ამ აქტივობაზე"
-                  />
-                </div>
-
-                {/* Action button */}
-                <div className="pt-2">
+                <div className="flex items-center gap-1 shrink-0">
+                  {isAdmin && (
+                    <button
+                      onClick={() => deleteCalendarEvent(activeEvent.id)}
+                      className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 cursor-pointer"
+                      title="წაშლა"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                   <button
-                    onClick={() => {
-                      soundEffects.success();
-                      setActiveEvent(null);
-                    }}
-                    className="w-full py-3 rounded-xl bg-[#f5f2eb] hover:bg-white text-[#0c0d12] font-semibold text-xs tracking-wider uppercase transition-colors cursor-pointer shadow-md"
+                    onClick={() => setActiveEvent(null)}
+                    className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white cursor-pointer"
+                    aria-label="დახურვა"
                   >
-                    დახურვა
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
-      {/* Admin Add / Edit Calendar Event Modal */}
-      {showEventForm && isAdmin && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-          onClick={() => setShowEventForm(false)}
-        >
-          <div
-            className="bg-white text-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900">
-                {editingEventId ? 'კალენდრის აქტივობის რედაქტირება' : 'კალენდარში ახალი აქტივობის დამატება'}
-              </h3>
-              <button
-                type="button"
-                onClick={() => setShowEventForm(false)}
-                className="p-1.5 rounded-full bg-slate-100 text-slate-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+              {/* Authoritative Information: Metadata grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-white/5 p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/5">
+                {activeEvent.time && (
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span>დრო: {activeEvent.time}</span>
+                  </div>
+                )}
+                {activeEvent.teacher && (
+                  <div className="flex items-center gap-2">
+                    <User className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span>მასწავლებელი: {activeEvent.teacher}</span>
+                  </div>
+                )}
+                {activeEvent.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+                    <span>ადგილი: {activeEvent.location}</span>
+                  </div>
+                )}
+              </div>
 
-            <form onSubmit={handleSaveEvent} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">სათაური *</label>
-                <input
-                  type="text"
-                  required
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="მაგ: ფიზიკა — შემაჯამებელი წერა №2"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+              {/* Requirements & Description */}
+              <div className="space-y-1.5">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  მოთხოვნები & პროგრამა
+                </h3>
+                <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed bg-white dark:bg-white/[0.02] p-4 rounded-2xl border border-slate-200/80 dark:border-white/10">
+                  {activeEvent.description}
+                </p>
+              </div>
+
+              {/* AI Study Assistance — Collapsed by default & clearly labeled as unofficial */}
+              {activeEvent.aiAnalysis && (
+                <div className="rounded-2xl border border-indigo-200/60 dark:border-indigo-500/20 overflow-hidden bg-indigo-50/30 dark:bg-indigo-950/10">
+                  <button
+                    onClick={() => setIsAiExpanded((prev) => !prev)}
+                    className="w-full px-4 py-3 text-left flex items-center justify-between text-xs font-semibold text-indigo-900 dark:text-indigo-300 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                      <span>AI სასწავლო რჩევა (დამხმარე)</span>
+                    </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${isAiExpanded ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {isAiExpanded && (
+                    <div className="px-4 pb-4 pt-1 space-y-2 text-xs text-slate-600 dark:text-slate-300 border-t border-indigo-200/40 dark:border-indigo-500/20">
+                      <div className="flex items-center gap-4 text-[11px]">
+                        <span>სავარაუდო სირთულე: {activeEvent.aiAnalysis.difficultyScore}</span>
+                        <span>საჭირო დრო: {activeEvent.aiAnalysis.estimatedHours}</span>
+                      </div>
+                      {activeEvent.aiAnalysis.recommendation && (
+                        <p className="text-[11px] leading-relaxed">
+                          {activeEvent.aiAnalysis.recommendation}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Resources & Study Notes Section */}
+              <div className="pt-2 border-t border-slate-200/70 dark:border-white/10">
+                <ResourceSection
+                  targetType="event"
+                  targetId={activeEvent.id}
+                  targetTitle={activeEvent.title}
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+              {/* Comments Thread Section */}
+              <div className="pt-2 border-t border-slate-200/70 dark:border-white/10">
+                <CommentsThread targetType="event" targetId={activeEvent.id} />
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* =========================================================================
+          FILTER BOTTOM SHEET
+          ========================================================================= */}
+      <AnimatePresence>
+        {isFilterSheetOpen && (
+          <div className="fixed inset-0 z-50 flex flex-col justify-end">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsFilterSheetOpen(false)}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+              aria-hidden="true"
+            />
+            <motion.div
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', stiffness: 400, damping: 38 }}
+              className="relative z-10 glass-sheet rounded-t-3xl p-5 space-y-4 max-w-md mx-auto w-full pb-[max(2rem,env(safe-area-inset-bottom))]"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  კალენდრის ფილტრები
+                </span>
+                <button
+                  onClick={() => setIsFilterSheetOpen(false)}
+                  className="p-1 text-slate-400 hover:text-slate-700"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                {CALENDAR_FILTERS.map((f) => {
+                  const isSelected = selectedCategory === f.id;
+                  return (
+                    <button
+                      key={f.id}
+                      onClick={() => {
+                        setSelectedCategory(f.id);
+                        setIsFilterSheetOpen(false);
+                      }}
+                      className={`p-2.5 rounded-xl text-xs font-semibold text-left transition-colors ${
+                        isSelected
+                          ? 'bg-indigo-600 text-white shadow-sm'
+                          : 'bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-slate-300'
+                      }`}
+                    >
+                      {f.label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="pt-2 flex justify-between">
+                <button
+                  onClick={() => {
+                    setSelectedCategory('ყველა');
+                    setIsFilterSheetOpen(false);
+                  }}
+                  className="text-xs font-bold text-rose-500"
+                >
+                  ყველას გასუფთავება
+                </button>
+                <button
+                  onClick={() => setIsFilterSheetOpen(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold"
+                >
+                  მზადაა
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* =========================================================================
+          ADMIN ADD/EDIT EVENT MODAL
+          ========================================================================= */}
+      <AnimatePresence>
+        {showEventForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowEventForm(false)}
+              className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative z-10 w-full max-w-md rounded-3xl bg-white dark:bg-[#141522] border border-slate-200/80 dark:border-white/10 p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  {editingEventId ? 'მოვლენის რედაქტირება' : 'ახალი მოვლენის დამატება'}
+                </h3>
+                <button
+                  onClick={() => setShowEventForm(false)}
+                  className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEvent} className="space-y-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">თარიღი *</label>
-                  <input
-                    type="date"
-                    required
-                    value={formDate}
-                    onChange={(e) => setFormDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">დრო / გაკვეთილი</label>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    სათაური
+                  </label>
                   <input
                     type="text"
-                    value={formTime}
-                    onChange={(e) => setFormTime(e.target.value)}
-                    placeholder="მაგ: მე-3 გაკვეთილი (10:35)"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                    required
+                    value={formTitle}
+                    onChange={(e) => setFormTitle(e.target.value)}
+                    placeholder="მაგ. მათემატიკის შემაჯამებელი"
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                   />
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">მთავარი მიმართულება</label>
-                  <select
-                    value={formMainCategory}
-                    onChange={(e) => setFormMainCategory(e.target.value as MainCategory)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                  >
-                    <option value="სკოლა">სკოლა</option>
-                    <option value="აქტივობები">აქტივობები</option>
-                    <option value="ოლიმპიადები">ოლიმპიადები</option>
-                    <option value="შეჯიბრებები">შეჯიბრებები</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      თარიღი
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      value={formDate}
+                      onChange={(e) => setFormDate(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      დასრულება (სურვილისამებრ)
+                    </label>
+                    <input
+                      type="date"
+                      value={formEndDate}
+                      onChange={(e) => setFormEndDate(e.target.value)}
+                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">ქვეკატეგორია</label>
-                  <select
-                    value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value as CalendarCategory)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                  >
-                    <option value="შემაჯამებელი">შემაჯამებელი</option>
-                    <option value="დამოუკიდებელი">დამოუკიდებელი</option>
-                    <option value="გამოკითხვა">გამოკითხვა</option>
-                    <option value="დავალებები">დავალებები</option>
-                    <option value="სკოლა">სასკოლო პროცესი</option>
-                    <option value="ოლიმპიადები">ოლიმპიადები</option>
-                    <option value="ჩემპიონატები">ჩემპიონატები</option>
-                    <option value="ჰაკათონები/იდეათონები">ჰაკათონები/იდეათონები</option>
-                    <option value="აქტივობები">აქტივობები</option>
-                    <option value="მოხალისეობრივი">მოხალისეობრივი</option>
-                    <option value="პრე-აქსელერაციის პროგრამები">პრე-აქსელერაციის პროგრამები</option>
-                  </select>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-2.5">
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      კატეგორია
+                    </label>
+                    <select
+                      value={formCategory}
+                      onChange={(e) => setFormCategory(e.target.value as CalendarCategory)}
+                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    >
+                      <option value="შემაჯამებელი">შემაჯამებელი</option>
+                      <option value="დამოუკიდებელი">დამოუკიდებელი</option>
+                      <option value="გამოკითხვა">გამოკითხვა</option>
+                      <option value="სკოლა">სასკოლო პროცესი</option>
+                      <option value="ჩემპიონატები">ჩემპიონატები</option>
+                      <option value="ოლიმპიადები">ოლიმპიადები</option>
+                      <option value="აქტივობები">აქტივობები</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      დრო
+                    </label>
+                    <input
+                      type="text"
+                      value={formTime}
+                      onChange={(e) => setFormTime(e.target.value)}
+                      placeholder="10:00 - 10:45"
+                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">მასწავლებელი / ორგანიზატორი</label>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    მასწავლებელი / ორგანიზატორი
+                  </label>
                   <input
                     type="text"
                     value={formTeacher}
                     onChange={(e) => setFormTeacher(e.target.value)}
-                    placeholder="მაგ: თემურ კვარაცხელია"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                    placeholder="მაგ. ნანა ჯაფარიძე"
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                   />
                 </div>
+
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">ოთახი / ლოკაცია</label>
-                  <input
-                    type="text"
-                    value={formLocation}
-                    onChange={(e) => setFormLocation(e.target.value)}
-                    placeholder="მაგ: 305-ე კაბინეტი"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    მოთხოვნები & აღწერა
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={formDescription}
+                    onChange={(e) => setFormDescription(e.target.value)}
+                    placeholder="შინაარსი, საკითხები, მოსამზადებელი პარაგრაფები..."
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl p-3 text-xs text-slate-900 dark:text-white resize-none"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">აღწერა *</label>
-                <textarea
-                  rows={2}
-                  required
-                  value={formDescription}
-                  onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="რა საკითხები შედის ამ აქტივობაში?"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">სირთულე (AI შეფასება)</label>
-                  <input
-                    type="text"
-                    value={formDifficulty}
-                    onChange={(e) => setFormDifficulty(e.target.value)}
-                    placeholder="მაგ: 8/10 (რთული)"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
-                  />
+                <div className="pt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowEventForm(false)}
+                    className="px-3.5 py-2 rounded-xl text-xs text-slate-500 hover:text-slate-800"
+                  >
+                    გაუქმება
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white cursor-pointer"
+                  >
+                    შენახვა
+                  </button>
                 </div>
-                <div>
-                  <label className="block font-bold text-slate-700 mb-1">მოსამზადებელი დრო</label>
-                  <input
-                    type="text"
-                    value={formHours}
-                    onChange={(e) => setFormHours(e.target.value)}
-                    placeholder="მაგ: 3 საათი"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-bold text-slate-700 mb-1">
-                  საკვანძო საკითხები (თითო ხაზზე თითო საკითხი)
-                </label>
-                <textarea
-                  rows={3}
-                  value={formKeyPoints}
-                  onChange={(e) => setFormKeyPoints(e.target.value)}
-                  placeholder="ნიუტონის კანონები&#10;იმპულსის მუდმივობა&#10;ხახუნის ძალა"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowEventForm(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
-                >
-                  გაუქმება
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm"
-                >
-                  შენახვა
-                </button>
-              </div>
-            </form>
+              </form>
+            </motion.div>
           </div>
-        </div>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   );
 };

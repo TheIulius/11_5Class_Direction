@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   BookOpen,
@@ -7,7 +7,6 @@ import {
   Circle,
   Clock,
   User,
-  FileText,
   Table,
   Plus,
   Trash2,
@@ -15,6 +14,9 @@ import {
   Check,
   X,
   Save,
+  MessageSquare,
+  FileText,
+  ChevronDown
 } from 'lucide-react';
 import { DaySchedule, TimetableSlot } from '../data/campaignData';
 import { soundEffects } from '../utils/soundEffects';
@@ -70,12 +72,20 @@ export const HomeworkSection: React.FC = () => {
     openAuthModal,
   } = usePlatform();
 
-  const [selectedDate, setSelectedDate] = useState<string>('2026-10-13');
   const [viewMode, setViewMode] = useState<'homework' | 'timetable'>('homework');
-  const [completedMap, setCompletedMap] = useState<Record<string, boolean>>({});
+  const [selectedDate, setSelectedDate] = useState<string>('2026-10-13');
+  const [completedMap, setCompletedMap] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = localStorage.getItem('class11_5_hw_completed_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
   const [expandedHwId, setExpandedHwId] = useState<string | null>(null);
 
-  // Add homework modal
+  // Add Homework Modal
   const [isAddHwOpen, setIsAddHwOpen] = useState(false);
   const [hwDate, setHwDate] = useState('2026-10-13');
   const [hwSubject, setHwSubject] = useState('მათემატიკა');
@@ -84,7 +94,10 @@ export const HomeworkSection: React.FC = () => {
   const [hwNotes, setHwNotes] = useState('');
   const [submitBanner, setSubmitBanner] = useState<string | null>(null);
 
-  // Admin timetable editor state
+  // Mobile timetable selected day tab
+  const [mobileTimetableDay, setMobileTimetableDay] = useState<string>('სამშაბათი');
+
+  // Admin Timetable Editing
   const [isEditingTimetable, setIsEditingTimetable] = useState(false);
   const [draftTimetable, setDraftTimetable] = useState<DaySchedule[]>([]);
 
@@ -93,10 +106,16 @@ export const HomeworkSection: React.FC = () => {
 
   const handleToggleComplete = (id: string) => {
     soundEffects.success();
-    setCompletedMap((prev) => ({ ...prev, [id]: !prev[id] }));
+    setCompletedMap((prev) => {
+      const updated = { ...prev, [id]: !prev[id] };
+      try {
+        localStorage.setItem('class11_5_hw_completed_v1', JSON.stringify(updated));
+      } catch {}
+      return updated;
+    });
   };
 
-  // Weekdays buttons + any other dates that have homework
+  // Weekdays buttons for current school week
   const baseWeekDays = [
     { date: '2026-10-12', label: '12 ოქტ', dayName: 'ორშაბათი', shortDay: 'ორშ' },
     { date: '2026-10-13', label: '13 ოქტ', dayName: 'სამშაბათი', shortDay: 'სამ' },
@@ -114,12 +133,18 @@ export const HomeworkSection: React.FC = () => {
       shortDay: currentSelectedFormatted.dayOfWeek.slice(0, 3),
     };
 
-  const visibleHomeworks = homeworks.filter(
-    (h) =>
-      h.status !== 'rejected' &&
-      (h.status !== 'pending' || isAdmin || (user && h.authorUsername === user.username))
-  );
-  const activeDayHomeworks = visibleHomeworks.filter((h) => h.date === selectedDate);
+  const visibleHomeworks = useMemo(() => {
+    return homeworks.filter(
+      (h) =>
+        h.status !== 'rejected' &&
+        (h.status !== 'pending' || isAdmin || (user && h.authorUsername === user.username))
+    );
+  }, [homeworks, isAdmin, user]);
+
+  const activeDayHomeworks = useMemo(() => {
+    return visibleHomeworks.filter((h) => h.date === selectedDate);
+  }, [visibleHomeworks, selectedDate]);
+
   const activeDaySchedule = timetable.find((d) => d.dayId === currentSelectedDayInfo.dayName);
 
   const handleCreateHomework = async (e: React.FormEvent) => {
@@ -135,6 +160,7 @@ export const HomeworkSection: React.FC = () => {
       title: hwTitle.trim(),
       notes: hwNotes.trim(),
     });
+
     if (res.success) {
       soundEffects.success();
       setSelectedDate(hwDate);
@@ -143,10 +169,10 @@ export const HomeworkSection: React.FC = () => {
       setIsAddHwOpen(false);
       setSubmitBanner(
         res.isPending
-          ? 'დავალება გაიგზავნა! ადმინისტრატორის დადასტურების შემდეგ გამოჩნდება ყველასთვის.'
+          ? 'დავალება გაიგზავნა დასადასტურებლად.'
           : 'დავალება წარმატებით დაემატა!'
       );
-      setTimeout(() => setSubmitBanner(null), 5000);
+      setTimeout(() => setSubmitBanner(null), 4000);
     }
   };
 
@@ -179,6 +205,7 @@ export const HomeworkSection: React.FC = () => {
             : period === 6
             ? '13:05 - 13:50'
             : '13:55 - 14:40';
+
         const updatedSlots = exists
           ? day.slots.map((s) => (s.period === period ? { ...s, [field]: value } : s))
           : [
@@ -190,6 +217,7 @@ export const HomeworkSection: React.FC = () => {
                 teacher: field === 'teacher' ? value : '',
               },
             ].sort((a, b) => a.period - b.period);
+
         return {
           ...day,
           slots: updatedSlots.filter((s) => s.subject.trim() !== '' || s.teacher?.trim()),
@@ -207,58 +235,52 @@ export const HomeworkSection: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-8">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 space-y-6 min-w-0">
+      {/* =========================================================================
+          PAGE HEADER: TITLE & SEGMENTED VIEW SWITCH
+          ========================================================================= */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 min-w-0">
         <div>
-          <div className="text-xs font-mono uppercase text-[#e6e2d3] tracking-widest mb-1 opacity-80 flex items-center flex-wrap">
-            <span>სასწავლო დავალებები &bull;&nbsp;</span>
-            <span className="inline-flex items-end">
-              <span>11/5</span>
-              <span className="text-[8px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-[1px]">
-                class
-              </span>
-            </span>
-            <span className="ml-1">PLATFORM</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#fcfbf7]">
-            საშინაო დავალებების ცენტრი &amp; ცხრილი
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            {viewMode === 'homework' ? 'დავალებები' : 'გაკვეთილების ცხრილი'}
           </h1>
-          <p className="text-xs sm:text-sm text-[#b8b5a8] mt-1">
-            დავალებები კალენდრის მიხედვით, კონსპექტები/ამოხსნები და გაკვეთილების ცხრილი.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            {viewMode === 'homework'
+              ? 'საშინაო დავალებები და მიმაგრებული ამოხსნები'
+              : '11/5 კლასის ყოველკვირეული გაკვეთილები'}
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 self-start sm:self-end">
-          {/* Add Homework Button (Admin or Student) */}
-          <button
-            type="button"
-            onClick={() => {
-              soundEffects.click();
-              if (!user) {
-                openAuthModal('login');
-                return;
-              }
-              setHwDate(selectedDate);
-              setIsAddHwOpen(true);
-            }}
-            className="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-md transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>{isAdmin ? '+ დავალების დამატება (Admin)' : '+ დავალების დამატება'}</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+          {/* Add Homework Button */}
+          {viewMode === 'homework' && (
+            <button
+              onClick={() => {
+                if (!user) {
+                  openAuthModal('login');
+                  return;
+                }
+                setHwDate(selectedDate);
+                setIsAddHwOpen(true);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-indigo-600/20 transition-all cursor-pointer"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>დამატება</span>
+            </button>
+          )}
 
-          {/* View Switcher: Homework vs Full Timetable */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-[#161722]/80 border border-[#f5f2eb]/15 backdrop-blur-xl">
+          {/* Segmented Control: Homework vs Timetable */}
+          <div className="flex items-center p-1 rounded-xl glass-pill">
             <button
               onClick={() => {
                 soundEffects.click();
                 setViewMode('homework');
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'homework'
-                  ? 'bg-[#f5f2eb] text-[#0c0d12] font-semibold shadow-sm'
-                  : 'text-[#c2bfae] hover:text-white'
+                  ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <BookOpen className="w-3.5 h-3.5" />
@@ -270,54 +292,50 @@ export const HomeworkSection: React.FC = () => {
                 soundEffects.click();
                 setViewMode('timetable');
               }}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                 viewMode === 'timetable'
-                  ? 'bg-[#f5f2eb] text-[#0c0d12] font-semibold shadow-sm'
-                  : 'text-[#c2bfae] hover:text-white'
+                  ? 'bg-white dark:bg-[#1a2236] text-slate-900 dark:text-slate-100 font-bold shadow-sm'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Table className="w-3.5 h-3.5" />
-              <span>სრული ცხრილი</span>
+              <span>ცხრილი</span>
             </button>
           </div>
         </div>
       </div>
 
       {submitBanner && (
-        <div className="p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xs text-emerald-200 font-medium flex items-center justify-between">
+        <div className="p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-500/20 text-xs text-emerald-800 dark:text-emerald-300 font-medium flex items-center justify-between">
           <span>{submitBanner}</span>
-          <button onClick={() => setSubmitBanner(null)} className="text-emerald-300 hover:text-white">
+          <button onClick={() => setSubmitBanner(null)} className="text-emerald-600 dark:text-emerald-400">
             <X className="w-4 h-4" />
           </button>
         </div>
       )}
 
+      {/* =========================================================================
+          MODE 1: HOMEWORK VIEW
+          ========================================================================= */}
       {viewMode === 'homework' && (
-        <div className="space-y-6">
-          {/* Weekday Date Strip Selector + Custom Date Picker */}
-          <div className="rounded-2xl bg-[#141520]/80 border border-[#f5f2eb]/12 backdrop-blur-2xl p-2.5 sm:p-4 shadow-xl space-y-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="text-xs font-mono text-[#a8a495] flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-[#e6e2d3]" />
-                <span>აირჩიეთ თარიღი კალენდარში:</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <label htmlFor="hw-custom-date" className="text-[11px] font-mono text-[#a8a495]">
-                  სხვა თარიღი:
-                </label>
-                <input
-                  id="hw-custom-date"
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => {
-                    if (e.target.value) setSelectedDate(e.target.value);
-                  }}
-                  className="bg-[#181a28] border border-[#f5f2eb]/15 rounded-lg px-2.5 py-1 text-xs text-white focus:outline-none focus:border-indigo-400"
-                />
-              </div>
+        <div className="space-y-6 min-w-0">
+          {/* Weekday Strip + Date Control */}
+          <div className="card-surface p-3 sm:p-4 space-y-2.5 shadow-sm min-w-0">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                აირჩიეთ თარიღი:
+              </span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  if (e.target.value) setSelectedDate(e.target.value);
+                }}
+                className="bg-transparent text-xs font-mono text-slate-600 dark:text-slate-300 border border-slate-200/80 dark:border-white/10 rounded-lg px-2 py-0.5"
+              />
             </div>
 
-            <div className="grid grid-cols-5 gap-1.5 sm:gap-3">
+            <div className="grid grid-cols-5 gap-1.5 sm:gap-2.5 min-w-0">
               {baseWeekDays.map((day) => {
                 const isSelected = selectedDate === day.date;
                 const hasHw = visibleHomeworks.some((h) => h.date === day.date);
@@ -328,23 +346,20 @@ export const HomeworkSection: React.FC = () => {
                       soundEffects.click();
                       setSelectedDate(day.date);
                     }}
-                    className={`px-1.5 py-2 sm:p-3 rounded-xl border transition-all text-center cursor-pointer flex flex-col items-center justify-center relative ${
+                    className={`p-2 sm:p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center relative min-w-0 ${
                       isSelected
-                        ? 'bg-[#f5f2eb] text-[#0c0d12] border-white font-bold shadow-lg scale-102'
-                        : 'bg-[#181a28]/60 border-[#f5f2eb]/10 text-[#c2bfae] hover:bg-white/5 hover:text-white'
+                        ? 'bg-indigo-600 text-white border-indigo-600 font-bold shadow-sm'
+                        : 'bg-slate-50 dark:bg-white/5 border-slate-200/70 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:border-indigo-400/30'
                     }`}
                   >
-                    <span className="text-[10px] sm:text-[11px] font-mono uppercase opacity-80">
-                      {day.shortDay}
-                    </span>
-                    <span className="text-[11px] sm:text-sm font-semibold mt-0.5 whitespace-nowrap">
+                    <span className="text-[10px] font-mono opacity-80">{day.shortDay}</span>
+                    <span className="text-xs sm:text-sm font-semibold mt-0.5 truncate max-w-full">
                       {day.label}
                     </span>
-
                     {hasHw && (
                       <span
-                        className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full ${
-                          isSelected ? 'bg-amber-600' : 'bg-amber-400 animate-pulse'
+                        className={`w-1.5 h-1.5 rounded-full mt-1 ${
+                          isSelected ? 'bg-white' : 'bg-amber-500'
                         }`}
                       />
                     )}
@@ -354,106 +369,102 @@ export const HomeworkSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Day Detail & Homework Display */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base sm:text-lg font-semibold text-[#fcfbf7] flex items-center gap-2">
-                <span>
-                  {currentSelectedDayInfo.dayName}, {currentSelectedDayInfo.label}
-                </span>
-                <span className="text-xs font-mono text-[#a8a495] font-normal">
-                  ({activeDayHomeworks.length} დავალება)
-                </span>
-              </h2>
+          {/* Active Day Homework List */}
+          <div className="space-y-3.5 min-w-0">
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                {currentSelectedDayInfo.dayName}, {currentSelectedDayInfo.label} ({activeDayHomeworks.length} დავალება)
+              </span>
             </div>
 
             {activeDayHomeworks.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-3 min-w-0">
                 {activeDayHomeworks.map((hw) => {
                   const isDone = Boolean(completedMap[hw.id]);
                   const isExpanded = expandedHwId === hw.id;
+                  const resCount = platform.resources.filter(
+                    (r) => r.targetType === 'homework' && r.targetId === hw.id
+                  ).length;
+                  const comCount = platform.comments.filter(
+                    (c) => c.targetType === 'homework' && c.targetId === hw.id
+                  ).length;
 
                   return (
-                    <motion.div
+                    <div
                       key={hw.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className={`p-4 sm:p-6 rounded-2xl border transition-all backdrop-blur-2xl shadow-xl space-y-4 ${
+                      className={`card-surface p-4 sm:p-5 space-y-3 transition-all min-w-0 ${
                         isDone
-                          ? 'bg-[#151c18]/80 border-emerald-500/30 text-emerald-200'
-                          : 'bg-[#171826]/85 border-[#f5f2eb]/15 text-[#f5f2eb]'
+                          ? 'border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/10'
+                          : ''
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="space-y-2 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
+                        <div className="space-y-1.5 min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold">
+                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                               {hw.subject}
                             </span>
-                            <span className="text-xs font-mono text-[#a8a495] flex items-center gap-1">
-                              <User className="w-3 h-3" />
-                              <span>მასწავლებელი: {hw.teacher}</span>
-                            </span>
-                            <span className="text-xs font-mono text-[#dedacb] bg-white/10 px-2 py-0.5 rounded-md">
+                            {hw.teacher && (
+                              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                {hw.teacher}
+                              </span>
+                            )}
+                            <span className="text-[11px] text-slate-400">•</span>
+                            <span className="text-[11px] text-slate-500 dark:text-slate-400">
                               {hw.displayDate}
                             </span>
                             {hw.status === 'pending' && (
-                              <span className="px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-bold">
-                                ელოდება ადმინის დადასტურებას
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">
+                                დასადასტურებელი
                               </span>
                             )}
                           </div>
 
                           <h3
-                            className={`text-base sm:text-lg font-bold ${
-                              isDone ? 'line-through text-emerald-300' : 'text-white'
+                            className={`text-sm sm:text-base font-bold leading-snug ${
+                              isDone
+                                ? 'line-through text-slate-400 dark:text-slate-500'
+                                : 'text-slate-900 dark:text-slate-100'
                             }`}
                           >
                             {hw.title}
                           </h3>
 
                           {hw.notes && (
-                            <p className="text-xs text-[#b8b5a8] leading-relaxed">{hw.notes}</p>
+                            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                              {hw.notes}
+                            </p>
                           )}
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2 shrink-0">
+                        {/* Completion Button & Actions */}
+                        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
                           {isAdmin && hw.status === 'pending' && (
-                            <>
-                              <button
-                                onClick={() => moderateHomework(hw.id, 'approved')}
-                                className="px-3 py-2 rounded-xl bg-emerald-500 text-slate-950 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <Check className="w-3.5 h-3.5" />
-                                დადასტურება
-                              </button>
-                              <button
-                                onClick={() => moderateHomework(hw.id, 'rejected')}
-                                className="px-3 py-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold flex items-center gap-1 cursor-pointer"
-                              >
-                                <X className="w-3.5 h-3.5" />
-                                უარყოფა
-                              </button>
-                            </>
+                            <button
+                              onClick={() => moderateHomework(hw.id, 'approved')}
+                              className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold"
+                            >
+                              დადასტურება
+                            </button>
                           )}
 
                           <button
                             onClick={() => handleToggleComplete(hw.id)}
-                            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
                               isDone
-                                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                                : 'bg-[#f5f2eb] hover:bg-white text-[#0c0d12] shadow-md'
+                                ? 'bg-emerald-600 text-white'
+                                : 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/15'
                             }`}
                           >
                             {isDone ? (
                               <>
-                                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                                <CheckCircle2 className="w-3.5 h-3.5" />
                                 <span>შესრულებულია</span>
                               </>
                             ) : (
                               <>
-                                <Circle className="w-4 h-4 text-[#0c0d12]" />
-                                <span>მონიშნე შესრულებულად</span>
+                                <Circle className="w-3.5 h-3.5" />
+                                <span>მონიშვნა</span>
                               </>
                             )}
                           </button>
@@ -461,8 +472,8 @@ export const HomeworkSection: React.FC = () => {
                           {isAdmin && (
                             <button
                               onClick={() => deleteHomework(hw.id)}
-                              title="დავალების წაშლა"
-                              className="p-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/30 text-rose-300 border border-rose-500/25 cursor-pointer"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 transition-colors"
+                              title="წაშლა"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -470,23 +481,32 @@ export const HomeworkSection: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-white/10 flex items-center justify-between">
+                      {/* Expandable Resource & Comment Bar */}
+                      <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
                         <button
-                          type="button"
                           onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
-                          className="text-xs font-semibold text-indigo-300 hover:text-indigo-200 flex items-center gap-1.5 cursor-pointer"
+                          className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-3 cursor-pointer"
                         >
-                          <FileText className="w-3.5 h-3.5" />
-                          <span>
-                            {isExpanded
-                              ? 'დამალე ამოხსნები / რესურსები & კომენტარები'
-                              : 'ამოხსნების / რესურსების ატვირთვა & კომენტარები'}
+                          <span className="flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>მასალები ({resCount})</span>
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span>კომენტარები ({comCount})</span>
                           </span>
                         </button>
+                        <ChevronDown
+                          onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
+                          className={`w-4 h-4 text-slate-400 transition-transform cursor-pointer ${
+                            isExpanded ? 'rotate-180' : ''
+                          }`}
+                        />
                       </div>
 
+                      {/* Expanded Section (Preserves card context, no sudden jump!) */}
                       {isExpanded && (
-                        <div className="pt-3 border-t border-white/10 space-y-5">
+                        <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4">
                           <ResourceSection
                             targetType="homework"
                             targetId={hw.id}
@@ -496,24 +516,16 @@ export const HomeworkSection: React.FC = () => {
                           <CommentsThread targetType="homework" targetId={hw.id} compact />
                         </div>
                       )}
-                    </motion.div>
+                    </div>
                   );
                 })}
               </div>
             ) : (
-              <div className="p-8 sm:p-12 rounded-2xl bg-[#141520]/50 border border-dashed border-[#f5f2eb]/15 text-center space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-white/5 mx-auto flex items-center justify-center text-[#a8a495]">
-                  <FileText className="w-6 h-6" />
-                </div>
-                <h3 className="text-sm font-semibold text-[#fcfbf7]">
-                  დავალება არ არის მოცემული
-                </h3>
-                <p className="text-xs text-[#a8a495] max-w-sm mx-auto">
-                  {currentSelectedDayInfo.dayName}სთვის ({currentSelectedDayInfo.label}) ახალი საშინაო
-                  დავალება ატვირთული არ არის.
+              <div className="card-surface p-8 text-center space-y-2">
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+                  {currentSelectedDayInfo.dayName}სთვის დავალება ატვირთული არ არის.
                 </p>
                 <button
-                  type="button"
                   onClick={() => {
                     if (!user) {
                       openAuthModal('login');
@@ -522,170 +534,154 @@ export const HomeworkSection: React.FC = () => {
                     setHwDate(selectedDate);
                     setIsAddHwOpen(true);
                   }}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-semibold text-white cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/15 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>დაამატე დავალება ამ დღისთვის</span>
+                  <span>დაამატე დავალება</span>
                 </button>
-              </div>
-            )}
-
-            {/* Daily Schedule Preview for selected day */}
-            {activeDaySchedule && (
-              <div className="pt-4 border-t border-white/5 space-y-3">
-                <span className="text-xs font-mono text-[#a8a495] uppercase tracking-wider block">
-                  {activeDaySchedule.dayId}ს გაკვეთილების განრიგი ცხრილით:
-                </span>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                  {activeDaySchedule.slots.map((slot) => (
-                    <div
-                      key={slot.period}
-                      className="p-3 rounded-xl bg-[#161724]/70 border border-[#f5f2eb]/10 text-xs flex items-center justify-between gap-2"
-                    >
-                      <div className="min-w-0">
-                        <div className="font-semibold text-white flex items-center gap-1.5">
-                          <span className="font-mono text-[#a8a495]">{slot.period}.</span>
-                          <span>{slot.subject}</span>
-                        </div>
-                        {slot.teacher && (
-                          <div className="text-[11px] text-[#b8b5a8] font-mono mt-0.5">
-                            {slot.teacher}
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-[10px] font-mono text-[#a8a495] bg-white/5 px-2 py-0.5 rounded shrink-0">
-                        {slot.time}
-                      </span>
-                    </div>
-                  ))}
-                </div>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {/* FULL TIMETABLE VIEW (WITH ADMIN EDIT CAPABILITY) */}
+      {/* =========================================================================
+          MODE 2: TIMETABLE VIEW
+          ========================================================================= */}
       {viewMode === 'timetable' && (
-        <div className="space-y-4">
+        <div className="space-y-4 min-w-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h2 className="text-base sm:text-lg font-bold text-white">
-                გაკვეთილების ოფიციალური ცხრილი
-              </h2>
-              <p className="text-xs text-[#b8b5a8]">11/5 კლასის ყოველკვირეული განრიგი</p>
-            </div>
-            <div className="flex items-center gap-2">
-              {isAdmin && !isEditingTimetable && (
-                <button
-                  type="button"
-                  onClick={startEditTimetable}
-                  className="px-3.5 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>ცხრილის რედაქტირება (Admin)</span>
-                </button>
-              )}
-              {isAdmin && isEditingTimetable && (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleSaveTimetable}
-                    className="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <Save className="w-3.5 h-3.5" />
-                    <span>შენახვა</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsEditingTimetable(false)}
-                    className="px-3 py-1.5 rounded-xl bg-white/10 text-white text-xs cursor-pointer"
-                  >
-                    გაუქმება
-                  </button>
-                </>
-              )}
-              <span className="text-xs font-mono text-[#dedacb] bg-white/5 px-3 py-1 rounded-lg border border-white/10 shrink-0">
-                ორშ - პარ
-              </span>
-            </div>
-          </div>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              ყოველკვირეული განრიგი (ორშაბათი – პარასკევი)
+            </span>
 
-          {/* Mobile Stacked Day Cards (< md) */}
-          <div className="md:hidden space-y-3">
-            {(isEditingTimetable ? draftTimetable : timetable).map((day) => (
-              <div
-                key={`mob-tt-${day.dayId}`}
-                className="rounded-2xl border border-[#f5f2eb]/15 bg-[#12131d]/90 backdrop-blur-2xl overflow-hidden shadow-lg"
-              >
-                <div className="px-4 py-2.5 bg-[#181928]/90 border-b border-[#f5f2eb]/12 flex items-center justify-between">
-                  <span className="text-xs font-bold text-[#fcfbf7]">{day.dayId}</span>
-                  <span className="text-[10px] font-mono text-[#a8a495]">
-                    {day.slots.length} გაკვეთილი
-                  </span>
-                </div>
-                <div className="divide-y divide-white/5 p-2 space-y-1">
-                  {day.slots.map((slot) => (
-                    <div
-                      key={`${day.dayId}-${slot.period}`}
-                      className="flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl"
+            {isAdmin && (
+              <div className="flex items-center gap-2">
+                {!isEditingTimetable ? (
+                  <button
+                    onClick={startEditTimetable}
+                    className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>ცხრილის რედაქტირება (Admin)</span>
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleSaveTimetable}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                     >
-                      <div className="min-w-0">
-                        <div className="text-xs font-semibold text-white flex items-center gap-1.5">
-                          <span className="font-mono text-[#a8a495]">{slot.period}.</span>
-                          <span>{slot.subject}</span>
-                        </div>
-                        {slot.teacher && (
-                          <div className="text-[10px] font-mono text-[#a8a495] pl-4">
-                            {slot.teacher}
-                          </div>
-                        )}
-                      </div>
-                      <span className="text-[10px] font-mono text-[#a8a495] bg-white/5 px-2 py-0.5 rounded shrink-0">
-                        {slot.time}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                      <Save className="w-3.5 h-3.5" />
+                      <span>შენახვა</span>
+                    </button>
+                    <button
+                      onClick={() => setIsEditingTimetable(false)}
+                      className="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-white/10 text-xs cursor-pointer"
+                    >
+                      გაუქმება
+                    </button>
+                  </>
+                )}
               </div>
-            ))}
+            )}
           </div>
 
-          {/* Desktop Full Table Container (md and up) */}
-          <div className="hidden md:block overflow-x-auto rounded-2xl border border-[#f5f2eb]/15 bg-[#12131d]/90 backdrop-blur-2xl shadow-2xl">
-            <table className="w-full text-left text-xs text-[#dedacb] border-collapse min-w-[650px]">
+          {/* Mobile: Day Selector & Vertical Lesson Cards */}
+          <div className="md:hidden space-y-3 min-w-0">
+            <div className="flex items-center gap-1 p-1 rounded-xl glass-pill overflow-x-auto scrollbar-none">
+              {(isEditingTimetable ? draftTimetable : timetable).map((day) => {
+                const isSelected = mobileTimetableDay === day.dayId;
+                return (
+                  <button
+                    key={day.dayId}
+                    onClick={() => setMobileTimetableDay(day.dayId)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-indigo-600 text-white shadow-sm'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900'
+                    }`}
+                  >
+                    {day.dayId}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Vertical Lesson Cards for Selected Day */}
+            {(() => {
+              const currentDaySchedule =
+                (isEditingTimetable ? draftTimetable : timetable).find(
+                  (d) => d.dayId === mobileTimetableDay
+                ) || timetable[0];
+
+              return (
+                <div className="card-surface p-4 space-y-2 min-w-0">
+                  <div className="text-xs font-bold text-slate-700 dark:text-slate-300 pb-1 border-b border-slate-100 dark:border-white/5">
+                    {currentDaySchedule.dayId} ({currentDaySchedule.slots.length} გაკვეთილი)
+                  </div>
+
+                  <div className="divide-y divide-slate-100 dark:divide-white/5">
+                    {currentDaySchedule.slots.map((slot) => (
+                      <div
+                        key={`${currentDaySchedule.dayId}-${slot.period}`}
+                        className="py-2.5 flex items-center justify-between gap-2"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                            <span className="font-mono text-slate-400">{slot.period}.</span>
+                            <span>{slot.subject}</span>
+                          </div>
+                          {slot.teacher && (
+                            <div className="text-[11px] text-slate-500 dark:text-slate-400 pl-4">
+                              {slot.teacher}
+                            </div>
+                          )}
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded shrink-0">
+                          {slot.time}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Desktop Full Weekly Table */}
+          <div className="hidden md:block overflow-x-auto card-surface p-1 shadow-sm min-w-0">
+            <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-[#f5f2eb]/15 bg-[#181928]/90 font-mono text-[11px]">
-                  <th className="py-3 px-3 sm:px-4 text-[#a8a495] font-semibold w-28">დრო/დღეები</th>
-                  <th className="py-3 px-3 sm:px-4 text-[#fcfbf7] font-semibold">ორშაბათი</th>
-                  <th className="py-3 px-3 sm:px-4 text-[#fcfbf7] font-semibold">სამშაბათი</th>
-                  <th className="py-3 px-3 sm:px-4 text-[#fcfbf7] font-semibold">ოთხშაბათი</th>
-                  <th className="py-3 px-3 sm:px-4 text-[#fcfbf7] font-semibold">ხუთშაბათი</th>
-                  <th className="py-3 px-3 sm:px-4 text-[#fcfbf7] font-semibold">პარასკევი</th>
+                <tr className="border-b border-slate-200/80 dark:border-white/10 font-semibold text-slate-500 dark:text-slate-400">
+                  <th className="py-3 px-4 w-28">დრო</th>
+                  <th className="py-3 px-4">ორშაბათი</th>
+                  <th className="py-3 px-4">სამშაბათი</th>
+                  <th className="py-3 px-4">ოთხშაბათი</th>
+                  <th className="py-3 px-4">ხუთშაბათი</th>
+                  <th className="py-3 px-4">პარასკევი</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
                 {[1, 2, 3, 4, 5, 6, 7].map((periodNum) => {
                   const timeLabel =
                     periodNum === 1
-                      ? '1. 8:30 - 9:15'
+                      ? '8:30 - 9:15'
                       : periodNum === 2
-                      ? '2. 9:20 - 10:05'
+                      ? '9:20 - 10:05'
                       : periodNum === 3
-                      ? '3. 10:10 - 10:55'
+                      ? '10:10 - 10:55'
                       : periodNum === 4
-                      ? '4. 11:20 - 12:05'
+                      ? '11:20 - 12:05'
                       : periodNum === 5
-                      ? '5. 12:10 - 12:55'
+                      ? '12:10 - 12:55'
                       : periodNum === 6
-                      ? '6. 13:05 - 13:50'
-                      : '7. 13:55 - 14:40';
+                      ? '13:05 - 13:50'
+                      : '13:55 - 14:40';
 
                   return (
-                    <tr key={periodNum} className="hover:bg-white/5 transition-colors">
-                      <td className="py-3 px-3 sm:px-4 font-mono text-[11px] text-[#a8a495] whitespace-nowrap bg-black/20">
-                        {timeLabel}
+                    <tr key={periodNum} className="hover:bg-slate-50/50 dark:hover:bg-white/[0.02]">
+                      <td className="py-3 px-4 font-mono text-[11px] text-slate-400 whitespace-nowrap">
+                        {periodNum}. {timeLabel}
                       </td>
 
                       {(isEditingTimetable ? draftTimetable : timetable).map((day) => {
@@ -693,7 +689,7 @@ export const HomeworkSection: React.FC = () => {
 
                         if (isEditingTimetable) {
                           return (
-                            <td key={day.dayId} className="py-2 px-2 align-top space-y-1">
+                            <td key={day.dayId} className="py-2 px-3 align-top space-y-1">
                               <input
                                 type="text"
                                 value={slot?.subject || ''}
@@ -701,7 +697,7 @@ export const HomeworkSection: React.FC = () => {
                                   handleSlotChange(day.dayId, periodNum, 'subject', e.target.value)
                                 }
                                 placeholder="საგანი..."
-                                className="w-full bg-black/50 border border-white/15 rounded px-2 py-1 text-[11px] text-white"
+                                className="w-full bg-slate-100 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded px-2 py-1 text-xs"
                               />
                               <input
                                 type="text"
@@ -710,25 +706,29 @@ export const HomeworkSection: React.FC = () => {
                                   handleSlotChange(day.dayId, periodNum, 'teacher', e.target.value)
                                 }
                                 placeholder="მასწავლებელი..."
-                                className="w-full bg-black/30 border border-white/10 rounded px-2 py-0.5 text-[10px] text-[#a8a495]"
+                                className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200/50 dark:border-white/5 rounded px-2 py-0.5 text-[10px] text-slate-500"
                               />
                             </td>
                           );
                         }
 
                         return (
-                          <td key={day.dayId} className="py-3 px-3 sm:px-4 align-top">
+                          <td key={day.dayId} className="py-3 px-4 align-top">
                             {slot ? (
-                              <div className="space-y-0.5 p-1.5 rounded-lg">
-                                <div className="font-semibold text-white">{slot.subject}</div>
+                              <div className="space-y-0.5">
+                                <div className="font-semibold text-slate-900 dark:text-slate-100">
+                                  {slot.subject}
+                                </div>
                                 {slot.teacher && (
-                                  <div className="text-[10px] font-mono text-[#a8a495]">
+                                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
                                     {slot.teacher}
                                   </div>
                                 )}
                               </div>
                             ) : (
-                              <span className="text-zinc-600 font-mono text-xs">—</span>
+                              <span className="text-slate-300 dark:text-slate-700 font-mono text-xs">
+                                —
+                              </span>
                             )}
                           </td>
                         );
@@ -751,19 +751,21 @@ export const HomeworkSection: React.FC = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsAddHwOpen(false)}
-              className="fixed inset-0 bg-black/75 backdrop-blur-sm"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative z-10 w-full max-w-md rounded-2xl bg-[#141522] border border-[#f5f2eb]/20 p-6 space-y-4 shadow-2xl"
+              className="relative z-10 w-full max-w-md rounded-3xl bg-white dark:bg-[#141522] border border-slate-200/80 dark:border-white/10 p-6 space-y-4 shadow-2xl"
             >
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-bold text-white">ახალი საშინაო დავალების დამატება</h3>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                  საშინაო დავალების დამატება
+                </h3>
                 <button
                   onClick={() => setIsAddHwOpen(false)}
-                  className="p-1 text-zinc-400 hover:text-white"
+                  className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -771,77 +773,84 @@ export const HomeworkSection: React.FC = () => {
 
               <form onSubmit={handleCreateHomework} className="space-y-3">
                 <div>
-                  <label className="block text-xs text-[#b8b5a8] mb-1">თარიღი</label>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    თარიღი
+                  </label>
                   <input
                     type="date"
                     required
                     value={hwDate}
                     onChange={(e) => setHwDate(e.target.value)}
-                    className="w-full bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white"
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-2.5">
+
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="block text-xs text-[#b8b5a8] mb-1">საგანი</label>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      საგანი
+                    </label>
                     <input
                       type="text"
                       required
                       value={hwSubject}
                       onChange={(e) => setHwSubject(e.target.value)}
-                      placeholder="მაგ. მათემატიკა"
-                      className="w-full bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white"
+                      placeholder="მათემატიკა"
+                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-[#b8b5a8] mb-1">მასწავლებელი</label>
+                    <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                      მასწავლებელი
+                    </label>
                     <input
                       type="text"
                       value={hwTeacher}
                       onChange={(e) => setHwTeacher(e.target.value)}
-                      placeholder="მაგ. ნანა ჯაფარიძე"
-                      className="w-full bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white"
+                      placeholder="ნანა ჯაფარიძე"
+                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
                 </div>
+
                 <div>
-                  <label className="block text-xs text-[#b8b5a8] mb-1">დავალების სათაური / ნომრები</label>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    დავალება / ნომრები
+                  </label>
                   <input
                     type="text"
                     required
                     value={hwTitle}
                     onChange={(e) => setHwTitle(e.target.value)}
-                    placeholder="მაგ. ამოცანები 54-დან 60-ის ჩათვლით"
-                    className="w-full bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-[#b8b5a8] mb-1">შენიშვნა / დეტალები</label>
-                  <textarea
-                    rows={3}
-                    value={hwNotes}
-                    onChange={(e) => setHwNotes(e.target.value)}
-                    placeholder="დამატებითი მითითებები კლასელებისთვის..."
-                    className="w-full bg-black/40 border border-[#f5f2eb]/15 rounded-xl p-3 text-xs text-white resize-none"
+                    placeholder="ამოცანები 54-60"
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                   />
                 </div>
 
-                {!isAdmin && (
-                  <p className="text-[11px] text-amber-300/90 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2">
-                    მოსწავლის მიერ დამატებული დავალება გაეგზავნება ადმინებს დასადასტურებლად.
-                  </p>
-                )}
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
+                    დეტალები
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={hwNotes}
+                    onChange={(e) => setHwNotes(e.target.value)}
+                    placeholder="მითითებები კლასელებისთვის..."
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl p-3 text-xs text-slate-900 dark:text-white resize-none"
+                  />
+                </div>
 
                 <div className="pt-2 flex justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setIsAddHwOpen(false)}
-                    className="px-3.5 py-2 rounded-xl text-xs text-[#b8b5a8] hover:text-white"
+                    className="px-3.5 py-2 rounded-xl text-xs text-slate-500"
                   >
                     გაუქმება
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-[#f5f2eb] hover:bg-white text-xs font-bold text-[#0c0d12] cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white cursor-pointer"
                   >
                     დამატება
                   </button>

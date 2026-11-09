@@ -26,7 +26,7 @@ export interface PlatformUser {
 
 export interface PlatformComment {
   id: string;
-  targetType: 'event' | 'homework' | 'resource' | 'idea' | 'opportunity' | 'club' | 'general';
+  targetType: 'event' | 'homework' | 'resource' | 'idea' | 'opportunity' | 'club' | 'general' | 'archive';
   targetId: string;
   authorId: string;
   authorName: string;
@@ -129,8 +129,8 @@ interface PlatformContextValue {
   openAuthModal: (mode?: 'login' | 'register') => void;
   closeAuthModal: () => void;
   isAdminModalOpen: boolean;
-  adminModalTab: 'approvals' | 'users' | 'announcement';
-  openAdminModal: (tab?: 'approvals' | 'users' | 'announcement') => void;
+  adminModalTab: 'approvals' | 'users' | 'announcement' | 'analytics';
+  openAdminModal: (tab?: 'approvals' | 'users' | 'announcement' | 'analytics') => void;
   closeAdminModal: () => void;
   refreshPlatform: () => Promise<void>;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
@@ -253,7 +253,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalInitialMode, setAuthModalInitialMode] = useState<'login' | 'register'>('login');
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
-  const [adminModalTab, setAdminModalTab] = useState<'approvals' | 'users' | 'announcement'>('approvals');
+  const [adminModalTab, setAdminModalTab] = useState<'approvals' | 'users' | 'announcement' | 'analytics'>('approvals');
 
   const getHeaders = useCallback(
     (customToken?: string | null) => {
@@ -324,7 +324,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
-  const openAdminModal = (tab: 'approvals' | 'users' | 'announcement' = 'approvals') => {
+  const openAdminModal = (tab: 'approvals' | 'users' | 'announcement' | 'analytics' = 'approvals') => {
     setAdminModalTab(tab);
     setIsAdminModalOpen(true);
   };

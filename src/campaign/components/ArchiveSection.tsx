@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
-  Archive,
+  FolderOpen,
   BookOpen,
-  Sparkles,
+  ArrowLeft,
   Plus,
   Trash2,
   ExternalLink,
   ChevronRight,
-  ArrowLeft,
+  Search,
+  Sparkles,
   Calendar,
-  FolderOpen,
   X,
+  FileText
 } from 'lucide-react';
 import { usePlatform } from '../context/PlatformContext';
 import { QuizPrepSection } from './QuizPrepSection';
@@ -19,21 +20,32 @@ import { CommentsThread } from './CommentsThread';
 
 export const ArchiveSection: React.FC = () => {
   const { isAdmin, platform, addArchivePack, deleteArchivePack } = usePlatform();
-  const [activePackId, setActivePackId] = useState<string | null>('arch_geo_romantizmi_quiz');
+  const [activePackId, setActivePackId] = useState<string | null>(null); // Default to library view for clean entry
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Admin New Archive Pack state
+  // New archive pack form state
   const [title, setTitle] = useState('');
   const [subject, setSubject] = useState('ქართული');
   const [teacher, setTeacher] = useState('');
-  const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
+  const [date, setDate] = useState('2026-10-15');
   const [description, setDescription] = useState('');
-  const [badge, setBadge] = useState('არქივის მოდული');
+  const [badge, setBadge] = useState('სასწავლო მოდული');
   const [content, setContent] = useState('');
   const [linkUrl, setLinkUrl] = useState('');
-  const [keyTopics, setKeyTopics] = useState('');
 
   const selectedPack = platform.archivePacks.find((p) => p.id === activePackId) || null;
+
+  const filteredPacks = useMemo(() => {
+    if (!searchQuery.trim()) return platform.archivePacks;
+    const q = searchQuery.toLowerCase();
+    return platform.archivePacks.filter(
+      (p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.subject.toLowerCase().includes(q) ||
+        p.description.toLowerCase().includes(q)
+    );
+  }, [platform.archivePacks, searchQuery]);
 
   const handleCreatePack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,382 +59,279 @@ export const ArchiveSection: React.FC = () => {
       badge: badge.trim() || 'არქივის მასალა',
       content: content.trim() || undefined,
       linkUrl: linkUrl.trim() || undefined,
-      keyTopics: keyTopics
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
+      keyTopics: [],
     });
     if (ok) {
       setTitle('');
       setDescription('');
       setContent('');
       setLinkUrl('');
-      setKeyTopics('');
       setShowAddModal(false);
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Archive Header Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-indigo-200 text-xs font-bold">
-              <Archive className="w-3.5 h-3.5 text-amber-400" />
-              <span>11/5 სასწავლო არქივი & ქვიზების ბიბლიოთეკა</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-              არქივი — ქართულის ქვიზი & განვლილი მასალები
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              აქ ინახება ჩვენი კლასის ყველა ინტერაქტიული მოსამზადებელი მოდული (მათ შორის{' '}
-              <strong className="text-white">ქართული რომანტიზმის სრული ქვიზი, პოდკასტები და ვიდეოები</strong>),
-              განვლილი შემაჯამებლების კონსპექტები და სასწავლო რესურსები.
-            </p>
-          </div>
-
-          {isAdmin && (
+  // =========================================================================
+  // STATE 1: ACTIVE STUDY MODULE VIEW
+  // =========================================================================
+  if (selectedPack) {
+    if (selectedPack.isBuiltInGeorgianQuiz) {
+      return (
+        <div className="space-y-4">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 flex items-center justify-between">
             <button
-              type="button"
-              onClick={() => setShowAddModal(true)}
-              className="px-4 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shrink-0 transition-all"
-            >
-              <Plus className="w-4 h-4" />
-              არქივში მოდულის დამატება
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Archive Packs Selector Bar */}
-      <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black text-slate-900 flex items-center gap-2">
-            <FolderOpen className="w-4 h-4 text-indigo-600" />
-            არქივში შენახული მოდულები ({platform.archivePacks.length})
-          </h3>
-          {activePackId && (
-            <button
-              type="button"
               onClick={() => setActivePackId(null)}
-              className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
-              ყველა მოდულის სია
+              <span>ყველა მასალაზე დაბრუნება</span>
+            </button>
+            <span className="text-xs text-slate-500 font-medium">{selectedPack.title}</span>
+          </div>
+          <QuizPrepSection onBack={() => setActivePackId(null)} />
+        </div>
+      );
+    }
+
+    // Generic Archive Pack Viewer
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+        <button
+          onClick={() => setActivePackId(null)}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+        >
+          <ArrowLeft className="w-3.5 h-3.5" />
+          <span>ყველა მასალაზე დაბრუნება</span>
+        </button>
+
+        <div className="card-surface p-6 sm:p-8 space-y-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-600 text-white">
+              {selectedPack.subject}
+            </span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{selectedPack.date}</span>
+          </div>
+
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
+            {selectedPack.title}
+          </h1>
+
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            {selectedPack.description}
+          </p>
+
+          {selectedPack.content && (
+            <div className="pt-2">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/5 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap text-slate-800 dark:text-slate-200 font-sans">
+                {selectedPack.content}
+              </div>
+            </div>
+          )}
+
+          {selectedPack.linkUrl && (
+            <div className="pt-2">
+              <a
+                href={selectedPack.linkUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors"
+              >
+                <span>გახსნა ბმულით</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          )}
+
+          <div className="pt-4 border-t border-slate-200/70 dark:border-white/10 space-y-6">
+            <ResourceSection targetType="archive" targetId={selectedPack.id} />
+            <CommentsThread targetType="archive" targetId={selectedPack.id} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // STATE 2: LIBRARY OVERVIEW (Concise Module Cards & Search)
+  // =========================================================================
+  return (
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+            სასწავლო მასალები
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+            ქართული რომანტიზმი, განვლილი შემაჯამებლების კონსპექტები და არქივი.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {isAdmin && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-sm transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>მოდულის დამატება (Admin)</span>
             </button>
           )}
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {platform.archivePacks.map((pack) => {
-            const isSelected = activePackId === pack.id;
-            return (
-              <div
-                key={pack.id}
-                onClick={() => setActivePackId(pack.id)}
-                className={`p-4 rounded-2xl border text-left cursor-pointer transition-all flex flex-col justify-between gap-3 ${
-                  isSelected
-                    ? 'bg-indigo-50/70 border-indigo-500 ring-2 ring-indigo-500/20'
-                    : 'bg-slate-50/70 hover:bg-white border-slate-200/80 hover:border-indigo-300'
-                }`}
-              >
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-indigo-600 text-white">
-                        {pack.subject}
-                      </span>
-                      {pack.badge && (
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
-                          {pack.badge}
-                        </span>
-                      )}
-                      <span className="text-[11px] text-slate-400 font-medium flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {pack.date}
-                      </span>
-                    </div>
-
-                    {isAdmin && !pack.isBuiltInGeorgianQuiz && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (window.confirm('ნამდვილად გსურთ არქივის ამ მოდულის წაშლა?')) {
-                            deleteArchivePack(pack.id);
-                            if (activePackId === pack.id) {
-                              setActivePackId('arch_geo_romantizmi_quiz');
-                            }
-                          }
-                        }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-
-                  <h4 className="text-sm sm:text-base font-black text-slate-900">{pack.title}</h4>
-                  <p className="text-xs text-slate-600 line-clamp-2">{pack.description}</p>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200/60">
-                  <div className="flex flex-wrap gap-1">
-                    {(pack.keyTopics || []).slice(0, 3).map((t, i) => (
-                      <span
-                        key={i}
-                        className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-semibold text-slate-600"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-xs font-black text-indigo-600 flex items-center gap-1 shrink-0">
-                    {isSelected ? 'გახსნილია' : 'გახსნა'}
-                    <ChevronRight className="w-4 h-4" />
-                  </span>
-                </div>
-              </div>
-            );
-          })}
-        </div>
       </div>
 
-      {/* Selected Archive Pack Viewer */}
-      {selectedPack && (
-        <div className="space-y-6 animate-fadeIn">
-          {selectedPack.isBuiltInGeorgianQuiz ? (
-            <div className="space-y-6">
-              <QuizPrepSection />
-              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ResourceSection
-                  targetType="archive"
-                  targetId={selectedPack.id}
-                  targetTitle={selectedPack.title}
-                  defaultSubject="ქართული"
-                  title="ქართულის ქვიზის დამატებითი კონსპექტები"
-                />
-                <CommentsThread
-                  targetType="resource"
-                  targetId={selectedPack.id}
-                  title="კომენტარები ქართულის ქვიზზე"
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
-              <div className="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-slate-100">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 rounded-full text-xs font-black bg-indigo-100 text-indigo-700">
-                      {selectedPack.subject}
-                    </span>
-                    <span className="text-xs text-slate-500 font-medium">{selectedPack.date}</span>
-                    {selectedPack.teacher && (
-                      <span className="text-xs text-slate-500">• პედაგოგი: {selectedPack.teacher}</span>
-                    )}
-                  </div>
-                  <h3 className="text-xl font-black text-slate-900">{selectedPack.title}</h3>
-                  <p className="text-sm text-slate-600 mt-1">{selectedPack.description}</p>
-                </div>
-
-                {selectedPack.linkUrl && (
-                  <a
-                    href={selectedPack.linkUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    გარე რესურსის გახსნა
-                  </a>
-                )}
-              </div>
-
-              {selectedPack.content && (
-                <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-sm text-slate-800 whitespace-pre-wrap leading-relaxed">
-                  {selectedPack.content}
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-                <ResourceSection
-                  targetType="archive"
-                  targetId={selectedPack.id}
-                  targetTitle={selectedPack.title}
-                  defaultSubject={selectedPack.subject}
-                />
-                <CommentsThread targetType="resource" targetId={selectedPack.id} />
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* General Class Archive Shared Resources */}
-      <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
-        <ResourceSection
-          targetType="general"
-          targetTitle="საერთო სასწავლო ბიბლიოთეკა"
-          defaultSubject="ზოგადი"
-          title="საერთო სასწავლო მასალების & კონსპექტების საცავი"
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="მოძებნეთ მასალა სათაურით ან საგნით..."
+          className="w-full bg-slate-50 dark:bg-white/5 border border-slate-200/80 dark:border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500"
         />
       </div>
 
-      {/* Admin Add Archive Pack Modal */}
-      {showAddModal && isAdmin && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-          onClick={() => setShowAddModal(false)}
-        >
-          <div
-            className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
+      {/* Module Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filteredPacks.map((pack) => {
+          return (
+            <div
+              key={pack.id}
+              onClick={() => setActivePackId(pack.id)}
+              className="card-surface card-hover p-5 sm:p-6 flex flex-col justify-between gap-4 cursor-pointer text-left group"
+            >
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-500/20">
+                    {pack.subject}
+                  </span>
+                  {pack.badge && (
+                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
+                      {pack.badge}
+                    </span>
+                  )}
+                </div>
+
+                <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors leading-snug">
+                  {pack.title}
+                </h2>
+
+                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                  {pack.description}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-white/5 text-xs">
+                <span className="text-[11px] text-slate-400">
+                  {pack.teacher ? `მასწავლებელი: ${pack.teacher}` : pack.date}
+                </span>
+
+                <div className="flex items-center gap-2">
+                  {isAdmin && !pack.isBuiltInGeorgianQuiz && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteArchivePack(pack.id);
+                      }}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 cursor-pointer"
+                      title="წაშლა"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                  <span className="font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                    <span>გახსნა</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Add Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-[#141522] rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl border border-slate-200/80 dark:border-white/10">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-black text-slate-900 flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-indigo-600" />
-                არქივში ახალი მოდულის / კონსპექტის დამატება
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                ახალი სასწავლო მოდულის დამატება
               </h3>
-              <button
-                type="button"
-                onClick={() => setShowAddModal(false)}
-                className="p-1.5 rounded-full bg-slate-100 text-slate-500"
-              >
+              <button onClick={() => setShowAddModal(false)} className="p-1 text-slate-400">
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleCreatePack} className="space-y-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">სათაური *</label>
+                <label className="block text-xs text-slate-500 mb-1">სათაური</label>
                 <input
                   type="text"
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="მაგ: ფიზიკა — კინემატიკის შემაჯამებლის სრული კრებული"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
+                  placeholder="მაგ. ფიზიკის შემაჯამებლის კონსპექტი"
+                  className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">საგანი</label>
-                  <select
+                  <label className="block text-xs text-slate-500 mb-1">საგანი</label>
+                  <input
+                    type="text"
+                    required
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
-                  >
-                    <option value="ქართული">ქართული</option>
-                    <option value="მათემატიკა">მათემატიკა</option>
-                    <option value="ფიზიკა">ფიზიკა</option>
-                    <option value="ინგლისური">ინგლისური</option>
-                    <option value="ისტორია">ისტორია</option>
-                    <option value="ქიმია">ქიმია</option>
-                    <option value="ბიოლოგია">ბიოლოგია</option>
-                    <option value="გეოგრაფია">გეოგრაფია</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">თარიღი</label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs"
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">პედაგოგი</label>
+                  <label className="block text-xs text-slate-500 mb-1">მასწავლებელი</label>
                   <input
                     type="text"
                     value={teacher}
                     onChange={(e) => setTeacher(e.target.value)}
-                    placeholder="მაგ: თემურ კვარაცხელია"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">ბეიჯი / ტიპი</label>
-                  <input
-                    type="text"
-                    value={badge}
-                    onChange={(e) => setBadge(e.target.value)}
-                    placeholder="მაგ: კონსპექტი & ტესტი"
-                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">მოკლე აღწერა *</label>
-                <input
-                  type="text"
+                <label className="block text-xs text-slate-500 mb-1">აღწერა</label>
+                <textarea
+                  rows={2}
                   required
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="რას მოიცავს ეს არქივის მოდული?"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
+                  className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl p-3 text-xs resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  სრული ტექსტი / კონსპექტი
-                </label>
-                <textarea
-                  rows={5}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder="ჩაწერეთ თეორია, ფორმულები ან კითხვები..."
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  გარე ბმული (სურვილისამებრ)
-                </label>
+                <label className="block text-xs text-slate-500 mb-1">ბმული (Drive / PDF)</label>
                 <input
                   type="url"
                   value={linkUrl}
                   onChange={(e) => setLinkUrl(e.target.value)}
                   placeholder="https://..."
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
+                  className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  საკვანძო თემები (მძიმით გამოყოფილი)
-                </label>
-                <input
-                  type="text"
-                  value={keyTopics}
-                  onChange={(e) => setKeyTopics(e.target.value)}
-                  placeholder="მაგ: იმპულსის მუდმივობა, ენერგია, დრეკადი დაჯახება"
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-sm"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="pt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold"
+                  className="px-3.5 py-2 text-xs text-slate-500"
                 >
                   გაუქმება
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold"
+                  className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold"
                 >
-                  არქივში შენახვა
+                  დამატება
                 </button>
               </div>
             </form>

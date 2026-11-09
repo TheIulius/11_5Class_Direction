@@ -2077,7 +2077,11 @@ const IOS_QUICK_SPRING = {
   damping: 35
 };
 
-export const QuizPrepSection: React.FC = () => {
+export interface QuizPrepSectionProps {
+  onBack?: () => void;
+}
+
+export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
   const [activeStudioTab, setActiveStudioTab] = useState<StudioTab>('media');
   const [swipeDirection, setSwipeDirection] = useState<number>(0);
   const [selectedPoemId, setSelectedPoemId] =
@@ -2611,7 +2615,7 @@ export const QuizPrepSection: React.FC = () => {
               title="მარცხნივ გადახვევა"
               aria-label="მარცხნივ გადახვევა"
             >
-              <ChevronLeft className="w-3.5 h-3.5 text-red-300" />
+              <ChevronLeft className="w-3.5 h-3.5 text-indigo-400" />
             </button>
           )}
 
@@ -2642,7 +2646,7 @@ export const QuizPrepSection: React.FC = () => {
                     <motion.div
                       layoutId="activePoemSelectorPill"
                       transition={IOS_QUICK_SPRING}
-                      className="absolute inset-0 rounded-xl bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.4)] will-change-transform"
+                      className="absolute inset-0 rounded-xl bg-indigo-600 shadow-sm will-change-transform"
                     />
                   )}
                   <span className="relative z-10 whitespace-nowrap">
@@ -2661,7 +2665,7 @@ export const QuizPrepSection: React.FC = () => {
               title="მარჯვნივ გადახვევა"
               aria-label="მარჯვნივ გადახვევა"
             >
-              <ChevronRight className="w-3.5 h-3.5 text-red-300" />
+              <ChevronRight className="w-3.5 h-3.5 text-indigo-400" />
             </button>
           )}
 
@@ -2675,7 +2679,7 @@ export const QuizPrepSection: React.FC = () => {
               title="ყველა ლექსის სია"
               aria-label="ყველა ლექსის სია"
             >
-              <BookOpen className="w-3.5 h-3.5 text-red-300" />
+              <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
             </button>
             <button
               onClick={() => {
@@ -2686,7 +2690,7 @@ export const QuizPrepSection: React.FC = () => {
               title="ოფიციალური პროგრამის ფოტო"
               aria-label="ოფიციალური პროგრამის ფოტო"
             >
-              <ImageIcon className="w-3.5 h-3.5 text-red-300" />
+              <ImageIcon className="w-3.5 h-3.5 text-indigo-400" />
             </button>
             <button
               onClick={() => {
@@ -2697,7 +2701,7 @@ export const QuizPrepSection: React.FC = () => {
               title="დამატებითი ფაილები და NotebookLM"
               aria-label="დამატებითი ფაილები და NotebookLM"
             >
-              <MoreHorizontal className="w-3.5 h-3.5 text-red-300" />
+              <MoreHorizontal className="w-3.5 h-3.5 text-indigo-400" />
             </button>
           </div>
         </div>
@@ -2720,7 +2724,7 @@ export const QuizPrepSection: React.FC = () => {
                   <motion.div
                     layoutId="activeMaterialMenuTab"
                     transition={IOS_QUICK_SPRING}
-                    className="absolute inset-0 rounded-xl bg-red-500/90 border border-red-400/50 shadow-[0_0_12px_rgba(239,68,68,0.3)] will-change-transform"
+                    className="absolute inset-0 rounded-xl bg-indigo-600 border border-indigo-400/40 shadow-sm will-change-transform"
                   />
                 )}
                 <Icon className="relative z-10 w-3.5 h-3.5 shrink-0" />
