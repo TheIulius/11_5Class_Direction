@@ -114,6 +114,90 @@ export interface DetailedAnalyticsData {
   };
 }
 
+export interface PlatformComment {
+  id: string;
+  targetType: 'event' | 'homework' | 'resource' | 'idea' | 'opportunity' | 'club' | 'general';
+  targetId: string;
+  authorId: string;
+  authorName: string;
+  authorUsername: string;
+  isAdmin?: boolean;
+  content: string;
+  createdAt: string;
+  isPinned?: boolean;
+}
+
+export interface PlatformResource {
+  id: string;
+  title: string;
+  description: string;
+  content?: string;
+  linkUrl?: string;
+  attachmentName?: string;
+  attachmentDataUrl?: string;
+  resourceType: 'კონსპექტი' | 'დავალების ამოხსნა' | 'პრეზენტაცია' | 'ტესტი/მასალა' | 'ბმული';
+  subject?: string;
+  targetType: 'event' | 'homework' | 'archive' | 'general';
+  targetId?: string;
+  targetTitle?: string;
+  authorId: string;
+  authorName: string;
+  authorUsername: string;
+  status: 'approved' | 'pending' | 'rejected';
+  createdAt: string;
+  approvedBy?: string;
+  upvotes?: number;
+  upvotedBy?: string[];
+}
+
+export interface ArchiveStudyPack {
+  id: string;
+  title: string;
+  subject: string;
+  teacher?: string;
+  date: string;
+  description: string;
+  badge?: string;
+  isBuiltInGeorgianQuiz?: boolean;
+  content?: string;
+  linkUrl?: string;
+  keyTopics?: string[];
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface PlatformCMSData {
+  updatedAt: number;
+  announcement?: {
+    text: string;
+    active: boolean;
+    type: 'info' | 'urgent' | 'success';
+    linkTab?: string;
+    updatedAt: string;
+  };
+  calendarEvents: any[];
+  homeworks: any[];
+  timetable: any[];
+  opportunities: any[];
+  opportunityQuestions: {
+    id: string;
+    opportunityId: string;
+    speaker: string;
+    authorName: string;
+    authorUsername: string;
+    question: string;
+    createdAt: string;
+    answer?: string;
+  }[];
+  ideas: any[];
+  clubs: any[];
+  studyPods: any[];
+  resources: PlatformResource[];
+  comments: PlatformComment[];
+  archivePacks: ArchiveStudyPack[];
+  completedHomeworksByUser?: Record<string, string[]>;
+}
+
 export interface DatabaseSchema {
   currentGW: number;
   players: Record<string, Player>;
@@ -129,6 +213,7 @@ export interface DatabaseSchema {
   lineupVisibility?: 'auto' | 'always_show' | 'always_hide';
   pendingPhotos?: import('../src/types/fpl').PendingPlayerPhoto[];
   analytics?: DetailedAnalyticsData;
+  platform?: PlatformCMSData;
 }
 
 export function hashPassword(password: string, salt?: string): { hash: string; salt: string } {
@@ -281,12 +366,37 @@ class Database {
     // Grant permanent moderator / admin privileges to designated accounts
     Object.values(this.data.users).forEach((u) => {
       const lower = u.username.toLowerCase();
-      if (lower === 'theiulius' || lower === 'chaga') {
+      if (lower === 'theiulius' || lower === 'chaga' || lower === 'admin') {
         u.role = 'admin';
         u.isAdmin = true;
         u.isApproved = true;
       }
     });
+
+    // Ensure default platform admin account exists so admins can always log in
+    const hasAdminAccount = Object.values(this.data.users).some(
+      (u) => u.username.toLowerCase() === 'admin'
+    );
+    if (!hasAdminAccount) {
+      const adminPass = hashPassword('admin115');
+      this.data.users['user_admin_115'] = {
+        id: 'user_admin_115',
+        username: 'admin',
+        email: 'admin@11-5.komarovi.ge',
+        passwordHash: adminPass.hash,
+        salt: adminPass.salt,
+        managerName: '11/5 ადმინი',
+        teamName: '11/5 კლასი',
+        realName: '11/5 ადმინისტრატორი',
+        grade: '11',
+        parallel: '5',
+        role: 'admin',
+        isAdmin: true,
+        isApproved: true,
+        createdAt: new Date().toISOString(),
+      };
+      modified = true;
+    }
 
     // Ensure valid school clubs
     if (

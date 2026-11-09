@@ -3,7 +3,16 @@ import cors from 'cors';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData } from './db';
+import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData, PlatformCMSData, PlatformComment, PlatformResource, ArchiveStudyPack } from './db';
+import {
+  INITIAL_CALENDAR_EVENTS,
+  INITIAL_HOMEWORKS,
+  CLASS_TIMETABLE,
+  INITIAL_OPPORTUNITIES,
+  INITIAL_IDEAS,
+  INITIAL_GREEN_LIGHT_CLUBS,
+  INITIAL_STUDY_PODS,
+} from '../src/campaign/data/campaignData';
 import { calculateGameweekSquadPoints, calculatePlayerPoints } from '../src/engine/scoring';
 import { applyTransferAccountingToManager } from '../src/engine/transferAccounting';
 import { DEFAULT_SQUAD_PLAYER_IDS } from '../src/data/seedPlayers';
@@ -24,7 +33,7 @@ app.use(express.json({ limit: '25mb' }));
 app.use(express.urlencoded({ limit: '25mb', extended: true }));
 
 // Moderator / Admin privilege designations
-export const ADMIN_USERNAMES = ['theiulius', 'chaga'];
+export const ADMIN_USERNAMES = ['theiulius', 'chaga', 'admin'];
 export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'adminpassword';
 export const INITIAL_BUDGET = 55.0;
 
@@ -2799,6 +2808,17 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
     }
   }
 
+  // 10. Merge Platform CMS Data (11/5 Class Hub)
+  if (remote.platform && typeof remote.platform === 'object') {
+    if (!local.platform) {
+      local.platform = remote.platform;
+      changed = true;
+    } else if ((remote.platform.updatedAt || 0) > (local.platform.updatedAt || 0)) {
+      local.platform = remote.platform;
+      changed = true;
+    }
+  }
+
   return changed;
 }
 
@@ -4407,6 +4427,1267 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
   recalculateAllManagersLeaguePoints(data);
   db.save(`Match stats saved for ${fixture.homeClubId} vs ${fixture.awayClubId}`);
   res.json({ success: true, fixture, players: data.players });
+});
+
+// ============================================================================
+// 11/5 CLASS PLATFORM — FULL CMS, AUTH, ADMIN & STUDENT INTERACTION ENDPOINTS
+// ============================================================================
+
+export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
+  if (!data.platform) {
+    const initialResources: PlatformResource[] = [
+      {
+        id: 'res_initial_romantizmi',
+        title: 'ქართული რომანტიზმის სრული კონსპექტი (ჭავჭავაძე, ორბელიანი, ბარათაშვილი)',
+        description: 'შემაჯამებლისთვის მოსამზადებელი მოკლე კონსპექტი: მთავარი სიმბოლოები, პარალელები და საზეპირო ციტატები.',
+        content: '1. ალექსანდრე ჭავჭავაძე — „გოგჩა“ (წარმავლობის მოტივი, ტბისა და ნანგრევების კონტრასტი).\n2. გრიგოლ ორბელიანი — „საღამო გამოსალმებისა“ და „თამარ მეფის სახე ბეთანიის ეკლესიაში“.\n3. ნიკოლოზ ბარათაშვილი — რომანტიკული სწრაფვა და მსოფლიო სევდა.',
+        resourceType: 'კონსპექტი',
+        subject: 'ქართული',
+        targetType: 'event',
+        targetId: 'ev-geo-oct15',
+        targetTitle: 'ქართული — ქვიზი (რომანტიზმი)',
+        authorId: 'user_admin_115',
+        authorName: '11/5 ადმინი',
+        authorUsername: 'admin',
+        status: 'approved',
+        createdAt: new Date().toISOString(),
+        approvedBy: 'admin',
+        upvotes: 14,
+        upvotedBy: [],
+      },
+      {
+        id: 'res_initial_math_trig',
+        title: 'ტრიგონომეტრიული ფორმულების კრებული და ნიმუში ამოცანები',
+        description: 'დაყვანის ფორმულები, ორმაგი კუთხის იგივეობები და განტოლებების ამოხსნის სქემა.',
+        content: 'sin²x + cos²x = 1\nsin(2x) = 2sin(x)cos(x)\ncos(2x) = cos²x - sin²x\n1 + tan²x = 1/cos²x',
+        resourceType: 'კონსპექტი',
+        subject: 'მათემატიკა',
+        targetType: 'event',
+        targetId: 'ev-math-oct22',
+        targetTitle: 'მათემატიკის შემაჯამებელი №1',
+        authorId: 'user_admin_115',
+        authorName: '11/5 ადმინი',
+        authorUsername: 'admin',
+        status: 'approved',
+        createdAt: new Date().toISOString(),
+        approvedBy: 'admin',
+        upvotes: 19,
+        upvotedBy: [],
+      },
+    ];
+
+    const initialArchivePacks: ArchiveStudyPack[] = [
+      {
+        id: 'arch_geo_romantizmi_quiz',
+        title: 'ქართული რომანტიზმი — ინტერაქტიული ქვიზი, AI ღია კითხვები, პოდკასტი & ვიდეო',
+        subject: 'ქართული',
+        teacher: 'ნინო ჩხაიძე',
+        date: '2026-10-15',
+        description: 'სრული მოსამზადებელი მოდული 6 საკვანძო ლექსით, 30+ ტესტური და ღია კითხვით, NotebookLM-ის აუდიო პოდკასტებით, ვიდეო მიმოხილვითა და ფლეშ-ბარათებით.',
+        badge: 'ინტერაქტიული მოდული',
+        isBuiltInGeorgianQuiz: true,
+        keyTopics: [
+          'ედემი (ხალხური)',
+          'ვისაც გსურთ (ალ. ჭავჭავაძე)',
+          'ვაჰ, დრონი, დრონი (ალ. ჭავჭავაძე)',
+          'გოგჩა (ალ. ჭავჭავაძე)',
+          'საღამო გამოსალმებისა (გრ. ორბელიანი)',
+          'თამარ მეფის სახე ბეთანიის ეკლესიაში (გრ. ორბელიანი)',
+        ],
+        createdBy: 'admin',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    data.platform = {
+      updatedAt: Date.now(),
+      announcement: {
+        text: 'კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.',
+        active: true,
+        type: 'info',
+        updatedAt: new Date().toISOString(),
+      },
+      calendarEvents: JSON.parse(JSON.stringify(INITIAL_CALENDAR_EVENTS)),
+      homeworks: JSON.parse(JSON.stringify(INITIAL_HOMEWORKS)),
+      timetable: JSON.parse(JSON.stringify(CLASS_TIMETABLE)),
+      opportunities: JSON.parse(JSON.stringify(INITIAL_OPPORTUNITIES)),
+      opportunityQuestions: [],
+      ideas: JSON.parse(JSON.stringify(INITIAL_IDEAS)),
+      clubs: JSON.parse(JSON.stringify(INITIAL_GREEN_LIGHT_CLUBS)),
+      studyPods: JSON.parse(JSON.stringify(INITIAL_STUDY_PODS)),
+      resources: initialResources,
+      comments: [
+        {
+          id: 'cmt_welcome_1',
+          targetType: 'event',
+          targetId: 'ev-math-oct22',
+          authorId: 'user_admin_115',
+          authorName: '11/5 ადმინი',
+          authorUsername: 'admin',
+          isAdmin: true,
+          content: 'ამ შემაჯამებელზე ძირითადი აქცენტი იქნება ტრიგონომეტრიულ განტოლებებსა და დაყვანის ფორმულებზე. ზემოთ მიმაგრებულია ფორმულების კონსპექტი!',
+          createdAt: new Date().toISOString(),
+          isPinned: true,
+        },
+      ],
+      archivePacks: initialArchivePacks,
+      completedHomeworksByUser: {},
+    };
+    db.saveSilent();
+  }
+
+  const p = data.platform;
+  if (!Array.isArray(p.calendarEvents)) p.calendarEvents = JSON.parse(JSON.stringify(INITIAL_CALENDAR_EVENTS));
+  if (!Array.isArray(p.homeworks)) p.homeworks = JSON.parse(JSON.stringify(INITIAL_HOMEWORKS));
+  if (!Array.isArray(p.timetable)) p.timetable = JSON.parse(JSON.stringify(CLASS_TIMETABLE));
+  if (!Array.isArray(p.opportunities)) p.opportunities = JSON.parse(JSON.stringify(INITIAL_OPPORTUNITIES));
+  if (!Array.isArray(p.opportunityQuestions)) p.opportunityQuestions = [];
+  if (!Array.isArray(p.ideas)) p.ideas = JSON.parse(JSON.stringify(INITIAL_IDEAS));
+  if (!Array.isArray(p.clubs)) p.clubs = JSON.parse(JSON.stringify(INITIAL_GREEN_LIGHT_CLUBS));
+  if (!Array.isArray(p.studyPods)) p.studyPods = JSON.parse(JSON.stringify(INITIAL_STUDY_PODS));
+  if (!Array.isArray(p.resources)) p.resources = [];
+  if (!Array.isArray(p.comments)) p.comments = [];
+  if (!Array.isArray(p.archivePacks) || p.archivePacks.length === 0) {
+    p.archivePacks = [
+      {
+        id: 'arch_geo_romantizmi_quiz',
+        title: 'ქართული რომანტიზმი — ინტერაქტიული ქვიზი, AI ღია კითხვები, პოდკასტი & ვიდეო',
+        subject: 'ქართული',
+        teacher: 'ნინო ჩხაიძე',
+        date: '2026-10-15',
+        description: 'სრული მოსამზადებელი მოდული 6 საკვანძო ლექსით, 30+ ტესტური და ღია კითხვით, NotebookLM-ის აუდიო პოდკასტებით, ვიდეო მიმოხილვითა და ფლეშ-ბარათებით.',
+        badge: 'ინტერაქტიული მოდული',
+        isBuiltInGeorgianQuiz: true,
+        keyTopics: [
+          'ედემი (ხალხური)',
+          'ვისაც გსურთ (ალ. ჭავჭავაძე)',
+          'ვაჰ, დრონი, დრონი (ალ. ჭავჭავაძე)',
+          'გოგჩა (ალ. ჭავჭავაძე)',
+          'საღამო გამოსალმებისა (გრ. ორბელიანი)',
+          'თამარ მეფის სახე ბეთანიის ეკლესიაში (გრ. ორბელიანი)',
+        ],
+        createdBy: 'admin',
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  }
+  return p;
+}
+
+function getPlatformAuthUser(req: Request): { user: UserAccount; isAdmin: boolean } | null {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith('Bearer ')
+    ? authHeader.substring(7).trim()
+    : (req.body?.token || req.query?.token || '');
+  if (!token) return null;
+
+  const data = db.getData();
+  if (!data.users) return null;
+  const user = Object.values(data.users).find((u) => u.token === token);
+  if (!user) return null;
+
+  const isAdmin = isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isAdmin);
+  return { user, isAdmin };
+}
+
+function savePlatformCMS(data: DatabaseSchema, reason: string) {
+  if (data.platform) {
+    data.platform.updatedAt = Date.now();
+  }
+  db.save(reason);
+  scheduleAutoSyncToGitHub(reason);
+}
+
+// 1. Get Full Platform State (Public — Guests can view all approved content!)
+app.get('/api/platform/state', (req: Request, res: Response) => {
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const auth = getPlatformAuthUser(req);
+
+  const pendingResourcesCount = p.resources.filter((r) => r.status === 'pending').length;
+  const pendingHomeworksCount = p.homeworks.filter((h: any) => h.status === 'pending').length;
+  const pendingClubsCount = p.clubs.filter((c: any) => c.status === 'განხილვაშია').length;
+
+  res.json({
+    platform: p,
+    pendingCounts: {
+      resources: pendingResourcesCount,
+      homeworks: pendingHomeworksCount,
+      clubs: pendingClubsCount,
+      total: pendingResourcesCount + pendingHomeworksCount + pendingClubsCount,
+    },
+    currentUser: auth
+      ? {
+          id: auth.user.id,
+          username: auth.user.username,
+          fullName: auth.user.realName || auth.user.managerName || auth.user.username,
+          role: auth.isAdmin ? 'admin' : 'user',
+          isAdmin: auth.isAdmin,
+        }
+      : null,
+  });
+});
+
+// 2. Platform Student Registration (Frictionless Sign-Up for Classmates)
+app.post('/api/platform/auth/register', (req: Request, res: Response) => {
+  const { username, fullName, password } = req.body || {};
+  if (!username || !password || !fullName) {
+    return res.status(400).json({ error: 'გთხოვთ შეავსოთ მომხმარებლის სახელი, სახელი/გვარი და პაროლი.' });
+  }
+
+  const cleanUsername = String(username).trim().toLowerCase();
+  const cleanFullName = String(fullName).trim();
+
+  if (cleanUsername.length < 2) {
+    return res.status(400).json({ error: 'მომხმარებლის სახელი უნდა შედგებოდეს მინიმუმ 2 სიმბოლოსგან.' });
+  }
+  if (String(password).length < 4) {
+    return res.status(400).json({ error: 'პაროლი უნდა შედგებოდეს მინიმუმ 4 სიმბოლოსგან.' });
+  }
+
+  const data = db.getData();
+  if (!data.users) data.users = {};
+
+  const existing = Object.values(data.users).find(
+    (u) => u.username.toLowerCase() === cleanUsername
+  );
+  if (existing) {
+    return res.status(400).json({ error: 'ეს მომხმარებლის სახელი (username) უკვე დაკავებულია.' });
+  }
+
+  const id = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+  const hashed = hashPassword(String(password));
+  const token = generateToken();
+  const isAdmin = isUserAdmin(cleanUsername);
+
+  const newUser: UserAccount = {
+    id,
+    username: cleanUsername,
+    email: `${cleanUsername}@11-5.komarovi.ge`,
+    passwordHash: hashed.hash,
+    salt: hashed.salt,
+    managerName: cleanFullName,
+    teamName: '11/5 კლასი',
+    realName: cleanFullName,
+    grade: '11',
+    parallel: '5',
+    showRealNamePublicly: true,
+    token,
+    role: isAdmin ? 'admin' : 'user',
+    isAdmin,
+    isApproved: true,
+    createdAt: new Date().toISOString(),
+  };
+
+  data.users[id] = newUser;
+  savePlatformCMS(data, `Platform student registered: @${cleanUsername} (${cleanFullName})`);
+
+  res.json({
+    success: true,
+    token,
+    user: {
+      id: newUser.id,
+      username: newUser.username,
+      fullName: cleanFullName,
+      role: isAdmin ? 'admin' : 'user',
+      isAdmin,
+    },
+  });
+});
+
+// 3. Platform Sign-In (Students & Admins)
+app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
+  const { username, login, password } = req.body || {};
+  const loginInput = String(username || login || '').trim();
+  if (!loginInput || !password) {
+    return res.status(400).json({ error: 'გთხოვთ შეიყვანოთ მომხმარებლის სახელი და პაროლი.' });
+  }
+
+  let data = db.getData();
+  if (!data.users) data.users = {};
+
+  let user = findUserByLogin(loginInput, data.users);
+  if (!user) {
+    try {
+      await syncDatabaseFromGitHub();
+      data = db.getData();
+      user = findUserByLogin(loginInput, data.users || {});
+    } catch (e) {}
+  }
+
+  // Built-in emergency fallback for admin account if password matches 'admin115' or 'komarovi2025'
+  if (!user && (loginInput.toLowerCase() === 'admin' || loginInput.toLowerCase() === 'theiulius')) {
+    if (password === 'admin115' || password === 'komarovi2025' || password === ADMIN_PASSWORD) {
+      const passHash = hashPassword(password);
+      const id = `user_${loginInput.toLowerCase()}_115`;
+      user = {
+        id,
+        username: loginInput.toLowerCase(),
+        email: `${loginInput.toLowerCase()}@11-5.komarovi.ge`,
+        passwordHash: passHash.hash,
+        salt: passHash.salt,
+        managerName: loginInput.toLowerCase() === 'theiulius' ? 'იულიუსი (ადმინი)' : '11/5 ადმინი',
+        teamName: '11/5 კლასი',
+        realName: loginInput.toLowerCase() === 'theiulius' ? 'იულიუსი (ადმინი)' : '11/5 ადმინი',
+        grade: '11',
+        parallel: '5',
+        role: 'admin',
+        isAdmin: true,
+        isApproved: true,
+        createdAt: new Date().toISOString(),
+      };
+      data.users[id] = user;
+    }
+  }
+
+  if (!user) {
+    return res.status(401).json({ error: 'მომხმარებელი ვერ მოიძებნა. გთხოვთ გაიაროთ რეგისტრაცია.' });
+  }
+
+  const isValid = verifyPassword(String(password), user.passwordHash, user.salt);
+  const isEmergencyAdminPass =
+    (user.username.toLowerCase() === 'admin' || user.username.toLowerCase() === 'theiulius') &&
+    (password === 'admin115' || password === 'komarovi2025');
+
+  if (!isValid && !isEmergencyAdminPass) {
+    return res.status(401).json({ error: 'პაროლი არასწორია.' });
+  }
+
+  const token = generateToken();
+  user.token = token;
+  const isAdmin = isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isAdmin);
+  if (isAdmin) {
+    user.role = 'admin';
+    user.isAdmin = true;
+  }
+  db.save(`Platform user login: @${user.username}`);
+
+  res.json({
+    success: true,
+    token,
+    user: {
+      id: user.id,
+      username: user.username,
+      fullName: user.realName || user.managerName || user.username,
+      role: isAdmin ? 'admin' : 'user',
+      isAdmin,
+    },
+  });
+});
+
+// 4. Check Current Platform User Session
+app.get('/api/platform/auth/me', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ error: 'Not authenticated' });
+  }
+  res.json({
+    success: true,
+    user: {
+      id: auth.user.id,
+      username: auth.user.username,
+      fullName: auth.user.realName || auth.user.managerName || auth.user.username,
+      role: auth.isAdmin ? 'admin' : 'user',
+      isAdmin: auth.isAdmin,
+    },
+  });
+});
+
+// 5. Admin: List All Accounts & Manage Admin/Student Accounts
+app.get('/api/platform/admin/users', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  }
+  const data = db.getData();
+  const users = Object.values(data.users || {}).map((u) => {
+    const isAdmin = isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isAdmin);
+    return {
+      id: u.id,
+      username: u.username,
+      fullName: u.realName || u.managerName || u.username,
+      role: isAdmin ? 'admin' : 'user',
+      isAdmin,
+      createdAt: u.createdAt,
+    };
+  });
+  res.json({ users });
+});
+
+// Admin: Create Special Admin or Student Account with Password
+app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ აქაუნთის შექმნა.' });
+  }
+  const { username, fullName, password, isAdmin } = req.body || {};
+  if (!username || !password) {
+    return res.status(400).json({ error: 'მომხმარებლის სახელი და პაროლი სავალდებულოა.' });
+  }
+
+  const cleanUsername = String(username).trim().toLowerCase();
+  const cleanName = String(fullName || username).trim();
+  const data = db.getData();
+  if (!data.users) data.users = {};
+
+  const existing = Object.values(data.users).find((u) => u.username.toLowerCase() === cleanUsername);
+  if (existing) {
+    // Update existing user's password and role if already exists
+    const hashed = hashPassword(String(password));
+    existing.passwordHash = hashed.hash;
+    existing.salt = hashed.salt;
+    existing.realName = cleanName;
+    existing.managerName = cleanName;
+    existing.role = isAdmin ? 'admin' : 'user';
+    existing.isAdmin = Boolean(isAdmin);
+    existing.isApproved = true;
+    savePlatformCMS(data, `Admin updated account @${cleanUsername} (admin=${Boolean(isAdmin)})`);
+    return res.json({
+      success: true,
+      user: {
+        id: existing.id,
+        username: existing.username,
+        fullName: cleanName,
+        isAdmin: Boolean(existing.isAdmin),
+        role: existing.role,
+      },
+    });
+  }
+
+  const id = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+  const hashed = hashPassword(String(password));
+  const grantAdmin = Boolean(isAdmin) || isUserAdmin(cleanUsername);
+
+  const newUser: UserAccount = {
+    id,
+    username: cleanUsername,
+    email: `${cleanUsername}@11-5.komarovi.ge`,
+    passwordHash: hashed.hash,
+    salt: hashed.salt,
+    managerName: cleanName,
+    teamName: '11/5 კლასი',
+    realName: cleanName,
+    grade: '11',
+    parallel: '5',
+    showRealNamePublicly: true,
+    role: grantAdmin ? 'admin' : 'user',
+    isAdmin: grantAdmin,
+    isApproved: true,
+    createdAt: new Date().toISOString(),
+  };
+
+  data.users[id] = newUser;
+  savePlatformCMS(data, `Admin created account @${cleanUsername} (admin=${grantAdmin})`);
+
+  res.json({
+    success: true,
+    user: {
+      id: newUser.id,
+      username: newUser.username,
+      fullName: cleanName,
+      isAdmin: grantAdmin,
+      role: newUser.role,
+    },
+  });
+});
+
+// Admin: Toggle User Admin Role or Reset Password
+app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  }
+  const { id } = req.params;
+  const { isAdmin, newPassword, fullName } = req.body || {};
+  const data = db.getData();
+  const target = data.users?.[id];
+  if (!target) {
+    return res.status(404).json({ error: 'მომხმარებელი ვერ მოიძებნა.' });
+  }
+
+  if (typeof isAdmin === 'boolean') {
+    target.isAdmin = isAdmin;
+    target.role = isAdmin ? 'admin' : 'user';
+  }
+  if (fullName && String(fullName).trim()) {
+    target.realName = String(fullName).trim();
+    target.managerName = String(fullName).trim();
+  }
+  if (newPassword && String(newPassword).trim().length >= 4) {
+    const hashed = hashPassword(String(newPassword).trim());
+    target.passwordHash = hashed.hash;
+    target.salt = hashed.salt;
+  }
+
+  savePlatformCMS(data, `Admin updated user @${target.username}`);
+  res.json({ success: true });
+});
+
+app.delete('/api/platform/admin/users/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const target = data.users?.[id];
+  if (!target) return res.status(404).json({ error: 'მომხმარებელი ვერ მოიძებნა.' });
+  if (target.username.toLowerCase() === 'admin' || target.username.toLowerCase() === 'theiulius') {
+    return res.status(400).json({ error: 'მთავარი ადმინის წაშლა დაუშვებელია.' });
+  }
+  delete data.users[id];
+  savePlatformCMS(data, `Admin deleted user @${target.username}`);
+  res.json({ success: true });
+});
+
+// 6. Admin: Update Announcement Banner
+app.put('/api/platform/announcement', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const { text, active, type, linkTab } = req.body || {};
+  p.announcement = {
+    text: String(text || '').trim(),
+    active: Boolean(active),
+    type: type || 'info',
+    linkTab: linkTab || undefined,
+    updatedAt: new Date().toISOString(),
+  };
+  savePlatformCMS(data, 'Admin updated announcement banner');
+  res.json({ success: true, announcement: p.announcement });
+});
+
+// 7. Calendar Events CRUD (Admin)
+app.post('/api/platform/calendar', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კალენდარში აქტივობის დამატება.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const body = req.body || {};
+  if (!body.title || !body.date) {
+    return res.status(400).json({ error: 'სათაური და თარიღი სავალდებულოა.' });
+  }
+
+  const keyPoints = Array.isArray(body.aiAnalysis?.keyPoints)
+    ? body.aiAnalysis.keyPoints
+    : Array.isArray(body.keyTopics)
+    ? body.keyTopics
+    : String(body.keyPoints || body.keyTopics || '')
+        .split('\n')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+  const newEvent = {
+    id: body.id || 'ev_' + Date.now(),
+    title: String(body.title).trim(),
+    date: String(body.date).trim(),
+    endDate: body.endDate ? String(body.endDate).trim() : undefined,
+    time: String(body.time || '10:00 - 10:45').trim(),
+    mainCategory: body.mainCategory || 'სასწავლო',
+    category: body.category || 'შემაჯამებელი',
+    description: String(body.description || '').trim(),
+    location: String(body.location || body.room || 'კომაროვი, 11/5 აუდიტორია').trim(),
+    teacher: body.teacher ? String(body.teacher).trim() : undefined,
+    organizer: body.organizer ? String(body.organizer).trim() : undefined,
+    aiAnalysis: {
+      difficultyScore: String(body.aiAnalysis?.difficultyScore || body.difficulty || '7/10 (საშუალოზე მაღალი)'),
+      estimatedHours: String(body.aiAnalysis?.estimatedHours || '2.5 - 3 საათი'),
+      strategy: String(
+        body.aiAnalysis?.strategy ||
+          body.aiSummary ||
+          body.description ||
+          'გადაიმეორეთ მიმაგრებული კონსპექტი და კლასში განხილული ამოცანები.'
+      ),
+      keyPoints: keyPoints.length > 0 ? keyPoints : ['გადახედეთ მიმაგრებულ კონსპექტებსა და კომენტარებს'],
+      recommendation: String(
+        body.aiAnalysis?.recommendation ||
+          'ყურადღებით გაეცანით ქვემოთ მიმაგრებულ კონსპექტებს და დასვით კითხვები კომენტარებში.'
+      ),
+    },
+  };
+
+  p.calendarEvents.push(newEvent);
+  p.calendarEvents.sort((a: any, b: any) => String(a.date).localeCompare(String(b.date)));
+  savePlatformCMS(data, `Calendar event added: ${newEvent.title}`);
+  res.json({ success: true, event: newEvent, calendarEvents: p.calendarEvents });
+});
+
+app.put('/api/platform/calendar/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კალენდრის რედაქტირება.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const idx = p.calendarEvents.findIndex((e: any) => e.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'აქტივობა ვერ მოიძებნა.' });
+
+  const body = req.body || {};
+  const existing = p.calendarEvents[idx];
+  p.calendarEvents[idx] = {
+    ...existing,
+    ...body,
+    id: existing.id,
+    keyTopics: Array.isArray(body.keyTopics)
+      ? body.keyTopics
+      : typeof body.keyTopics === 'string'
+      ? body.keyTopics.split(',').map((s: string) => s.trim()).filter(Boolean)
+      : existing.keyTopics,
+    prepTips: Array.isArray(body.prepTips)
+      ? body.prepTips
+      : typeof body.prepTips === 'string'
+      ? body.prepTips.split('\n').map((s: string) => s.trim()).filter(Boolean)
+      : existing.prepTips,
+  };
+  p.calendarEvents.sort((a: any, b: any) => String(a.date).localeCompare(String(b.date)));
+  savePlatformCMS(data, `Calendar event updated: ${p.calendarEvents[idx].title}`);
+  res.json({ success: true, event: p.calendarEvents[idx], calendarEvents: p.calendarEvents });
+});
+
+app.delete('/api/platform/calendar/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ აქტივობის წაშლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  p.calendarEvents = p.calendarEvents.filter((e: any) => e.id !== id);
+  savePlatformCMS(data, `Calendar event deleted: ${id}`);
+  res.json({ success: true, calendarEvents: p.calendarEvents });
+});
+
+// 8. Homework & Timetable Endpoints (Admins auto-approve; Students can submit homework for approval!)
+app.post('/api/platform/homework', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ error: 'დავალების დასამატებლად გთხოვთ შეხვიდეთ აქაუნთზე.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const body = req.body || {};
+  const hwDate = String(body.date || body.forDate || '').trim();
+  if (!body.subject || !body.title || !hwDate) {
+    return res.status(400).json({ error: 'საგანი, თარიღი და დავალების სათაური სავალდებულოა.' });
+  }
+
+  const newHw = {
+    id: 'hw_' + Date.now(),
+    date: hwDate,
+    displayDate: String(body.displayDate || hwDate).trim(),
+    dayOfWeek: String(body.dayOfWeek || 'სასწავლო დღე').trim(),
+    subject: String(body.subject).trim(),
+    teacher: String(body.teacher || '11/5 პედაგოგი').trim(),
+    title: String(body.title).trim(),
+    notes: String(body.notes || body.details || '').trim(),
+    authorName: auth.user.realName || auth.user.managerName || auth.user.username,
+    authorUsername: auth.user.username,
+    status: auth.isAdmin ? 'approved' : 'pending',
+    createdAt: new Date().toISOString(),
+  };
+
+  p.homeworks.push(newHw);
+  savePlatformCMS(data, `Homework added (${newHw.status}): ${newHw.title}`);
+  res.json({ success: true, homework: newHw, homeworks: p.homeworks });
+});
+
+app.put('/api/platform/homework/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ დავალების რედაქტირება.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const idx = p.homeworks.findIndex((h: any) => h.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'დავალება ვერ მოიძებნა.' });
+
+  p.homeworks[idx] = { ...p.homeworks[idx], ...req.body, id };
+  savePlatformCMS(data, `Homework updated: ${p.homeworks[idx].title}`);
+  res.json({ success: true, homework: p.homeworks[idx], homeworks: p.homeworks });
+});
+
+app.post('/api/platform/homework/:id/status', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ დავალების დადასტურება.' });
+  }
+  const { id } = req.params;
+  const { status } = req.body || {};
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const hw = p.homeworks.find((h: any) => h.id === id);
+  if (!hw) return res.status(404).json({ error: 'დავალება ვერ მოიძებნა.' });
+
+  if (status === 'rejected') {
+    p.homeworks = p.homeworks.filter((h: any) => h.id !== id);
+  } else {
+    hw.status = 'approved';
+  }
+  savePlatformCMS(data, `Homework moderated (${status}): ${hw.title}`);
+  res.json({ success: true, homeworks: p.homeworks });
+});
+
+app.delete('/api/platform/homework/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ დავალების წაშლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  p.homeworks = p.homeworks.filter((h: any) => h.id !== id);
+  savePlatformCMS(data, `Homework deleted: ${id}`);
+  res.json({ success: true, homeworks: p.homeworks });
+});
+
+// Update Class Timetable (Admin)
+app.put('/api/platform/timetable', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ ცხრილის რედაქტირება.' });
+  }
+  const { timetable } = req.body || {};
+  if (!Array.isArray(timetable)) {
+    return res.status(400).json({ error: 'ცხრილის ფორმატი არასწორია.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  p.timetable = timetable;
+  savePlatformCMS(data, 'Class timetable updated by admin');
+  res.json({ success: true, timetable: p.timetable });
+});
+
+// 9. Study Resources / Summaries (კონსპექტები & მასალები) — Student Upload + Admin Approval
+app.post('/api/platform/resources', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ error: 'მასალის/კონსპექტის ასატვირთად გთხოვთ შეხვიდეთ აქაუნთზე.' });
+  }
+  const body = req.body || {};
+  if (!body.title || !body.description) {
+    return res.status(400).json({ error: 'სათაური და მოკლე აღწერა სავალდებულოა.' });
+  }
+
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+
+  const newResource: PlatformResource = {
+    id: 'res_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+    title: String(body.title).trim(),
+    description: String(body.description).trim(),
+    content: body.content ? String(body.content).trim() : undefined,
+    linkUrl: body.linkUrl ? String(body.linkUrl).trim() : undefined,
+    attachmentName: body.attachmentName ? String(body.attachmentName).trim() : undefined,
+    attachmentDataUrl: body.attachmentDataUrl ? String(body.attachmentDataUrl) : undefined,
+    resourceType: body.resourceType || 'კონსპექტი',
+    subject: body.subject ? String(body.subject).trim() : 'ზოგადი',
+    targetType: body.targetType || 'general',
+    targetId: body.targetId ? String(body.targetId).trim() : undefined,
+    targetTitle: body.targetTitle ? String(body.targetTitle).trim() : undefined,
+    authorId: auth.user.id,
+    authorName: auth.user.realName || auth.user.managerName || auth.user.username,
+    authorUsername: auth.user.username,
+    status: auth.isAdmin ? 'approved' : 'pending',
+    createdAt: new Date().toISOString(),
+    approvedBy: auth.isAdmin ? auth.user.username : undefined,
+    upvotes: 1,
+    upvotedBy: [auth.user.id],
+  };
+
+  p.resources.unshift(newResource);
+  savePlatformCMS(data, `Resource uploaded (${newResource.status}): ${newResource.title} by @${auth.user.username}`);
+  res.json({ success: true, resource: newResource, resources: p.resources });
+});
+
+app.post('/api/platform/resources/:id/status', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ მასალის დადასტურება.' });
+  }
+  const { id } = req.params;
+  const { status } = req.body || {};
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const resItem = p.resources.find((r) => r.id === id);
+  if (!resItem) return res.status(404).json({ error: 'მასალა ვერ მოიძებნა.' });
+
+  if (status === 'rejected') {
+    resItem.status = 'rejected';
+  } else {
+    resItem.status = 'approved';
+    resItem.approvedBy = auth.user.username;
+  }
+  savePlatformCMS(data, `Admin ${status} resource: ${resItem.title}`);
+  res.json({ success: true, resource: resItem, resources: p.resources });
+});
+
+app.delete('/api/platform/resources/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth) return res.status(401).json({ error: 'ავტორიზაცია სავალდებულოა.' });
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const target = p.resources.find((r) => r.id === id);
+  if (!target) return res.status(404).json({ error: 'მასალა ვერ მოიძებნა.' });
+  if (!auth.isAdmin && target.authorId !== auth.user.id) {
+    return res.status(403).json({ error: 'მხოლოდ ავტორს ან ადმინს შეუძლია წაშლა.' });
+  }
+  p.resources = p.resources.filter((r) => r.id !== id);
+  savePlatformCMS(data, `Resource deleted: ${target.title}`);
+  res.json({ success: true, resources: p.resources });
+});
+
+app.post('/api/platform/resources/:id/upvote', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const target = p.resources.find((r) => r.id === id);
+  if (!target) return res.status(404).json({ error: 'მასალა ვერ მოიძებნა.' });
+
+  const voterKey = auth ? auth.user.id : getClientIp(req);
+  if (!Array.isArray(target.upvotedBy)) target.upvotedBy = [];
+  if (target.upvotedBy.includes(voterKey)) {
+    target.upvotedBy = target.upvotedBy.filter((k) => k !== voterKey);
+    target.upvotes = Math.max(0, (target.upvotes || 1) - 1);
+  } else {
+    target.upvotedBy.push(voterKey);
+    target.upvotes = (target.upvotes || 0) + 1;
+  }
+  savePlatformCMS(data, `Resource upvoted: ${target.title}`);
+  res.json({ success: true, resource: target, resources: p.resources });
+});
+
+// 10. Universal Comments (Events, Homeworks, Resources, Ideas, Opportunities, Clubs, General)
+app.post('/api/platform/comments', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ error: 'კომენტარის დასატოვებლად გთხოვთ შეხვიდეთ აქაუნთზე.' });
+  }
+  const { targetType, targetId, content } = req.body || {};
+  if (!targetType || !targetId || !content || !String(content).trim()) {
+    return res.status(400).json({ error: 'კომენტარის ტექსტი სავალდებულოა.' });
+  }
+
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const newComment: PlatformComment = {
+    id: 'cmt_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+    targetType,
+    targetId: String(targetId),
+    authorId: auth.user.id,
+    authorName: auth.user.realName || auth.user.managerName || auth.user.username,
+    authorUsername: auth.user.username,
+    isAdmin: auth.isAdmin,
+    content: String(content).trim(),
+    createdAt: new Date().toISOString(),
+    isPinned: false,
+  };
+
+  p.comments.push(newComment);
+  savePlatformCMS(data, `New comment on ${targetType}:${targetId} by @${auth.user.username}`);
+  res.json({ success: true, comment: newComment, comments: p.comments });
+});
+
+app.delete('/api/platform/comments/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth) return res.status(401).json({ error: 'ავტორიზაცია სავალდებულოა.' });
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const target = p.comments.find((c) => c.id === id);
+  if (!target) return res.status(404).json({ error: 'კომენტარი ვერ მოიძებნა.' });
+  if (!auth.isAdmin && target.authorId !== auth.user.id) {
+    return res.status(403).json({ error: 'მხოლოდ კომენტარის ავტორს ან ადმინს შეუძლია წაშლა.' });
+  }
+  p.comments = p.comments.filter((c) => c.id !== id);
+  savePlatformCMS(data, `Comment deleted: ${id}`);
+  res.json({ success: true, comments: p.comments });
+});
+
+app.post('/api/platform/comments/:id/pin', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კომენტარის მიმაგრება.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const target = p.comments.find((c) => c.id === id);
+  if (!target) return res.status(404).json({ error: 'კომენტარი ვერ მოიძებნა.' });
+  target.isPinned = !target.isPinned;
+  savePlatformCMS(data, `Comment pin toggled: ${id}`);
+  res.json({ success: true, comments: p.comments });
+});
+
+// 11. Opportunities / Alumni Sessions CRUD & RSVP
+app.post('/api/platform/opportunities', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ სესიის დამატება.' });
+  }
+  const body = req.body || {};
+  if (!body.speaker) {
+    return res.status(400).json({ error: 'სპიკერი სავალდებულოა.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const newOpp = {
+    id: 'opp_' + Date.now(),
+    speaker: String(body.speaker).trim(),
+    university: String(body.university || body.speakerRole || 'უნივერსიტეტი').trim(),
+    badge: String(body.badge || 'ZOOM შეხვედრა').trim(),
+    topic: String(body.topic || body.title || '').trim(),
+    description: String(body.description || body.highlight || '').trim(),
+    date: String(body.date || 'უახლოეს კვირაში').trim(),
+    time: String(body.time || '19:30').trim(),
+    location: String(body.location || 'Zoom').trim(),
+    commonAppDetails: Array.isArray(body.commonAppDetails)
+      ? body.commonAppDetails
+      : String(body.commonAppDetails || body.tags || '')
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+    keyAdvice: [],
+    rsvpCount: Number(body.rsvpCount) || 1,
+    rsvpUsers: [],
+  };
+  p.opportunities.unshift(newOpp);
+  savePlatformCMS(data, `Opportunity added: ${newOpp.speaker}`);
+  res.json({ success: true, opportunity: newOpp, opportunities: p.opportunities });
+});
+
+app.put('/api/platform/opportunities/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const idx = p.opportunities.findIndex((o: any) => o.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'სესია ვერ მოიძებნა.' });
+  p.opportunities[idx] = { ...p.opportunities[idx], ...req.body, id };
+  savePlatformCMS(data, `Opportunity updated: ${p.opportunities[idx].speaker}`);
+  res.json({ success: true, opportunities: p.opportunities });
+});
+
+app.delete('/api/platform/opportunities/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  p.opportunities = p.opportunities.filter((o: any) => o.id !== id);
+  savePlatformCMS(data, `Opportunity deleted: ${id}`);
+  res.json({ success: true, opportunities: p.opportunities });
+});
+
+app.post('/api/platform/opportunities/:id/rsvp', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const opp = p.opportunities.find((o: any) => o.id === id);
+  if (!opp) return res.status(404).json({ error: 'სესია ვერ მოიძებნა.' });
+
+  const userKey = auth ? auth.user.username : getClientIp(req);
+  if (!Array.isArray(opp.rsvpUsers)) opp.rsvpUsers = [];
+  if (opp.rsvpUsers.includes(userKey)) {
+    opp.rsvpUsers = opp.rsvpUsers.filter((u: string) => u !== userKey);
+    opp.rsvpCount = Math.max(0, (opp.rsvpCount || 1) - 1);
+  } else {
+    opp.rsvpUsers.push(userKey);
+    opp.rsvpCount = (opp.rsvpCount || 0) + 1;
+  }
+  savePlatformCMS(data, `Opportunity RSVP toggled: ${opp.speaker}`);
+  res.json({ success: true, opportunities: p.opportunities });
+});
+
+app.post('/api/platform/opportunities/:id/question', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const { id } = req.params;
+  const { question } = req.body || {};
+  if (!question || !String(question).trim()) {
+    return res.status(400).json({ error: 'კითხვის ტექსტი სავალდებულოა.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const opp = p.opportunities.find((o: any) => o.id === id);
+  if (!opp) return res.status(404).json({ error: 'სესია ვერ მოიძებნა.' });
+
+  const qItem = {
+    id: 'oppq_' + Date.now(),
+    opportunityId: id,
+    speaker: opp.speaker,
+    authorName: auth ? auth.user.realName || auth.user.managerName || auth.user.username : 'მოსწავლე (სტუმარი)',
+    authorUsername: auth ? auth.user.username : 'guest',
+    question: String(question).trim(),
+    createdAt: new Date().toISOString(),
+  };
+  p.opportunityQuestions.unshift(qItem);
+  savePlatformCMS(data, `Question submitted for speaker ${opp.speaker}`);
+  res.json({ success: true, opportunityQuestions: p.opportunityQuestions });
+});
+
+// 12. Ideas Board CRUD & Upvote
+app.post('/api/platform/ideas', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const body = req.body || {};
+  const ideaContent = String(body.content || body.description || '').trim();
+  if (!body.title) {
+    return res.status(400).json({ error: 'სათაური სავალდებულოა.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+
+  const authorDisplay = body.isAnonymous
+    ? 'ანონიმური მოსწავლე'
+    : auth
+    ? `${auth.user.realName || auth.user.username} (11/5)`
+    : body.author || 'მოსწავლე 11/5';
+
+  const newIdea = {
+    id: 'idea_' + Date.now(),
+    title: String(body.title).trim(),
+    content: ideaContent,
+    author: authorDisplay,
+    category: body.category || 'სასკოლო რეფორმა',
+    upvotes: 1,
+    upvotedBy: auth ? [auth.user.id] : [],
+    statusLabel: body.statusLabel || 'განხილვაშია',
+    timestamp: 'ახლახან',
+    commentsCount: 0,
+    comments: [],
+  };
+  p.ideas.unshift(newIdea);
+  savePlatformCMS(data, `New idea submitted: ${newIdea.title}`);
+  res.json({ success: true, idea: newIdea, ideas: p.ideas });
+});
+
+app.put('/api/platform/ideas/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ სტატუსის შეცვლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const idx = p.ideas.findIndex((i: any) => i.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'იდეა ვერ მოიძებნა.' });
+  p.ideas[idx] = { ...p.ideas[idx], ...req.body, id };
+  savePlatformCMS(data, `Idea updated: ${p.ideas[idx].title}`);
+  res.json({ success: true, ideas: p.ideas });
+});
+
+app.delete('/api/platform/ideas/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ იდეის წაშლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  p.ideas = p.ideas.filter((i: any) => i.id !== id);
+  savePlatformCMS(data, `Idea deleted: ${id}`);
+  res.json({ success: true, ideas: p.ideas });
+});
+
+app.post('/api/platform/ideas/:id/upvote', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const idea = p.ideas.find((i: any) => i.id === id);
+  if (!idea) return res.status(404).json({ error: 'იდეა ვერ მოიძებნა.' });
+
+  const voterKey = auth ? auth.user.id : getClientIp(req);
+  if (!Array.isArray(idea.upvotedBy)) idea.upvotedBy = [];
+  if (idea.upvotedBy.includes(voterKey)) {
+    idea.upvotedBy = idea.upvotedBy.filter((u: string) => u !== voterKey);
+    idea.upvotes = Math.max(0, (idea.upvotes || 1) - 1);
+  } else {
+    idea.upvotedBy.push(voterKey);
+    idea.upvotes = (idea.upvotes || 0) + 1;
+  }
+  savePlatformCMS(data, `Idea upvoted: ${idea.title}`);
+  res.json({ success: true, ideas: p.ideas });
+});
+
+// 13. Clubs & Initiatives CRUD
+app.post('/api/platform/clubs', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const body = req.body || {};
+  if (!body.name) {
+    return res.status(400).json({ error: 'კლუბის სახელი სავალდებულოა.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const room = String(body.room || body.roomNeeded || 'ოთახი 304').trim();
+  const newClub = {
+    id: 'club_' + Date.now(),
+    name: String(body.name).trim(),
+    category: String(body.category || 'ტექნოლოგიები').trim(),
+    lead: String(body.lead || body.founder || (auth ? auth.user.realName || auth.user.username : '11/5 მოსწავლე')).trim(),
+    room,
+    summary: String(body.summary || body.goal || `დამტკიცებულია ${room}-ის გამოყენება 11/5 Platform-ის წესდებით.`).trim(),
+    charterId: body.charterId || `CHARTER-2026-${Math.floor(100 + Math.random() * 900)}`,
+    status: auth?.isAdmin ? 'მწვანე შუქი მიღებულია' : 'განხილვაშია',
+  };
+  p.clubs.unshift(newClub);
+  savePlatformCMS(data, `Club submitted: ${newClub.name}`);
+  res.json({ success: true, club: newClub, clubs: p.clubs });
+});
+
+app.put('/api/platform/clubs/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კლუბის სტატუსის შეცვლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const idx = p.clubs.findIndex((c: any) => c.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'კლუბი ვერ მოიძებნა.' });
+  p.clubs[idx] = { ...p.clubs[idx], ...req.body, id };
+  savePlatformCMS(data, `Club updated: ${p.clubs[idx].name}`);
+  res.json({ success: true, clubs: p.clubs });
+});
+
+app.delete('/api/platform/clubs/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კლუბის წაშლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  p.clubs = p.clubs.filter((c: any) => c.id !== id);
+  savePlatformCMS(data, `Club deleted: ${id}`);
+  res.json({ success: true, clubs: p.clubs });
+});
+
+// 14. Study Pods (მეცადინეობის ჯგუფები) CRUD & Join
+app.post('/api/platform/study-pods', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const body = req.body || {};
+  if (!body.subject || !body.topic) {
+    return res.status(400).json({ error: 'საგანი და თემა სავალდებულოა.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const host = String(body.host || body.hostName || (auth ? auth.user.realName || auth.user.username : '11/5 მოსწავლე')).trim();
+  const newPod = {
+    id: 'pod_' + Date.now(),
+    subject: String(body.subject).trim(),
+    topic: String(body.topic).trim(),
+    host,
+    time: String(body.time || body.date || 'ამ კვირაში').trim(),
+    location: String(body.location || body.format || 'ბიბლიოთეკა / Zoom').trim(),
+    maxSpots: Number(body.maxSpots || body.maxParticipants) || 8,
+    currentSpots: 1,
+    participants: [host],
+  };
+  p.studyPods.unshift(newPod);
+  savePlatformCMS(data, `Study pod created: ${newPod.topic}`);
+  res.json({ success: true, studyPods: p.studyPods });
+});
+
+app.post('/api/platform/study-pods/:id/join', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const pod = p.studyPods.find((s: any) => s.id === id);
+  if (!pod) return res.status(404).json({ error: 'ჯგუფი ვერ მოიძებნა.' });
+
+  const memberKey = auth ? auth.user.username : getClientIp(req);
+  if (!Array.isArray(pod.participants)) pod.participants = [];
+  if (pod.participants.includes(memberKey)) {
+    pod.participants = pod.participants.filter((m: string) => m !== memberKey);
+    pod.currentSpots = Math.max(0, (pod.currentSpots || 1) - 1);
+  } else if ((pod.currentSpots || 0) < (pod.maxSpots || 8)) {
+    pod.participants.push(memberKey);
+    pod.currentSpots = (pod.currentSpots || 0) + 1;
+  }
+  savePlatformCMS(data, `Study pod join toggled: ${pod.topic}`);
+  res.json({ success: true, studyPods: p.studyPods });
+});
+
+app.delete('/api/platform/study-pods/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ წაშლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  p.studyPods = p.studyPods.filter((s: any) => s.id !== id);
+  savePlatformCMS(data, `Study pod deleted: ${id}`);
+  res.json({ success: true, studyPods: p.studyPods });
+});
+
+// 15. Archive Study Packs (არქივი) CRUD
+app.post('/api/platform/archive', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ არქივში მოდულის დამატება.' });
+  }
+  const body = req.body || {};
+  if (!body.title || !body.subject) {
+    return res.status(400).json({ error: 'სათაური და საგანი სავალდებულოა.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const newPack: ArchiveStudyPack = {
+    id: 'arch_' + Date.now(),
+    title: String(body.title).trim(),
+    subject: String(body.subject).trim(),
+    teacher: body.teacher ? String(body.teacher).trim() : undefined,
+    date: String(body.date || new Date().toISOString().slice(0, 10)).trim(),
+    description: String(body.description || '').trim(),
+    badge: String(body.badge || 'არქივის მასალა').trim(),
+    isBuiltInGeorgianQuiz: false,
+    content: body.content ? String(body.content).trim() : undefined,
+    linkUrl: body.linkUrl ? String(body.linkUrl).trim() : undefined,
+    keyTopics: Array.isArray(body.keyTopics)
+      ? body.keyTopics
+      : String(body.keyTopics || '')
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+    createdBy: auth.user.username,
+    createdAt: new Date().toISOString(),
+  };
+  p.archivePacks.push(newPack);
+  savePlatformCMS(data, `Archive pack added: ${newPack.title}`);
+  res.json({ success: true, archivePacks: p.archivePacks });
+});
+
+app.delete('/api/platform/archive/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ წაშლა.' });
+  }
+  const { id } = req.params;
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const target = p.archivePacks.find((a) => a.id === id);
+  if (target?.isBuiltInGeorgianQuiz) {
+    return res.status(400).json({ error: 'ქართულის ძირითადი ქვიზის არქივიდან წაშლა დაუშვებელია.' });
+  }
+  p.archivePacks = p.archivePacks.filter((a) => a.id !== id);
+  savePlatformCMS(data, `Archive pack deleted: ${id}`);
+  res.json({ success: true, archivePacks: p.archivePacks });
 });
 
 // Global JSON error handler (prevents default Express HTML error pages for payload too large, bad JSON, etc.)

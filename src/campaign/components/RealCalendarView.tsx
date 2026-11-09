@@ -12,7 +12,12 @@ import {
   SlidersHorizontal,
   X,
   Bot,
-  RotateCcw
+  RotateCcw,
+  Plus,
+  Edit3,
+  Trash2,
+  FileText,
+  MessageSquare
 } from 'lucide-react';
 import { 
   MainCategory,
@@ -23,6 +28,9 @@ import {
   INITIAL_CALENDAR_EVENTS 
 } from '../data/campaignData';
 import { soundEffects } from '../utils/soundEffects';
+import { usePlatform } from '../context/PlatformContext';
+import { ResourceSection } from './ResourceSection';
+import { CommentsThread } from './CommentsThread';
 
 const GEORGIAN_MONTHS = [
   'იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი',
@@ -31,7 +39,13 @@ const GEORGIAN_MONTHS = [
 
 const WEEKDAYS = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ', 'შაბ', 'კვი'];
 
-export const RealCalendarView: React.FC = () => {
+interface RealCalendarViewProps {
+  onOpenQuiz?: () => void;
+}
+
+export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }) => {
+  const { isAdmin, platform, addCalendarEvent, updateCalendarEvent, deleteCalendarEvent } = usePlatform();
+
   // Main Category state (Top Level)
   const [selectedMainCategory, setSelectedMainCategory] = useState<MainCategory | 'ყველა'>('ყველა');
   // Specific Filter state (Sub Level)
@@ -40,6 +54,104 @@ export const RealCalendarView: React.FC = () => {
   // Target current view to October 2026
   const [currentDate, setCurrentDate] = useState<Date>(new Date(2026, 9, 1)); // 9 = October
   const [activeEvent, setActiveEvent] = useState<CalendarEvent | null>(null);
+
+  // Admin Add/Edit Modal State
+  const [showEventForm, setShowEventForm] = useState(false);
+  const [editingEventId, setEditingEventId] = useState<string | null>(null);
+  const [formTitle, setFormTitle] = useState('');
+  const [formDate, setFormDate] = useState('2026-10-15');
+  const [formEndDate, setFormEndDate] = useState('');
+  const [formTime, setFormTime] = useState('10:00 - 10:45');
+  const [formMainCategory, setFormMainCategory] = useState<MainCategory>('სკოლა');
+  const [formCategory, setFormCategory] = useState<CalendarCategory>('შემაჯამებელი');
+  const [formTeacher, setFormTeacher] = useState('');
+  const [formLocation, setFormLocation] = useState('კომაროვი, 11/5 აუდიტორია');
+  const [formDescription, setFormDescription] = useState('');
+  const [formDifficulty, setFormDifficulty] = useState('7/10 (საშუალოზე მაღალი)');
+  const [formHours, setFormHours] = useState('2.5 - 3 საათი');
+  const [formStrategy, setFormStrategy] = useState('');
+  const [formKeyPoints, setFormKeyPoints] = useState('');
+  const [formRecommendation, setFormRecommendation] = useState('');
+
+  const openCreateEventModal = (defaultDate?: string) => {
+    setEditingEventId(null);
+    setFormTitle('');
+    setFormDate(defaultDate || selectedDate || '2026-10-15');
+    setFormEndDate('');
+    setFormTime('10:00 - 10:45');
+    setFormMainCategory('სკოლა');
+    setFormCategory('შემაჯამებელი');
+    setFormTeacher('');
+    setFormLocation('კომაროვი, 11/5 აუდიტორია');
+    setFormDescription('');
+    setFormDifficulty('7/10 (საშუალოზე მაღალი)');
+    setFormHours('2.5 - 3 საათი');
+    setFormStrategy('');
+    setFormKeyPoints('');
+    setFormRecommendation('');
+    setShowEventForm(true);
+  };
+
+  const openEditEventModal = (evt: CalendarEvent) => {
+    setEditingEventId(evt.id);
+    setFormTitle(evt.title);
+    setFormDate(evt.date);
+    setFormEndDate(evt.endDate || '');
+    setFormTime(evt.time || '');
+    setFormMainCategory(evt.mainCategory);
+    setFormCategory(evt.category);
+    setFormTeacher(evt.teacher || evt.organizer || '');
+    setFormLocation(evt.location || '');
+    setFormDescription(evt.description);
+    setFormDifficulty(evt.aiAnalysis?.difficultyScore || '7/10');
+    setFormHours(evt.aiAnalysis?.estimatedHours || '2 საათი');
+    setFormStrategy(evt.aiAnalysis?.strategy || '');
+    setFormKeyPoints((evt.aiAnalysis?.keyPoints || []).join('\n'));
+    setFormRecommendation(evt.aiAnalysis?.recommendation || '');
+    setShowEventForm(true);
+  };
+
+  const handleSaveEvent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formTitle.trim() || !formDate) return;
+    const payload: any = {
+      title: formTitle.trim(),
+      date: formDate,
+      endDate: formEndDate.trim() || undefined,
+      time: formTime.trim() || undefined,
+      mainCategory: formMainCategory,
+      category: formCategory,
+      teacher: formTeacher.trim() || undefined,
+      location: formLocation.trim() || undefined,
+      description: formDescription.trim(),
+      aiAnalysis: {
+        difficultyScore: formDifficulty.trim() || '7/10',
+        estimatedHours: formHours.trim() || '2 საათი',
+        strategy: formStrategy.trim() || formDescription.trim(),
+        keyPoints: formKeyPoints
+          .split('\n')
+          .map((s) => s.trim())
+          .filter(Boolean),
+        recommendation:
+          formRecommendation.trim() ||
+          'გადახედეთ მიმაგრებულ კონსპექტებს და დასვით კითხვები კომენტარებში.',
+      },
+    };
+
+    if (editingEventId) {
+      await updateCalendarEvent(editingEventId, payload);
+      setActiveEvent(null);
+    } else {
+      await addCalendarEvent(payload);
+    }
+    setShowEventForm(false);
+  };
+
+  const allEvents = useMemo(() => {
+    return platform.calendarEvents && platform.calendarEvents.length > 0
+      ? platform.calendarEvents
+      : INITIAL_CALENDAR_EVENTS;
+  }, [platform.calendarEvents]);
 
   // Typewriter effect state for AI evaluation
   const [typedText, setTypedText] = useState<string>('');
@@ -68,7 +180,7 @@ export const RealCalendarView: React.FC = () => {
 
   // Filter events based on both Main Category and Specific Filter
   const filteredEvents = useMemo(() => {
-    return INITIAL_CALENDAR_EVENTS.filter(evt => {
+    return allEvents.filter(evt => {
       // Check main category
       if (selectedMainCategory !== 'ყველა' && evt.mainCategory !== selectedMainCategory) {
         return false;
@@ -79,7 +191,7 @@ export const RealCalendarView: React.FC = () => {
       }
       return true;
     });
-  }, [selectedMainCategory, selectedFilter]);
+  }, [allEvents, selectedMainCategory, selectedFilter]);
 
   // Calendar matrix calculations
   const year = currentDate.getFullYear();
@@ -511,16 +623,28 @@ export const RealCalendarView: React.FC = () => {
 
       {/* SELECTED DAY FULL READABLE PANEL (ESPECIALLY HELPFUL ON MOBILE) */}
       <div className="p-3.5 sm:p-4 rounded-2xl bg-[#161724]/80 border border-[#f5f2eb]/15 backdrop-blur-2xl space-y-2.5 shadow-lg">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#fcfbf7]" />
             <h3 className="text-xs sm:text-sm font-bold text-[#fcfbf7]">
               არჩეული თარიღი: {selectedDate}
             </h3>
           </div>
-          <span className="text-[11px] font-mono text-[#a8a495]">
-            {selectedDateEvents.length} მოვლენა
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono text-[#a8a495]">
+              {selectedDateEvents.length} მოვლენა
+            </span>
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => openCreateEventModal(selectedDate)}
+                className="px-3 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs flex items-center gap-1 shadow-sm cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                ამ დღეს დამატება
+              </button>
+            )}
+          </div>
         </div>
 
         {selectedDateEvents.length > 0 ? (
@@ -681,12 +805,39 @@ export const RealCalendarView: React.FC = () => {
                     </h2>
                   </div>
 
-                  <button
-                    onClick={() => setActiveEvent(null)}
-                    className="p-1.5 rounded-full bg-white/10 hover:bg-white/15 text-zinc-300 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1.5">
+                    {isAdmin && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => openEditEventModal(activeEvent)}
+                          title="რედაქტირება"
+                          className="p-1.5 rounded-full bg-amber-400/20 hover:bg-amber-400/30 text-amber-300 transition-colors cursor-pointer"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (window.confirm(`ნამდვილად გსურთ წაშალოთ "${activeEvent.title}"?`)) {
+                              await deleteCalendarEvent(activeEvent.id);
+                              setActiveEvent(null);
+                            }
+                          }}
+                          title="წაშლა"
+                          className="p-1.5 rounded-full bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 transition-colors cursor-pointer"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
+                    <button
+                      onClick={() => setActiveEvent(null)}
+                      className="p-1.5 rounded-full bg-white/10 hover:bg-white/15 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Logistics */}
@@ -746,7 +897,7 @@ export const RealCalendarView: React.FC = () => {
                       საკვანძო ასპექტები:
                     </span>
                     <div className="space-y-1">
-                      {activeEvent.aiAnalysis.keyPoints.map((pt, pIdx) => (
+                      {(activeEvent.aiAnalysis?.keyPoints || []).map((pt, pIdx) => (
                         <div key={pIdx} className="flex items-start gap-2 text-xs text-[#dedacb]">
                           <span className="text-emerald-400 mt-0.5">✓</span>
                           <span>{pt}</span>
@@ -754,6 +905,26 @@ export const RealCalendarView: React.FC = () => {
                       ))}
                     </div>
                   </div>
+                </div>
+
+                {/* ATTACHED STUDY RESOURCES / კონსპექტები (Students can upload, Admins approve!) */}
+                <div className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 space-y-4">
+                  <ResourceSection
+                    targetType="event"
+                    targetId={activeEvent.id}
+                    targetTitle={activeEvent.title}
+                    defaultSubject={activeEvent.title.split(' ')[0]}
+                    title="ამ აქტივობაზე მიბმული კონსპექტები & რესურსები"
+                  />
+                </div>
+
+                {/* COMMENTS ON THIS CALENDAR EVENT */}
+                <div className="p-4 rounded-2xl bg-white text-slate-900 border border-slate-200 space-y-4">
+                  <CommentsThread
+                    targetType="event"
+                    targetId={activeEvent.id}
+                    title="კომენტარები & კითხვები ამ აქტივობაზე"
+                  />
                 </div>
 
                 {/* Action button */}
@@ -773,6 +944,192 @@ export const RealCalendarView: React.FC = () => {
           </>
         )}
       </AnimatePresence>
+
+      {/* Admin Add / Edit Calendar Event Modal */}
+      {showEventForm && isAdmin && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setShowEventForm(false)}
+        >
+          <div
+            className="bg-white text-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900">
+                {editingEventId ? 'კალენდრის აქტივობის რედაქტირება' : 'კალენდარში ახალი აქტივობის დამატება'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowEventForm(false)}
+                className="p-1.5 rounded-full bg-slate-100 text-slate-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEvent} className="space-y-3 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">სათაური *</label>
+                <input
+                  type="text"
+                  required
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  placeholder="მაგ: ფიზიკა — შემაჯამებელი წერა №2"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">თარიღი *</label>
+                  <input
+                    type="date"
+                    required
+                    value={formDate}
+                    onChange={(e) => setFormDate(e.target.value)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">დრო / გაკვეთილი</label>
+                  <input
+                    type="text"
+                    value={formTime}
+                    onChange={(e) => setFormTime(e.target.value)}
+                    placeholder="მაგ: მე-3 გაკვეთილი (10:35)"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">მთავარი მიმართულება</label>
+                  <select
+                    value={formMainCategory}
+                    onChange={(e) => setFormMainCategory(e.target.value as MainCategory)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
+                  >
+                    <option value="სკოლა">სკოლა</option>
+                    <option value="აქტივობები">აქტივობები</option>
+                    <option value="ოლიმპიადები">ოლიმპიადები</option>
+                    <option value="შეჯიბრებები">შეჯიბრებები</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">ქვეკატეგორია</label>
+                  <select
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value as CalendarCategory)}
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
+                  >
+                    <option value="შემაჯამებელი">შემაჯამებელი</option>
+                    <option value="დამოუკიდებელი">დამოუკიდებელი</option>
+                    <option value="გამოკითხვა">გამოკითხვა</option>
+                    <option value="დავალებები">დავალებები</option>
+                    <option value="სკოლა">სასკოლო პროცესი</option>
+                    <option value="ოლიმპიადები">ოლიმპიადები</option>
+                    <option value="ჩემპიონატები">ჩემპიონატები</option>
+                    <option value="ჰაკათონები/იდეათონები">ჰაკათონები/იდეათონები</option>
+                    <option value="აქტივობები">აქტივობები</option>
+                    <option value="მოხალისეობრივი">მოხალისეობრივი</option>
+                    <option value="პრე-აქსელერაციის პროგრამები">პრე-აქსელერაციის პროგრამები</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">მასწავლებელი / ორგანიზატორი</label>
+                  <input
+                    type="text"
+                    value={formTeacher}
+                    onChange={(e) => setFormTeacher(e.target.value)}
+                    placeholder="მაგ: თემურ კვარაცხელია"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">ოთახი / ლოკაცია</label>
+                  <input
+                    type="text"
+                    value={formLocation}
+                    onChange={(e) => setFormLocation(e.target.value)}
+                    placeholder="მაგ: 305-ე კაბინეტი"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">აღწერა *</label>
+                <textarea
+                  rows={2}
+                  required
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  placeholder="რა საკითხები შედის ამ აქტივობაში?"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">სირთულე (AI შეფასება)</label>
+                  <input
+                    type="text"
+                    value={formDifficulty}
+                    onChange={(e) => setFormDifficulty(e.target.value)}
+                    placeholder="მაგ: 8/10 (რთული)"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">მოსამზადებელი დრო</label>
+                  <input
+                    type="text"
+                    value={formHours}
+                    onChange={(e) => setFormHours(e.target.value)}
+                    placeholder="მაგ: 3 საათი"
+                    className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">
+                  საკვანძო საკითხები (თითო ხაზზე თითო საკითხი)
+                </label>
+                <textarea
+                  rows={3}
+                  value={formKeyPoints}
+                  onChange={(e) => setFormKeyPoints(e.target.value)}
+                  placeholder="ნიუტონის კანონები&#10;იმპულსის მუდმივობა&#10;ხახუნის ძალა"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEventForm(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-bold"
+                >
+                  გაუქმება
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-sm"
+                >
+                  შენახვა
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

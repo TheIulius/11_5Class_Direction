@@ -1,35 +1,45 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Rocket, Copy, X } from 'lucide-react';
-import { INITIAL_GREEN_LIGHT_CLUBS, GreenLightClub } from '../data/campaignData';
+import { Check, Copy, X, Trash2 } from 'lucide-react';
+import { GreenLightClub } from '../data/campaignData';
 import { soundEffects } from '../utils/soundEffects';
+import { usePlatform } from '../context/PlatformContext';
 
 export const ClubFastTrackSection: React.FC = () => {
-  const [clubs, setClubs] = useState<GreenLightClub[]>(INITIAL_GREEN_LIGHT_CLUBS);
+  const { user, isAdmin, platform, addClub, deleteClub, openAuthModal } = usePlatform();
+  const clubs = platform.clubs;
+
   const [clubName, setClubName] = useState('');
   const [clubCategory, setClubCategory] = useState('ტექნოლოგიები');
   const [clubRoom, setClubRoom] = useState('ოთახი 304');
   const [activeCharter, setActiveCharter] = useState<GreenLightClub | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const handleMint = (e: React.FormEvent) => {
+  const handleMint = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clubName.trim()) return;
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
     soundEffects.success();
 
+    const charterId = `CHARTER-2026-${Math.floor(100 + Math.random() * 900)}`;
     const created: GreenLightClub = {
       id: `club-${Date.now()}`,
       name: clubName.trim(),
       category: clubCategory,
-      lead: 'თქვენ და კლასელები',
-      room: clubRoom,
+      lead: user.fullName,
+      room: clubRoom.trim() || 'ოთახი 304',
       summary: `დამტკიცებულია ${clubRoom}-ის გამოყენება 11/5 Platform-ის წესდებით.`,
-      charterId: `CHARTER-2026-${Math.floor(100 + Math.random() * 900)}`
+      charterId,
     };
 
-    setClubs([created, ...clubs]);
-    setActiveCharter(created);
-    setClubName('');
+    const ok = await addClub(created);
+    if (ok) {
+      setActiveCharter(created);
+      setClubName('');
+    }
   };
 
   const handleCopy = () => {
@@ -66,48 +76,21 @@ export const ClubFastTrackSection: React.FC = () => {
         </p>
       </div>
 
-      {/* Comparison Grid with Multi-Shade Glass */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Old Process */}
-        <div className="p-5 rounded-2xl border border-white/10 bg-[#141520]/60 backdrop-blur-xl text-xs space-y-2">
-          <span className="font-mono text-[#a8a495] font-semibold uppercase text-[11px] block">
-            ძველი ბიუროკრატიული სისტემა
-          </span>
-          <ul className="space-y-1.5 text-[#b8b5a8]">
-            <li>&bull; 21 სამუშაო დღე განხილვისთვის</li>
-            <li>&bull; 5 სხვადასხვა ხელმოწერა</li>
-            <li>&bull; გაურკვევლობა ოთახების განაწილებაზე</li>
-          </ul>
-        </div>
-
-        {/* Green Light */}
-        <div className="p-5 rounded-2xl border border-[#f5f2eb]/20 bg-[#181926]/80 backdrop-blur-xl text-xs space-y-2 shadow-lg">
-          <span className="font-mono text-[#fcfbf7] font-semibold uppercase text-[11px] block">
-            "მწვანე შუქის" პროტოკოლი
-          </span>
-          <ul className="space-y-1.5 text-[#dedacb]">
-            <li>&bull; მყისიერი დამტკიცება და კოორდინაცია</li>
-            <li>&bull; ოთახებისა და სივრცეების ოფიციალური დაჯავშნა</li>
-            <li>&bull; საპრეზიდენტო წესდების ტოკენი</li>
-          </ul>
-        </div>
-      </div>
-
       {/* Club Application Form */}
       <div className="border border-[#f5f2eb]/12 bg-[#141522]/80 backdrop-blur-2xl rounded-2xl p-5 space-y-3">
         <h3 className="text-sm font-semibold text-white">ახალი კლუბის დარეგისტრირება</h3>
-        <form onSubmit={handleMint} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <form onSubmit={handleMint} className="grid grid-cols-1 sm:grid-cols-4 gap-3">
           <input
             type="text"
             required
             value={clubName}
-            onChange={e => setClubName(e.target.value)}
+            onChange={(e) => setClubName(e.target.value)}
             placeholder="კლუბის სახელი (მაგ. AI გილდია)"
             className="bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white placeholder-[#78756c] focus:outline-none focus:border-[#f5f2eb]/40"
           />
           <select
             value={clubCategory}
-            onChange={e => setClubCategory(e.target.value)}
+            onChange={(e) => setClubCategory(e.target.value)}
             className="bg-[#181926] border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#f5f2eb]/40"
           >
             <option value="ტექნოლოგიები">ტექნოლოგიები &amp; AI</option>
@@ -115,6 +98,13 @@ export const ClubFastTrackSection: React.FC = () => {
             <option value="ხელოვნება & კულტურა">ხელოვნება &amp; კულტურა</option>
             <option value="ლოგიკა & სპორტი">ლოგიკა &amp; სპორტი</option>
           </select>
+          <input
+            type="text"
+            value={clubRoom}
+            onChange={(e) => setClubRoom(e.target.value)}
+            placeholder="ოთახი (მაგ. ოთახი 304)"
+            className="bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white placeholder-[#78756c] focus:outline-none focus:border-[#f5f2eb]/40"
+          />
           <button
             type="submit"
             className="px-4 py-2 rounded-xl bg-[#f5f2eb] hover:bg-white text-xs font-semibold text-[#0c0d12] transition-colors cursor-pointer"
@@ -130,17 +120,31 @@ export const ClubFastTrackSection: React.FC = () => {
           აქტიური კლუბები სკოლაში
         </span>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {clubs.map(club => (
+          {clubs.map((club) => (
             <div
               key={club.id}
-              className="border border-[#f5f2eb]/10 bg-[#161724]/70 backdrop-blur-xl p-4 rounded-2xl space-y-1.5 text-xs"
+              className="border border-[#f5f2eb]/10 bg-[#161724]/70 backdrop-blur-xl p-4 rounded-2xl space-y-1.5 text-xs relative"
             >
               <div className="flex items-center justify-between text-[11px] font-mono text-[#a8a495]">
                 <span>{club.category}</span>
-                <span className="text-emerald-400">აქტიური</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-emerald-400">აქტიური</span>
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => deleteClub(club.id)}
+                      className="text-rose-400 hover:text-rose-300 cursor-pointer"
+                      title="კლუბის წაშლა"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="font-semibold text-white leading-snug">{club.name}</div>
-              <div className="text-[#b8b5a8] text-[11px] font-mono">{club.room}</div>
+              <div className="text-[#b8b5a8] text-[11px] font-mono">
+                {club.room} {club.lead ? `• ${club.lead}` : ''}
+              </div>
             </div>
           ))}
         </div>
@@ -165,15 +169,7 @@ export const ClubFastTrackSection: React.FC = () => {
               className="relative w-full max-w-sm bg-[#131420] border border-[#f5f2eb]/20 rounded-2xl p-6 z-10 text-[#f5f2eb] space-y-4 shadow-2xl"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-mono text-[#dedacb] flex items-center">
-                  <span className="inline-flex items-end">
-                    <span>11/5</span>
-                    <span className="text-[8px] font-bold lowercase tracking-tight leading-none ml-0.5 mb-[1px]">
-                      class
-                    </span>
-                  </span>
-                  <span className="ml-1">Platform წესდება</span>
-                </span>
+                <span className="text-xs font-mono text-[#dedacb]">11/5 Platform წესდება</span>
                 <button
                   onClick={() => setActiveCharter(null)}
                   className="p-1 text-zinc-400 hover:text-white"
@@ -189,17 +185,11 @@ export const ClubFastTrackSection: React.FC = () => {
                 </div>
                 <div className="flex justify-between gap-2 text-[#a8a495]">
                   <span>კლუბი:</span>
-                  <span className="text-white font-medium text-right">
-                    {activeCharter.name}
-                  </span>
+                  <span className="text-white font-medium text-right">{activeCharter.name}</span>
                 </div>
                 <div className="flex justify-between text-[#a8a495]">
                   <span>სივრცე:</span>
                   <span className="text-white font-medium">{activeCharter.room}</span>
-                </div>
-                <div className="flex justify-between text-[#a8a495]">
-                  <span>სტატუსი:</span>
-                  <span className="text-emerald-400 font-medium">დამტკიცებულია</span>
                 </div>
               </div>
 

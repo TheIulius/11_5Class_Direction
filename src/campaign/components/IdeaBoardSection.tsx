@@ -1,14 +1,26 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronUp, MessageSquare, Plus, X, Send } from 'lucide-react';
-import { INITIAL_IDEAS, IdeaItem, IdeaComment } from '../data/campaignData';
+import { ChevronUp, MessageSquare, Plus, X, Trash2, CheckCircle2 } from 'lucide-react';
+import { IdeaItem } from '../data/campaignData';
 import { soundEffects } from '../utils/soundEffects';
+import { usePlatform } from '../context/PlatformContext';
+import { CommentsThread } from './CommentsThread';
 
 export const IdeaBoardSection: React.FC = () => {
-  const [ideas, setIdeas] = useState<IdeaItem[]>(INITIAL_IDEAS);
+  const {
+    user,
+    isAdmin,
+    platform,
+    addIdea,
+    updateIdea,
+    deleteIdea,
+    upvoteIdea,
+    openAuthModal,
+  } = usePlatform();
+
+  const ideas = platform.ideas;
   const [userVotes, setUserVotes] = useState<Record<string, boolean>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [commentInputs, setCommentInputs] = useState<Record<string, string>>({});
 
   // New proposal modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,71 +28,30 @@ export const IdeaBoardSection: React.FC = () => {
   const [newContent, setNewContent] = useState('');
   const [newCategory, setNewCategory] = useState<IdeaItem['category']>('სასკოლო რეფორმა');
 
-  const handleVote = (id: string) => {
+  const handleVote = async (id: string) => {
     soundEffects.upvote();
-    const hasVoted = Boolean(userVotes[id]);
-    setUserVotes(prev => ({ ...prev, [id]: !hasVoted }));
-    setIdeas(prev =>
-      prev.map(idea =>
-        idea.id === id
-          ? { ...idea, upvotes: hasVoted ? idea.upvotes - 1 : idea.upvotes + 1 }
-          : idea
-      )
-    );
+    setUserVotes((prev) => ({ ...prev, [id]: !prev[id] }));
+    await upvoteIdea(id);
   };
 
   const toggleComments = (id: string) => {
     soundEffects.click();
-    setExpandedId(prev => (prev === id ? null : id));
+    setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const handleAddComment = (id: string) => {
-    const text = commentInputs[id]?.trim();
-    if (!text) return;
-    soundEffects.upvote();
-
-    const newComment: IdeaComment = {
-      id: `c-${Date.now()}`,
-      author: 'ანონიმი მოსწავლე',
-      content: text,
-      timestamp: 'ახლახან'
-    };
-
-    setIdeas(prev =>
-      prev.map(idea =>
-        idea.id === id
-          ? {
-              ...idea,
-              commentsCount: idea.commentsCount + 1,
-              comments: [newComment, ...idea.comments]
-            }
-          : idea
-      )
-    );
-
-    setCommentInputs(prev => ({ ...prev, [id]: '' }));
-  };
-
-  const handleCreate = (e: React.FormEvent) => {
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
     soundEffects.success();
 
-    const created: IdeaItem = {
-      id: `idea-${Date.now()}`,
+    await addIdea({
       title: newTitle.trim(),
       content: newContent.trim(),
       category: newCategory,
-      author: 'მოსწავლე 11/5',
+      author: user ? user.fullName : 'მოსწავლე 11/5',
       timestamp: 'ახლახან',
-      upvotes: 1,
-      statusLabel: 'განხილვაშია',
-      commentsCount: 0,
-      comments: []
-    };
+    });
 
-    setIdeas([created, ...ideas]);
-    setUserVotes(prev => ({ ...prev, [created.id]: true }));
     setIsModalOpen(false);
     setNewTitle('');
     setNewContent('');
@@ -105,13 +76,17 @@ export const IdeaBoardSection: React.FC = () => {
             იდეებისა და ინიციატივების დაფა
           </h2>
           <p className="text-xs sm:text-sm text-[#b8b5a8] mt-1 max-w-xl">
-            დააფიქსირეთ სასკოლო წესების ცვლილებები, მიეცით ხმა და დატოვეთ ანონიმური აზრი.
+            დააფიქსირეთ სასკოლო წესების ცვლილებები, მიეცით ხმა და დატოვეთ კომენტარი.
           </p>
         </div>
 
         <button
           onClick={() => {
             soundEffects.click();
+            if (!user) {
+              openAuthModal('login');
+              return;
+            }
             setIsModalOpen(true);
           }}
           className="flex items-center gap-1.5 text-xs text-[#0c0d12] font-semibold py-2 px-3.5 rounded-xl bg-[#f5f2eb] hover:bg-white transition-all self-start sm:self-end cursor-pointer shadow-md"
@@ -123,9 +98,14 @@ export const IdeaBoardSection: React.FC = () => {
 
       {/* Ideas List */}
       <div className="space-y-3">
-        {ideas.map(idea => {
-          const hasVoted = Boolean(userVotes[idea.id]);
+        {ideas.map((idea) => {
+          const hasVoted =
+            Boolean(userVotes[idea.id]) ||
+            Boolean(user && idea.upvotedBy?.includes(user.username));
           const isCommentsOpen = expandedId === idea.id;
+          const ideaCommentsCount =
+            platform.comments.filter((c) => c.targetType === 'idea' && c.targetId === idea.id)
+              .length + (idea.comments?.length || 0);
 
           return (
             <div
@@ -148,13 +128,48 @@ export const IdeaBoardSection: React.FC = () => {
 
                 {/* Body */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1.5 text-xs">
+                  <div className="flex flex-wrap items-center gap-2 mb-1.5 text-xs">
                     <span className="font-mono text-[#a8a495]">{idea.author}</span>
                     <span className="text-zinc-600">&bull;</span>
                     <span className="font-mono text-[#b8b5a8] text-[11px]">{idea.category}</span>
-                    <span className="ml-auto text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-[#dedacb]">
+                    <span
+                      className={`ml-auto text-[10px] font-mono px-2.5 py-0.5 rounded-full ${
+                        idea.statusLabel === 'დამტკიცებულია'
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          : 'bg-white/10 text-[#dedacb]'
+                      }`}
+                    >
                       {idea.statusLabel}
                     </span>
+
+                    {isAdmin && (
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            updateIdea(idea.id, {
+                              statusLabel:
+                                idea.statusLabel === 'დამტკიცებულია'
+                                  ? 'განხილვაშია'
+                                  : 'დამტკიცებულია',
+                            })
+                          }
+                          className="px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                          title="სტატუსის შეცვლა"
+                        >
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>სტატუსის შეცვლა</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteIdea(idea.id)}
+                          className="p-1 rounded bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 cursor-pointer"
+                          title="იდეის წაშლა"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   <h3 className="text-sm sm:text-base font-semibold text-white leading-snug">
@@ -171,7 +186,7 @@ export const IdeaBoardSection: React.FC = () => {
                       className="flex items-center gap-1.5 hover:text-white transition-colors cursor-pointer"
                     >
                       <MessageSquare className="w-3.5 h-3.5" />
-                      <span>{idea.commentsCount} კომენტარი</span>
+                      <span>{ideaCommentsCount} კომენტარი</span>
                     </button>
                   </div>
                 </div>
@@ -184,44 +199,24 @@ export const IdeaBoardSection: React.FC = () => {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="px-4 pb-4 pt-2 border-t border-white/5 space-y-3 bg-[#11121c]/60"
+                    className="px-4 pb-4 pt-3 border-t border-white/5 space-y-3 bg-[#11121c]/60"
                   >
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={commentInputs[idea.id] || ''}
-                        onChange={e =>
-                          setCommentInputs({ ...commentInputs, [idea.id]: e.target.value })
-                        }
-                        onKeyDown={e => {
-                          if (e.key === 'Enter') handleAddComment(idea.id);
-                        }}
-                        placeholder="დატოვეთ ანონიმური აზრი..."
-                        className="flex-1 bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white placeholder-[#78756c] focus:outline-none focus:border-[#f5f2eb]/40"
-                      />
-                      <button
-                        onClick={() => handleAddComment(idea.id)}
-                        className="px-3.5 py-2 rounded-xl bg-[#f5f2eb]/15 hover:bg-[#f5f2eb]/25 text-[#fcfbf7] text-xs font-medium cursor-pointer transition-colors"
-                      >
-                        გაგზავნა
-                      </button>
-                    </div>
-
-                    <div className="space-y-2 pt-1">
-                      {idea.comments.length === 0 ? (
-                        <div className="text-xs text-[#78756c] italic">კომენტარები ჯერ არ არის.</div>
-                      ) : (
-                        idea.comments.map(c => (
+                    {idea.comments && idea.comments.length > 0 && (
+                      <div className="space-y-2">
+                        {idea.comments.map((c) => (
                           <div
                             key={c.id}
                             className="p-2.5 rounded-xl bg-black/30 border border-white/5 text-xs text-[#dedacb] space-y-0.5"
                           >
-                            <div className="text-[10px] font-mono text-[#a8a495]">{c.author} &bull; {c.timestamp}</div>
+                            <div className="text-[10px] font-mono text-[#a8a495]">
+                              {c.author} &bull; {c.timestamp}
+                            </div>
                             <p>{c.content}</p>
                           </div>
-                        ))
-                      )}
-                    </div>
+                        ))}
+                      </div>
+                    )}
+                    <CommentsThread targetType="idea" targetId={idea.id} compact />
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -265,7 +260,7 @@ export const IdeaBoardSection: React.FC = () => {
                     type="text"
                     required
                     value={newTitle}
-                    onChange={e => setNewTitle(e.target.value)}
+                    onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="მაგ. ბიბლიოთეკაში დამატებითი დამტენები"
                     className="w-full bg-black/40 border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white placeholder-[#78756c] focus:outline-none focus:border-[#f5f2eb]/40"
                   />
@@ -278,7 +273,7 @@ export const IdeaBoardSection: React.FC = () => {
                   <textarea
                     rows={3}
                     value={newContent}
-                    onChange={e => setNewContent(e.target.value)}
+                    onChange={(e) => setNewContent(e.target.value)}
                     placeholder="მოკლედ აღწერეთ იდეის სარგებელი კლასელებისთვის..."
                     className="w-full bg-black/40 border border-[#f5f2eb]/15 rounded-xl p-3 text-xs text-white placeholder-[#78756c] focus:outline-none focus:border-[#f5f2eb]/40 resize-none"
                   />
@@ -288,7 +283,7 @@ export const IdeaBoardSection: React.FC = () => {
                   <label className="block text-xs font-medium text-[#b8b5a8] mb-1">კატეგორია</label>
                   <select
                     value={newCategory}
-                    onChange={e => setNewCategory(e.target.value as any)}
+                    onChange={(e) => setNewCategory(e.target.value as IdeaItem['category'])}
                     className="w-full bg-[#181926] border border-[#f5f2eb]/15 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-[#f5f2eb]/40"
                   >
                     <option value="სასკოლო რეფორმა">სასკოლო რეფორმა</option>
@@ -308,7 +303,7 @@ export const IdeaBoardSection: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl bg-[#f5f2eb] hover:bg-white text-xs font-semibold text-[#0c0d12]"
+                    className="px-4 py-2 rounded-xl bg-[#f5f2eb] hover:bg-white text-xs font-semibold text-[#0c0d12] cursor-pointer"
                   >
                     გაგზავნა
                   </button>
