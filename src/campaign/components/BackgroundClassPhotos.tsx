@@ -50,24 +50,24 @@ export const BackgroundClassPhotos: React.FC<BackgroundClassPhotosProps> = () =>
   const prefersReducedMotion = useReducedMotion();
   const { scrollY } = useScroll();
 
-  // Original multi-layer spring-smoothed scroll values for smooth vertical jiggle/parallax inertia
+  // Snappy, responsive multi-layer spring scroll values with smooth jiggle settle
   const smoothScrollDeep = useSpring(scrollY, {
-    stiffness: 55,
-    damping: 24,
-    mass: 0.75,
-    restDelta: 0.1,
+    stiffness: 170,
+    damping: 20,
+    mass: 0.35,
+    restDelta: 0.05,
   });
   const smoothScrollMid = useSpring(scrollY, {
-    stiffness: 70,
-    damping: 26,
-    mass: 0.6,
-    restDelta: 0.1,
+    stiffness: 210,
+    damping: 22,
+    mass: 0.3,
+    restDelta: 0.05,
   });
   const smoothScrollNear = useSpring(scrollY, {
-    stiffness: 85,
-    damping: 28,
-    mass: 0.5,
-    restDelta: 0.1,
+    stiffness: 250,
+    damping: 24,
+    mass: 0.25,
+    restDelta: 0.05,
   });
 
   // Photos move up slower than foreground scroll speed (0.20x, 0.32x, 0.45x) without rolling
