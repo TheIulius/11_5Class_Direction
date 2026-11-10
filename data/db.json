@@ -33378,7 +33378,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 42,
+    "visits": 43,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33475,7 +33475,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-10T17:36:16.988Z"
+    "lastUpdated": "2026-11-10T18:36:48.827Z"
   },
   "platform": {
     "updatedAt": 1794331135104,
@@ -34314,7 +34314,7 @@
         "salt": "bf561a201267f9bc1552d255a30d0ce4",
         "role": "admin",
         "isAdmin": true,
-        "token": "676d4479de52aea1a6f90c307c7f4c81a0e4959fdd1bc865c556df5fd0e75f58",
+        "token": "f520e66823a648625a80feb13681224d683f4fdf0a2bcff43838285fa7cb8dab",
         "createdAt": "2026-09-25T16:18:23.548Z"
       },
       "user_1794331064867_659": {
