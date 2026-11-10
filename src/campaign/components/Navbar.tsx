@@ -70,21 +70,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="sticky top-0 z-40 w-full glass-nav transition-colors">
       <div className="max-w-6xl mx-auto px-3.5 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Brand Identity */}
+        {/* Brand Identity: 11⁵ Logo (Clean icon badge with 5 at index) */}
         <button
           onClick={() => handleNavClick('home')}
-          className="flex items-center gap-2 sm:gap-2.5 text-left group cursor-pointer shrink-0 min-h-[44px]"
+          className="flex items-center justify-center cursor-pointer shrink-0 min-h-[44px] min-w-[44px] -ml-1 group"
           aria-label="მთავარ გვერდზე გადასვლა"
+          title="11⁵ მთავარი"
         >
-          <div className="w-8 h-8 rounded-lg btn-primary flex items-center justify-center font-mono font-bold text-xs shadow-xs group-hover:opacity-90 transition-opacity shrink-0">
-            11/5
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xs sm:text-sm font-bold tracking-tight text-[var(--text-primary)] flex items-center gap-1.5">
-              <span>კომაროვი</span>
-              <span className="hidden sm:inline text-[11px] font-normal text-[var(--text-muted)]">
-                &bull; 11/5 კლასი
-              </span>
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl btn-primary flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-all select-none">
+            <span className="font-black text-sm sm:text-base tracking-tight leading-none text-white flex items-start">
+              11<span className="text-[10px] sm:text-[11px] font-extrabold -mt-1 ml-0.5 opacity-95">5</span>
             </span>
           </div>
         </button>
@@ -216,11 +211,13 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             aria-label="მთავარი გვერდი"
           >
             <div
-              className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-bold ${
+              className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold ${
                 activeTab === 'home' ? 'btn-primary text-white shadow-xs' : 'card-third text-[var(--text-secondary)]'
               }`}
             >
-              11
+              <span className="flex items-start text-[10px] font-black leading-none">
+                11<span className="text-[6.5px] -mt-0.5 ml-px">5</span>
+              </span>
             </div>
             <span className="text-[11px] leading-tight">მთავარი</span>
             {activeTab === 'home' && <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary-action)] mt-0.5" />}

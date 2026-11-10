@@ -281,9 +281,9 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--text-primary)]">11/5 კლასი</span>
             <span>&bull;</span>
-            <span>კომაროვის სკოლა</span>
+            <span className="font-medium text-[var(--text-secondary)]">theiulius</span>
             <span>&bull;</span>
-            <span className="font-mono text-[11px] opacity-70">2025–2026</span>
+            <span className="font-mono text-[11px] opacity-70">2026–2027</span>
           </div>
 
           <div className="flex items-center gap-3">
