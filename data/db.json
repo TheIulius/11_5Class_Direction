@@ -19892,6 +19892,21 @@
           "realName": "11/5 ადმინისტრატორი",
           "activeChip": null,
           "lineup": []
+        },
+        {
+          "id": "user_1794322010802_792",
+          "managerName": "Irakli Kakabadze",
+          "teamName": "11/5 კლასი",
+          "totalPoints": 0,
+          "gwPoints": 0,
+          "rank": 87,
+          "previousRank": 87,
+          "grade": "11",
+          "parallel": "5",
+          "realName": "Irakli Kakabadze",
+          "showRealNamePublicly": true,
+          "activeChip": null,
+          "lineup": []
         }
       ]
     }
@@ -31752,6 +31767,33 @@
       "joinedAt": "2026-11-09T15:06:44.605Z",
       "gwPoints": 0,
       "totalPoints": 0
+    },
+    "user_1794322010802_792": {
+      "id": "user_1794322010802_792",
+      "managerName": "Irakli Kakabadze",
+      "teamName": "11/5 კლასი",
+      "squad": {
+        "teamName": "11/5 კლასი",
+        "managerName": "Irakli Kakabadze",
+        "players": [],
+        "bank": 55,
+        "freeTransfers": 1,
+        "transfersMadeThisGW": 0,
+        "activeChip": null,
+        "usedChips": {
+          "triple_captain": false,
+          "bench_boost": false,
+          "wildcard": false
+        },
+        "accumulatedTransferPenalties": 0,
+        "gwTransferPenalties": {},
+        "gameweekSquads": {},
+        "gameweekChips": {},
+        "startFreeTransfers": 1
+      },
+      "joinedAt": "2026-11-10T14:46:50.803Z",
+      "gwPoints": 0,
+      "totalPoints": 0
     }
   },
   "users": {
@@ -33362,7 +33404,7 @@
       "open": 0,
       "flashcards": 0,
       "open_essay": 5,
-      "text": 4,
+      "text": 5,
       "media": 2,
       "flash_ai": 1
     },
@@ -33432,7 +33474,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-10T14:45:30.345Z"
+    "lastUpdated": "2026-11-10T14:50:15.153Z"
   },
   "platform": {
     "updatedAt": 1794322094527,
