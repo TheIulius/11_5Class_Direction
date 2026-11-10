@@ -33400,7 +33400,7 @@
       "overview": 0,
       "poem": 0,
       "analysis": 3,
-      "quiz": 16,
+      "quiz": 17,
       "open": 0,
       "flashcards": 0,
       "open_essay": 5,
@@ -33418,14 +33418,14 @@
       "iarali": 1
     },
     "tests": {
-      "totalAnswered": 35,
-      "correctAnswers": 34,
+      "totalAnswered": 36,
+      "correctAnswers": 35,
       "incorrectAnswers": 1,
       "quizzesCompleted": 0,
       "byTopic": {
         "edemi": {
-          "answered": 6,
-          "correct": 5
+          "answered": 7,
+          "correct": 6
         },
         "visac-gsurt": {
           "answered": 13,
@@ -33474,7 +33474,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-10T15:00:34.242Z"
+    "lastUpdated": "2026-11-10T15:01:05.277Z"
   },
   "platform": {
     "updatedAt": 1794322094527,
