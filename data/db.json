@@ -33400,13 +33400,13 @@
     "tabClicks": {
       "overview": 0,
       "poem": 0,
-      "analysis": 4,
+      "analysis": 5,
       "quiz": 17,
       "open": 0,
       "flashcards": 0,
       "open_essay": 6,
-      "text": 6,
-      "media": 2,
+      "text": 7,
+      "media": 3,
       "flash_ai": 2
     },
     "topicViews": {
@@ -33475,7 +33475,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-10T18:37:13.896Z"
+    "lastUpdated": "2026-11-10T18:47:39.534Z"
   },
   "platform": {
     "updatedAt": 1794331135104,
