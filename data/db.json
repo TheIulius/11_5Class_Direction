@@ -33403,7 +33403,7 @@
       "quiz": 17,
       "open": 0,
       "flashcards": 0,
-      "open_essay": 5,
+      "open_essay": 6,
       "text": 6,
       "media": 2,
       "flash_ai": 2
@@ -33474,7 +33474,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-10T15:02:09.166Z"
+    "lastUpdated": "2026-11-10T15:02:32.545Z"
   },
   "platform": {
     "updatedAt": 1794322094527,
