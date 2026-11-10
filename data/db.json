@@ -33478,7 +33478,7 @@
     "lastUpdated": "2026-11-10T17:18:04.540Z"
   },
   "platform": {
-    "updatedAt": 1794331089308,
+    "updatedAt": 1794331097692,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -34324,8 +34324,8 @@
         "passwordHash": "7cd0ea89652a2c172a0bb60a86ee38ad0763b2321ac06d227547b56644c4d047089019768a536b1a32df2eb6b00a3e14814baf5e1b3c99b636f093e33d9d883a",
         "salt": "5600e8dd5902091426cf38e256d20d7f",
         "token": "3b4c89be501f39cf44e04ecd62b888c50457caf5bba3c66bce2f5aeb28a92b95",
-        "role": "user",
-        "isAdmin": false,
+        "role": "admin",
+        "isAdmin": true,
         "createdAt": "2026-11-10T17:17:44.868Z"
       }
     }
