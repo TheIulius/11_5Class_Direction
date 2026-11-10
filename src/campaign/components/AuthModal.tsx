@@ -213,7 +213,7 @@ export const AuthModal: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl btn-primary disabled:opacity-60 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <LogIn className="w-4 h-4" />
               {isSubmitting ? 'მიმდინარეობს შესვლა...' : 'შესვლა'}
@@ -226,7 +226,7 @@ export const AuthModal: React.FC = () => {
                 htmlFor="signup-fullname"
                 className="block text-xs font-bold text-slate-700 mb-1.5"
               >
-                სახელი და გვარი (გამოჩნდება კომენტარებსა და მასალებზე)
+                სახელი და გვარი (11/5 კლასელი)
               </label>
               <input
                 id="signup-fullname"
@@ -237,7 +237,7 @@ export const AuthModal: React.FC = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="მაგ: ნიკოლოზ ბერიძე"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-action)]"
               />
             </div>
 
@@ -260,7 +260,7 @@ export const AuthModal: React.FC = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="მაგ: nika_b"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-action)] font-mono"
               />
             </div>
 
@@ -282,14 +282,14 @@ export const AuthModal: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="შექმენით პაროლი"
-                  className="w-full pl-3.5 pr-11 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full pl-3.5 pr-11 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary-action)]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((prev) => !prev)}
                   aria-pressed={showPassword}
                   aria-label={showPassword ? 'პაროლის დამალვა' : 'პაროლის გამოჩენა'}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-700 rounded-lg transition-colors"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-700 rounded-lg transition-colors cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -299,10 +299,10 @@ export const AuthModal: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-60 text-white font-bold text-sm shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl btn-primary disabled:opacity-60 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
-              {isSubmitting ? 'იქმნება აქაუნთი...' : 'აქაუნთის შექმნა'}
+              {isSubmitting ? 'იქმნება აქაუნთი...' : '11/5 აქაუნთის რეგისტრაცია'}
             </button>
           </form>
         )}

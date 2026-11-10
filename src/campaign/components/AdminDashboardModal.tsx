@@ -507,21 +507,21 @@ export const AdminDashboardModal: React.FC = () => {
               {/* Create Special Admin or Student Account */}
               <div className="lg:col-span-5 bg-slate-50 rounded-2xl p-5 border border-slate-200/80 h-fit">
                 <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-9 h-9 rounded-xl bg-indigo-600 text-white flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl btn-primary text-white flex items-center justify-center">
                     <UserPlus className="w-4 h-4" />
                   </div>
                   <div>
                     <h3 className="text-sm font-black text-slate-900">
-                      სპეციალური აქაუნთის შექმნა
+                      11/5 კლასელის აქაუნთის შექმნა
                     </h3>
                     <p className="text-[11px] text-slate-500">
-                      მიეცით კლასელს ადმინის ან მოსწავლის აქაუნთი და პაროლი
+                      მიეცით 11/5 კლასელს ადმინის ან მოსწავლის აქაუნთი და პაროლი
                     </p>
                   </div>
                 </div>
 
                 {userFormStatus && (
-                  <div className="mb-3 p-3 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-bold">
+                  <div className="mb-3 p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold">
                     {userFormStatus}
                   </div>
                 )}
@@ -587,16 +587,16 @@ export const AdminDashboardModal: React.FC = () => {
                       type="checkbox"
                       checked={newIsAdmin}
                       onChange={(e) => setNewIsAdmin(e.target.checked)}
-                      className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500"
+                      className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-xs font-bold text-slate-800">
-                      მიენიჭოს სრული ადმინისტრატორის უფლებები
+                      მიენიჭოს 11/5 ადმინისტრატორის უფლებები
                     </span>
                   </label>
 
                   <button
                     type="submit"
-                    className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/15 transition-all"
+                    className="w-full py-2.5 rounded-xl btn-primary text-white font-bold text-xs shadow-md transition-all cursor-pointer"
                   >
                     აქაუნთის შექმნა / განახლება
                   </button>
@@ -606,13 +606,18 @@ export const AdminDashboardModal: React.FC = () => {
               {/* Existing Accounts List */}
               <div className="lg:col-span-7 space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">
-                    რეგისტრირებული აქაუნთები ({users.length})
-                  </h3>
+                  <div>
+                    <h3 className="text-xs font-black uppercase tracking-wider text-slate-500">
+                      11/5 კლასის რეგისტრირებული აქაუნთები ({users.length})
+                    </h3>
+                    <p className="text-[10px] text-slate-400">
+                      მხოლოდ 11/5 კლასის მოსწავლეები და ადმინისტრატორები (განცალკევებულია KCL-სგან)
+                    </p>
+                  </div>
                   <button
                     type="button"
                     onClick={fetchUsers}
-                    className="text-xs font-bold text-indigo-600 hover:underline"
+                    className="text-xs font-bold text-[var(--primary-action)] hover:underline cursor-pointer"
                   >
                     განახლება
                   </button>

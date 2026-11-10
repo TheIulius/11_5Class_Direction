@@ -166,6 +166,18 @@ export interface ArchiveStudyPack {
   createdAt: string;
 }
 
+export interface PlatformUserAccount {
+  id: string;
+  username: string;
+  fullName: string;
+  passwordHash: string;
+  salt: string;
+  role: 'admin' | 'user';
+  isAdmin: boolean;
+  token?: string;
+  createdAt: string;
+}
+
 export interface PlatformCMSData {
   updatedAt: number;
   announcement?: {
@@ -175,6 +187,7 @@ export interface PlatformCMSData {
     linkTab?: string;
     updatedAt: string;
   };
+  users?: Record<string, PlatformUserAccount>;
   calendarEvents: any[];
   homeworks: any[];
   timetable: any[];

@@ -3,7 +3,7 @@ import cors from 'cors';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData, PlatformCMSData, PlatformComment, PlatformResource, ArchiveStudyPack } from './db';
+import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PlatformUserAccount, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData, PlatformCMSData, PlatformComment, PlatformResource, ArchiveStudyPack } from './db';
 import {
   INITIAL_CALENDAR_EVENTS,
   INITIAL_HOMEWORKS,
@@ -4571,10 +4571,37 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
       },
     ];
   }
+
+  // Strictly isolate 11/5 Class Platform accounts from KCL fantasy users
+  if (!p.users || typeof p.users !== 'object') {
+    p.users = {};
+  }
+
+  // Ensure primary 11/5 Platform admin (@theiulius) exists in 11/5 accounts
+  if (!Object.values(p.users).some((u) => u.username.toLowerCase() === 'theiulius')) {
+    const kclIlia = Object.values(data.users || {}).find(
+      (u) => u.username.toLowerCase() === 'theiulius'
+    );
+    const passHash = kclIlia?.passwordHash || hashPassword('admin115').hash;
+    const salt = kclIlia?.salt || hashPassword('admin115').salt;
+    const id = 'user_theiulius_115';
+    p.users[id] = {
+      id,
+      username: 'theiulius',
+      fullName: 'Ilia Shinjiashvili',
+      passwordHash: passHash,
+      salt: salt,
+      role: 'admin',
+      isAdmin: true,
+      token: kclIlia?.token,
+      createdAt: kclIlia?.createdAt || new Date().toISOString(),
+    };
+  }
+
   return p;
 }
 
-function getPlatformAuthUser(req: Request): { user: UserAccount; isAdmin: boolean } | null {
+function getPlatformAuthUser(req: Request): { user: PlatformUserAccount; isAdmin: boolean } | null {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ')
     ? authHeader.substring(7).trim()
@@ -4582,11 +4609,27 @@ function getPlatformAuthUser(req: Request): { user: UserAccount; isAdmin: boolea
   if (!token) return null;
 
   const data = db.getData();
-  if (!data.users) return null;
-  const user = Object.values(data.users).find((u) => u.token === token);
+  const p = initPlatformCMS(data);
+  if (!p.users) p.users = {};
+
+  // 1. Search in strictly isolated 11/5 platform accounts
+  let user = Object.values(p.users).find((u) => u.token === token);
+
+  // 2. Seamless session bridge: if @theiulius has an existing active login token, preserve their admin session
+  if (!user && data.users) {
+    const kclUser = Object.values(data.users).find((u) => u.token === token && u.username.toLowerCase() === 'theiulius');
+    if (kclUser) {
+      const ilia = Object.values(p.users).find((u) => u.username.toLowerCase() === 'theiulius');
+      if (ilia) {
+        ilia.token = token;
+        user = ilia;
+      }
+    }
+  }
+
   if (!user) return null;
 
-  const isAdmin = isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isAdmin);
+  const isAdmin = Boolean(user.isAdmin) || user.role === 'admin' || user.username.toLowerCase() === 'theiulius' || user.username.toLowerCase() === 'admin';
   return { user, isAdmin };
 }
 
@@ -4620,7 +4663,7 @@ app.get('/api/platform/state', (req: Request, res: Response) => {
       ? {
           id: auth.user.id,
           username: auth.user.username,
-          fullName: auth.user.realName || auth.user.managerName || auth.user.username,
+          fullName: auth.user.fullName || auth.user.username,
           role: auth.isAdmin ? 'admin' : 'user',
           isAdmin: auth.isAdmin,
         }
@@ -4628,7 +4671,7 @@ app.get('/api/platform/state', (req: Request, res: Response) => {
   });
 });
 
-// 2. Platform Student Registration (Frictionless Sign-Up for Classmates)
+// 2. Platform Student Registration (Frictionless Sign-Up for 11/5 Classmates)
 app.post('/api/platform/auth/register', (req: Request, res: Response) => {
   const { username, fullName, password } = req.body || {};
   if (!username || !password || !fullName) {
@@ -4646,9 +4689,10 @@ app.post('/api/platform/auth/register', (req: Request, res: Response) => {
   }
 
   const data = db.getData();
-  if (!data.users) data.users = {};
+  const p = initPlatformCMS(data);
+  if (!p.users) p.users = {};
 
-  const existing = Object.values(data.users).find(
+  const existing = Object.values(p.users).find(
     (u) => u.username.toLowerCase() === cleanUsername
   );
   if (existing) {
@@ -4658,28 +4702,21 @@ app.post('/api/platform/auth/register', (req: Request, res: Response) => {
   const id = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
   const hashed = hashPassword(String(password));
   const token = generateToken();
-  const isAdmin = isUserAdmin(cleanUsername);
+  const isAdmin = cleanUsername === 'theiulius' || cleanUsername === 'admin';
 
-  const newUser: UserAccount = {
+  const newUser: PlatformUserAccount = {
     id,
     username: cleanUsername,
-    email: `${cleanUsername}@11-5.komarovi.ge`,
+    fullName: cleanFullName,
     passwordHash: hashed.hash,
     salt: hashed.salt,
-    managerName: cleanFullName,
-    teamName: '11/5 კლასი',
-    realName: cleanFullName,
-    grade: '11',
-    parallel: '5',
-    showRealNamePublicly: true,
     token,
     role: isAdmin ? 'admin' : 'user',
     isAdmin,
-    isApproved: true,
     createdAt: new Date().toISOString(),
   };
 
-  data.users[id] = newUser;
+  p.users[id] = newUser;
   savePlatformCMS(data, `Platform student registered: @${cleanUsername} (${cleanFullName})`);
 
   res.json({
@@ -4695,7 +4732,7 @@ app.post('/api/platform/auth/register', (req: Request, res: Response) => {
   });
 });
 
-// 3. Platform Sign-In (Students & Admins)
+// 3. Platform Sign-In (11/5 Classmates & Admins)
 app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
   const { username, login, password } = req.body || {};
   const loginInput = String(username || login || '').trim();
@@ -4704,40 +4741,32 @@ app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
   }
 
   let data = db.getData();
-  if (!data.users) data.users = {};
+  const p = initPlatformCMS(data);
+  if (!p.users) p.users = {};
 
-  let user = findUserByLogin(loginInput, data.users);
-  if (!user) {
-    try {
-      await syncDatabaseFromGitHub();
-      data = db.getData();
-      user = findUserByLogin(loginInput, data.users || {});
-    } catch (e) {}
-  }
+  let user = Object.values(p.users).find(
+    (u) => u.username.toLowerCase() === loginInput.toLowerCase()
+  );
 
-  // Built-in emergency fallback for admin account if password matches 'admin115' or 'komarovi2025'
-  if (!user && (loginInput.toLowerCase() === 'admin' || loginInput.toLowerCase() === 'theiulius')) {
-    if (password === 'admin115' || password === 'komarovi2025' || password === ADMIN_PASSWORD) {
-      const passHash = hashPassword(password);
-      const id = `user_${loginInput.toLowerCase()}_115`;
-      user = {
-        id,
-        username: loginInput.toLowerCase(),
-        email: `${loginInput.toLowerCase()}@11-5.komarovi.ge`,
-        passwordHash: passHash.hash,
-        salt: passHash.salt,
-        managerName: loginInput.toLowerCase() === 'theiulius' ? 'იულიუსი (ადმინი)' : '11/5 ადმინი',
-        teamName: '11/5 კლასი',
-        realName: loginInput.toLowerCase() === 'theiulius' ? 'იულიუსი (ადმინი)' : '11/5 ადმინი',
-        grade: '11',
-        parallel: '5',
-        role: 'admin',
-        isAdmin: true,
-        isApproved: true,
-        createdAt: new Date().toISOString(),
-      };
-      data.users[id] = user;
-    }
+  // If the user logging in is 'theiulius' or 'admin' and not yet in p.users, bootstrap them
+  if (!user && (loginInput.toLowerCase() === 'theiulius' || loginInput.toLowerCase() === 'admin')) {
+    const kclIlia = Object.values(data.users || {}).find(
+      (u) => u.username.toLowerCase() === loginInput.toLowerCase()
+    );
+    const passHash = kclIlia?.passwordHash || hashPassword('admin115').hash;
+    const salt = kclIlia?.salt || hashPassword('admin115').salt;
+    const id = `user_${loginInput.toLowerCase()}_115`;
+    user = {
+      id,
+      username: loginInput.toLowerCase(),
+      fullName: loginInput.toLowerCase() === 'theiulius' ? 'Ilia Shinjiashvili' : '11/5 ადმინი',
+      passwordHash: passHash,
+      salt: salt,
+      role: 'admin',
+      isAdmin: true,
+      createdAt: new Date().toISOString(),
+    };
+    p.users[id] = user;
   }
 
   if (!user) {
@@ -4747,7 +4776,7 @@ app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
   const isValid = verifyPassword(String(password), user.passwordHash, user.salt);
   const isEmergencyAdminPass =
     (user.username.toLowerCase() === 'admin' || user.username.toLowerCase() === 'theiulius') &&
-    (password === 'admin115' || password === 'komarovi2025');
+    (password === 'admin115' || password === 'komarovi2025' || password === ADMIN_PASSWORD);
 
   if (!isValid && !isEmergencyAdminPass) {
     return res.status(401).json({ error: 'პაროლი არასწორია.' });
@@ -4755,12 +4784,12 @@ app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
 
   const token = generateToken();
   user.token = token;
-  const isAdmin = isUserAdmin(user.username) || user.role === 'admin' || Boolean(user.isAdmin);
+  const isAdmin = Boolean(user.isAdmin) || user.role === 'admin' || user.username.toLowerCase() === 'theiulius' || user.username.toLowerCase() === 'admin';
   if (isAdmin) {
     user.role = 'admin';
     user.isAdmin = true;
   }
-  db.save(`Platform user login: @${user.username}`);
+  savePlatformCMS(data, `Platform user login: @${user.username}`);
 
   res.json({
     success: true,
@@ -4768,7 +4797,7 @@ app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
     user: {
       id: user.id,
       username: user.username,
-      fullName: user.realName || user.managerName || user.username,
+      fullName: user.fullName || user.username,
       role: isAdmin ? 'admin' : 'user',
       isAdmin,
     },
@@ -4786,26 +4815,27 @@ app.get('/api/platform/auth/me', (req: Request, res: Response) => {
     user: {
       id: auth.user.id,
       username: auth.user.username,
-      fullName: auth.user.realName || auth.user.managerName || auth.user.username,
+      fullName: auth.user.fullName || auth.user.username,
       role: auth.isAdmin ? 'admin' : 'user',
       isAdmin: auth.isAdmin,
     },
   });
 });
 
-// 5. Admin: List All Accounts & Manage Admin/Student Accounts
+// 5. Admin: List All 11/5 Class Accounts (Strictly isolated from KCL)
 app.get('/api/platform/admin/users', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
     return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
   }
   const data = db.getData();
-  const users = Object.values(data.users || {}).map((u) => {
-    const isAdmin = isUserAdmin(u.username) || u.role === 'admin' || Boolean(u.isAdmin);
+  const p = initPlatformCMS(data);
+  const users = Object.values(p.users || {}).map((u) => {
+    const isAdmin = Boolean(u.isAdmin) || u.role === 'admin' || u.username.toLowerCase() === 'theiulius' || u.username.toLowerCase() === 'admin';
     return {
       id: u.id,
       username: u.username,
-      fullName: u.realName || u.managerName || u.username,
+      fullName: u.fullName || u.username,
       role: isAdmin ? 'admin' : 'user',
       isAdmin,
       createdAt: u.createdAt,
@@ -4814,7 +4844,7 @@ app.get('/api/platform/admin/users', (req: Request, res: Response) => {
   res.json({ users });
 });
 
-// Admin: Create Special Admin or Student Account with Password
+// Admin: Create Special Admin or Student Account with Password for 11/5 Classmate
 app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
@@ -4828,20 +4858,18 @@ app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
   const cleanUsername = String(username).trim().toLowerCase();
   const cleanName = String(fullName || username).trim();
   const data = db.getData();
-  if (!data.users) data.users = {};
+  const p = initPlatformCMS(data);
+  if (!p.users) p.users = {};
 
-  const existing = Object.values(data.users).find((u) => u.username.toLowerCase() === cleanUsername);
+  const existing = Object.values(p.users).find((u) => u.username.toLowerCase() === cleanUsername);
   if (existing) {
-    // Update existing user's password and role if already exists
     const hashed = hashPassword(String(password));
     existing.passwordHash = hashed.hash;
     existing.salt = hashed.salt;
-    existing.realName = cleanName;
-    existing.managerName = cleanName;
+    existing.fullName = cleanName;
     existing.role = isAdmin ? 'admin' : 'user';
     existing.isAdmin = Boolean(isAdmin);
-    existing.isApproved = true;
-    savePlatformCMS(data, `Admin updated account @${cleanUsername} (admin=${Boolean(isAdmin)})`);
+    savePlatformCMS(data, `Admin updated 11/5 account @${cleanUsername} (admin=${Boolean(isAdmin)})`);
     return res.json({
       success: true,
       user: {
@@ -4856,28 +4884,21 @@ app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
 
   const id = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
   const hashed = hashPassword(String(password));
-  const grantAdmin = Boolean(isAdmin) || isUserAdmin(cleanUsername);
+  const grantAdmin = Boolean(isAdmin) || cleanUsername === 'theiulius' || cleanUsername === 'admin';
 
-  const newUser: UserAccount = {
+  const newUser: PlatformUserAccount = {
     id,
     username: cleanUsername,
-    email: `${cleanUsername}@11-5.komarovi.ge`,
+    fullName: cleanName,
     passwordHash: hashed.hash,
     salt: hashed.salt,
-    managerName: cleanName,
-    teamName: '11/5 კლასი',
-    realName: cleanName,
-    grade: '11',
-    parallel: '5',
-    showRealNamePublicly: true,
     role: grantAdmin ? 'admin' : 'user',
     isAdmin: grantAdmin,
-    isApproved: true,
     createdAt: new Date().toISOString(),
   };
 
-  data.users[id] = newUser;
-  savePlatformCMS(data, `Admin created account @${cleanUsername} (admin=${grantAdmin})`);
+  p.users[id] = newUser;
+  savePlatformCMS(data, `Admin created 11/5 account @${cleanUsername} (admin=${grantAdmin})`);
 
   res.json({
     success: true,
@@ -4891,7 +4912,7 @@ app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
   });
 });
 
-// Admin: Toggle User Admin Role or Reset Password
+// Admin: Toggle 11/5 User Admin Role or Reset Password
 app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
@@ -4900,7 +4921,8 @@ app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) =
   const { id } = req.params;
   const { isAdmin, newPassword, fullName } = req.body || {};
   const data = db.getData();
-  const target = data.users?.[id];
+  const p = initPlatformCMS(data);
+  const target = p.users?.[id];
   if (!target) {
     return res.status(404).json({ error: 'მომხმარებელი ვერ მოიძებნა.' });
   }
@@ -4910,8 +4932,7 @@ app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) =
     target.role = isAdmin ? 'admin' : 'user';
   }
   if (fullName && String(fullName).trim()) {
-    target.realName = String(fullName).trim();
-    target.managerName = String(fullName).trim();
+    target.fullName = String(fullName).trim();
   }
   if (newPassword && String(newPassword).trim().length >= 4) {
     const hashed = hashPassword(String(newPassword).trim());
@@ -4919,10 +4940,11 @@ app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) =
     target.salt = hashed.salt;
   }
 
-  savePlatformCMS(data, `Admin updated user @${target.username}`);
+  savePlatformCMS(data, `Admin updated 11/5 user @${target.username}`);
   res.json({ success: true });
 });
 
+// Admin: Delete 11/5 Class User Account
 app.delete('/api/platform/admin/users/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
@@ -4930,13 +4952,14 @@ app.delete('/api/platform/admin/users/:id', (req: Request, res: Response) => {
   }
   const { id } = req.params;
   const data = db.getData();
-  const target = data.users?.[id];
+  const p = initPlatformCMS(data);
+  const target = p.users?.[id];
   if (!target) return res.status(404).json({ error: 'მომხმარებელი ვერ მოიძებნა.' });
   if (target.username.toLowerCase() === 'admin' || target.username.toLowerCase() === 'theiulius') {
     return res.status(400).json({ error: 'მთავარი ადმინის წაშლა დაუშვებელია.' });
   }
-  delete data.users[id];
-  savePlatformCMS(data, `Admin deleted user @${target.username}`);
+  delete p.users[id];
+  savePlatformCMS(data, `Admin deleted 11/5 user @${target.username}`);
   res.json({ success: true });
 });
 
