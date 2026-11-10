@@ -33282,8 +33282,8 @@
       "parallel": "5",
       "showRealNamePublicly": true,
       "token": "6c49a0403627c2dba03de72dcd323fc446f5c2008813af7fe836fdcfd91397fc",
-      "role": "user",
-      "isAdmin": false,
+      "role": "admin",
+      "isAdmin": true,
       "isApproved": true,
       "createdAt": "2026-11-10T14:46:50.803Z"
     }
@@ -33435,7 +33435,7 @@
     "lastUpdated": "2026-11-10T14:45:30.345Z"
   },
   "platform": {
-    "updatedAt": 1794322010803,
+    "updatedAt": 1794322094527,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
