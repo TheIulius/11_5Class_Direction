@@ -17,6 +17,7 @@ import { usePlatform } from '../context/PlatformContext';
 import { QuizPrepSection } from './QuizPrepSection';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
+import { SubjectAutocomplete } from './SubjectAutocomplete';
 
 export const ArchiveSection: React.FC = () => {
   const { isAdmin, platform, addArchivePack, deleteArchivePack } = usePlatform();
@@ -154,13 +155,13 @@ export const ArchiveSection: React.FC = () => {
   // STATE 2: LIBRARY OVERVIEW (Concise Module Cards & Search)
   // =========================================================================
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+    <div className="max-w-5xl mx-auto px-3.5 sm:px-6 py-4 sm:py-8 space-y-4 sm:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
             სასწავლო მასალები
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5">
             ქართული რომანტიზმი, განვლილი შემაჯამებლების კონსპექტები და არქივი.
           </p>
         </div>
@@ -186,18 +187,27 @@ export const ArchiveSection: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="მოძებნეთ მასალა სათაურით ან საგნით..."
-          className="w-full card-surface border border-[var(--border-subtle)] rounded-2xl pl-10 pr-4 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
+          className="w-full card-surface border border-[var(--border-subtle)] rounded-2xl pl-10 pr-9 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)] transition-colors shadow-xs"
         />
+        {searchQuery && (
+          <button
+            type="button"
+            onClick={() => setSearchQuery('')}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Module Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
         {filteredPacks.map((pack) => {
           return (
             <div
               key={pack.id}
               onClick={() => setActivePackId(pack.id)}
-              className="card-surface card-hover p-5 sm:p-6 flex flex-col justify-between gap-4 cursor-pointer text-left group"
+              className="card-surface card-hover p-4 sm:p-6 flex flex-col justify-between gap-3.5 sm:gap-4 cursor-pointer text-left group rounded-2xl border border-[var(--border-subtle)] shadow-xs"
             >
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-2">
@@ -211,7 +221,7 @@ export const ArchiveSection: React.FC = () => {
                   )}
                 </div>
 
-                <h2 className="text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--primary-action)] transition-colors leading-snug">
+                <h2 className="text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--primary-action)] transition-colors leading-snug">
                   {pack.title}
                 </h2>
 
@@ -278,12 +288,13 @@ export const ArchiveSection: React.FC = () => {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="block text-xs text-slate-500 mb-1">საგანი</label>
-                  <input
-                    type="text"
+                  <SubjectAutocomplete
                     required
                     value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl px-3 py-2 text-xs"
+                    onChange={setSubject}
+                    onSelectTeacher={setTeacher}
+                    currentTeacher={teacher}
+                    placeholder="ქართული"
                   />
                 </div>
                 <div>

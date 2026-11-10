@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Navbar, ActiveTab } from './components/Navbar';
+import { Navbar, MobileBottomNav, ActiveTab } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { RealCalendarView } from './components/RealCalendarView';
 import { HomeworkSection } from './components/HomeworkSection';
@@ -83,12 +83,15 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
   useEffect(() => {
     try {
       localStorage.setItem('class11_5_theme', theme);
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
         document.documentElement.classList.remove('light');
+        if (metaTheme) metaTheme.setAttribute('content', '#0B1422');
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
+        if (metaTheme) metaTheme.setAttribute('content', '#F5F1E8');
       }
     } catch {}
   }, [theme]);
@@ -123,18 +126,19 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
     platform.announcement?.text?.includes('საიტზე ყველა მასალის ნახვა');
 
   return (
-    <div className="relative min-h-screen font-sans flex flex-col justify-between transition-colors duration-300 bg-[var(--bg-page)] text-[var(--text-primary)]">
+    <div className="relative min-h-screen min-h-[100dvh] font-sans flex flex-col justify-between transition-colors duration-300 bg-[var(--bg-page)] text-[var(--text-primary)] overflow-x-clip">
       {/* Restored animated springy scattered class photography layer (continuous background) */}
       <BackgroundClassPhotos activeTab={activeTab} />
 
-      <div className="relative z-10 flex-1">
-        <Navbar
-          activeTab={activeTab}
-          onSelectTab={handleSelectTab}
-          theme={theme}
-          onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
-        />
+      {/* Sticky Desktop & Mobile Top Header */}
+      <Navbar
+        activeTab={activeTab}
+        onSelectTab={handleSelectTab}
+        theme={theme}
+        onToggleTheme={() => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+      />
 
+      <div className="relative z-10 flex-1 flex flex-col">
         {/* Site-wide Admin Announcement Banner (filtered if legacy default text) */}
         {platform.announcement?.active && platform.announcement?.text && !isLegacyWelcome && (
           <div
@@ -164,7 +168,7 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
           </div>
         )}
 
-        <main className="pb-24 sm:pb-12">
+        <main className="flex-1 pb-24 sm:pb-12 min-h-[50vh]">
           <AnimatePresence mode="wait">
             {(activeTab === 'home' || activeTab === 'about') && (
               <motion.div
@@ -271,8 +275,8 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
         </main>
       </div>
 
-      {/* Quiet, refined footer */}
-      <footer className="relative z-10 border-t border-[var(--border-subtle)] py-6 px-4 sm:px-6 bg-[var(--surface-card)]/60 backdrop-blur-md">
+      {/* Quiet, refined footer with safe area padding above mobile tab bar */}
+      <footer className="relative z-10 border-t border-[var(--border-subtle)] py-5 px-4 sm:px-6 pb-[calc(4.8rem+env(safe-area-inset-bottom,16px))] lg:pb-6 bg-[var(--surface-card)]/70 backdrop-blur-md">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[var(--text-muted)]">
           <div className="flex items-center gap-2">
             <span className="font-semibold text-[var(--text-primary)]">11/5 კლასი</span>
@@ -297,6 +301,12 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
           </div>
         </div>
       </footer>
+
+      {/* Mobile Bottom Tab Bar (Root level z-50, always visible and never covered by footer) */}
+      <MobileBottomNav
+        activeTab={activeTab}
+        onSelectTab={handleSelectTab}
+      />
 
       <AuthModal />
       <AdminDashboardModal />

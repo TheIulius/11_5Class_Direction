@@ -24,6 +24,7 @@ import { usePlatform } from '../context/PlatformContext';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
 import { getTbilisiNow, formatGeorgianDate } from '../utils/tbilisiDate';
+import { SubjectAutocomplete } from './SubjectAutocomplete';
 
 const DAY_NAMES_BY_INDEX = [
   'კვირა',
@@ -867,13 +868,13 @@ export const HomeworkSection: React.FC = () => {
                     <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">
                       საგანი
                     </label>
-                    <input
-                      type="text"
+                    <SubjectAutocomplete
                       required
                       value={hwSubject}
-                      onChange={(e) => setHwSubject(e.target.value)}
+                      onChange={setHwSubject}
+                      onSelectTeacher={setHwTeacher}
+                      currentTeacher={hwTeacher}
                       placeholder="მათემატიკა"
-                      className="w-full bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/15 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
