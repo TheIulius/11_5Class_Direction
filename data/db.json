@@ -32608,18 +32608,18 @@
       "id": "user_1790509727660",
       "username": "dgi",
       "email": "dgi@fantasy.pl",
-      "passwordHash": "7c15592fbed6a49bca2b6247aff9dba742341c63c8a9dd76283c83f5f175b01a2cd3472e644ac655d1f5c221192bcb4739e013977404d76beb4c701456929aa6",
-      "salt": "01e9aa5daf8922bfaca357136213c0b7",
-      "managerName": "Dgi",
+      "passwordHash": "4e566cf2f539b956727dbe8306193d5978ac7034778c37fa6bc42f2150eae0329843a46d8a613f0492f2c5e934a0d612184c3883c2278af72e5c40ce95c6c26d",
+      "salt": "c50723c0b4ede442f170ccde59ed3611",
+      "managerName": "დავით-გიორგი ინანეიშვილი",
       "teamName": "Dgi",
       "token": "d0232d9847b6350d5ccb888dbec463f5d9bdc3e11786527c7b0aa23ac02c005d",
       "createdAt": "2026-09-27T11:48:47.661Z",
-      "role": "user",
-      "isAdmin": false,
+      "role": "admin",
+      "isAdmin": true,
       "isApproved": true,
       "grade": "11",
       "parallel": "5",
-      "realName": "David Giorgi Inaneishvili",
+      "realName": "დავით-გიორგი ინანეიშვილი",
       "showRealNamePublicly": true
     },
     "user_1790509932063": {
@@ -33417,7 +33417,7 @@
     "lastUpdated": "2026-11-10T14:41:13.786Z"
   },
   "platform": {
-    "updatedAt": 1794245630836,
+    "updatedAt": 1794321881693,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
