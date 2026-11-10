@@ -33399,7 +33399,7 @@
     "tabClicks": {
       "overview": 0,
       "poem": 0,
-      "analysis": 3,
+      "analysis": 4,
       "quiz": 17,
       "open": 0,
       "flashcards": 0,
@@ -33474,7 +33474,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-10T15:01:27.302Z"
+    "lastUpdated": "2026-11-10T15:02:09.166Z"
   },
   "platform": {
     "updatedAt": 1794322094527,
