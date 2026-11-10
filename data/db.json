@@ -33268,6 +33268,24 @@
       "isAdmin": true,
       "isApproved": true,
       "createdAt": "2026-11-09T15:06:44.605Z"
+    },
+    "user_1794322010802_792": {
+      "id": "user_1794322010802_792",
+      "username": "ikakabadze989@gmail.com",
+      "email": "ikakabadze989@gmail.com@11-5.komarovi.ge",
+      "passwordHash": "abc32c4120facf19e8355e0f3ad67baa595de83b2a532efc8bf8517f683e952b5f9b6e06e54e46a1115aef1940688401ac206ab8522987f1d3824e3cf25ce31f",
+      "salt": "ef7735977aeee913053ccd0be0de89b4",
+      "managerName": "Irakli Kakabadze",
+      "teamName": "11/5 კლასი",
+      "realName": "Irakli Kakabadze",
+      "grade": "11",
+      "parallel": "5",
+      "showRealNamePublicly": true,
+      "token": "6c49a0403627c2dba03de72dcd323fc446f5c2008813af7fe836fdcfd91397fc",
+      "role": "user",
+      "isAdmin": false,
+      "isApproved": true,
+      "createdAt": "2026-11-10T14:46:50.803Z"
     }
   },
   "deadline": {
@@ -33417,7 +33435,7 @@
     "lastUpdated": "2026-11-10T14:45:30.345Z"
   },
   "platform": {
-    "updatedAt": 1794321881693,
+    "updatedAt": 1794322010803,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
