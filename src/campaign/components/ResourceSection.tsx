@@ -119,8 +119,8 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h4 className="text-xs font-black uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-          <FileText className="w-3.5 h-3.5 text-indigo-600" />
+        <h4 className="text-xs font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5 text-[var(--primary-action)]" />
           {title} ({matchingResources.length})
         </h4>
 
@@ -133,16 +133,16 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
             }
             setShowUploadForm((prev) => !prev);
           }}
-          className="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold flex items-center gap-1.5 border border-indigo-200/80 transition-colors"
+          className="min-h-[44px] px-3.5 py-2 rounded-xl card-third hover:opacity-90 text-[var(--primary-action)] text-xs font-bold flex items-center gap-1.5 border border-[var(--border-subtle)] transition-opacity cursor-pointer"
         >
-          {showUploadForm ? <X className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+          {showUploadForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
           {showUploadForm ? 'დახურვა' : 'კონსპექტის / მასალის ატვირთვა'}
         </button>
       </div>
 
       {feedbackMsg && (
-        <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
           <span>{feedbackMsg}</span>
         </div>
       )}
@@ -151,15 +151,15 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
       {showUploadForm && user && (
         <form
           onSubmit={handleSubmit}
-          className="p-4 rounded-2xl bg-indigo-50/50 border border-indigo-200 space-y-3 animate-fadeIn"
+          className="p-4 rounded-2xl card-third border border-[var(--border-subtle)] space-y-3 animate-fadeIn"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-black text-indigo-950 flex items-center gap-1.5">
-              <Upload className="w-3.5 h-3.5 text-indigo-600" />
+            <span className="text-xs font-black text-[var(--text-primary)] flex items-center gap-1.5">
+              <Upload className="w-3.5 h-3.5 text-[var(--primary-action)]" />
               ახალი სასწავლო მასალის / კონსპექტის დამატება
             </span>
             {!isAdmin && (
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                 გამოქვეყნდება ადმინის დადასტურების შემდეგ
               </span>
             )}
@@ -167,7 +167,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             <div className="sm:col-span-2">
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
                 სათაური *
               </label>
               <input
@@ -176,17 +176,17 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                 value={resTitle}
                 onChange={(e) => setResTitle(e.target.value)}
                 placeholder="მაგ: ტრიგონომეტრიის ფორმულების კონსპექტი"
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
                 მასალის ტიპი
               </label>
               <select
                 value={resType}
                 onChange={(e) => setResType(e.target.value as any)}
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary-action)] min-h-[44px]"
               >
                 <option value="კონსპექტი">კონსპექტი</option>
                 <option value="დავალების ამოხსნა">დავალების ამოხსნა</option>
@@ -198,7 +198,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">
+            <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
               მოკლე აღწერა *
             </label>
             <input
@@ -207,12 +207,12 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
               value={resDesc}
               onChange={(e) => setResDesc(e.target.value)}
               placeholder="რა საკითხებს მოიცავს ეს მასალა?"
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-slate-700 mb-1">
+            <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
               კონსპექტის ტექსტი / ფორმულები (სურვილისამებრ)
             </label>
             <textarea
@@ -220,13 +220,13 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
               value={resContent}
               onChange={(e) => setResContent(e.target.value)}
               placeholder="ჩაწერეთ კონსპექტი, საკვანძო თეზისები ან ამოხსნა პირდაპირ აქ..."
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
             />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
                 გარე ბმული (Google Docs, Drive, PDF, YouTube)
               </label>
               <input
@@ -234,18 +234,18 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                 value={resLink}
                 onChange={(e) => setResLink(e.target.value)}
                 placeholder="https://docs.google.com/..."
-                className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
               />
             </div>
             <div>
-              <label className="block text-[11px] font-bold text-slate-700 mb-1">
+              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
                 ფაილის მიმაგრება (PDF, ფოტო, Word — მაქს. 4MB)
               </label>
               <input
                 type="file"
                 accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.txt"
                 onChange={handleFileChange}
-                className="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-indigo-100 file:text-indigo-700 hover:file:bg-indigo-200"
+                className="w-full text-xs text-[var(--text-muted)] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:btn-primary file:text-white"
               />
             </div>
           </div>
@@ -254,13 +254,13 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
             <button
               type="button"
               onClick={() => setShowUploadForm(false)}
-              className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-slate-600 text-xs font-bold"
+              className="min-h-[44px] px-4 py-2 rounded-xl card-surface border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold hover:text-[var(--text-primary)] cursor-pointer"
             >
               გაუქმება
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm"
+              className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-xs cursor-pointer"
             >
               {isAdmin ? 'ატვირთვა და გამოქვეყნება' : 'ატვირთვა (ადმინთან გაგზავნა)'}
             </button>
@@ -270,13 +270,13 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
       {/* Resources List */}
       {matchingResources.length === 0 ? (
-        <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs text-slate-500 flex items-center justify-between gap-2">
+        <div className="p-3.5 rounded-2xl card-third border border-[var(--border-subtle)] text-xs text-[var(--text-muted)] flex items-center justify-between gap-2">
           <span>ამ აქტივობაზე კონსპექტი ჯერ არ არის ატვირთული.</span>
           {!user && (
             <button
               type="button"
               onClick={() => openAuthModal('login')}
-              className="text-indigo-600 font-bold hover:underline shrink-0"
+              className="text-[var(--primary-action)] font-bold hover:underline shrink-0 cursor-pointer"
             >
               ატვირთე პირველმა →
             </button>
@@ -292,29 +292,29 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                 key={r.id}
                 className={`p-3.5 rounded-2xl border transition-all ${
                   r.status === 'pending'
-                    ? 'bg-amber-50/60 border-amber-300'
-                    : 'bg-white border-slate-200 hover:border-indigo-200 shadow-sm'
+                    ? 'bg-amber-500/10 border-amber-500/30'
+                    : 'card-surface border-[var(--border-subtle)] hover:border-[var(--primary-action)]/30 shadow-xs'
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1 flex-1">
                     <div className="flex flex-wrap items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 text-[10px] font-black">
+                      <span className="px-2 py-0.5 rounded-md bg-[var(--primary-action-light)] text-[var(--primary-action)] text-[10px] font-black border border-[var(--primary-action)]/20">
                         {r.resourceType}
                       </span>
                       {r.status === 'pending' && (
-                        <span className="px-2 py-0.5 rounded-md bg-amber-200 text-amber-900 text-[10px] font-black inline-flex items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-black inline-flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           ელოდება ადმინის დადასტურებას
                         </span>
                       )}
-                      <span className="text-[11px] text-slate-400">
-                        • ავტორი: <strong className="text-slate-600">{r.authorName}</strong>
+                      <span className="text-[11px] text-[var(--text-muted)]">
+                        • ავტორი: <strong className="text-[var(--text-secondary)]">{r.authorName}</strong>
                       </span>
                     </div>
 
-                    <h5 className="text-xs sm:text-sm font-black text-slate-900">{r.title}</h5>
-                    <p className="text-xs text-slate-600">{r.description}</p>
+                    <h5 className="text-xs sm:text-sm font-black text-[var(--text-primary)]">{r.title}</h5>
+                    <p className="text-xs text-[var(--text-secondary)]">{r.description}</p>
 
                     {/* Action Links */}
                     <div className="flex flex-wrap items-center gap-3 pt-1.5">
@@ -322,7 +322,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                         <button
                           type="button"
                           onClick={() => setExpandedResId(isExpanded ? null : r.id)}
-                          className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                          className="text-xs font-bold text-[var(--primary-action)] hover:opacity-80 flex items-center gap-1 cursor-pointer"
                         >
                           <Sparkles className="w-3.5 h-3.5" />
                           {isExpanded ? 'კონსპექტის დამალვა' : 'კონსპექტის წაკითხვა'}
@@ -333,7 +333,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                           href={r.linkUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-xs font-bold text-indigo-600 hover:underline flex items-center gap-1"
+                          className="text-xs font-bold text-[var(--primary-action)] hover:underline flex items-center gap-1"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           ბმულზე გადასვლა
@@ -343,7 +343,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                         <a
                           href={r.attachmentDataUrl}
                           download={r.attachmentName || 'masala'}
-                          className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+                          className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
                         >
                           <Download className="w-3.5 h-3.5" />
                           {r.attachmentName || 'ფაილის ჩამოტვირთვა'}
@@ -352,7 +352,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                     </div>
 
                     {isExpanded && r.content && (
-                      <div className="mt-2.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-800 whitespace-pre-wrap leading-relaxed">
+                      <div className="mt-2.5 p-3.5 rounded-xl card-third border border-[var(--border-subtle)] text-xs text-[var(--text-primary)] whitespace-pre-wrap leading-relaxed">
                         {r.content}
                       </div>
                     )}
@@ -364,7 +364,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                       <button
                         type="button"
                         onClick={() => moderateResource(r.id, 'approved')}
-                        className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-sm"
+                        className="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold flex items-center gap-1 shadow-xs cursor-pointer"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         დადასტურება
@@ -374,7 +374,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                     <button
                       type="button"
                       onClick={() => upvoteResource(r.id)}
-                      className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-700 text-xs font-bold flex items-center gap-1 transition-colors"
+                      className="px-2.5 py-1.5 rounded-xl card-third hover:bg-black/10 dark:hover:bg-white/10 text-[var(--text-secondary)] hover:text-[var(--primary-action)] text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
                     >
                       <ThumbsUp className="w-3.5 h-3.5" />
                       <span>{r.upvotes || 0}</span>
@@ -385,7 +385,8 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                         type="button"
                         onClick={() => deleteResource(r.id)}
                         title="წაშლა"
-                        className="p-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
+                        aria-label="წაშლა"
+                        className="p-2 rounded-xl card-third hover:bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>

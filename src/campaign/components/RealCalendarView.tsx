@@ -240,6 +240,34 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
     });
   };
 
+  const handlePrev = () => {
+    soundEffects.click();
+    if (mobileView === 'week') {
+      const [y, m, d] = selectedDate.split('-').map(Number);
+      const prevDate = new Date(y, m - 1, d);
+      prevDate.setDate(prevDate.getDate() - 7);
+      const newStr = `${prevDate.getFullYear()}-${String(prevDate.getMonth() + 1).padStart(2, '0')}-${String(prevDate.getDate()).padStart(2, '0')}`;
+      setSelectedDate(newStr);
+      setCurrentDate(new Date(prevDate.getFullYear(), prevDate.getMonth(), 1));
+    } else {
+      handlePrevMonth();
+    }
+  };
+
+  const handleNext = () => {
+    soundEffects.click();
+    if (mobileView === 'week') {
+      const [y, m, d] = selectedDate.split('-').map(Number);
+      const nextDate = new Date(y, m - 1, d);
+      nextDate.setDate(nextDate.getDate() + 7);
+      const newStr = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
+      setSelectedDate(newStr);
+      setCurrentDate(new Date(nextDate.getFullYear(), nextDate.getMonth(), 1));
+    } else {
+      handleNextMonth();
+    }
+  };
+
   const handleToday = () => {
     soundEffects.click();
     const now = getTbilisiNow();
@@ -325,12 +353,12 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
             </button>
           )}
 
-          {/* Month Navigation Controls */}
+          {/* Month & Week Navigation Controls */}
           <div className="inline-flex items-center gap-1 p-1 rounded-xl glass-pill">
             <button
-              onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-primary)] transition-colors cursor-pointer"
-              aria-label="წინა თვე"
+              onClick={handlePrev}
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-primary)] transition-colors cursor-pointer"
+              aria-label={mobileView === 'week' ? 'წინა კვირა' : 'წინა თვე'}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -338,15 +366,15 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               {GEORGIAN_MONTHS[month]} {year}
             </span>
             <button
-              onClick={handleNextMonth}
-              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-primary)] transition-colors cursor-pointer"
-              aria-label="შემდეგი თვე"
+              onClick={handleNext}
+              className="w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-[var(--text-primary)] transition-colors cursor-pointer"
+              aria-label={mobileView === 'week' ? 'შემდეგი კვირა' : 'შემდეგი თვე'}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
             <button
               onClick={handleToday}
-              className="px-2.5 py-1 text-[11px] font-semibold rounded-lg btn-primary transition-colors cursor-pointer"
+              className="px-3 py-2 min-h-[40px] text-xs font-semibold rounded-lg btn-primary transition-colors cursor-pointer flex items-center justify-center"
             >
               დღეს
             </button>
@@ -714,11 +742,8 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                           onClick={() => {
                             soundEffects.click();
                             setSelectedDate(cell.dateString);
-                            if (dayAllEvents.length > 0 && window.innerWidth < 640) {
-                              setActiveEvent(dayAllEvents[0]);
-                            }
                           }}
-                          className={`p-1 sm:p-2 flex items-center justify-between cursor-pointer transition-colors ${
+                          className={`p-1 sm:p-2 min-h-[38px] sm:min-h-[44px] flex items-center justify-between cursor-pointer transition-colors ${
                             cell.isCurrentMonth ? '' : 'opacity-35'
                           } ${
                             isSelectedDay
@@ -1174,18 +1199,26 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
               className="relative z-10 glass-sheet rounded-t-3xl p-5 space-y-4 max-w-md mx-auto w-full pb-[max(2rem,env(safe-area-inset-bottom))]"
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-[var(--text-primary)]">
-                  კალენდრის ყველა კატეგორია
-                </span>
+                <div>
+                  <span className="text-sm font-bold text-[var(--text-primary)]">
+                    კალენდრის ყველა კატეგორია
+                  </span>
+                  {selectedCategory !== 'ყველა' && (
+                    <span className="ml-2 px-2 py-0.5 rounded-full bg-[var(--primary-action)] text-white text-[10px] font-bold">
+                      აქტიურია
+                    </span>
+                  )}
+                </div>
                 <button
                   onClick={() => setIsFilterSheetOpen(false)}
-                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] -mr-2 flex items-center justify-center rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                  aria-label="დახურვა"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto pr-0.5">
                 {CALENDAR_FILTERS.map((f) => {
                   const isSelected = selectedCategory === f.id;
                   const catStyle = getCategoryStyle(f.id);
@@ -1206,30 +1239,30 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                             }
                           : undefined
                       }
-                      className={`p-2.5 rounded-xl text-xs font-semibold text-left transition-colors flex items-center gap-2 border ${
+                      className={`min-h-[44px] p-3 rounded-xl text-xs font-semibold text-left transition-colors flex items-center gap-2.5 border ${
                         isSelected
                           ? 'border shadow-2xs font-bold'
                           : 'card-third border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                       }`}
                     >
                       <span
-                        className="w-2 h-2 rounded-full shrink-0"
+                        className="w-2.5 h-2.5 rounded-full shrink-0"
                         style={{ backgroundColor: catStyle.dotColor }}
                       />
-                      <span className="truncate">{f.label}</span>
+                      <span className="leading-snug">{f.label}</span>
                     </button>
                   );
                 })}
               </div>
 
-              <div className="pt-2 flex justify-between">
+              <div className="pt-2 flex items-center justify-between border-t border-[var(--border-subtle)]">
                 <button
                   onClick={() => {
                     soundEffects.click();
                     setSelectedCategory('ყველა');
                     setIsFilterSheetOpen(false);
                   }}
-                  className="text-xs font-bold text-rose-500 cursor-pointer"
+                  className="min-h-[44px] px-3 py-2 text-xs font-bold text-rose-500 cursor-pointer flex items-center hover:underline"
                 >
                   ყველას გასუფთავება
                 </button>
@@ -1238,7 +1271,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                     soundEffects.click();
                     setIsFilterSheetOpen(false);
                   }}
-                  className="px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer"
+                  className="min-h-[44px] px-5 py-2.5 rounded-xl btn-primary text-xs font-bold cursor-pointer flex items-center shadow-xs"
                 >
                   მზადაა
                 </button>

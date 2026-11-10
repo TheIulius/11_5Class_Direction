@@ -187,12 +187,12 @@ const USER_STORAGE_KEY = 'class11_5_auth_user_v1';
 const defaultArchivePacks: ArchiveStudyPack[] = [
   {
     id: 'arch_geo_romantizmi_quiz',
-    title: 'ქართული რომანტიზმი — ინტერაქტიული ქვიზი, AI ღია კითხვები, პოდკასტი & ვიდეო',
+    title: 'ქართული რომანტიზმი',
     subject: 'ქართული',
     teacher: 'ნინო ჩხაიძე',
     date: '2026-10-15',
     description:
-      'სრული მოსამზადებელი მოდული 6 საკვანძო ლექსით, 30+ ტესტური და ღია კითხვით, NotebookLM-ის აუდიო პოდკასტებით, ვიდეო მიმოხილვითა და ფლეშ-ბარათებით.',
+      'სრული მოსამზადებელი მოდული 7 საკვანძო თემით, 30+ ტესტური და ღია კითხვით, NotebookLM-ის აუდიო პოდკასტებით, ვიდეო მიმოხილვითა და ფლეშ-ბარათებით.',
     badge: 'ინტერაქტიული მოდული',
     isBuiltInGeorgianQuiz: true,
     keyTopics: [
@@ -202,6 +202,7 @@ const defaultArchivePacks: ArchiveStudyPack[] = [
       'გოგჩა (ალ. ჭავჭავაძე)',
       'საღამო გამოსალმებისა (გრ. ორბელიანი)',
       'თამარ მეფის სახე ბეთანიის ეკლესიაში (გრ. ორბელიანი)',
+      'იარაღი (გრ. ორბელიანი)',
     ],
     createdBy: 'admin',
     createdAt: new Date().toISOString(),

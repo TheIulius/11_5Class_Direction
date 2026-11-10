@@ -83,7 +83,14 @@ export const HomeworkSection: React.FC = () => {
     const offsetToMonday = 1 - currentW;
     const nowRef = new Date(tbilisiNow.year, tbilisiNow.month - 1, tbilisiNow.day);
 
-    const days: { date: string; label: string; dayName: string; shortDay: string }[] = [];
+    const days: {
+      date: string;
+      label: string;
+      dayNum: number;
+      monthShort: string;
+      dayName: string;
+      shortDay: string;
+    }[] = [];
     const DAY_NAMES = ['ორშაბათი', 'სამშაბათი', 'ოთხშაბათი', 'ხუთშაბათი', 'პარასკევი'];
     const DAY_SHORTS = ['ორშ', 'სამ', 'ოთხ', 'ხუთ', 'პარ'];
     const MONTH_SHORTS = ['იანვ', 'თებ', 'მარტ', 'აპრ', 'მაის', 'ივნ', 'ივლ', 'აგვ', 'სექტ', 'ოქტ', 'ნოემ', 'დეკ'];
@@ -97,6 +104,8 @@ export const HomeworkSection: React.FC = () => {
       const dateStr = `${y}-${String(m).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
       days.push({
         date: dateStr,
+        dayNum,
+        monthShort: MONTH_SHORTS[d.getMonth()],
         label: `${dayNum} ${MONTH_SHORTS[d.getMonth()]}`,
         dayName: DAY_NAMES[i],
         shortDay: DAY_SHORTS[i],
@@ -370,26 +379,40 @@ export const HomeworkSection: React.FC = () => {
                   გთხოვთ მონიშნოთ დასრულებისას
                 </span>
               </div>
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {overdueHomeworks.map((hw) => (
                   <div
                     key={hw.id}
-                    className="flex items-center justify-between py-2 px-3 rounded-xl card-third text-xs gap-2"
+                    className="p-3.5 rounded-xl card-third text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
                   >
-                    <div className="flex items-center gap-2 truncate">
-                      <span className="font-bold text-rose-600 dark:text-rose-400 text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 shrink-0">
-                        {hw.subject}
-                      </span>
-                      <span className="truncate text-[var(--text-primary)] font-medium">{hw.title}</span>
-                      <span className="text-[10px] font-mono text-[var(--text-muted)] shrink-0">
-                        {hw.displayDate}
-                      </span>
+                    <div className="space-y-1 min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold text-rose-600 dark:text-rose-400 text-[10px] px-2 py-0.5 rounded-md bg-rose-500/10 shrink-0">
+                          {hw.subject}
+                        </span>
+                        <span className="text-[11px] font-mono text-[var(--text-muted)]">
+                          {hw.displayDate}
+                        </span>
+                        <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.2 rounded">
+                          ვადაგასული
+                        </span>
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug break-words">
+                        {hw.title}
+                      </h4>
+                      {hw.notes && (
+                        <p className="text-[11px] text-[var(--text-secondary)] line-clamp-1">
+                          {hw.notes}
+                        </p>
+                      )}
                     </div>
                     <button
                       onClick={() => handleToggleComplete(hw.id)}
-                      className="px-2.5 py-1 rounded-lg btn-primary text-[10px] font-bold shrink-0 cursor-pointer"
+                      className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-xs font-bold shrink-0 cursor-pointer self-start sm:self-center flex items-center justify-center gap-1.5 shadow-xs"
+                      aria-label="დავალების დასრულება"
                     >
-                      დასრულება
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>დასრულება</span>
                     </button>
                   </div>
                 ))}
@@ -424,16 +447,15 @@ export const HomeworkSection: React.FC = () => {
                       soundEffects.click();
                       setSelectedDate(day.date);
                     }}
-                    className={`p-2 sm:p-3 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center relative min-w-0 ${
+                    className={`p-1.5 sm:p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center relative min-w-0 min-h-[52px] ${
                       isSelected
                         ? 'btn-primary font-bold shadow-xs border-[var(--primary-action)]'
                         : 'card-third border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--primary-action)]/30'
                     }`}
                   >
-                    <span className="text-[10px] font-mono opacity-80">{day.shortDay}</span>
-                    <span className="text-xs sm:text-sm font-semibold mt-0.5 truncate max-w-full">
-                      {day.label}
-                    </span>
+                    <span className="text-[10px] font-mono opacity-80 leading-tight">{day.shortDay}</span>
+                    <span className="text-xs sm:text-sm font-bold mt-0.5 leading-tight">{day.dayNum}</span>
+                    <span className="text-[9px] text-[var(--text-muted)] mt-0.5 leading-tight">{day.monthShort}</span>
                     {hasHw && (
                       <span
                         className={`w-1.5 h-1.5 rounded-full mt-1 ${
@@ -673,7 +695,7 @@ export const HomeworkSection: React.FC = () => {
                   <button
                     key={day.dayId}
                     onClick={() => setMobileTimetableDay(day.dayId)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                    className={`min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center justify-center ${
                       isSelected
                         ? 'btn-primary shadow-xs'
                         : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'

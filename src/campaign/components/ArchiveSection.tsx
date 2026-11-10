@@ -78,15 +78,23 @@ export const ArchiveSection: React.FC = () => {
     if (selectedPack.isBuiltInGeorgianQuiz) {
       return (
         <div className="space-y-4">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 flex items-center justify-between">
+          <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-3 sm:pt-4 flex items-center justify-between gap-3">
             <button
               onClick={() => setActivePackId(null)}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--primary-action)] hover:underline cursor-pointer"
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl card-third text-xs font-bold text-[var(--primary-action)] hover:opacity-90 cursor-pointer transition-opacity"
+              aria-label="მასალებზე დაბრუნება"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
-              <span>ყველა მასალაზე დაბრუნება</span>
+              <ArrowLeft className="w-4 h-4" />
+              <span>მასალები</span>
             </button>
-            <span className="text-xs text-[var(--text-muted)] font-medium">{selectedPack.title}</span>
+            <div className="text-right">
+              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] block">
+                {selectedPack.title}
+              </span>
+              <span className="text-[11px] text-[var(--text-muted)] block">
+                ინტერაქტიული მოდული
+              </span>
+            </div>
           </div>
           <QuizPrepSection onBack={() => setActivePackId(null)} />
         </div>
@@ -179,7 +187,7 @@ export const ArchiveSection: React.FC = () => {
         </div>
       </div>
 
-      {/* Search Input */}
+      {/* Search Input (16px to prevent iOS auto-zoom, min 44px touch target) */}
       <div className="relative">
         <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
         <input
@@ -187,77 +195,119 @@ export const ArchiveSection: React.FC = () => {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="მოძებნეთ მასალა სათაურით ან საგნით..."
-          className="w-full card-surface border border-[var(--border-subtle)] rounded-2xl pl-10 pr-9 py-2.5 text-xs text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)] transition-colors shadow-xs"
+          aria-label="სასწავლო მასალების ძიება"
+          className="w-full card-surface border border-[var(--border-subtle)] rounded-2xl pl-10 pr-11 py-3 text-base sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)] transition-colors shadow-xs min-h-[48px]"
         />
         {searchQuery && (
           <button
             type="button"
             onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 min-w-[40px] min-h-[40px] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer rounded-full"
+            aria-label="ძიების გასუფთავება"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Module Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-        {filteredPacks.map((pack) => {
-          return (
-            <div
-              key={pack.id}
-              onClick={() => setActivePackId(pack.id)}
-              className="card-surface card-hover p-4 sm:p-6 flex flex-col justify-between gap-3.5 sm:gap-4 cursor-pointer text-left group rounded-2xl border border-[var(--border-subtle)] shadow-xs"
-            >
-              <div className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[var(--primary-action-light)] text-[var(--primary-action)] border border-[var(--primary-action)]/20">
-                    {pack.subject}
-                  </span>
-                  {pack.badge && (
-                    <span className="text-[11px] font-medium text-[var(--text-muted)]">
-                      {pack.badge}
+      {/* Module Cards Grid or No-Results Empty State */}
+      {filteredPacks.length === 0 ? (
+        <div className="card-surface p-8 rounded-2xl text-center space-y-3 border border-dashed border-[var(--border-subtle)]">
+          <div className="w-11 h-11 rounded-2xl card-third text-[var(--text-muted)] flex items-center justify-center mx-auto">
+            <Search className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-[var(--text-primary)]">
+              მასალა ვერ მოიძებნა
+            </p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">
+              საძიებო მოთხოვნით „{searchQuery}“ არცერთი სასწავლო მასალა არ მოიძებნა.
+            </p>
+          </div>
+          <button
+            onClick={() => setSearchQuery('')}
+            className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer inline-flex items-center gap-1.5"
+          >
+            ძიების გასუფთავება
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+          {filteredPacks.map((pack) => {
+            return (
+              <div
+                key={pack.id}
+                onClick={() => setActivePackId(pack.id)}
+                className="card-surface card-hover p-4 sm:p-6 flex flex-col justify-between gap-3.5 sm:gap-4 cursor-pointer text-left group rounded-2xl border border-[var(--border-subtle)] shadow-xs"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[var(--primary-action-light)] text-[var(--primary-action)] border border-[var(--primary-action)]/20">
+                      {pack.subject}
                     </span>
+                    {pack.badge && (
+                      <span className="text-[11px] font-medium text-[var(--text-muted)]">
+                        {pack.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <h2 className="text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--primary-action)] transition-colors leading-snug">
+                    {pack.title}
+                  </h2>
+
+                  <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
+                    {pack.description}
+                  </p>
+
+                  {pack.isBuiltInGeorgianQuiz && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        ქვიზი &bull; 30+ ტესტი
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                        AI კითხვები
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        პოდკასტი &amp; ვიდეო
+                      </span>
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                        ფლეშ-ბარათები
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                <h2 className="text-sm sm:text-base font-bold text-[var(--text-primary)] group-hover:text-[var(--primary-action)] transition-colors leading-snug">
-                  {pack.title}
-                </h2>
-
-                <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
-                  {pack.description}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)] text-xs">
-                <span className="text-[11px] text-[var(--text-muted)]">
-                  {pack.teacher ? `მასწავლებელი: ${pack.teacher}` : pack.date}
-                </span>
-
-                <div className="flex items-center gap-2">
-                  {isAdmin && !pack.isBuiltInGeorgianQuiz && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        deleteArchivePack(pack.id);
-                      }}
-                      className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 cursor-pointer"
-                      title="წაშლა"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                  <span className="font-semibold text-[var(--primary-action)] flex items-center gap-1">
-                    <span>გახსნა</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                <div className="flex items-center justify-between pt-3 border-t border-[var(--border-subtle)] text-xs">
+                  <span className="text-[11px] text-[var(--text-muted)]">
+                    {pack.teacher ? `მასწავლებელი: ${pack.teacher}` : pack.date}
                   </span>
+
+                  <div className="flex items-center gap-2">
+                    {isAdmin && !pack.isBuiltInGeorgianQuiz && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteArchivePack(pack.id);
+                        }}
+                        className="w-9 h-9 min-w-[36px] min-h-[36px] flex items-center justify-center rounded-lg text-[var(--text-muted)] hover:text-rose-500 cursor-pointer"
+                        title="წაშლა"
+                        aria-label="მასალის წაშლა"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                    <span className="font-semibold text-[var(--primary-action)] flex items-center gap-1">
+                      <span>გახსნა</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Add Modal */}
       {showAddModal && (

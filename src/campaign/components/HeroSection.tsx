@@ -37,7 +37,23 @@ interface HeroSectionProps {
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenVideo }) => {
   const { platform } = usePlatform();
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const getGenitiveWeekday = (day: string) => {
+    if (day.endsWith('ი')) {
+      return day.slice(0, -1) + 'ის';
+    }
+    return day + 'ის';
+  };
+
+  const handleCloseVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+    setIsVideoOpen(false);
+    setVideoError(false);
+  };
 
   // Real Tbilisi Date & Time (auto-refreshes every 30s or on visibilitychange)
   const [tbilisiTime, setTbilisiTime] = useState(() => getTbilisiNow());
@@ -64,6 +80,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
 
   useEffect(() => {
     if (isVideoOpen && videoRef.current) {
+      setVideoError(false);
       videoRef.current.currentTime = 0;
       videoRef.current.play().catch(() => {});
     }
@@ -206,43 +223,47 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                         <button
                           type="button"
                           onClick={(e) => toggleHomeworkComplete(hw.id, e)}
-                          className={`mt-0.5 w-4 h-4 rounded-md flex items-center justify-center transition-colors ${
-                            isDone
-                              ? 'bg-emerald-600 text-white'
-                              : 'border border-[var(--text-muted)] hover:border-[var(--primary-action)]'
-                          }`}
+                          className="w-11 h-11 min-w-[44px] min-h-[44px] -m-2.5 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
                           aria-label={isDone ? 'მონიშვნის მოხსნა' : 'შესრულებულად მონიშვნა'}
                         >
-                          {isDone && <CheckCircle2 className="w-3.5 h-3.5" />}
+                          <div
+                            className={`w-5 h-5 rounded-md flex items-center justify-center transition-colors ${
+                              isDone
+                                ? 'bg-emerald-600 text-white'
+                                : 'border border-[var(--text-muted)] hover:border-[var(--primary-action)]'
+                            }`}
+                          >
+                            {isDone && <CheckCircle2 className="w-3.5 h-3.5" />}
+                          </div>
                         </button>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 text-[11px] text-[var(--text-muted)] mb-0.5">
+                          <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-[var(--text-muted)] mb-1">
                             <span className="font-semibold text-[var(--primary-action)]">{hw.subject}</span>
                             <span>&bull;</span>
                             <span>{hw.displayDate || formatGeorgianDate(hw.date)}</span>
                             {hw.teacher && (
                               <>
                                 <span>&bull;</span>
-                                <span className="truncate">{hw.teacher}</span>
+                                <span className="truncate max-w-[130px]">{hw.teacher}</span>
                               </>
                             )}
                           </div>
                           <h3
-                            className={`text-xs font-bold text-[var(--text-primary)] truncate ${
+                            className={`text-xs sm:text-sm font-bold text-[var(--text-primary)] line-clamp-2 leading-snug ${
                               isDone ? 'line-through text-[var(--text-muted)]' : ''
                             }`}
                           >
                             {hw.title}
                           </h3>
                           {hw.notes && (
-                            <p className="text-[11px] text-[var(--text-secondary)] mt-0.5 line-clamp-1">
+                            <p className="text-[11px] text-[var(--text-secondary)] mt-1 line-clamp-2 leading-relaxed">
                               {hw.notes}
                             </p>
                           )}
                         </div>
 
-                        <ChevronRight className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0 self-center" />
+                        <ChevronRight className="w-4 h-4 text-[var(--text-muted)] shrink-0 self-center" />
                       </div>
                     </div>
                   );
@@ -338,7 +359,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                 </div>
                 <div>
                   <h2 className="text-sm font-bold text-[var(--text-primary)]">
-                    {timetableDayId}ის განრიგი
+                    {getGenitiveWeekday(timetableDayId)} განრიგი
                   </h2>
                   <p className="text-[11px] text-[var(--text-muted)]">
                     {tbilisiTime.weekday >= 1 && tbilisiTime.weekday <= 5
@@ -407,10 +428,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
 
             <div>
               <h3 className="text-sm font-bold text-[var(--text-primary)]">
-                ქართული რომანტიზმი &bull; 6 თემა
+                ქართული რომანტიზმი &bull; 7 თემა
               </h3>
               <p className="text-xs text-[var(--text-secondary)] mt-1 leading-relaxed">
-                დაკარგული ედემი, გოგჩა, ვაჰ დრონი, საღამო გამოსალმებისა. ლექსიკონი, ტესტები და პოდკასტი.
+                დაკარგული ედემი, გოგჩა, ვაჰ დრონი, ვისაც გსურთ, საღამო გამოსალმებისა, თამარ მეფე, იარაღი. ლექსიკონი, ტესტები და პოდკასტი.
               </p>
             </div>
 
@@ -419,7 +440,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                 soundEffects.click();
                 onNavigateTab('materials');
               }}
-              className="w-full py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+              className="w-full py-2.5 rounded-xl btn-primary text-xs font-semibold flex items-center justify-center gap-1.5 shadow-xs cursor-pointer min-h-[44px]"
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>მოდულის გახსნა</span>
@@ -436,7 +457,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsVideoOpen(false)}
+              onClick={handleCloseVideo}
               className="fixed inset-0 bg-black/80 backdrop-blur-md"
             />
             <motion.div
@@ -450,19 +471,56 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   რატომ უნდა ამირჩიოთ &bull; ვიდეო მიმართვა
                 </h3>
                 <button
-                  onClick={() => setIsVideoOpen(false)}
-                  className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  onClick={handleCloseVideo}
+                  className="w-11 h-11 min-w-[44px] min-h-[44px] flex items-center justify-center -mr-2 rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)] cursor-pointer"
+                  aria-label="დახურვა"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-              <div className="aspect-video bg-black">
-                <video
-                  ref={videoRef}
-                  controls
-                  className="w-full h-full"
-                  src="/class-photos/574221162_1170889274945417_3289060677592474946_n.mp4"
-                />
+              <div className="aspect-video bg-black relative flex items-center justify-center">
+                {videoError ? (
+                  <div className="p-6 text-center space-y-3 text-white max-w-md">
+                    <p className="text-xs sm:text-sm font-semibold">
+                      ვიდეოს ჩატვირთვა ვერ მოხერხდა ამ მოწყობილობაზე
+                    </p>
+                    <p className="text-[11px] text-white/70">
+                      შეგიძლიათ გახსნათ ვიდეო პირდაპირი ბმულით:
+                    </p>
+                    <div className="flex items-center justify-center gap-3 pt-1">
+                      <a
+                        href="/videos/why-vote.mp4"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3.5 py-1.5 rounded-xl btn-primary text-xs font-bold inline-flex items-center gap-1.5 min-h-[44px]"
+                      >
+                        პირდაპირი ვიდეო ბმული
+                      </a>
+                      <button
+                        onClick={() => {
+                          setVideoError(false);
+                          if (videoRef.current) {
+                            videoRef.current.load();
+                            videoRef.current.play().catch(() => {});
+                          }
+                        }}
+                        className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold min-h-[44px]"
+                      >
+                        ხელახლა ცდა
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <video
+                    ref={videoRef}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    onError={() => setVideoError(true)}
+                    className="w-full h-full"
+                    src="/videos/why-vote.mp4"
+                  />
+                )}
               </div>
             </motion.div>
           </div>

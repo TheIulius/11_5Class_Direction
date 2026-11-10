@@ -2132,6 +2132,15 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
     }
   ]);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const quizCardRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollToQuizCard = () => {
+    if (quizCardRef.current) {
+      const yOffset = -75;
+      const y = quizCardRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    }
+  };
 
   // Audio & Video Analytics Listen Tracking Refs
   const audioPlayedRef = useRef<Record<string, boolean>>({});
@@ -2464,6 +2473,11 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
   };
 
   const handleResetQuiz = () => {
+    if (Object.keys(selectedAnswers).length > 0) {
+      if (!window.confirm('ნამდვილად გსურთ ქვიზის პასუხების განულება?')) {
+        return;
+      }
+    }
     soundEffects.click();
     setSelectedAnswers({});
     setShowExplanations({});
@@ -3092,7 +3106,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                     {/* Interactive Stanza Cards */}
                     <div
                       onClick={() => setSelectedWordInfo(null)}
-                      className="space-y-3 max-h-[58vh] overflow-y-auto pr-1 pt-2 pb-6 px-0.5"
+                      className="space-y-3 pt-2 pb-6 px-0.5"
                     >
                       {activePoem.stanzas.map(stanza => {
                         const isExpanded = !!expandedStanzas[stanza.stanzaNumber];
@@ -3163,7 +3177,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[58vh] overflow-y-auto pr-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     {activePoem.vocabulary.map((v, idx) => (
                       <div
                         key={idx}
@@ -3292,25 +3306,25 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 text-[11px]">
-                  <div className="p-3 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-0.5">
-                    <strong className="text-red-300 block font-bold">1.ა) მოკლე პასუხი</strong>
-                    <span className="text-[#a8a495] block text-[10px]">~20 წუთი &bull; 1–2 წინადადება</span>
-                    <span className="text-[#d4d1c5] block text-[10px] pt-1">უშუალო, კონკრეტული და მკაფიო განმარტება</span>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                  <div className="p-3.5 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-1">
+                    <strong className="text-red-300 block font-bold text-xs sm:text-sm">1.ა) მოკლე პასუხი</strong>
+                    <span className="text-[#a8a495] block text-[11px]">~20 წუთი &bull; 1–2 წინადადება</span>
+                    <span className="text-[#d4d1c5] block text-xs pt-1">უშუალო, კონკრეტული და მკაფიო განმარტება</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-0.5">
-                    <strong className="text-amber-300 block font-bold">1.ბ) სამსჯელო პასუხი</strong>
-                    <span className="text-[#a8a495] block text-[10px]">~40 წუთი &bull; ნარატიული ანალიზი</span>
-                    <span className="text-[#d4d1c5] block text-[10px] pt-1">არგუმენტი, ციტირება და მხატვრული ხერხი</span>
+                  <div className="p-3.5 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-1">
+                    <strong className="text-amber-300 block font-bold text-xs sm:text-sm">1.ბ) სამსჯელო პასუხი</strong>
+                    <span className="text-[#a8a495] block text-[11px]">~40 წუთი &bull; ნარატიული ანალიზი</span>
+                    <span className="text-[#d4d1c5] block text-xs pt-1">არგუმენტი, ციტირება და მხატვრული ხერხი</span>
                   </div>
-                  <div className="p-3 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-0.5">
-                    <strong className="text-emerald-300 block font-bold">2. ანალიტიკური ესე</strong>
-                    <span className="text-[#a8a495] block text-[10px]">~60 წუთი &bull; კრიტიკული ანალიზი</span>
-                    <span className="text-[#d4d1c5] block text-[10px] pt-1">თეზისი, კონტრარგუმენტი და დასკვნა</span>
+                  <div className="p-3.5 rounded-2xl bg-[#181928] border border-[#f5f2eb]/10 space-y-1">
+                    <strong className="text-emerald-300 block font-bold text-xs sm:text-sm">2. ანალიტიკური ესე</strong>
+                    <span className="text-[#a8a495] block text-[11px]">~60 წუთი &bull; კრიტიკული ანალიზი</span>
+                    <span className="text-[#d4d1c5] block text-xs pt-1">თეზისი, კონტრარგუმენტი და დასკვნა</span>
                   </div>
                 </div>
 
-                <div className="space-y-3 max-h-[56vh] overflow-y-auto pr-1">
+                <div className="space-y-3">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                     {ESSAY_GUIDES.map(essay => (
                       <div
@@ -3384,7 +3398,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
 
                 {/* 1-Card Mode */}
                 {quizDisplayMode === 'card' && currentUnifiedQuestion ? (
-                  <div className="space-y-3">
+                  <div ref={quizCardRef} className="space-y-3 scroll-mt-24">
                     {currentUnifiedQuestion.kind === 'open' ? (
                       <OpenQuestionCard
                         key={currentUnifiedQuestion.id}
@@ -3452,21 +3466,23 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                     )}
 
                     {/* Stepper Navigation */}
-                    <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center justify-between pt-1 gap-2">
                       <button
                         onClick={() => {
                           soundEffects.click();
                           setActiveQuestionIdx(prev =>
                             prev === 0 ? unifiedQuestions.length - 1 : prev - 1
                           );
+                          scrollToQuizCard();
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-[#12131d] border border-[#f5f2eb]/15 text-xs font-semibold text-[#dedacb] cursor-pointer hover:bg-white/5 transition-all"
+                        className="min-h-[44px] px-4 py-2.5 rounded-xl bg-[#12131d] border border-[#f5f2eb]/15 text-xs font-semibold text-[#dedacb] cursor-pointer hover:bg-white/5 transition-all flex items-center justify-center shrink-0"
+                        aria-label="წინა კითხვა"
                       >
                         &larr; წინა
                       </button>
 
                       {/* Question Dots */}
-                      <div className="flex items-center gap-1 overflow-x-auto max-w-[220px] scrollbar-none py-1 px-1">
+                      <div className="flex items-center gap-1.5 overflow-x-auto max-w-[200px] sm:max-w-[260px] scrollbar-none py-2 px-1">
                         {unifiedQuestions.map((q, idx) => {
                           const isCurr = idx === safeUnifiedIdx;
                           let dotColor = 'bg-white/20';
@@ -3482,9 +3498,12 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                           return (
                             <button
                               key={q.id}
-                              onClick={() => setActiveQuestionIdx(idx)}
-                              className={`h-2 rounded-full transition-all cursor-pointer shrink-0 ${
-                                isCurr ? 'w-5 bg-red-500' : `w-2 ${dotColor}`
+                              onClick={() => {
+                                setActiveQuestionIdx(idx);
+                                scrollToQuizCard();
+                              }}
+                              className={`h-2.5 rounded-full transition-all cursor-pointer shrink-0 ${
+                                isCurr ? 'w-6 bg-red-500' : `w-2.5 ${dotColor}`
                               }`}
                               title={`#${idx + 1} (${q.kind === 'open' ? 'ღია' : 'ტესტური'})`}
                               aria-label={`კითხვა ${idx + 1}`}
@@ -3497,8 +3516,10 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                         onClick={() => {
                           soundEffects.click();
                           setActiveQuestionIdx(prev => (prev + 1) % unifiedQuestions.length);
+                          scrollToQuizCard();
                         }}
-                        className="px-3.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold cursor-pointer shadow-md transition-all"
+                        className="min-h-[44px] px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-bold cursor-pointer shadow-md transition-all flex items-center justify-center shrink-0"
+                        aria-label="შემდეგი კითხვა"
                       >
                         შემდეგი &rarr;
                       </button>
@@ -3506,7 +3527,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                   </div>
                 ) : (
                   /* List Mode: Sequential interleaved cards */
-                  <div className="space-y-3.5 max-h-[65vh] overflow-y-auto pr-1">
+                  <div className="space-y-3.5">
                     {unifiedQuestions.map((q, qIndex) => {
                       if (q.kind === 'open') {
                         return (
@@ -3730,13 +3751,15 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
                         value={chatInput}
                         onChange={e => setChatInput(e.target.value)}
                         placeholder="იკითხე ლექსზე, ალეგორიაზე ან ესეზე..."
-                        className="flex-1 px-3 py-2 rounded-xl bg-[#181928] border border-[#f5f2eb]/15 text-xs text-[#fcfbf7] placeholder:text-[#7c796e] focus:outline-none focus:border-red-400"
+                        aria-label="AI კითხვის შეყვანა"
+                        className="flex-1 px-3.5 py-2.5 rounded-xl bg-[#181928] border border-[#f5f2eb]/15 text-base sm:text-xs text-[#fcfbf7] placeholder:text-[#7c796e] focus:outline-none focus:border-red-400 min-h-[44px]"
                       />
                       <button
                         type="submit"
-                        className="px-3.5 py-2 rounded-xl bg-red-500 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                        aria-label="კითხვის გაგზავნა"
+                        className="min-h-[44px] min-w-[44px] px-3.5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs flex items-center justify-center gap-1 cursor-pointer"
                       >
-                        <Send className="w-3.5 h-3.5" />
+                        <Send className="w-4 h-4" />
                       </button>
                     </form>
                   </div>
@@ -3778,7 +3801,7 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
               <div className="w-full pt-3 pb-2 touch-none cursor-grab active:cursor-grabbing select-none flex flex-col items-center">
                 <div className="w-12 h-1 bg-white/20 rounded-full" />
                 <div className="mt-2 text-xs font-bold tracking-wider uppercase text-[#c5c1b2]">
-                  აირჩიე საპროგრამო ლექსი / თემა (6)
+                  აირჩიე საპროგრამო ლექსი / თემა ({PROGRAM_TOPICS_AND_POEMS.length})
                 </div>
               </div>
 
