@@ -4598,6 +4598,19 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
     };
   }
 
+  // Ensure background physics settings exist
+  if (!p.backgroundPhysics) {
+    p.backgroundPhysics = {
+      stiffness: 520,
+      damping: 15,
+      mass: 0.08,
+      adaptiveFastScroll: true,
+      parallaxDeep: 0.20,
+      parallaxMid: 0.32,
+      parallaxNear: 0.45,
+    };
+  }
+
   return p;
 }
 
@@ -4981,6 +4994,30 @@ app.put('/api/platform/announcement', (req: Request, res: Response) => {
   };
   savePlatformCMS(data, 'Admin updated announcement banner');
   res.json({ success: true, announcement: p.announcement });
+});
+
+// Admin: Update Background Photos Physics & Animation Variables
+app.put('/api/platform/physics', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth || !auth.isAdmin) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა ფონის ფიზიკის შეცვლაზე.' });
+  }
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const { stiffness, damping, mass, adaptiveFastScroll, parallaxDeep, parallaxMid, parallaxNear } = req.body || {};
+
+  p.backgroundPhysics = {
+    stiffness: typeof stiffness === 'number' && !isNaN(stiffness) ? Math.max(50, Math.min(1200, stiffness)) : 520,
+    damping: typeof damping === 'number' && !isNaN(damping) ? Math.max(5, Math.min(60, damping)) : 15,
+    mass: typeof mass === 'number' && !isNaN(mass) ? Math.max(0.01, Math.min(0.5, mass)) : 0.08,
+    adaptiveFastScroll: typeof adaptiveFastScroll === 'boolean' ? adaptiveFastScroll : true,
+    parallaxDeep: typeof parallaxDeep === 'number' && !isNaN(parallaxDeep) ? Math.max(0.05, Math.min(0.5, parallaxDeep)) : 0.20,
+    parallaxMid: typeof parallaxMid === 'number' && !isNaN(parallaxMid) ? Math.max(0.1, Math.min(0.7, parallaxMid)) : 0.32,
+    parallaxNear: typeof parallaxNear === 'number' && !isNaN(parallaxNear) ? Math.max(0.15, Math.min(0.9, parallaxNear)) : 0.45,
+  };
+
+  savePlatformCMS(data, `Admin updated background physics: stiffness=${p.backgroundPhysics.stiffness}, mass=${p.backgroundPhysics.mass}, damping=${p.backgroundPhysics.damping}, adaptive=${p.backgroundPhysics.adaptiveFastScroll}`);
+  res.json({ success: true, backgroundPhysics: p.backgroundPhysics });
 });
 
 // 7. Calendar Events CRUD (Admin)

@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { motion, useScroll, useSpring, useTransform, useReducedMotion } from 'framer-motion';
 import { ActiveTab } from './Navbar';
+import { usePlatform, DEFAULT_BACKGROUND_PHYSICS } from '../context/PlatformContext';
 
 export interface BackgroundClassPhotosProps {
   activeTab?: ActiveTab;
@@ -48,32 +49,71 @@ function createRng(seed: number) {
 
 export const BackgroundClassPhotos: React.FC<BackgroundClassPhotosProps> = () => {
   const prefersReducedMotion = useReducedMotion();
+  const { platform } = usePlatform();
+  const settings = platform?.backgroundPhysics || DEFAULT_BACKGROUND_PHYSICS;
   const { scrollY } = useScroll();
+
+  // Fast scroll & discrete wheel detection:
+  // When user uses mouse scroll wheel or swipes rapidly, dynamically lower mass and boost stiffness for 0 delay
+  const [isFastScrolling, setIsFastScrolling] = useState(false);
+  const fastScrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!settings.adaptiveFastScroll) {
+      setIsFastScrolling(false);
+      return;
+    }
+
+    const handleWheel = () => {
+      setIsFastScrolling(true);
+      if (fastScrollTimerRef.current) clearTimeout(fastScrollTimerRef.current);
+      fastScrollTimerRef.current = setTimeout(() => {
+        setIsFastScrolling(false);
+      }, 140);
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: true });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      if (fastScrollTimerRef.current) clearTimeout(fastScrollTimerRef.current);
+    };
+  }, [settings.adaptiveFastScroll]);
+
+  // Dynamic parameters based on active wheel / fast scroll state
+  const effectiveStiffness = isFastScrolling
+    ? Math.max(settings.stiffness * 1.55, 800)
+    : settings.stiffness;
+  const effectiveMass = isFastScrolling
+    ? Math.min(settings.mass * 0.35, 0.025)
+    : settings.mass;
+  const effectiveDamping = isFastScrolling
+    ? Math.max(settings.damping, 18)
+    : settings.damping;
 
   // Snappy, low-delay multi-layer spring scroll values with smooth jiggle settle
   const smoothScrollDeep = useSpring(scrollY, {
-    stiffness: 280,
-    damping: 12,
-    mass: 0.22,
+    stiffness: effectiveStiffness * 0.88,
+    damping: effectiveDamping * 0.92,
+    mass: effectiveMass * 1.15,
     restDelta: 0.05,
   });
   const smoothScrollMid = useSpring(scrollY, {
-    stiffness: 330,
-    damping: 12.5,
-    mass: 0.2,
+    stiffness: effectiveStiffness,
+    damping: effectiveDamping,
+    mass: effectiveMass,
     restDelta: 0.05,
   });
   const smoothScrollNear = useSpring(scrollY, {
-    stiffness: 380,
-    damping: 13,
-    mass: 0.18,
+    stiffness: effectiveStiffness * 1.14,
+    damping: effectiveDamping * 1.08,
+    mass: effectiveMass * 0.9,
     restDelta: 0.05,
   });
 
   // Photos move up slower than foreground scroll speed (0.20x, 0.32x, 0.45x) without rolling
-  const yDeep = useTransform(smoothScrollDeep, (v) => (prefersReducedMotion ? 0 : -v * 0.2));
-  const yMid = useTransform(smoothScrollMid, (v) => (prefersReducedMotion ? 0 : -v * 0.32));
-  const yNear = useTransform(smoothScrollNear, (v) => (prefersReducedMotion ? 0 : -v * 0.45));
+  const yDeep = useTransform(smoothScrollDeep, (v) => (prefersReducedMotion ? 0 : -v * settings.parallaxDeep));
+  const yMid = useTransform(smoothScrollMid, (v) => (prefersReducedMotion ? 0 : -v * settings.parallaxMid));
+  const yNear = useTransform(smoothScrollNear, (v) => (prefersReducedMotion ? 0 : -v * settings.parallaxNear));
 
   const { deepPhotos, midPhotos, nearPhotos } = useMemo(() => {
     const rng = createRng(11052026);

@@ -95,8 +95,29 @@ export interface OpportunityQuestion {
   answer?: string;
 }
 
+export interface BackgroundPhysicsSettings {
+  stiffness: number;
+  damping: number;
+  mass: number;
+  adaptiveFastScroll: boolean;
+  parallaxDeep: number;
+  parallaxMid: number;
+  parallaxNear: number;
+}
+
+export const DEFAULT_BACKGROUND_PHYSICS: BackgroundPhysicsSettings = {
+  stiffness: 520,
+  damping: 15,
+  mass: 0.08,
+  adaptiveFastScroll: true,
+  parallaxDeep: 0.20,
+  parallaxMid: 0.32,
+  parallaxNear: 0.45,
+};
+
 export interface PlatformDataState {
   announcement?: PlatformAnnouncement;
+  backgroundPhysics?: BackgroundPhysicsSettings;
   calendarEvents: CalendarEvent[];
   homeworks: (HomeworkAssignment & { status?: 'approved' | 'pending' | 'rejected'; authorName?: string; authorUsername?: string })[];
   timetable: DaySchedule[];
@@ -129,13 +150,14 @@ interface PlatformContextValue {
   openAuthModal: (mode?: 'login' | 'register') => void;
   closeAuthModal: () => void;
   isAdminModalOpen: boolean;
-  adminModalTab: 'approvals' | 'users' | 'announcement' | 'analytics';
-  openAdminModal: (tab?: 'approvals' | 'users' | 'announcement' | 'analytics') => void;
+  adminModalTab: 'approvals' | 'users' | 'announcement' | 'analytics' | 'physics';
+  openAdminModal: (tab?: 'approvals' | 'users' | 'announcement' | 'analytics' | 'physics') => void;
   closeAdminModal: () => void;
   refreshPlatform: () => Promise<void>;
   login: (username: string, password: string) => Promise<{ success: boolean; error?: string }>;
   register: (username: string, fullName: string, password: string) => Promise<{ success: boolean; error?: string }>;
   logout: () => void;
+  updateBackgroundPhysics: (settings: BackgroundPhysicsSettings) => Promise<boolean>;
   // Calendar
   addCalendarEvent: (ev: Partial<CalendarEvent>) => Promise<boolean>;
   updateCalendarEvent: (id: string, ev: Partial<CalendarEvent>) => Promise<boolean>;
@@ -183,6 +205,15 @@ interface PlatformContextValue {
 
 const TOKEN_STORAGE_KEY = 'class11_5_auth_token_v1';
 const USER_STORAGE_KEY = 'class11_5_auth_user_v1';
+const PHYSICS_STORAGE_KEY = 'class11_5_bg_physics_v1';
+
+const getInitialBackgroundPhysics = (): BackgroundPhysicsSettings => {
+  try {
+    const stored = localStorage.getItem(PHYSICS_STORAGE_KEY);
+    if (stored) return { ...DEFAULT_BACKGROUND_PHYSICS, ...JSON.parse(stored) };
+  } catch {}
+  return DEFAULT_BACKGROUND_PHYSICS;
+};
 
 const defaultArchivePacks: ArchiveStudyPack[] = [
   {
@@ -230,6 +261,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   });
 
   const [platform, setPlatform] = useState<PlatformDataState>({
+    backgroundPhysics: getInitialBackgroundPhysics(),
     calendarEvents: INITIAL_CALENDAR_EVENTS,
     homeworks: INITIAL_HOMEWORKS,
     timetable: CLASS_TIMETABLE,
@@ -254,7 +286,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalInitialMode, setAuthModalInitialMode] = useState<'login' | 'register'>('login');
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
-  const [adminModalTab, setAdminModalTab] = useState<'approvals' | 'users' | 'announcement' | 'analytics'>('approvals');
+  const [adminModalTab, setAdminModalTab] = useState<'approvals' | 'users' | 'announcement' | 'analytics' | 'physics'>('approvals');
 
   const getHeaders = useCallback(
     (customToken?: string | null) => {
@@ -277,8 +309,14 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (!res.ok) return;
         const data = await res.json();
         if (data.platform) {
+          if (data.platform.backgroundPhysics) {
+            try {
+              localStorage.setItem(PHYSICS_STORAGE_KEY, JSON.stringify(data.platform.backgroundPhysics));
+            } catch {}
+          }
           setPlatform({
             announcement: data.platform.announcement,
+            backgroundPhysics: data.platform.backgroundPhysics || getInitialBackgroundPhysics(),
             calendarEvents: data.platform.calendarEvents || INITIAL_CALENDAR_EVENTS,
             homeworks: data.platform.homeworks || INITIAL_HOMEWORKS,
             timetable: data.platform.timetable || CLASS_TIMETABLE,
@@ -325,7 +363,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
-  const openAdminModal = (tab: 'approvals' | 'users' | 'announcement' | 'analytics' = 'approvals') => {
+  const openAdminModal = (tab: 'approvals' | 'users' | 'announcement' | 'analytics' | 'physics' = 'approvals') => {
     setAdminModalTab(tab);
     setIsAdminModalOpen(true);
   };
@@ -813,6 +851,27 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return false;
   };
 
+  const updateBackgroundPhysics = async (newSettings: BackgroundPhysicsSettings) => {
+    setPlatform((prev) => ({ ...prev, backgroundPhysics: newSettings }));
+    try {
+      localStorage.setItem(PHYSICS_STORAGE_KEY, JSON.stringify(newSettings));
+    } catch {}
+
+    if (token) {
+      try {
+        const res = await fetch('/api/platform/physics', {
+          method: 'PUT',
+          headers: getHeaders(),
+          body: JSON.stringify(newSettings),
+        });
+        return res.ok;
+      } catch (err) {
+        console.warn('Failed to sync background physics to server:', err);
+      }
+    }
+    return true;
+  };
+
   return (
     <PlatformContext.Provider
       value={{
@@ -867,6 +926,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         addArchivePack,
         deleteArchivePack,
         updateAnnouncement,
+        updateBackgroundPhysics,
       }}
     >
       {children}

@@ -178,6 +178,16 @@ export interface PlatformUserAccount {
   createdAt: string;
 }
 
+export interface BackgroundPhysicsSettings {
+  stiffness: number;
+  damping: number;
+  mass: number;
+  adaptiveFastScroll: boolean;
+  parallaxDeep: number;
+  parallaxMid: number;
+  parallaxNear: number;
+}
+
 export interface PlatformCMSData {
   updatedAt: number;
   announcement?: {
@@ -188,6 +198,7 @@ export interface PlatformCMSData {
     updatedAt: string;
   };
   users?: Record<string, PlatformUserAccount>;
+  backgroundPhysics?: BackgroundPhysicsSettings;
   calendarEvents: any[];
   homeworks: any[];
   timetable: any[];
