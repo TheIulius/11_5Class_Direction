@@ -33478,7 +33478,7 @@
     "lastUpdated": "2026-11-10T17:17:12.065Z"
   },
   "platform": {
-    "updatedAt": 1794322094527,
+    "updatedAt": 1794331064868,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -34316,6 +34316,17 @@
         "isAdmin": true,
         "token": "f520e66823a648625a80feb13681224d683f4fdf0a2bcff43838285fa7cb8dab",
         "createdAt": "2026-09-25T16:18:23.548Z"
+      },
+      "user_1794331064867_659": {
+        "id": "user_1794331064867_659",
+        "username": "dgi",
+        "fullName": "დავით გიორგი ინანეიშვილი",
+        "passwordHash": "7cd0ea89652a2c172a0bb60a86ee38ad0763b2321ac06d227547b56644c4d047089019768a536b1a32df2eb6b00a3e14814baf5e1b3c99b636f093e33d9d883a",
+        "salt": "5600e8dd5902091426cf38e256d20d7f",
+        "token": "3b4c89be501f39cf44e04ecd62b888c50457caf5bba3c66bce2f5aeb28a92b95",
+        "role": "user",
+        "isAdmin": false,
+        "createdAt": "2026-11-10T17:17:44.868Z"
       }
     }
   }
