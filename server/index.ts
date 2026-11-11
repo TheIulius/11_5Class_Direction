@@ -4614,7 +4614,27 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
   return p;
 }
 
-function getPlatformAuthUser(req: Request): { user: PlatformUserAccount; isAdmin: boolean } | null {
+function resolvePlatformRoles(u: Pick<PlatformUserAccount, 'username' | 'role' | 'isAdmin' | 'isModerator'>): {
+  isAdmin: boolean;
+  isModerator: boolean;
+  canModerate: boolean;
+  role: 'admin' | 'moderator' | 'user';
+} {
+  const uname = (u.username || '').toLowerCase();
+  const isAdmin = Boolean(u.isAdmin) || u.role === 'admin' || uname === 'theiulius' || uname === 'admin';
+  const isModerator = !isAdmin && (Boolean(u.isModerator) || u.role === 'moderator');
+  const canModerate = isAdmin || isModerator;
+  const role: 'admin' | 'moderator' | 'user' = isAdmin ? 'admin' : isModerator ? 'moderator' : 'user';
+  return { isAdmin, isModerator, canModerate, role };
+}
+
+function getPlatformAuthUser(req: Request): {
+  user: PlatformUserAccount;
+  isAdmin: boolean;
+  isModerator: boolean;
+  canModerate: boolean;
+  role: 'admin' | 'moderator' | 'user';
+} | null {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ')
     ? authHeader.substring(7).trim()
@@ -4642,8 +4662,8 @@ function getPlatformAuthUser(req: Request): { user: PlatformUserAccount; isAdmin
 
   if (!user) return null;
 
-  const isAdmin = Boolean(user.isAdmin) || user.role === 'admin' || user.username.toLowerCase() === 'theiulius' || user.username.toLowerCase() === 'admin';
-  return { user, isAdmin };
+  const roles = resolvePlatformRoles(user);
+  return { user, ...roles };
 }
 
 function savePlatformCMS(data: DatabaseSchema, reason: string) {
@@ -4664,8 +4684,10 @@ app.get('/api/platform/state', (req: Request, res: Response) => {
   const pendingHomeworksCount = p.homeworks.filter((h: any) => h.status === 'pending').length;
   const pendingClubsCount = p.clubs.filter((c: any) => c.status === 'განხილვაშია').length;
 
+  const { users: _omittedUsers, ...publicPlatform } = p;
+
   res.json({
-    platform: p,
+    platform: publicPlatform,
     pendingCounts: {
       resources: pendingResourcesCount,
       homeworks: pendingHomeworksCount,
@@ -4677,8 +4699,10 @@ app.get('/api/platform/state', (req: Request, res: Response) => {
           id: auth.user.id,
           username: auth.user.username,
           fullName: auth.user.fullName || auth.user.username,
-          role: auth.isAdmin ? 'admin' : 'user',
+          role: auth.role,
           isAdmin: auth.isAdmin,
+          isModerator: auth.isModerator,
+          canModerate: auth.canModerate,
         }
       : null,
   });
@@ -4726,6 +4750,7 @@ app.post('/api/platform/auth/register', (req: Request, res: Response) => {
     token,
     role: isAdmin ? 'admin' : 'user',
     isAdmin,
+    isModerator: false,
     createdAt: new Date().toISOString(),
   };
 
@@ -4741,6 +4766,8 @@ app.post('/api/platform/auth/register', (req: Request, res: Response) => {
       fullName: cleanFullName,
       role: isAdmin ? 'admin' : 'user',
       isAdmin,
+      isModerator: false,
+      canModerate: isAdmin,
     },
   });
 });
@@ -4797,10 +4824,19 @@ app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
 
   const token = generateToken();
   user.token = token;
-  const isAdmin = Boolean(user.isAdmin) || user.role === 'admin' || user.username.toLowerCase() === 'theiulius' || user.username.toLowerCase() === 'admin';
-  if (isAdmin) {
+  const roles = resolvePlatformRoles(user);
+  if (roles.isAdmin) {
     user.role = 'admin';
     user.isAdmin = true;
+    user.isModerator = false;
+  } else if (roles.isModerator) {
+    user.role = 'moderator';
+    user.isAdmin = false;
+    user.isModerator = true;
+  } else {
+    user.role = 'user';
+    user.isAdmin = false;
+    user.isModerator = false;
   }
   savePlatformCMS(data, `Platform user login: @${user.username}`);
 
@@ -4811,8 +4847,10 @@ app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
       id: user.id,
       username: user.username,
       fullName: user.fullName || user.username,
-      role: isAdmin ? 'admin' : 'user',
-      isAdmin,
+      role: roles.role,
+      isAdmin: roles.isAdmin,
+      isModerator: roles.isModerator,
+      canModerate: roles.canModerate,
     },
   });
 });
@@ -4829,8 +4867,10 @@ app.get('/api/platform/auth/me', (req: Request, res: Response) => {
       id: auth.user.id,
       username: auth.user.username,
       fullName: auth.user.fullName || auth.user.username,
-      role: auth.isAdmin ? 'admin' : 'user',
+      role: auth.role,
       isAdmin: auth.isAdmin,
+      isModerator: auth.isModerator,
+      canModerate: auth.canModerate,
     },
   });
 });
@@ -4844,60 +4884,71 @@ app.get('/api/platform/admin/users', (req: Request, res: Response) => {
   const data = db.getData();
   const p = initPlatformCMS(data);
   const users = Object.values(p.users || {}).map((u) => {
-    const isAdmin = Boolean(u.isAdmin) || u.role === 'admin' || u.username.toLowerCase() === 'theiulius' || u.username.toLowerCase() === 'admin';
+    const roles = resolvePlatformRoles(u);
     return {
       id: u.id,
       username: u.username,
       fullName: u.fullName || u.username,
-      role: isAdmin ? 'admin' : 'user',
-      isAdmin,
+      role: roles.role,
+      isAdmin: roles.isAdmin,
+      isModerator: roles.isModerator,
       createdAt: u.createdAt,
     };
   });
   res.json({ users });
 });
 
-// Admin: Create Special Admin or Student Account with Password for 11/5 Classmate
+// Admin: Create Moderator or Student Account for 11/5 Classmate (Admin role cannot be granted)
 app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
     return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ აქაუნთის შექმნა.' });
   }
-  const { username, fullName, password, isAdmin } = req.body || {};
+  const { username, fullName, password, isModerator } = req.body || {};
   if (!username || !password) {
     return res.status(400).json({ error: 'მომხმარებლის სახელი და პაროლი სავალდებულოა.' });
   }
 
   const cleanUsername = String(username).trim().toLowerCase();
   const cleanName = String(fullName || username).trim();
+  const grantModerator = Boolean(isModerator);
   const data = db.getData();
   const p = initPlatformCMS(data);
   if (!p.users) p.users = {};
 
   const existing = Object.values(p.users).find((u) => u.username.toLowerCase() === cleanUsername);
   if (existing) {
+    const existingRoles = resolvePlatformRoles(existing);
+    if (existingRoles.isAdmin) {
+      return res.status(403).json({ error: 'ადმინისტრატორის აქაუნთის როლის შეცვლა ან გადაწერა დაუშვებელია.' });
+    }
     const hashed = hashPassword(String(password));
     existing.passwordHash = hashed.hash;
     existing.salt = hashed.salt;
     existing.fullName = cleanName;
-    existing.role = isAdmin ? 'admin' : 'user';
-    existing.isAdmin = Boolean(isAdmin);
-    savePlatformCMS(data, `Admin updated 11/5 account @${cleanUsername} (admin=${Boolean(isAdmin)})`);
+    existing.role = grantModerator ? 'moderator' : 'user';
+    existing.isAdmin = false;
+    existing.isModerator = grantModerator;
+    savePlatformCMS(data, `Admin updated 11/5 account @${cleanUsername} (moderator=${grantModerator})`);
     return res.json({
       success: true,
       user: {
         id: existing.id,
         username: existing.username,
         fullName: cleanName,
-        isAdmin: Boolean(existing.isAdmin),
+        isAdmin: false,
+        isModerator: grantModerator,
         role: existing.role,
       },
     });
   }
 
+  if (cleanUsername === 'theiulius' || cleanUsername === 'admin') {
+    return res.status(403).json({ error: 'მთავარი ადმინის აქაუნთის შექმნა აქედან დაუშვებელია.' });
+  }
+
   const id = 'user_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
   const hashed = hashPassword(String(password));
-  const grantAdmin = Boolean(isAdmin) || cleanUsername === 'theiulius' || cleanUsername === 'admin';
 
   const newUser: PlatformUserAccount = {
     id,
@@ -4905,13 +4956,14 @@ app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
     fullName: cleanName,
     passwordHash: hashed.hash,
     salt: hashed.salt,
-    role: grantAdmin ? 'admin' : 'user',
-    isAdmin: grantAdmin,
+    role: grantModerator ? 'moderator' : 'user',
+    isAdmin: false,
+    isModerator: grantModerator,
     createdAt: new Date().toISOString(),
   };
 
   p.users[id] = newUser;
-  savePlatformCMS(data, `Admin created 11/5 account @${cleanUsername} (admin=${grantAdmin})`);
+  savePlatformCMS(data, `Admin created 11/5 account @${cleanUsername} (moderator=${grantModerator})`);
 
   res.json({
     success: true,
@@ -4919,20 +4971,21 @@ app.post('/api/platform/admin/users/create', (req: Request, res: Response) => {
       id: newUser.id,
       username: newUser.username,
       fullName: cleanName,
-      isAdmin: grantAdmin,
+      isAdmin: false,
+      isModerator: grantModerator,
       role: newUser.role,
     },
   });
 });
 
-// Admin: Toggle 11/5 User Admin Role or Reset Password
+// Admin: Toggle 11/5 User Moderator Role or Reset Password (Strictly Admin-only; Admin targets protected)
 app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
     return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
   }
   const { id } = req.params;
-  const { isAdmin, newPassword, fullName } = req.body || {};
+  const { isModerator, newPassword, fullName } = req.body || {};
   const data = db.getData();
   const p = initPlatformCMS(data);
   const target = p.users?.[id];
@@ -4940,10 +4993,20 @@ app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) =
     return res.status(404).json({ error: 'მომხმარებელი ვერ მოიძებნა.' });
   }
 
-  if (typeof isAdmin === 'boolean') {
-    target.isAdmin = isAdmin;
-    target.role = isAdmin ? 'admin' : 'user';
+  const targetRoles = resolvePlatformRoles(target);
+  if (targetRoles.isAdmin) {
+    if (typeof isModerator === 'boolean' || typeof req.body?.isAdmin === 'boolean') {
+      return res.status(403).json({ error: 'ადმინისტრატორის სტატუსის შეცვლა ან მოხსნა დაუშვებელია.' });
+    }
+    if (target.id !== auth.user.id) {
+      return res.status(403).json({ error: 'სხვა ადმინისტრატორის აქაუნთის შეცვლა დაუშვებელია.' });
+    }
+  } else if (typeof isModerator === 'boolean') {
+    target.isModerator = isModerator;
+    target.isAdmin = false;
+    target.role = isModerator ? 'moderator' : 'user';
   }
+
   if (fullName && String(fullName).trim()) {
     target.fullName = String(fullName).trim();
   }
@@ -4957,7 +5020,7 @@ app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) =
   res.json({ success: true });
 });
 
-// Admin: Delete 11/5 Class User Account
+// Admin: Delete Non-Admin 11/5 Class User Account (Strictly Admin-only)
 app.delete('/api/platform/admin/users/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
@@ -4968,19 +5031,20 @@ app.delete('/api/platform/admin/users/:id', (req: Request, res: Response) => {
   const p = initPlatformCMS(data);
   const target = p.users?.[id];
   if (!target) return res.status(404).json({ error: 'მომხმარებელი ვერ მოიძებნა.' });
-  if (target.username.toLowerCase() === 'admin' || target.username.toLowerCase() === 'theiulius') {
-    return res.status(400).json({ error: 'მთავარი ადმინის წაშლა დაუშვებელია.' });
+  const targetRoles = resolvePlatformRoles(target);
+  if (targetRoles.isAdmin) {
+    return res.status(403).json({ error: 'ადმინისტრატორის აქაუნთის წაშლა დაუშვებელია.' });
   }
   delete p.users[id];
   savePlatformCMS(data, `Admin deleted 11/5 user @${target.username}`);
   res.json({ success: true });
 });
 
-// 6. Admin: Update Announcement Banner
+// 6. Admin / Moderator: Update Announcement Banner
 app.put('/api/platform/announcement', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს აქვთ წვდომა.' });
   }
   const data = db.getData();
   const p = initPlatformCMS(data);
@@ -4992,7 +5056,7 @@ app.put('/api/platform/announcement', (req: Request, res: Response) => {
     linkTab: linkTab || undefined,
     updatedAt: new Date().toISOString(),
   };
-  savePlatformCMS(data, 'Admin updated announcement banner');
+  savePlatformCMS(data, `${auth.isAdmin ? 'Admin' : 'Moderator'} updated announcement banner`);
   res.json({ success: true, announcement: p.announcement });
 });
 
@@ -5020,11 +5084,11 @@ app.put('/api/platform/physics', (req: Request, res: Response) => {
   res.json({ success: true, backgroundPhysics: p.backgroundPhysics });
 });
 
-// 7. Calendar Events CRUD (Admin)
+// 7. Calendar Events CRUD (Admin / Moderator)
 app.post('/api/platform/calendar', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კალენდარში აქტივობის დამატება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ კალენდარში აქტივობის დამატება.' });
   }
   const data = db.getData();
   const p = initPlatformCMS(data);
@@ -5079,8 +5143,8 @@ app.post('/api/platform/calendar', (req: Request, res: Response) => {
 
 app.put('/api/platform/calendar/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კალენდრის რედაქტირება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ კალენდრის რედაქტირება.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5112,8 +5176,8 @@ app.put('/api/platform/calendar/:id', (req: Request, res: Response) => {
 
 app.delete('/api/platform/calendar/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ აქტივობის წაშლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ აქტივობის წაშლა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5123,7 +5187,7 @@ app.delete('/api/platform/calendar/:id', (req: Request, res: Response) => {
   res.json({ success: true, calendarEvents: p.calendarEvents });
 });
 
-// 8. Homework & Timetable Endpoints (Admins auto-approve; Students can submit homework for approval!)
+// 8. Homework & Timetable Endpoints (Admins/Moderators auto-approve; Students can submit homework for approval!)
 app.post('/api/platform/homework', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth) {
@@ -5148,7 +5212,7 @@ app.post('/api/platform/homework', (req: Request, res: Response) => {
     notes: String(body.notes || body.details || '').trim(),
     authorName: auth.user.realName || auth.user.managerName || auth.user.username,
     authorUsername: auth.user.username,
-    status: auth.isAdmin ? 'approved' : 'pending',
+    status: auth.canModerate ? 'approved' : 'pending',
     createdAt: new Date().toISOString(),
   };
 
@@ -5159,8 +5223,8 @@ app.post('/api/platform/homework', (req: Request, res: Response) => {
 
 app.put('/api/platform/homework/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ დავალების რედაქტირება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ დავალების რედაქტირება.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5175,8 +5239,8 @@ app.put('/api/platform/homework/:id', (req: Request, res: Response) => {
 
 app.post('/api/platform/homework/:id/status', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ დავალების დადასტურება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ დავალების დადასტურება.' });
   }
   const { id } = req.params;
   const { status } = req.body || {};
@@ -5196,8 +5260,8 @@ app.post('/api/platform/homework/:id/status', (req: Request, res: Response) => {
 
 app.delete('/api/platform/homework/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ დავალების წაშლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ დავალების წაშლა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5207,11 +5271,11 @@ app.delete('/api/platform/homework/:id', (req: Request, res: Response) => {
   res.json({ success: true, homeworks: p.homeworks });
 });
 
-// Update Class Timetable (Admin)
+// Update Class Timetable (Admin / Moderator)
 app.put('/api/platform/timetable', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ ცხრილის რედაქტირება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ ცხრილის რედაქტირება.' });
   }
   const { timetable } = req.body || {};
   if (!Array.isArray(timetable)) {
@@ -5220,11 +5284,11 @@ app.put('/api/platform/timetable', (req: Request, res: Response) => {
   const data = db.getData();
   const p = initPlatformCMS(data);
   p.timetable = timetable;
-  savePlatformCMS(data, 'Class timetable updated by admin');
+  savePlatformCMS(data, `Class timetable updated by ${auth.isAdmin ? 'admin' : 'moderator'}`);
   res.json({ success: true, timetable: p.timetable });
 });
 
-// 9. Study Resources / Summaries (კონსპექტები & მასალები) — Student Upload + Admin Approval
+// 9. Study Resources / Summaries (კონსპექტები & მასალები) — Student Upload + Admin/Moderator Approval
 app.post('/api/platform/resources', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth) {
@@ -5254,9 +5318,9 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
     authorId: auth.user.id,
     authorName: auth.user.realName || auth.user.managerName || auth.user.username,
     authorUsername: auth.user.username,
-    status: auth.isAdmin ? 'approved' : 'pending',
+    status: auth.canModerate ? 'approved' : 'pending',
     createdAt: new Date().toISOString(),
-    approvedBy: auth.isAdmin ? auth.user.username : undefined,
+    approvedBy: auth.canModerate ? auth.user.username : undefined,
     upvotes: 1,
     upvotedBy: [auth.user.id],
   };
@@ -5268,8 +5332,8 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
 
 app.post('/api/platform/resources/:id/status', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ მასალის დადასტურება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ მასალის დადასტურება.' });
   }
   const { id } = req.params;
   const { status } = req.body || {};
@@ -5284,7 +5348,7 @@ app.post('/api/platform/resources/:id/status', (req: Request, res: Response) => 
     resItem.status = 'approved';
     resItem.approvedBy = auth.user.username;
   }
-  savePlatformCMS(data, `Admin ${status} resource: ${resItem.title}`);
+  savePlatformCMS(data, `${auth.isAdmin ? 'Admin' : 'Moderator'} ${status} resource: ${resItem.title}`);
   res.json({ success: true, resource: resItem, resources: p.resources });
 });
 
@@ -5296,8 +5360,8 @@ app.delete('/api/platform/resources/:id', (req: Request, res: Response) => {
   const p = initPlatformCMS(data);
   const target = p.resources.find((r) => r.id === id);
   if (!target) return res.status(404).json({ error: 'მასალა ვერ მოიძებნა.' });
-  if (!auth.isAdmin && target.authorId !== auth.user.id) {
-    return res.status(403).json({ error: 'მხოლოდ ავტორს ან ადმინს შეუძლია წაშლა.' });
+  if (!auth.canModerate && target.authorId !== auth.user.id) {
+    return res.status(403).json({ error: 'მხოლოდ ავტორს, მოდერატორს ან ადმინს შეუძლია წაშლა.' });
   }
   p.resources = p.resources.filter((r) => r.id !== id);
   savePlatformCMS(data, `Resource deleted: ${target.title}`);
@@ -5346,6 +5410,7 @@ app.post('/api/platform/comments', (req: Request, res: Response) => {
     authorName: auth.user.realName || auth.user.managerName || auth.user.username,
     authorUsername: auth.user.username,
     isAdmin: auth.isAdmin,
+    isModerator: auth.isModerator,
     content: String(content).trim(),
     createdAt: new Date().toISOString(),
     isPinned: false,
@@ -5364,8 +5429,11 @@ app.delete('/api/platform/comments/:id', (req: Request, res: Response) => {
   const p = initPlatformCMS(data);
   const target = p.comments.find((c) => c.id === id);
   if (!target) return res.status(404).json({ error: 'კომენტარი ვერ მოიძებნა.' });
-  if (!auth.isAdmin && target.authorId !== auth.user.id) {
-    return res.status(403).json({ error: 'მხოლოდ კომენტარის ავტორს ან ადმინს შეუძლია წაშლა.' });
+  if (!auth.canModerate && target.authorId !== auth.user.id) {
+    return res.status(403).json({ error: 'მხოლოდ კომენტარის ავტორს, მოდერატორს ან ადმინს შეუძლია წაშლა.' });
+  }
+  if (target.isAdmin && !auth.isAdmin && target.authorId !== auth.user.id) {
+    return res.status(403).json({ error: 'მოდერატორს არ შეუძლია ადმინისტრატორის კომენტარის წაშლა.' });
   }
   p.comments = p.comments.filter((c) => c.id !== id);
   savePlatformCMS(data, `Comment deleted: ${id}`);
@@ -5374,8 +5442,8 @@ app.delete('/api/platform/comments/:id', (req: Request, res: Response) => {
 
 app.post('/api/platform/comments/:id/pin', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კომენტარის მიმაგრება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ კომენტარის მიმაგრება.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5390,8 +5458,8 @@ app.post('/api/platform/comments/:id/pin', (req: Request, res: Response) => {
 // 11. Opportunities / Alumni Sessions CRUD & RSVP
 app.post('/api/platform/opportunities', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ სესიის დამატება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ სესიის დამატება.' });
   }
   const body = req.body || {};
   if (!body.speaker) {
@@ -5426,8 +5494,8 @@ app.post('/api/platform/opportunities', (req: Request, res: Response) => {
 
 app.put('/api/platform/opportunities/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს აქვთ წვდომა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5441,8 +5509,8 @@ app.put('/api/platform/opportunities/:id', (req: Request, res: Response) => {
 
 app.delete('/api/platform/opportunities/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს აქვთ წვდომა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5467,8 +5535,8 @@ app.post('/api/platform/ideas', (_req: Request, res: Response) => {
 
 app.put('/api/platform/ideas/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ სტატუსის შეცვლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ სტატუსის შეცვლა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5482,8 +5550,8 @@ app.put('/api/platform/ideas/:id', (req: Request, res: Response) => {
 
 app.delete('/api/platform/ideas/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ იდეის წაშლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ იდეის წაშლა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5504,8 +5572,8 @@ app.post('/api/platform/clubs', (_req: Request, res: Response) => {
 
 app.put('/api/platform/clubs/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კლუბის სტატუსის შეცვლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ კლუბის სტატუსის შეცვლა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5519,8 +5587,8 @@ app.put('/api/platform/clubs/:id', (req: Request, res: Response) => {
 
 app.delete('/api/platform/clubs/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ კლუბის წაშლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ კლუბის წაშლა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5541,8 +5609,8 @@ app.post('/api/platform/study-pods/:id/join', (_req: Request, res: Response) => 
 
 app.delete('/api/platform/study-pods/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ წაშლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ წაშლა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5555,8 +5623,8 @@ app.delete('/api/platform/study-pods/:id', (req: Request, res: Response) => {
 // 15. Archive Study Packs (არქივი) CRUD
 app.post('/api/platform/archive', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ არქივში მოდულის დამატება.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ არქივში მოდულის დამატება.' });
   }
   const body = req.body || {};
   if (!body.title || !body.subject) {
@@ -5591,8 +5659,8 @@ app.post('/api/platform/archive', (req: Request, res: Response) => {
 
 app.delete('/api/platform/archive/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს შეუძლიათ წაშლა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ წაშლა.' });
   }
   const { id } = req.params;
   const data = db.getData();

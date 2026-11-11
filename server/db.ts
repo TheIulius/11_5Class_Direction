@@ -122,6 +122,7 @@ export interface PlatformComment {
   authorName: string;
   authorUsername: string;
   isAdmin?: boolean;
+  isModerator?: boolean;
   content: string;
   createdAt: string;
   isPinned?: boolean;
@@ -172,8 +173,9 @@ export interface PlatformUserAccount {
   fullName: string;
   passwordHash: string;
   salt: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'moderator' | 'user';
   isAdmin: boolean;
+  isModerator?: boolean;
   token?: string;
   createdAt: string;
 }

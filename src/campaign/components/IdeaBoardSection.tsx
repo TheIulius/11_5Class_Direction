@@ -22,7 +22,7 @@ type SortOrder = 'votes' | 'recent';
 export const IdeaBoardSection: React.FC = () => {
   const {
     user,
-    isAdmin,
+    canModerate,
     platform,
     addIdea,
     updateIdea,
@@ -247,7 +247,7 @@ export const IdeaBoardSection: React.FC = () => {
                         {idea.statusLabel}
                       </span>
 
-                      {isAdmin && (
+                      {canModerate && (
                         <div className="flex items-center gap-1 ml-2">
                           <button
                             type="button"

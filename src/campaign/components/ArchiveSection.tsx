@@ -20,7 +20,7 @@ import { CommentsThread } from './CommentsThread';
 import { SubjectAutocomplete } from './SubjectAutocomplete';
 
 export const ArchiveSection: React.FC = () => {
-  const { isAdmin, platform, addArchivePack, deleteArchivePack } = usePlatform();
+  const { canModerate, platform, addArchivePack, deleteArchivePack } = usePlatform();
   const [activePackId, setActivePackId] = useState<string | null>(null); // Default to library view for clean entry
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -175,13 +175,13 @@ export const ArchiveSection: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {isAdmin && (
+          {canModerate && (
             <button
               onClick={() => setShowAddModal(true)}
               className="px-3.5 py-1.5 rounded-xl btn-primary text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-xs transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>მოდულის დამატება (Admin)</span>
+              <span>მოდულის დამატება</span>
             </button>
           )}
         </div>
@@ -284,7 +284,7 @@ export const ArchiveSection: React.FC = () => {
                   </span>
 
                   <div className="flex items-center gap-2">
-                    {isAdmin && !pack.isBuiltInGeorgianQuiz && (
+                    {canModerate && !pack.isBuiltInGeorgianQuiz && (
                       <button
                         onClick={(e) => {
                           e.stopPropagation();

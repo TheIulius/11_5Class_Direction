@@ -20,7 +20,7 @@ import { CommentsThread } from './CommentsThread';
 export const OpportunitiesSection: React.FC = () => {
   const {
     user,
-    isAdmin,
+    canModerate,
     platform,
     addOpportunity,
     deleteOpportunity,
@@ -107,13 +107,13 @@ export const OpportunitiesSection: React.FC = () => {
           </p>
         </div>
 
-        {isAdmin && (
+        {canModerate && (
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm transition-colors self-start sm:self-auto"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>შეხვედრის დამატება (Admin)</span>
+            <span>შეხვედრის დამატება</span>
           </button>
         )}
       </div>
@@ -176,7 +176,7 @@ export const OpportunitiesSection: React.FC = () => {
                     )}
                   </button>
 
-                  {isAdmin && (
+                  {canModerate && (
                     <button
                       onClick={() => deleteOpportunity(item.id)}
                       className="p-2 rounded-lg text-slate-400 hover:text-rose-500"

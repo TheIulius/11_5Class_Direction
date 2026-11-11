@@ -65,7 +65,7 @@ function formatGeoDate(dateStr: string): { displayDate: string; dayOfWeek: strin
 export const HomeworkSection: React.FC = () => {
   const {
     user,
-    isAdmin,
+    canModerate,
     platform,
     addHomework,
     deleteHomework,
@@ -180,9 +180,9 @@ export const HomeworkSection: React.FC = () => {
     return homeworks.filter(
       (h) =>
         h.status !== 'rejected' &&
-        (h.status !== 'pending' || isAdmin || (user && h.authorUsername === user.username))
+        (h.status !== 'pending' || canModerate || (user && h.authorUsername === user.username))
     );
-  }, [homeworks, isAdmin, user]);
+  }, [homeworks, canModerate, user]);
 
   const activeDayHomeworks = useMemo(() => {
     return visibleHomeworks.filter((h) => h.date === selectedDate);
@@ -539,7 +539,7 @@ export const HomeworkSection: React.FC = () => {
 
                         {/* Completion Button & Actions */}
                         <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
-                          {isAdmin && hw.status === 'pending' && (
+                          {canModerate && hw.status === 'pending' && (
                             <button
                               onClick={() => moderateHomework(hw.id, 'approved')}
                               className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold"
@@ -569,7 +569,7 @@ export const HomeworkSection: React.FC = () => {
                             )}
                           </button>
 
-                          {isAdmin && (
+                          {canModerate && (
                             <button
                               onClick={() => deleteHomework(hw.id)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 transition-colors"
@@ -655,7 +655,7 @@ export const HomeworkSection: React.FC = () => {
               ყოველკვირეული განრიგი (ორშაბათი – პარასკევი)
             </span>
 
-            {isAdmin && (
+            {canModerate && (
               <div className="flex items-center gap-2">
                 {!isEditingTimetable ? (
                   <button
@@ -663,7 +663,7 @@ export const HomeworkSection: React.FC = () => {
                     className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer"
                   >
                     <Edit3 className="w-3.5 h-3.5" />
-                    <span>ცხრილის რედაქტირება (Admin)</span>
+                    <span>ცხრილის რედაქტირება</span>
                   </button>
                 ) : (
                   <>

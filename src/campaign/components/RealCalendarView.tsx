@@ -68,7 +68,7 @@ interface RealCalendarViewProps {
 }
 
 export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }) => {
-  const { isAdmin, platform, addCalendarEvent, updateCalendarEvent, deleteCalendarEvent } =
+  const { canModerate, platform, addCalendarEvent, updateCalendarEvent, deleteCalendarEvent } =
     usePlatform();
 
   // Mobile layout switch: 'agenda' | 'week' | 'month'
@@ -342,14 +342,14 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* Admin Create Event Action */}
-          {isAdmin && (
+          {/* Admin / Moderator Create Event Action */}
+          {canModerate && (
             <button
               onClick={openCreateModal}
               className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-sm hover:bg-amber-300 transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>დამატება (Admin)</span>
+              <span>დამატება</span>
             </button>
           )}
 
@@ -1076,7 +1076,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
                 </div>
 
                 <div className="flex items-center gap-1 shrink-0">
-                  {isAdmin && (
+                  {canModerate && (
                     <button
                       onClick={() => deleteCalendarEvent(activeEvent.id)}
                       className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 cursor-pointer"

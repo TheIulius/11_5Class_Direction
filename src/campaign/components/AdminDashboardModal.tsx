@@ -35,14 +35,17 @@ interface ManagedUser {
   id: string;
   username: string;
   fullName: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'moderator' | 'user';
   isAdmin: boolean;
+  isModerator?: boolean;
   createdAt?: string;
 }
 
 export const AdminDashboardModal: React.FC = () => {
   const {
     isAdmin,
+    isModerator,
+    canModerate,
     token,
     platform,
     pendingCounts,
@@ -80,7 +83,7 @@ export const AdminDashboardModal: React.FC = () => {
   const [newUsername, setNewUsername] = useState('');
   const [newFullName, setNewFullName] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newIsAdmin, setNewIsAdmin] = useState(true);
+  const [newIsModerator, setNewIsModerator] = useState(true);
   const [userFormStatus, setUserFormStatus] = useState<string | null>(null);
 
   // Announcement state
@@ -92,8 +95,12 @@ export const AdminDashboardModal: React.FC = () => {
   const [annSaved, setAnnSaved] = useState(false);
 
   useEffect(() => {
-    setActiveTab(adminModalTab);
-  }, [adminModalTab, isAdminModalOpen]);
+    if (!isAdmin && (adminModalTab === 'users' || adminModalTab === 'physics')) {
+      setActiveTab('approvals');
+    } else {
+      setActiveTab(adminModalTab);
+    }
+  }, [adminModalTab, isAdminModalOpen, isAdmin]);
 
   useEffect(() => {
     if (platform.announcement) {
@@ -122,12 +129,12 @@ export const AdminDashboardModal: React.FC = () => {
   }, [token, isAdmin]);
 
   useEffect(() => {
-    if (isAdminModalOpen && activeTab === 'users') {
+    if (isAdminModalOpen && activeTab === 'users' && isAdmin) {
       fetchUsers();
     }
-  }, [isAdminModalOpen, activeTab, fetchUsers]);
+  }, [isAdminModalOpen, activeTab, fetchUsers, isAdmin]);
 
-  if (!isAdminModalOpen || !isAdmin) return null;
+  if (!isAdminModalOpen || !canModerate) return null;
 
   const pendingResources = platform.resources.filter((r) => r.status === 'pending');
   const pendingHomeworks = platform.homeworks.filter((h) => h.status === 'pending');
@@ -135,7 +142,7 @@ export const AdminDashboardModal: React.FC = () => {
 
   const handleCreateAccount = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUsername.trim() || !newPassword.trim()) return;
+    if (!isAdmin || !newUsername.trim() || !newPassword.trim()) return;
     setUserFormStatus(null);
     try {
       const res = await fetch('/api/platform/admin/users/create', {
@@ -148,14 +155,14 @@ export const AdminDashboardModal: React.FC = () => {
           username: newUsername.trim(),
           fullName: newFullName.trim() || newUsername.trim(),
           password: newPassword.trim(),
-          isAdmin: newIsAdmin,
+          isModerator: newIsModerator,
         }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setUserFormStatus(
           `აქაუნთი @${data.user.username} წარმატებით შეიქმნა/განახლდა (${
-            data.user.isAdmin ? 'ადმინი' : 'მოსწავლე'
+            data.user.isModerator ? 'მოდერატორი' : 'მოსწავლე'
           })!`
         );
         setNewUsername('');
@@ -170,24 +177,26 @@ export const AdminDashboardModal: React.FC = () => {
     }
   };
 
-  const handleToggleAdmin = async (u: ManagedUser) => {
+  const handleToggleModerator = async (u: ManagedUser) => {
+    if (!isAdmin || u.isAdmin) return;
     await fetch(`/api/platform/admin/users/${u.id}/update`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ isAdmin: !u.isAdmin }),
+      body: JSON.stringify({ isModerator: !Boolean(u.isModerator || u.role === 'moderator') }),
     });
     fetchUsers();
   };
 
   const handleResetUserPassword = async (u: ManagedUser) => {
+    if (!isAdmin || u.isAdmin) return;
     const nextPass = window.prompt(
       `შეიყვანეთ ახალი პაროლი მომხმარებლისთვის @${u.username} (მინ. 4 სიმბოლო):`
     );
     if (!nextPass || nextPass.trim().length < 4) return;
-    await fetch(`/api/platform/admin/users/${u.id}/update`, {
+    const res = await fetch(`/api/platform/admin/users/${u.id}/update`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -195,10 +204,13 @@ export const AdminDashboardModal: React.FC = () => {
       },
       body: JSON.stringify({ newPassword: nextPass.trim() }),
     });
-    window.alert(`@${u.username}-ის პაროლი წარმატებით განახლდა!`);
+    if (res.ok) {
+      window.alert(`@${u.username}-ის პაროლი წარმატებით განახლდა!`);
+    }
   };
 
   const handleDeleteUser = async (u: ManagedUser) => {
+    if (!isAdmin || u.isAdmin) return;
     if (!window.confirm(`ნამდვილად გსურთ @${u.username} აქაუნთის წაშლა?`)) return;
     await fetch(`/api/platform/admin/users/${u.id}`, {
       method: 'DELETE',
@@ -232,18 +244,32 @@ export const AdminDashboardModal: React.FC = () => {
         {/* Header */}
         <div className="px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
+              isAdmin
+                ? 'bg-amber-400/20 border-amber-400/40 text-amber-300'
+                : 'bg-sky-400/20 border-sky-400/40 text-sky-300'
+            }`}>
               <Shield className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black">11/5 ადმინისტრატორის სამართავი პანელი</h2>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-400 text-slate-950">
-                  ADMIN CMS
+                <h2 className="text-base sm:text-lg font-black">
+                  {isAdmin
+                    ? '11/5 ადმინისტრატორის სამართავი პანელი'
+                    : '11/5 მოდერატორის სამართავი პანელი'}
+                </h2>
+                <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                  isAdmin
+                    ? 'bg-amber-400 text-slate-950'
+                    : 'bg-sky-400 text-slate-950'
+                }`}>
+                  {isAdmin ? 'ADMIN CMS' : isModerator ? 'MODERATOR CMS' : 'CMS'}
                 </span>
               </div>
               <p className="text-xs text-slate-300">
-                მასალების დადასტურება, სპეციალური ადმინ-აქაუნთების გაცემა და პლატფორმის მართვა
+                {isAdmin
+                  ? 'მასალების დადასტურება, მოდერატორების დანიშვნა და პლატფორმის მართვა'
+                  : 'მასალების დადასტურება, განცხადების ზოლი და კონტენტის მოდერაცია'}
               </p>
             </div>
           </div>
@@ -277,18 +303,20 @@ export const AdminDashboardModal: React.FC = () => {
             )}
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('users')}
-            className={`px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
-              activeTab === 'users'
-                ? 'border-indigo-600 text-indigo-700 bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            აქაუნთები & ადმინების დამატება
-          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('users')}
+              className={`px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                activeTab === 'users'
+                  ? 'border-indigo-600 text-indigo-700 bg-white'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Users className="w-4 h-4" />
+              აქაუნთები &amp; მოდერატორები
+            </button>
+          )}
 
           <button
             type="button"
@@ -316,18 +344,20 @@ export const AdminDashboardModal: React.FC = () => {
             სტატისტიკა &amp; ვიზიტორები
           </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('physics')}
-            className={`px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
-              activeTab === 'physics'
-                ? 'border-blue-600 text-blue-700 bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Sliders className="w-4 h-4" />
-            ფონის ფიზიკა &amp; ანიმაცია
-          </button>
+          {isAdmin && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('physics')}
+              className={`px-4 py-2.5 rounded-t-xl text-xs font-bold border-b-2 transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer ${
+                activeTab === 'physics'
+                  ? 'border-blue-600 text-blue-700 bg-white'
+                  : 'border-transparent text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Sliders className="w-4 h-4" />
+              ფონის ფიზიკა &amp; ანიმაცია
+            </button>
+          )}
         </div>
 
         {/* Body */}
@@ -532,9 +562,9 @@ export const AdminDashboardModal: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'users' && (
+          {isAdmin && activeTab === 'users' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              {/* Create Special Admin or Student Account */}
+              {/* Create Moderator or Student Account */}
               <div className="lg:col-span-5 bg-slate-50 rounded-2xl p-5 border border-slate-200/80 h-fit">
                 <div className="flex items-center gap-2.5 mb-3">
                   <div className="w-9 h-9 rounded-xl btn-primary text-white flex items-center justify-center">
@@ -545,7 +575,7 @@ export const AdminDashboardModal: React.FC = () => {
                       11/5 კლასელის აქაუნთის შექმნა
                     </h3>
                     <p className="text-[11px] text-slate-500">
-                      მიეცით 11/5 კლასელს ადმინის ან მოსწავლის აქაუნთი და პაროლი
+                      მიეცით 11/5 კლასელს მოდერატორის ან მოსწავლის აქაუნთი და პაროლი
                     </p>
                   </div>
                 </div>
@@ -572,7 +602,7 @@ export const AdminDashboardModal: React.FC = () => {
                       autoCapitalize="off"
                       value={newUsername}
                       onChange={(e) => setNewUsername(e.target.value)}
-                      placeholder="მაგ: giorgi_admin"
+                      placeholder="მაგ: giorgi_mod"
                       className="w-full px-3 py-2 rounded-xl border border-slate-200 text-sm bg-white"
                     />
                   </div>
@@ -615,12 +645,12 @@ export const AdminDashboardModal: React.FC = () => {
                   <label className="flex items-center gap-2.5 p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={newIsAdmin}
-                      onChange={(e) => setNewIsAdmin(e.target.checked)}
+                      checked={newIsModerator}
+                      onChange={(e) => setNewIsModerator(e.target.checked)}
                       className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500"
                     />
                     <span className="text-xs font-bold text-slate-800">
-                      მიენიჭოს 11/5 ადმინისტრატორის უფლებები
+                      მიენიჭოს 11/5 მოდერატორის უფლებები
                     </span>
                   </label>
 
@@ -641,7 +671,7 @@ export const AdminDashboardModal: React.FC = () => {
                       11/5 კლასის რეგისტრირებული აქაუნთები ({users.length})
                     </h3>
                     <p className="text-[10px] text-slate-400">
-                      მხოლოდ 11/5 კლასის მოსწავლეები და ადმინისტრატორები (განცალკევებულია KCL-სგან)
+                      მხოლოდ 11/5 კლასის მოსწავლეები, მოდერატორები და ადმინისტრატორები (განცალკევებულია KCL-სგან)
                     </p>
                   </div>
                   <button
@@ -657,67 +687,88 @@ export const AdminDashboardModal: React.FC = () => {
                   <p className="text-xs text-slate-400 py-8 text-center">იტვირთება მომხმარებლები...</p>
                 ) : (
                   <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
-                    {users.map((u) => (
-                      <div
-                        key={u.id}
-                        className="p-3.5 rounded-2xl border border-slate-200 bg-white flex flex-wrap items-center justify-between gap-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div
-                            className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs ${
-                              u.isAdmin
-                                ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                                : 'bg-slate-100 text-slate-700'
-                            }`}
-                          >
-                            {u.isAdmin ? <Crown className="w-4 h-4" /> : u.fullName.slice(0, 1)}
+                    {users.map((u) => {
+                      const isMod = !u.isAdmin && (Boolean(u.isModerator) || u.role === 'moderator');
+                      return (
+                        <div
+                          key={u.id}
+                          className="p-3.5 rounded-2xl border border-slate-200 bg-white flex flex-wrap items-center justify-between gap-3"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs ${
+                                u.isAdmin
+                                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                  : isMod
+                                  ? 'bg-sky-100 text-sky-800 border border-sky-300'
+                                  : 'bg-slate-100 text-slate-700'
+                              }`}
+                            >
+                              {u.isAdmin ? (
+                                <Crown className="w-4 h-4" />
+                              ) : isMod ? (
+                                <Shield className="w-4 h-4" />
+                              ) : (
+                                u.fullName.slice(0, 1)
+                              )}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-black text-slate-900">{u.fullName}</span>
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                                    u.isAdmin
+                                      ? 'bg-amber-100 text-amber-800'
+                                      : isMod
+                                      ? 'bg-sky-100 text-sky-800'
+                                      : 'bg-slate-100 text-slate-600'
+                                  }`}
+                                >
+                                  {u.isAdmin ? 'ადმინი' : isMod ? 'მოდერატორი' : 'მოსწავლე'}
+                                </span>
+                              </div>
+                              <div className="text-xs text-slate-500 font-mono">@{u.username}</div>
+                            </div>
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-black text-slate-900">{u.fullName}</span>
-                              <span
-                                className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
-                                  u.isAdmin
-                                    ? 'bg-amber-100 text-amber-800'
-                                    : 'bg-slate-100 text-slate-600'
+
+                          {u.isAdmin ? (
+                            <span className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200/70">
+                              ადმინი
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleModerator(u)}
+                                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold transition-colors ${
+                                  isMod
+                                    ? 'bg-sky-50 hover:bg-sky-100 text-sky-800'
+                                    : 'bg-slate-100 hover:bg-sky-50 hover:text-sky-700 text-slate-700'
                                 }`}
                               >
-                                {u.isAdmin ? 'ადმინი' : 'მოსწავლე'}
-                              </span>
+                                {isMod ? 'მოდერატორის მოხსნა' : 'მოდერატორად დანიშვნა'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleResetUserPassword(u)}
+                                title="პაროლის შეცვლა"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-600 transition-colors"
+                              >
+                                <KeyRound className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteUser(u)}
+                                title="აქაუნთის წაშლა"
+                                className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
                             </div>
-                            <div className="text-xs text-slate-500 font-mono">@{u.username}</div>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleAdmin(u)}
-                            className="px-2.5 py-1.5 rounded-lg text-[11px] font-bold bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 text-slate-700 transition-colors"
-                          >
-                            {u.isAdmin ? 'ადმინის მოხსნა' : 'ადმინად დანიშვნა'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleResetUserPassword(u)}
-                            title="პაროლის შეცვლა"
-                            className="p-1.5 rounded-lg bg-slate-100 hover:bg-amber-50 hover:text-amber-700 text-slate-600 transition-colors"
-                          >
-                            <KeyRound className="w-3.5 h-3.5" />
-                          </button>
-                          {u.username !== 'admin' && u.username !== 'theiulius' && (
-                            <button
-                              type="button"
-                              onClick={() => handleDeleteUser(u)}
-                              title="აქაუნთის წაშლა"
-                              className="p-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 hover:text-rose-600 text-slate-600 transition-colors"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
                           )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
@@ -937,8 +988,8 @@ export const AdminDashboardModal: React.FC = () => {
             </div>
           )}
 
-          {/* Background Photos Physics & Animation Controls */}
-          {activeTab === 'physics' && (
+          {/* Background Photos Physics & Animation Controls (Admin-only) */}
+          {isAdmin && activeTab === 'physics' && (
             <div className="space-y-6 max-w-4xl">
               {/* Header Info Banner */}
               <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-transparent border border-blue-500/20">

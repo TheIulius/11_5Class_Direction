@@ -78,7 +78,7 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
     return 'dark';
   });
 
-  const { isAdmin, platform, openAdminModal } = usePlatform();
+  const { isAdmin, canModerate, platform, openAdminModal } = usePlatform();
 
   useEffect(() => {
     try {
@@ -155,7 +155,7 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 <Megaphone className="w-4 h-4 shrink-0" />
                 <span>{platform.announcement.text}</span>
               </div>
-              {isAdmin && (
+              {canModerate && (
                 <button
                   type="button"
                   onClick={() => openAdminModal('announcement')}
@@ -287,14 +287,14 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            {isAdmin && (
+            {canModerate && (
               <button
                 type="button"
                 onClick={() => openAdminModal('analytics')}
                 className="text-[11px] font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-1 cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5" />
-                <span>ადმინ პანელი &amp; ანალიტიკა</span>
+                <span>{isAdmin ? 'ადმინ პანელი & ანალიტიკა' : 'მოდერატორის პანელი & ანალიტიკა'}</span>
               </button>
             )}
             <span className="text-[11px] opacity-50">Class 11/5 Platform</span>

@@ -60,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   theme,
   onToggleTheme,
 }) => {
-  const { user, isAdmin, pendingCounts, openAuthModal, openAdminModal, logout } = usePlatform();
+  const { user, isAdmin, canModerate, pendingCounts, openAuthModal, openAdminModal, logout } = usePlatform();
 
   const handleNavClick = (tab: ActiveTab) => {
     soundEffects.click();
@@ -116,18 +116,22 @@ export const Navbar: React.FC<NavbarProps> = ({
             {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4" />}
           </button>
 
-          {/* Admin Badge & Quick Access (If Admin, desktop only) */}
-          {isAdmin && (
+          {/* Admin / Moderator Badge & Quick Access (desktop only) */}
+          {canModerate && (
             <button
               onClick={() => openAdminModal('approvals')}
-              className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/25 text-xs font-semibold hover:bg-amber-500/25 transition-colors cursor-pointer min-h-[44px]"
-              title="ადმინ პანელი"
-              aria-label="ადმინ პანელი"
+              className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border text-xs font-semibold transition-colors cursor-pointer min-h-[44px] ${
+                isAdmin
+                  ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/25 hover:bg-amber-500/25'
+                  : 'bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/25 hover:bg-sky-500/25'
+              }`}
+              title={isAdmin ? 'ადმინ პანელი' : 'მოდერატორის პანელი'}
+              aria-label={isAdmin ? 'ადმინ პანელი' : 'მოდერატორის პანელი'}
             >
-              <Shield className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
-              <span>ადმინი</span>
+              <Shield className={`w-3.5 h-3.5 ${isAdmin ? 'text-amber-600 dark:text-amber-400' : 'text-sky-600 dark:text-sky-400'}`} />
+              <span>{isAdmin ? 'ადმინი' : 'მოდერატორი'}</span>
               {pendingCounts.total > 0 && (
-                <span className="w-4 h-4 rounded-full bg-amber-600 text-white text-[10px] font-bold flex items-center justify-center">
+                <span className={`w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center ${isAdmin ? 'bg-amber-600' : 'bg-sky-600'}`}>
                   {pendingCounts.total}
                 </span>
               )}
@@ -138,7 +142,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           {user ? (
             <div className="flex items-center gap-1">
               <button
-                onClick={() => openAdminModal('users')}
+                onClick={() => canModerate && openAdminModal(isAdmin ? 'users' : 'approvals')}
                 className="px-2.5 sm:px-3 py-2 rounded-xl card-third text-[var(--text-primary)] text-xs font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer max-w-[120px] sm:max-w-[140px] min-h-[44px]"
                 title="აქაუნთი"
                 aria-label="აქაუნთის პროფილი"
@@ -176,7 +180,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
   onSelectTab,
   onOpenVideo,
 }) => {
-  const { isAdmin, pendingCounts, openAdminModal } = usePlatform();
+  const { isAdmin, canModerate, pendingCounts, openAdminModal } = usePlatform();
   const [isMoreSheetOpen, setIsMoreSheetOpen] = useState(false);
 
   const handleNavClick = (tab: ActiveTab) => {
@@ -284,7 +288,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             <MoreHorizontal className="w-4.5 h-4.5" />
             <span className="text-[11px] leading-tight">მეტი</span>
             {isMoreActive && <span className="w-1.5 h-1.5 rounded-full bg-[var(--primary-action)] mt-0.5" />}
-            {isAdmin && pendingCounts.total > 0 && (
+            {canModerate && pendingCounts.total > 0 && (
               <span className="absolute top-1 right-3 w-2 h-2 rounded-full bg-amber-500" />
             )}
           </button>
@@ -385,22 +389,26 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
                 </button>
               </div>
 
-              {/* Admin Dashboard Entry in More menu */}
-              {isAdmin && (
+              {/* Admin / Moderator Dashboard Entry in More menu */}
+              {canModerate && (
                 <div className="pt-2 border-t border-[var(--border-subtle)]">
                   <button
                     onClick={() => {
                       setIsMoreSheetOpen(false);
                       openAdminModal('approvals');
                     }}
-                    className="w-full p-3 rounded-2xl bg-amber-500/15 text-amber-700 dark:text-amber-300 font-semibold text-xs flex items-center justify-between cursor-pointer"
+                    className={`w-full p-3 rounded-2xl font-semibold text-xs flex items-center justify-between cursor-pointer ${
+                      isAdmin
+                        ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                        : 'bg-sky-500/15 text-sky-700 dark:text-sky-300'
+                    }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Shield className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                      <span>ადმინ პანელი (დადასტურებები & მართვა)</span>
+                      <Shield className={`w-4 h-4 ${isAdmin ? 'text-amber-600 dark:text-amber-400' : 'text-sky-600 dark:text-sky-400'}`} />
+                      <span>{isAdmin ? 'ადმინ პანელი (დადასტურებები & მართვა)' : 'მოდერატორის პანელი (დადასტურებები)'}</span>
                     </div>
                     {pendingCounts.total > 0 && (
-                      <span className="px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-bold">
+                      <span className={`px-2 py-0.5 rounded-full text-white text-[10px] font-bold ${isAdmin ? 'bg-amber-600' : 'bg-sky-600'}`}>
                         {pendingCounts.total}
                       </span>
                     )}

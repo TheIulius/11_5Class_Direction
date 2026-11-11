@@ -6,7 +6,7 @@ import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
 
 export const StudyMatcherSection: React.FC = () => {
-  const { user, isAdmin, platform, addStudyPod, joinStudyPod, deleteStudyPod, openAuthModal } =
+  const { user, canModerate, platform, addStudyPod, joinStudyPod, deleteStudyPod, openAuthModal } =
     usePlatform();
   const pods = platform.studyPods;
   const [joinedMap, setJoinedMap] = useState<Record<string, boolean>>({});
@@ -159,7 +159,7 @@ export const StudyMatcherSection: React.FC = () => {
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="text-[#dedacb]">{pod.time}</span>
-                    {isAdmin && (
+                    {canModerate && (
                       <button
                         type="button"
                         onClick={() => deleteStudyPod(pod.id)}

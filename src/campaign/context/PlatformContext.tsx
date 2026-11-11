@@ -20,8 +20,10 @@ export interface PlatformUser {
   id: string;
   username: string;
   fullName: string;
-  role: 'admin' | 'user';
+  role: 'admin' | 'moderator' | 'user';
   isAdmin: boolean;
+  isModerator?: boolean;
+  canModerate?: boolean;
 }
 
 export interface PlatformComment {
@@ -32,6 +34,7 @@ export interface PlatformComment {
   authorName: string;
   authorUsername: string;
   isAdmin?: boolean;
+  isModerator?: boolean;
   content: string;
   createdAt: string;
   isPinned?: boolean;
@@ -141,6 +144,8 @@ interface PendingCounts {
 interface PlatformContextValue {
   user: PlatformUser | null;
   isAdmin: boolean;
+  isModerator: boolean;
+  canModerate: boolean;
   token: string | null;
   platform: PlatformDataState;
   pendingCounts: PendingCounts;
@@ -357,6 +362,10 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     refreshPlatform();
   }, [refreshPlatform]);
 
+  const isAdminUser = Boolean(user?.isAdmin || user?.role === 'admin');
+  const isModeratorUser = !isAdminUser && Boolean(user?.isModerator || user?.role === 'moderator');
+  const canModerateUser = isAdminUser || isModeratorUser;
+
   const openAuthModal = (mode: 'login' | 'register' = 'login') => {
     setAuthModalInitialMode(mode);
     setIsAuthModalOpen(true);
@@ -364,7 +373,8 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const closeAuthModal = () => setIsAuthModalOpen(false);
 
   const openAdminModal = (tab: 'approvals' | 'users' | 'announcement' | 'analytics' | 'physics' = 'approvals') => {
-    setAdminModalTab(tab);
+    const safeTab = !isAdminUser && (tab === 'users' || tab === 'physics') ? 'approvals' : tab;
+    setAdminModalTab(safeTab);
     setIsAdminModalOpen(true);
   };
   const closeAdminModal = () => setIsAdminModalOpen(false);
@@ -876,7 +886,9 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     <PlatformContext.Provider
       value={{
         user,
-        isAdmin: Boolean(user?.isAdmin || user?.role === 'admin'),
+        isAdmin: isAdminUser,
+        isModerator: isModeratorUser,
+        canModerate: canModerateUser,
         token,
         platform,
         pendingCounts,

@@ -22,7 +22,7 @@ type CommunityTab = 'clubs' | 'study';
 export const CommunityHubSection: React.FC = () => {
   const {
     user,
-    isAdmin,
+    canModerate,
     platform,
     addClub,
     deleteClub,
@@ -235,7 +235,7 @@ export const CommunityHubSection: React.FC = () => {
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                         აქტიური
                       </span>
-                      {isAdmin && (
+                      {canModerate && (
                         <button
                           type="button"
                           onClick={() => deleteClub(club.id)}
@@ -315,7 +315,7 @@ export const CommunityHubSection: React.FC = () => {
                         >
                           {isFull ? 'სავსეა' : `${spotsRemaining} ადგილი დარჩენილია`}
                         </span>
-                        {isAdmin && (
+                        {canModerate && (
                           <button
                             type="button"
                             onClick={() => deleteStudyPod(pod.id)}

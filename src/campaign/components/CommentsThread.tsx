@@ -15,7 +15,7 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
   title = 'კლასელების კომენტარები & განხილვა',
   compact = false,
 }) => {
-  const { user, isAdmin, platform, addComment, deleteComment, pinComment, openAuthModal } =
+  const { user, isAdmin, canModerate, platform, addComment, deleteComment, pinComment, openAuthModal } =
     usePlatform();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,14 +56,14 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
       ) : (
         <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
           {threadComments.map((c) => {
-            const canDelete = isAdmin || (user && user.id === c.authorId);
+            const canDelete = isAdmin || (canModerate && !c.isAdmin) || (user && user.id === c.authorId);
             return (
               <div
                 key={c.id}
                 className={`p-3 rounded-2xl border text-xs transition-all ${
                   c.isPinned
                     ? 'bg-amber-500/15 border-amber-500/30'
-                    : c.isAdmin
+                    : c.isAdmin || c.isModerator
                     ? 'bg-[var(--primary-action-light)]/40 border-[var(--primary-action)]/30'
                     : 'card-surface border-[var(--border-subtle)]'
                 }`}
@@ -77,6 +77,12 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
                         ადმინი
                       </span>
                     )}
+                    {!c.isAdmin && c.isModerator && (
+                      <span className="px-1.5 py-0.5 rounded-md bg-sky-600 text-white text-[9px] font-black uppercase inline-flex items-center gap-0.5">
+                        <Shield className="w-2.5 h-2.5" />
+                        მოდერატორი
+                      </span>
+                    )}
                     {c.isPinned && (
                       <span className="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-700 dark:text-amber-300 text-[9px] font-black inline-flex items-center gap-0.5 border border-amber-500/30">
                         <Pin className="w-2.5 h-2.5" />
@@ -85,7 +91,7 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
                     )}
                   </div>
                   <div className="flex items-center gap-1">
-                    {isAdmin && (
+                    {canModerate && (
                       <button
                         type="button"
                         onClick={() => pinComment(c.id)}

@@ -31,7 +31,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 }) => {
   const {
     user,
-    isAdmin,
+    canModerate,
     platform,
     submitResource,
     moderateResource,
@@ -58,9 +58,9 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     } else if (r.targetType !== targetType) {
       return false;
     }
-    // Public sees approved resources; admins and the author also see pending resources
+    // Public sees approved resources; admins, moderators and the author also see pending resources
     if (r.status === 'approved') return true;
-    if (r.status === 'pending' && (isAdmin || (user && user.id === r.authorId))) return true;
+    if (r.status === 'pending' && (canModerate || (user && user.id === r.authorId))) return true;
     return false;
   });
 
@@ -158,9 +158,9 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
               <Upload className="w-3.5 h-3.5 text-[var(--primary-action)]" />
               ახალი სასწავლო მასალის / კონსპექტის დამატება
             </span>
-            {!isAdmin && (
+            {!canModerate && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20">
-                გამოქვეყნდება ადმინის დადასტურების შემდეგ
+                გამოქვეყნდება დადასტურების შემდეგ
               </span>
             )}
           </div>
@@ -262,7 +262,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
               type="submit"
               className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-xs cursor-pointer"
             >
-              {isAdmin ? 'ატვირთვა და გამოქვეყნება' : 'ატვირთვა (ადმინთან გაგზავნა)'}
+              {canModerate ? 'ატვირთვა და გამოქვეყნება' : 'ატვირთვა (დასადასტურებლად გაგზავნა)'}
             </button>
           </div>
         </form>
@@ -286,7 +286,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
         <div className="space-y-2.5">
           {matchingResources.map((r) => {
             const isExpanded = expandedResId === r.id;
-            const canDelete = isAdmin || (user && user.id === r.authorId);
+            const canDelete = canModerate || (user && user.id === r.authorId);
             return (
               <div
                 key={r.id}
@@ -360,7 +360,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
                   {/* Right Actions */}
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {r.status === 'pending' && isAdmin && (
+                    {r.status === 'pending' && canModerate && (
                       <button
                         type="button"
                         onClick={() => moderateResource(r.id, 'approved')}
