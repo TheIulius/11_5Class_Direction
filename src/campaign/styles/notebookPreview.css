@@ -1,0 +1,800 @@
+/* ==========================================================================
+   KOMCLUB NOTEBOOK DESIGN EXPERIMENT (LOCAL-ONLY, SCOPED, FULLY REVERSIBLE)
+   All rules are strictly scoped under [data-design-preview="notebook"].
+   Turning the preview off removes the attribute and restores 100% original UI.
+   ========================================================================== */
+
+@font-face {
+  font-family: "ALK Life";
+  src: url("/fonts/alk_life.otf") format("opentype");
+  font-display: swap;
+  unicode-range: U+10A0-10FF, U+1C90-1CBF, U+2D00-2D2F;
+}
+
+html[data-design-preview="notebook"] {
+  /* Core KomClub Paper & Ink Palette */
+  --nb-bg-paper: #fdfbf7;
+  --nb-bg-soft: #f7f3ec;
+  --nb-surface: #ffffff;
+  --nb-ink: #2d2d2d;
+  --nb-ink-secondary: rgba(45, 45, 45, 0.78);
+  --nb-ink-muted: rgba(45, 45, 45, 0.66);
+  --nb-muted-paper: #e5e0d8;
+  --nb-postit: #fff9c4;
+  --nb-amber: #ffff99;
+
+  /* Shared Accent Token (Default: KomClub Purple #7b2ff7 -> #4b1fd6) */
+  --nb-accent: #7b2ff7;
+  --nb-accent-hover: #4b1fd6;
+  --nb-accent-soft: rgba(123, 47, 247, 0.12);
+  --nb-focus-ring: rgba(123, 47, 247, 0.24);
+
+  /* Expressive Secondary Accents */
+  --nb-magenta: #e0219a;
+  --nb-azure: #0077b3;
+  --nb-azure-bright: #0099ff;
+  --nb-green: #1f9d63;
+  --nb-red: #ff6666;
+  --nb-red-deep: #c62828;
+
+  /* Wobble Hand-Drawn Radii */
+  --wobble-sm: 18px 6px 14px 8px / 8px 14px 6px 18px;
+  --wobble-md: 225px 15px 255px 15px / 15px 255px 15px 225px;
+  --wobble-lg: 255px 15px 225px 15px / 15px 225px 15px 255px;
+  --wobble-alt: 15px 225px 15px 255px / 255px 15px 225px 15px;
+  --wobble-card-box: 28px 10px 26px 12px / 12px 26px 10px 28px;
+  --wobble-pill: 140px 20px 130px 22px / 22px 120px 20px 140px;
+  --wobble-blob: 62% 38% 46% 54% / 54% 44% 56% 46%;
+
+  /* Strokes & Hard Offset Shadows (Zero Blur) */
+  --nb-border-thin: 2px solid var(--nb-ink);
+  --nb-border-thick: 3px solid var(--nb-ink);
+  --nb-border-sketch: 2px dashed rgba(45, 45, 45, 0.35);
+  --nb-shadow-sm: 2px 2px 0 0 var(--nb-ink);
+  --nb-shadow-md: 4px 4px 0 0 var(--nb-ink);
+  --nb-shadow-lg: 8px 8px 0 0 var(--nb-ink);
+  --nb-shadow-soft-tile: 3px 3px 0 0 rgba(45, 45, 45, 0.12);
+
+  /* Dotted Grid */
+  --nb-paper-dot: radial-gradient(var(--nb-muted-paper) 1.25px, transparent 1.25px);
+  --nb-paper-dot-size: 24px 24px;
+
+  /* Typography */
+  --nb-font-display: "Kalam", "ALK Life", "Noto Sans Georgian", cursive;
+  --nb-font-hand: "Patrick Hand", "ALK Life", "Noto Sans Georgian", sans-serif;
+  --nb-font-readable: "Inter", "Noto Sans Georgian", sans-serif;
+
+  /* Motion Timing */
+  --nb-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --nb-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --nb-duration-fast: 110ms;
+  --nb-duration-normal: 150ms;
+
+  /* Remap existing platform CSS variables so inner components inherit paper & charcoal */
+  --bg-page: #fdfbf7;
+  --surface-card: #ffffff;
+  --surface-card-solid: #ffffff;
+  --surface-third: #f7f3ec;
+  --surface-third-solid: #f7f3ec;
+  --surface-elevated: #ffffff;
+  --text-primary: #2d2d2d;
+  --text-secondary: rgba(45, 45, 45, 0.78);
+  --text-muted: rgba(45, 45, 45, 0.65);
+  --primary-action: var(--nb-accent);
+  --primary-action-hover: var(--nb-accent-hover);
+  --primary-action-light: var(--nb-accent-soft);
+  --border-subtle: #2d2d2d;
+  --border-glass: #2d2d2d;
+  --glass-bg: #ffffff;
+  --glass-sheet-bg: #fdfbf7;
+}
+
+/* Shared Accent Token Comparison: 11⁵ Blue vs KomClub Purple */
+html[data-design-preview="notebook"][data-notebook-accent="blue"] {
+  --nb-accent: #1d63d8;
+  --nb-accent-hover: #1449a6;
+  --nb-accent-soft: rgba(29, 99, 216, 0.12);
+  --nb-focus-ring: rgba(29, 99, 216, 0.24);
+}
+
+/* Intentional Dark Sketchbook Adaptation if Dark Mode is Toggled While in Preview */
+html.dark[data-design-preview="notebook"] {
+  --nb-bg-paper: #161922;
+  --nb-bg-soft: #1f2430;
+  --nb-surface: #232936;
+  --nb-ink: #f3EFE6;
+  --nb-ink-secondary: rgba(243, 239, 230, 0.82);
+  --nb-ink-muted: rgba(243, 239, 230, 0.64);
+  --nb-muted-paper: rgba(243, 239, 230, 0.14);
+  --nb-postit: #3a351e;
+  --nb-border-sketch: 2px dashed rgba(243, 239, 230, 0.28);
+  --nb-shadow-sm: 2px 2px 0 0 #090b10;
+  --nb-shadow-md: 4px 4px 0 0 #090b10;
+  --nb-shadow-lg: 8px 8px 0 0 #090b10;
+  --bg-page: #161922;
+  --surface-card: #232936;
+  --surface-card-solid: #232936;
+  --surface-third: #1f2430;
+  --surface-third-solid: #1f2430;
+  --surface-elevated: #283040;
+  --text-primary: #f3EFE6;
+  --text-secondary: rgba(243, 239, 230, 0.82);
+  --text-muted: rgba(243, 239, 230, 0.64);
+  --border-subtle: rgba(243, 239, 230, 0.75);
+  --border-glass: rgba(243, 239, 230, 0.75);
+  --glass-bg: #232936;
+  --glass-sheet-bg: #161922;
+}
+
+/* ==========================================================================
+   1. PAGE PAPER CANVAS & 24PX DOT GRID
+   ========================================================================== */
+
+html[data-design-preview="notebook"],
+html[data-design-preview="notebook"] body,
+html[data-design-preview="notebook"] #root,
+[data-design-preview="notebook"] .nb-app-root {
+  background-color: var(--nb-bg-paper) !important;
+  background-image: var(--nb-paper-dot) !important;
+  background-size: var(--nb-paper-dot-size) !important;
+  color: var(--nb-ink) !important;
+  font-family: var(--nb-font-hand);
+}
+
+html[data-design-preview="notebook"] ::selection {
+  background: var(--nb-amber);
+  color: #2d2d2d;
+}
+
+/* Keep dense study text, quiz options, and long Georgian paragraphs crisp & readable */
+[data-design-preview="notebook"] p,
+[data-design-preview="notebook"] li,
+[data-design-preview="notebook"] td,
+[data-design-preview="notebook"] input,
+[data-design-preview="notebook"] textarea,
+[data-design-preview="notebook"] select {
+  font-family: var(--nb-font-hand);
+  letter-spacing: 0.005em;
+}
+
+[data-design-preview="notebook"] h1,
+[data-design-preview="notebook"] h2,
+[data-design-preview="notebook"] h3,
+[data-design-preview="notebook"] .nb-display-heading {
+  font-family: var(--nb-font-display) !important;
+  letter-spacing: 0 !important;
+  text-wrap: balance;
+}
+
+[data-design-preview="notebook"] p,
+[data-design-preview="notebook"] li {
+  overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   2. CLASS PHOTOS IN MARGINS (POLAROID SNAPSHOT FRAMES, OPAQUE FOREGROUND)
+   ========================================================================== */
+
+[data-design-preview="notebook"] .bg-class-photos-root {
+  /* Keep photos framed in the left & right notebook margins so central reading cards stay clean */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.85) 11%,
+    rgba(0, 0, 0, 0.25) 19%,
+    rgba(0, 0, 0, 0.03) 26%,
+    rgba(0, 0, 0, 0.03) 74%,
+    rgba(0, 0, 0, 0.25) 81%,
+    rgba(0, 0, 0, 0.85) 89%,
+    rgba(0, 0, 0, 0.95) 100%
+  ) !important;
+  mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(0, 0, 0, 0.85) 11%,
+    rgba(0, 0, 0, 0.25) 19%,
+    rgba(0, 0, 0, 0.03) 26%,
+    rgba(0, 0, 0, 0.03) 74%,
+    rgba(0, 0, 0, 0.25) 81%,
+    rgba(0, 0, 0, 0.85) 89%,
+    rgba(0, 0, 0, 0.95) 100%
+  ) !important;
+}
+
+[data-design-preview="notebook"] .bg-class-photo-card {
+  background-color: #ffffff !important;
+  border: 1.5px solid #2d2d2d !important;
+  border-radius: 8px 4px 9px 5px / 5px 9px 4px 8px !important;
+  padding: 3px 3px 8px 3px !important;
+  box-shadow: 2px 2px 0 0 rgba(45, 45, 45, 0.38) !important;
+}
+
+/* ==========================================================================
+   3. TOP NAVIGATION, 11⁵ SKETCH BADGE & MOBILE BOTTOM BAR
+   ========================================================================== */
+
+[data-design-preview="notebook"] .glass-nav {
+  background-color: var(--nb-surface) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-bottom: 2.5px solid var(--nb-ink) !important;
+  box-shadow: 0 4px 0 0 rgba(45, 45, 45, 0.12) !important;
+}
+
+[data-design-preview="notebook"] .nb-logo-badge {
+  background-color: var(--nb-accent) !important;
+  color: #ffffff !important;
+  border: 2.5px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-sm) !important;
+  box-shadow: var(--nb-shadow-sm) !important;
+  transform: rotate(-2deg);
+  transition: transform var(--nb-duration-fast) var(--nb-ease-out),
+    box-shadow var(--nb-duration-fast) var(--nb-ease-out),
+    background-color var(--nb-duration-fast) var(--nb-ease-out) !important;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-design-preview="notebook"] .nb-logo-btn:hover .nb-logo-badge,
+  [data-design-preview="notebook"] .nb-logo-btn:focus-visible .nb-logo-badge {
+    transform: rotate(2deg) scale(1.06) !important;
+    background-color: var(--nb-accent-hover) !important;
+    box-shadow: 3px 3px 0 0 var(--nb-ink) !important;
+  }
+}
+
+[data-design-preview="notebook"] header .glass-pill {
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  gap: 0.25rem !important;
+}
+
+/* Segmented Controls in Main Content (e.g. Homework/Timetable & Calendar Day/Month/List) */
+[data-design-preview="notebook"] main .glass-pill {
+  background-color: var(--nb-bg-soft) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-sm) !important;
+  box-shadow: var(--nb-shadow-sm) !important;
+  padding: 0.25rem !important;
+  gap: 0.25rem !important;
+}
+
+[data-design-preview="notebook"] main .glass-pill button.bg-white,
+[data-design-preview="notebook"] main .glass-pill button.shadow-sm,
+[data-design-preview="notebook"] main .glass-pill button.shadow-xs {
+  background-color: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 1.5px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-sm) !important;
+  box-shadow: 2px 2px 0 0 var(--nb-ink) !important;
+}
+
+[data-design-preview="notebook"] .nb-nav-link {
+  position: relative;
+  background-color: transparent !important;
+  color: var(--nb-ink) !important;
+  border: 2px solid transparent !important;
+  border-radius: var(--wobble-sm) !important;
+  box-shadow: none !important;
+  font-family: var(--nb-font-hand) !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  padding: 0.4rem 0.75rem !important;
+  transition: transform var(--nb-duration-fast) var(--nb-ease-out),
+    color var(--nb-duration-fast) var(--nb-ease-out),
+    background-color var(--nb-duration-fast) var(--nb-ease-out) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-design-preview="notebook"] .nb-nav-link:hover {
+    color: var(--nb-accent) !important;
+    background-color: var(--nb-postit) !important;
+    border-color: var(--nb-ink) !important;
+    transform: rotate(-1deg) translateY(-1px);
+  }
+}
+
+[data-design-preview="notebook"] .nb-nav-link[data-active="true"] {
+  color: var(--nb-accent) !important;
+  background-color: var(--nb-postit) !important;
+  border: 2px solid var(--nb-ink) !important;
+  box-shadow: var(--nb-shadow-sm) !important;
+  transform: rotate(-1deg);
+}
+
+[data-design-preview="notebook"] .nb-nav-link[data-active="true"]::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -5px;
+  height: 4px;
+  background: var(--nb-accent);
+  border-radius: var(--wobble-pill);
+  transform: rotate(-0.8deg);
+}
+
+/* Mobile Bottom Tab Bar in Notebook Mode */
+[data-design-preview="notebook"] .glass-sheet {
+  background-color: var(--nb-bg-paper) !important;
+  background-image: var(--nb-paper-dot) !important;
+  background-size: var(--nb-paper-dot-size) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-top: 2.5px solid var(--nb-ink) !important;
+  box-shadow: 0 -4px 0 0 rgba(45, 45, 45, 0.12) !important;
+}
+
+[data-design-preview="notebook"] .nb-mobile-tab {
+  border-radius: var(--wobble-sm);
+  margin: 0 2px;
+  font-family: var(--nb-font-hand);
+  min-height: 44px !important;
+  padding: 3px 2px !important;
+}
+
+[data-design-preview="notebook"] .nb-mobile-tab[data-active="true"] {
+  background-color: var(--nb-postit);
+  color: var(--nb-accent) !important;
+  border: 1.5px solid var(--nb-ink);
+  box-shadow: 2px 2px 0 0 var(--nb-ink);
+  transform: rotate(-0.5deg);
+}
+
+[data-design-preview="notebook"] .nb-mobile-tab[data-active="true"] > span.rounded-full {
+  display: none !important;
+}
+
+[data-design-preview="notebook"] .nb-mini-logo {
+  border: 1.5px solid var(--nb-ink) !important;
+  border-radius: 7px 4px 8px 5px / 5px 8px 4px 7px !important;
+  box-shadow: 1.5px 1.5px 0 0 var(--nb-ink) !important;
+  transform: rotate(-2deg) !important;
+}
+
+/* ==========================================================================
+   4. CROOKED PAPER CARDS, BOARDS & INTERACTION MECHANICS
+   ========================================================================== */
+
+[data-design-preview="notebook"] .card-surface:not(input),
+[data-design-preview="notebook"] .glass-panel:not(input) {
+  position: relative;
+}
+
+[data-design-preview="notebook"] .card-surface,
+[data-design-preview="notebook"] .glass-panel {
+  background-color: var(--nb-surface) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 2.5px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-card-box) !important;
+  box-shadow: var(--nb-shadow-md) !important;
+  transition: transform var(--nb-duration-normal) var(--nb-ease-out),
+    box-shadow var(--nb-duration-normal) var(--nb-ease-out),
+    background-color var(--nb-duration-normal) var(--nb-ease-out),
+    border-color var(--nb-duration-normal) var(--nb-ease-out) !important;
+}
+
+[data-design-preview="notebook"] .card-surface:nth-of-type(even):not(.nb-stationary) {
+  border-radius: 14px 28px 12px 26px / 26px 12px 28px 14px !important;
+}
+
+/* Standalone content cards tilt -1deg and cast 8px 8px shadow on hover */
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-design-preview="notebook"] .card-surface:not(.nb-stationary):hover {
+    transform: rotate(-1deg) translate(-1px, -2px) !important;
+    box-shadow: var(--nb-shadow-lg) !important;
+    border-color: var(--nb-ink) !important;
+  }
+}
+
+/* Small Information Tiles & Inner Rows (.card-third) */
+[data-design-preview="notebook"] .card-third {
+  background-color: var(--nb-bg-soft) !important;
+  border: 2px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-sm) !important;
+  box-shadow: var(--nb-shadow-soft-tile) !important;
+  transition: transform var(--nb-duration-fast) var(--nb-ease-out),
+    box-shadow var(--nb-duration-fast) var(--nb-ease-out),
+    background-color var(--nb-duration-fast) var(--nb-ease-out) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-design-preview="notebook"] .card-third:hover {
+    background-color: var(--nb-postit) !important;
+    box-shadow: var(--nb-shadow-sm) !important;
+    transform: translate(-1px, -2px);
+  }
+}
+
+/* ==========================================================================
+   5. TACTILE BUTTONS (REST 4PX -> HOVER 2PX + TRANSLATE(2,2) -> ACTIVE 0PX)
+   ========================================================================== */
+
+[data-design-preview="notebook"] .btn-primary,
+[data-design-preview="notebook"] .nb-btn-primary {
+  background-color: var(--nb-accent) !important;
+  color: #ffffff !important;
+  border: 2.5px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-pill) !important;
+  box-shadow: var(--nb-shadow-md) !important;
+  font-family: var(--nb-font-hand) !important;
+  font-weight: 700 !important;
+  transition: transform var(--nb-duration-fast) var(--nb-ease-out),
+    box-shadow var(--nb-duration-fast) var(--nb-ease-out),
+    background-color var(--nb-duration-fast) var(--nb-ease-out) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-design-preview="notebook"] .btn-primary:hover:not(:disabled),
+  [data-design-preview="notebook"] .nb-btn-primary:hover:not(:disabled) {
+    background-color: var(--nb-accent-hover) !important;
+    box-shadow: var(--nb-shadow-sm) !important;
+    transform: translate(2px, 2px) !important;
+  }
+}
+
+[data-design-preview="notebook"] .btn-primary:active:not(:disabled),
+[data-design-preview="notebook"] .nb-btn-primary:active:not(:disabled) {
+  box-shadow: none !important;
+  transform: translate(4px, 4px) !important;
+}
+
+[data-design-preview="notebook"] .nb-btn-secondary {
+  background-color: var(--nb-muted-paper) !important;
+  color: var(--nb-ink) !important;
+  border: 2.5px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-pill) !important;
+  box-shadow: var(--nb-shadow-md) !important;
+  font-family: var(--nb-font-hand) !important;
+  font-weight: 700 !important;
+  transition: transform var(--nb-duration-fast) var(--nb-ease-out),
+    box-shadow var(--nb-duration-fast) var(--nb-ease-out),
+    background-color var(--nb-duration-fast) var(--nb-ease-out) !important;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-design-preview="notebook"] .nb-btn-secondary:hover:not(:disabled) {
+    background-color: var(--nb-postit) !important;
+    box-shadow: var(--nb-shadow-sm) !important;
+    transform: translate(2px, 2px) !important;
+  }
+}
+
+[data-design-preview="notebook"] .nb-btn-secondary:active:not(:disabled) {
+  box-shadow: none !important;
+  transform: translate(4px, 4px) !important;
+}
+
+/* ==========================================================================
+   6. KOMCLUB HERO & ACTIVE BOARD ("11/5 კლასის აქტიური დაფა" — REF SCREENSHOT 1)
+   ========================================================================== */
+
+[data-design-preview="notebook"] .nb-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 3px 12px;
+  background-color: var(--nb-postit);
+  color: #2d2d2d;
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--wobble-sm);
+  box-shadow: var(--nb-shadow-sm);
+  font-family: var(--nb-font-hand);
+  font-size: 0.95rem;
+  font-weight: 700;
+  transform: rotate(-1.5deg);
+}
+
+[data-design-preview="notebook"] .nb-hero-wordmark {
+  font-family: var(--nb-font-display) !important;
+  font-size: clamp(2.35rem, 1.6rem + 3.2vw, 3.85rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--nb-ink);
+}
+
+[data-design-preview="notebook"] .nb-hero-wordmark-magenta {
+  color: var(--nb-magenta);
+}
+
+[data-design-preview="notebook"] .nb-hero-wordmark-bang {
+  display: inline-block;
+  color: var(--nb-azure);
+  transform: rotate(11deg) translateY(-3px);
+  margin-left: 2px;
+}
+
+/* Crooked Active Board on Hero Right (Exact match to Screenshot 1) */
+[data-design-preview="notebook"] .nb-active-board {
+  position: relative;
+  padding: 1.5rem 1.4rem 1.45rem;
+  background-color: var(--nb-surface);
+  border: 3px solid var(--nb-ink);
+  border-radius: 225px 15px 255px 15px / 15px 255px 15px 225px;
+  box-shadow: var(--nb-shadow-lg);
+  transform: rotate(1.15deg);
+  transition: transform var(--nb-duration-normal) var(--nb-ease-out),
+    box-shadow var(--nb-duration-normal) var(--nb-ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  [data-design-preview="notebook"] .nb-active-board:hover {
+    transform: rotate(0.2deg) translate(-1px, -2px);
+  }
+}
+
+[data-design-preview="notebook"] .nb-active-board-title {
+  margin: 0 0 0.85rem 0;
+  color: var(--nb-ink);
+  font-family: var(--nb-font-display) !important;
+  font-size: 1.4rem;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+[data-design-preview="notebook"] .nb-stat-tile {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  width: 100%;
+  padding: 0.65rem 0.95rem;
+  background-color: var(--nb-bg-soft);
+  color: var(--nb-ink);
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--wobble-sm);
+  box-shadow: var(--nb-shadow-sm);
+  text-align: right;
+  cursor: pointer;
+  transition: transform var(--nb-duration-fast) var(--nb-ease-out),
+    box-shadow var(--nb-duration-fast) var(--nb-ease-out),
+    background-color var(--nb-duration-fast) var(--nb-ease-out);
+}
+
+[data-design-preview="notebook"] .nb-stat-tile:nth-of-type(1) {
+  transform: rotate(-0.8deg);
+}
+[data-design-preview="notebook"] .nb-stat-tile:nth-of-type(2) {
+  transform: rotate(0.4deg);
+}
+[data-design-preview="notebook"] .nb-stat-tile:nth-of-type(3) {
+  transform: rotate(1.1deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-design-preview="notebook"] .nb-stat-tile:hover {
+    background-color: var(--nb-postit);
+    box-shadow: var(--nb-shadow-md);
+    transform: translate(-2px, -2px) rotate(-0.5deg);
+  }
+}
+
+[data-design-preview="notebook"] .nb-stat-tile:active {
+  box-shadow: none;
+  transform: translate(2px, 2px);
+}
+
+[data-design-preview="notebook"] .nb-stat-icon {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--nb-surface);
+  color: var(--nb-ink);
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--wobble-blob);
+  box-shadow: var(--nb-shadow-sm);
+}
+
+[data-design-preview="notebook"] .nb-stat-label {
+  display: block;
+  color: var(--nb-ink-muted);
+  font-family: var(--nb-font-hand);
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+[data-design-preview="notebook"] .nb-stat-value {
+  display: block;
+  color: var(--nb-ink);
+  font-family: var(--nb-font-display) !important;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+/* ==========================================================================
+   7. HAND-DRAWN DECORATIONS (TAPE STRIPS, PIN DOTS, SMILEY, DASHED ARROW)
+   ========================================================================== */
+
+[data-design-preview="notebook"] .nb-tape-strip {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  z-index: 5;
+  width: 96px;
+  height: 26px;
+  background-color: rgba(210, 206, 196, 0.62);
+  border: 1px dashed rgba(45, 45, 45, 0.34);
+  pointer-events: none;
+}
+
+[data-design-preview="notebook"] .nb-pin-dot {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  width: 18px;
+  height: 18px;
+  background-color: var(--nb-accent);
+  border: 2px solid var(--nb-ink);
+  border-radius: var(--wobble-blob);
+  box-shadow: 1px 1px 0 0 var(--nb-ink);
+  pointer-events: none;
+}
+
+[data-design-preview="notebook"] .nb-sketch-smiley {
+  position: absolute;
+  left: -28px;
+  bottom: -24px;
+  z-index: 6;
+  width: 66px;
+  height: 66px;
+  color: var(--nb-accent);
+  transform: rotate(-6deg);
+  pointer-events: none;
+}
+
+[data-design-preview="notebook"] .nb-sketch-arrow {
+  width: 58px;
+  height: 76px;
+  color: var(--nb-azure);
+  transform: scaleX(-1) rotate(-14deg);
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  [data-design-preview="notebook"] .nb-active-board {
+    transform: rotate(-0.35deg);
+    padding: 1.15rem 1rem 1.1rem;
+    border-width: 2.5px;
+    box-shadow: 5px 5px 0 0 var(--nb-ink);
+  }
+  [data-design-preview="notebook"] .nb-active-board-title {
+    font-size: 1.22rem;
+    margin-bottom: 0.7rem;
+  }
+  [data-design-preview="notebook"] .nb-stat-tile {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 0.65rem;
+    padding: 0.55rem 0.8rem;
+  }
+  [data-design-preview="notebook"] .nb-stat-icon {
+    width: 42px;
+    height: 42px;
+  }
+  [data-design-preview="notebook"] .nb-stat-label {
+    font-size: 0.85rem;
+  }
+  [data-design-preview="notebook"] .nb-stat-value {
+    font-size: 1.45rem;
+  }
+  [data-design-preview="notebook"] .nb-sketch-smiley {
+    left: -8px;
+    bottom: -14px;
+    width: 44px;
+    height: 44px;
+  }
+  [data-design-preview="notebook"] .nb-sketch-arrow {
+    display: none;
+  }
+  [data-design-preview="notebook"] .nb-noticeboard-card {
+    padding: 1.5rem 1.2rem;
+    transform: rotate(-0.6deg);
+    box-shadow: 5px 5px 0 0 var(--nb-ink);
+  }
+  [data-design-preview="notebook"] .card-surface:not(input),
+  [data-design-preview="notebook"] .glass-panel:not(input) {
+    box-shadow: 3px 3px 0 0 var(--nb-ink) !important;
+  }
+}
+
+/* ==========================================================================
+   8. INPUTS, SELECTS, BADGES & FOCUS-VISIBLE RINGS
+   ========================================================================== */
+
+[data-design-preview="notebook"] input[type="text"],
+[data-design-preview="notebook"] input[type="password"],
+[data-design-preview="notebook"] input[type="search"],
+[data-design-preview="notebook"] input[type="date"],
+[data-design-preview="notebook"] input[type="url"],
+[data-design-preview="notebook"] select,
+[data-design-preview="notebook"] textarea {
+  background-color: var(--nb-surface) !important;
+  color: var(--nb-ink) !important;
+  border: 2px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-sm) !important;
+  box-shadow: var(--nb-shadow-sm) !important;
+  transition: border-color var(--nb-duration-fast) var(--nb-ease-out),
+    box-shadow var(--nb-duration-fast) var(--nb-ease-out) !important;
+}
+
+[data-design-preview="notebook"] input:focus,
+[data-design-preview="notebook"] select:focus,
+[data-design-preview="notebook"] textarea:focus {
+  border-color: var(--nb-accent) !important;
+  box-shadow: 0 0 0 4px var(--nb-focus-ring), var(--nb-shadow-sm) !important;
+  outline: none !important;
+}
+
+/* Ensure leading icons inside relative search/input wrappers stay above opaque paper input */
+[data-design-preview="notebook"] .relative > svg {
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Georgian Romanticism Study Workspace Dock & Deck in Notebook Mode */
+[data-design-preview="notebook"] .nb-study-dock {
+  background-color: var(--nb-surface) !important;
+  border: 2.5px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-sm) !important;
+  box-shadow: var(--nb-shadow-md) !important;
+}
+
+[data-design-preview="notebook"] .nb-study-dock button:not([data-selected="true"]) {
+  color: var(--nb-ink) !important;
+}
+
+[data-design-preview="notebook"] .nb-study-workspace .isolate > div > div {
+  border: 3px solid var(--nb-ink) !important;
+  border-radius: var(--wobble-card-box) !important;
+  box-shadow: var(--nb-shadow-lg) !important;
+}
+
+[data-design-preview="notebook"] :where(a, button, [role="button"], input, select, textarea):focus-visible {
+  outline: 3px solid var(--nb-accent) !important;
+  outline-offset: 3px !important;
+}
+
+/* ==========================================================================
+   9. LOCKED NOTICEBOARD PAGES ("coming soon!")
+   ========================================================================== */
+
+[data-design-preview="notebook"] .nb-noticeboard-card {
+  position: relative;
+  padding: 2.25rem 2.5rem;
+  background-color: var(--nb-postit);
+  border: 3px solid var(--nb-ink);
+  border-radius: var(--wobble-md);
+  box-shadow: var(--nb-shadow-lg);
+  transform: rotate(-1.2deg);
+}
+
+/* ==========================================================================
+   10. REDUCED MOTION COMPLIANCE
+   Keep non-motion color/background transitions enabled; disable spatial tilt/move
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  [data-design-preview="notebook"] .card-surface,
+  [data-design-preview="notebook"] .card-third,
+  [data-design-preview="notebook"] .btn-primary,
+  [data-design-preview="notebook"] .nb-btn-primary,
+  [data-design-preview="notebook"] .nb-btn-secondary,
+  [data-design-preview="notebook"] .nb-logo-badge,
+  [data-design-preview="notebook"] .nb-nav-link,
+  [data-design-preview="notebook"] .nb-active-board,
+  [data-design-preview="notebook"] .nb-stat-tile,
+  [data-design-preview="notebook"] .nb-noticeboard-card {
+    transform: none !important;
+    transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease, box-shadow 120ms ease !important;
+  }
+}

@@ -1,8 +1,16 @@
 import React from 'react';
+import { useDesignPreview } from '../context/DesignPreviewContext';
+import { TapeStrip, SketchPurpleSmiley } from './NotebookDecorations';
 
 interface LockedSectionPreviewProps {
   sectionType: 'opportunities' | 'ideas' | 'clubs';
 }
+
+const SECTION_LABELS: Record<LockedSectionPreviewProps['sectionType'], string> = {
+  opportunities: 'შესაძლებლობების დაფა',
+  ideas: 'იდეების ყუთი',
+  clubs: 'სასკოლო კლუბები',
+};
 
 /**
  * Renders a sanitized, non-sensitive silhouette layout of the section cards,
@@ -10,6 +18,8 @@ interface LockedSectionPreviewProps {
  * Completely excludes real data and interactive controls from DOM / a11y tree.
  */
 export const LockedSectionPreview: React.FC<LockedSectionPreviewProps> = ({ sectionType }) => {
+  const { isNotebook } = useDesignPreview();
+
   return (
     <div className="relative min-h-[65vh] w-full flex items-center justify-center py-10 px-4 sm:px-6">
       {/* Sanitized, non-sensitive layout silhouette (aria-hidden, inert, blurred) */}
@@ -142,9 +152,25 @@ export const LockedSectionPreview: React.FC<LockedSectionPreviewProps> = ({ sect
 
       {/* Crisp foreground message - EXACT text: coming soon! */}
       <div className="relative z-10 text-center px-4 py-8">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#292D32] dark:text-[#E9EEF4] select-none font-sans drop-shadow-xs">
-          coming soon!
-        </h2>
+        {isNotebook ? (
+          <div className="nb-noticeboard-card max-w-md mx-auto space-y-2">
+            <TapeStrip tilt="left" />
+            <span className="inline-block px-3 py-0.5 text-xs font-bold bg-white border-2 border-[#2d2d2d] rounded-lg shadow-[2px_2px_0_0_#2d2d2d] text-[#2d2d2d]">
+              {SECTION_LABELS[sectionType]} &bull; 11⁵
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#2d2d2d] select-none pt-1">
+              coming soon!
+            </h2>
+            <p className="text-sm text-[#2d2d2d]/80">
+              ეს განყოფილება მალე გაიხსნება 11/5 კლასის წევრებისთვის.
+            </p>
+            <SketchPurpleSmiley />
+          </div>
+        ) : (
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#292D32] dark:text-[#E9EEF4] select-none font-sans drop-shadow-xs">
+            coming soon!
+          </h2>
+        )}
       </div>
     </div>
   );

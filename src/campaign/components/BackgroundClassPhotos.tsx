@@ -205,7 +205,7 @@ export const BackgroundClassPhotos: React.FC<BackgroundClassPhotosProps> = () =>
         right: photo.right,
         transform: `rotate(${photo.rotate.toFixed(1)}deg) scale(${photo.scale.toFixed(2)})`,
       }}
-      className={`absolute w-12 sm:w-16 md:w-[4.5rem] lg:w-20 p-[3px] rounded-lg bg-[#f5f2eb]/[0.09] border border-[#f5f2eb]/[0.16] shadow-sm ${opacityClass}`}
+      className={`bg-class-photo-card absolute w-12 sm:w-16 md:w-[4.5rem] lg:w-20 p-[3px] rounded-lg bg-[#f5f2eb]/[0.09] border border-[#f5f2eb]/[0.16] shadow-sm ${opacityClass}`}
     >
       <img
         src={photo.src}
@@ -224,7 +224,7 @@ export const BackgroundClassPhotos: React.FC<BackgroundClassPhotosProps> = () =>
         maskImage:
           'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(0,0,0,0.92) 14%, rgba(0,0,0,0.52) 24%, rgba(0,0,0,0.12) 34%, rgba(0,0,0,0.12) 66%, rgba(0,0,0,0.52) 76%, rgba(0,0,0,0.92) 86%, rgba(0,0,0,1) 100%)',
       }}
-      className="fixed inset-0 pointer-events-none overflow-clip z-0 select-none"
+      className="bg-class-photos-root fixed inset-0 pointer-events-none overflow-clip z-0 select-none"
       aria-hidden="true"
     >
       {/* Deep Parallax Layer (Slowest: 0.20x scroll speed) */}

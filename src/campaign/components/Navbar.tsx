@@ -73,11 +73,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Brand Identity: 11⁵ Logo (Clean icon badge with 5 at index) */}
         <button
           onClick={() => handleNavClick('home')}
-          className="flex items-center justify-center cursor-pointer shrink-0 min-h-[44px] min-w-[44px] -ml-1 group"
+          className="nb-logo-btn flex items-center justify-center cursor-pointer shrink-0 min-h-[44px] min-w-[44px] -ml-1 group"
           aria-label="მთავარ გვერდზე გადასვლა"
           title="11⁵ მთავარი"
         >
-          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl btn-primary flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-all select-none">
+          <div className="nb-logo-badge w-9 h-9 sm:w-10 sm:h-10 rounded-xl btn-primary flex items-center justify-center shadow-xs group-hover:scale-105 active:scale-95 transition-all select-none">
             <span className="font-black text-sm sm:text-base tracking-tight leading-none text-white flex items-start">
               11<span className="text-[10px] sm:text-[11px] font-extrabold -mt-1 ml-0.5 opacity-95">5</span>
             </span>
@@ -92,7 +92,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               <button
                 key={link.id}
                 onClick={() => handleNavClick(link.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer relative whitespace-nowrap min-h-[36px] flex items-center ${
+                data-active={isActive ? 'true' : 'false'}
+                className={`nb-nav-link px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer relative whitespace-nowrap min-h-[36px] flex items-center ${
                   isActive
                     ? 'btn-primary font-semibold shadow-xs'
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
@@ -207,7 +208,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           {/* Tab 1: Home */}
           <button
             onClick={() => handleNavClick('home')}
-            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
+            data-active={activeTab === 'home'}
+            className={`nb-mobile-tab flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
               activeTab === 'home'
                 ? 'text-[var(--primary-action)] font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
@@ -215,7 +217,7 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
             aria-label="მთავარი გვერდი"
           >
             <div
-              className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold ${
+              className={`nb-mini-logo w-6 h-6 rounded-lg flex items-center justify-center font-bold ${
                 activeTab === 'home' ? 'btn-primary text-white shadow-xs' : 'card-third text-[var(--text-secondary)]'
               }`}
             >
@@ -230,7 +232,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           {/* Tab 2: Calendar */}
           <button
             onClick={() => handleNavClick('calendar')}
-            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
+            data-active={activeTab === 'calendar'}
+            className={`nb-mobile-tab flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
               activeTab === 'calendar'
                 ? 'text-[var(--primary-action)] font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
@@ -245,7 +248,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           {/* Tab 3: Homework & Timetable */}
           <button
             onClick={() => handleNavClick('homework')}
-            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
+            data-active={activeTab === 'homework'}
+            className={`nb-mobile-tab flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
               activeTab === 'homework'
                 ? 'text-[var(--primary-action)] font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
@@ -260,7 +264,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
           {/* Tab 4: Materials / Archive */}
           <button
             onClick={() => handleNavClick('materials')}
-            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
+            data-active={activeTab === 'materials'}
+            className={`nb-mobile-tab flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 ${
               activeTab === 'materials'
                 ? 'text-[var(--primary-action)] font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'
@@ -278,7 +283,8 @@ export const MobileBottomNav: React.FC<MobileBottomNavProps> = ({
               soundEffects.click();
               setIsMoreSheetOpen(true);
             }}
-            className={`flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 relative ${
+            data-active={isMoreActive}
+            className={`nb-mobile-tab flex flex-col items-center justify-center gap-0.5 transition-colors cursor-pointer min-h-[48px] py-1 relative ${
               isMoreActive
                 ? 'text-[var(--primary-action)] font-bold'
                 : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] font-medium'

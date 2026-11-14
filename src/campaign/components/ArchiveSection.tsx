@@ -18,9 +18,12 @@ import { QuizPrepSection } from './QuizPrepSection';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
 import { SubjectAutocomplete } from './SubjectAutocomplete';
+import { useDesignPreview } from '../context/DesignPreviewContext';
+import { PinDot, TapeStrip } from './NotebookDecorations';
 
 export const ArchiveSection: React.FC = () => {
   const { canModerate, platform, addArchivePack, deleteArchivePack } = usePlatform();
+  const { isNotebook } = useDesignPreview();
   const [activePackId, setActivePackId] = useState<string | null>(null); // Default to library view for clean entry
   const [searchQuery, setSearchQuery] = useState('');
   const [showAddModal, setShowAddModal] = useState(false);
@@ -78,16 +81,16 @@ export const ArchiveSection: React.FC = () => {
     if (selectedPack.isBuiltInGeorgianQuiz) {
       return (
         <div className="space-y-4">
-          <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-3 sm:pt-4 flex items-center justify-between gap-3">
+          <div className="max-w-6xl mx-auto px-3.5 sm:px-6 pt-3 sm:pt-4 flex flex-col sm:flex-row sm:items-center justify-between items-start gap-2.5 sm:gap-3">
             <button
               onClick={() => setActivePackId(null)}
-              className="min-h-[44px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl card-third text-xs font-bold text-[var(--primary-action)] hover:opacity-90 cursor-pointer transition-opacity"
+              className="min-h-[44px] inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl card-third text-xs font-bold text-[var(--primary-action)] hover:opacity-90 cursor-pointer transition-opacity shrink-0"
               aria-label="მასალებზე დაბრუნება"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>მასალები</span>
             </button>
-            <div className="text-right">
+            <div className="text-left sm:text-right">
               <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] block">
                 {selectedPack.title}
               </span>
@@ -189,7 +192,7 @@ export const ArchiveSection: React.FC = () => {
 
       {/* Search Input (16px to prevent iOS auto-zoom, min 44px touch target) */}
       <div className="relative">
-        <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <Search className="w-4 h-4 text-[var(--text-muted)] absolute left-3.5 top-1/2 -translate-y-1/2 z-10 pointer-events-none" />
         <input
           type="text"
           value={searchQuery}
@@ -233,13 +236,14 @@ export const ArchiveSection: React.FC = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-          {filteredPacks.map((pack) => {
+          {filteredPacks.map((pack, idx) => {
             return (
               <div
                 key={pack.id}
                 onClick={() => setActivePackId(pack.id)}
                 className="card-surface card-hover p-4 sm:p-6 flex flex-col justify-between gap-3.5 sm:gap-4 cursor-pointer text-left group rounded-2xl border border-[var(--border-subtle)] shadow-xs"
               >
+                {isNotebook && (idx === 0 ? <TapeStrip tilt="left" /> : <PinDot />)}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
                     <span className="px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-[var(--primary-action-light)] text-[var(--primary-action)] border border-[var(--primary-action)]/20">

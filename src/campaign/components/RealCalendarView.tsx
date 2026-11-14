@@ -635,7 +635,7 @@ export const RealCalendarView: React.FC<RealCalendarViewProps> = ({ onOpenQuiz }
           VIEW MODE 3: MONTH GRID WITH CONTINUOUS MULTI-DAY BARS
           ========================================================================= */}
       <div className={`space-y-5 min-w-0 ${mobileView === 'month' ? 'block' : 'hidden sm:block'}`}>
-        <div className="card-surface p-2 sm:p-5 shadow-sm rounded-3xl border border-[var(--border-subtle)] overflow-hidden min-w-0">
+        <div className="card-surface nb-stationary p-2 sm:p-5 shadow-sm rounded-3xl border border-[var(--border-subtle)] overflow-hidden min-w-0">
           {/* Weekday Labels Header */}
           <div className="grid grid-cols-7 mb-2 text-center min-w-0 border-b border-[var(--border-subtle)] pb-2">
             {WEEKDAYS_SHORT.map((day) => (

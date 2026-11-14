@@ -28,6 +28,13 @@ import {
   LESSON_PERIOD_TIMES,
 } from '../utils/tbilisiDate';
 import { getCategoryStyle } from '../utils/calendarCategories';
+import { useDesignPreview } from '../context/DesignPreviewContext';
+import {
+  TapeStrip,
+  PinDot,
+  SketchBlueArrow,
+  SketchPurpleSmiley,
+} from './NotebookDecorations';
 
 interface HeroSectionProps {
   onNavigateTab: (tab: ActiveTab) => void;
@@ -36,6 +43,7 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenVideo }) => {
   const { platform } = usePlatform();
+  const { isNotebook } = useDesignPreview();
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -141,33 +149,152 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
       {/* =========================================================================
-          TOP BAR: COMPACT GREETING & REAL DATE IN TBILISI
+          TOP BAR OR KOMCLUB NOTEBOOK HERO + ACTIVE BOARD
           ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
-        <div className="space-y-0.5">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-semibold text-[var(--text-secondary)]">
-              {tbilisiTime.formattedDisplay}
-            </span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
-            კომაროვის 11/5 კლასი
-          </h1>
-        </div>
-
-        <button
-          onClick={() => {
-            soundEffects.click();
-            if (onOpenVideo) onOpenVideo();
-            else setIsVideoOpen(true);
-          }}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl card-third text-xs font-semibold text-[var(--text-primary)] hover:opacity-90 transition-opacity self-start sm:self-auto cursor-pointer"
+      {isNotebook ? (
+        <section
+          aria-label="11/5 კლასის მთავარი დაფა"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center pt-2 pb-4"
         >
-          <Play className="w-3.5 h-3.5 text-[var(--primary-action)] fill-[var(--primary-action)]" />
-          <span>რატომ ავირჩიოთ</span>
-        </button>
-      </div>
+          {/* Left: Expressive Wordmark, Sticky Eyebrow, Copy, Tactile CTAs & Dashed Blue Arrow */}
+          <div className="lg:col-span-7 space-y-4">
+            <div className="nb-eyebrow">
+              <span className="w-2 h-2 rounded-full bg-emerald-600" aria-hidden="true" />
+              <span>11/5 კლასი &bull; {tbilisiTime.formattedDisplay}</span>
+            </div>
+
+            <h1 className="nb-hero-wordmark">
+              კომაროვის{' '}
+              <span className="nb-hero-wordmark-magenta">11⁵ კლასი</span>
+              <span className="nb-hero-wordmark-bang" aria-hidden="true">
+                !
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-xl leading-relaxed">
+              საშინაო დავალებები, შემაჯამებლების კალენდარი, მიმდინარე გაკვეთილების ცხრილი და სასწავლო მოდულები ერთ სივრცეში.
+            </p>
+
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.click();
+                  onNavigateTab('homework');
+                }}
+                className="nb-btn-primary min-h-[46px] sm:min-h-[48px] px-4 sm:px-5 py-2.5 text-sm sm:text-base inline-flex items-center gap-2 cursor-pointer"
+              >
+                <BookOpen className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>დავალებები &amp; ცხრილი</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.click();
+                  if (onOpenVideo) onOpenVideo();
+                  else setIsVideoOpen(true);
+                }}
+                className="nb-btn-secondary min-h-[46px] sm:min-h-[48px] px-4 sm:px-5 py-2.5 text-sm sm:text-base inline-flex items-center gap-2 cursor-pointer"
+              >
+                <Play className="w-4 h-4 shrink-0 text-[var(--primary-action)] fill-[var(--primary-action)]" aria-hidden="true" />
+                <span>რატომ ავირჩიოთ</span>
+              </button>
+
+              <SketchBlueArrow />
+            </div>
+          </div>
+
+          {/* Right: Crooked Paper Active Board ("11/5 კლასის აქტიური დაფა" — Ref Screenshot 1) */}
+          <div className="lg:col-span-5">
+            <div className="nb-active-board">
+              <TapeStrip tilt="left" />
+              <h2 className="nb-active-board-title">11/5 კლასის აქტიური დაფა</h2>
+
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.click();
+                    onNavigateTab('homework');
+                  }}
+                  className="nb-stat-tile"
+                >
+                  <span className="nb-stat-icon" aria-hidden="true">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </span>
+                  <span>
+                    <span className="nb-stat-label">მიმდინარე დავალებები</span>
+                    <strong className="nb-stat-value">{activeHomeworks.length}</strong>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.click();
+                    onNavigateTab('calendar');
+                  }}
+                  className="nb-stat-tile"
+                >
+                  <span className="nb-stat-icon" aria-hidden="true">
+                    <CalendarIcon className="w-5 h-5" />
+                  </span>
+                  <span>
+                    <span className="nb-stat-label">მოახლოებული შემაჯამებლები</span>
+                    <strong className="nb-stat-value">{upcomingAssessments.length}</strong>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.click();
+                    onNavigateTab('materials');
+                  }}
+                  className="nb-stat-tile"
+                >
+                  <span className="nb-stat-icon" aria-hidden="true">
+                    <BookOpen className="w-5 h-5" />
+                  </span>
+                  <span>
+                    <span className="nb-stat-label">სასწავლო მოდულები</span>
+                    <strong className="nb-stat-value">{platform.archivePacks.length}</strong>
+                  </span>
+                </button>
+              </div>
+
+              <SketchPurpleSmiley />
+            </div>
+          </div>
+        </section>
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[var(--border-subtle)]">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-xs font-semibold text-[var(--text-secondary)]">
+                {tbilisiTime.formattedDisplay}
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text-primary)]">
+              კომაროვის 11/5 კლასი
+            </h1>
+          </div>
+
+          <button
+            onClick={() => {
+              soundEffects.click();
+              if (onOpenVideo) onOpenVideo();
+              else setIsVideoOpen(true);
+            }}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl card-third text-xs font-semibold text-[var(--text-primary)] hover:opacity-90 transition-opacity self-start sm:self-auto cursor-pointer"
+          >
+            <Play className="w-3.5 h-3.5 text-[var(--primary-action)] fill-[var(--primary-action)]" />
+            <span>რატომ ავირჩიოთ</span>
+          </button>
+        </div>
+      )}
 
       {/* =========================================================================
           MAIN COMMAND CENTER GRID (2 COLUMNS)
@@ -179,6 +306,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
         <div className="lg:col-span-7 space-y-6">
           {/* Card 1: Today's Homework */}
           <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-4">
+            {isNotebook && <TapeStrip tilt="right" />}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl card-third flex items-center justify-center text-[var(--primary-action)]">
@@ -274,6 +402,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
 
           {/* Card 2: Upcoming Assessments (Real dynamic date filtering) */}
           <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-4">
+            {isNotebook && <PinDot />}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl card-third flex items-center justify-center text-amber-600 dark:text-amber-400">
@@ -351,7 +480,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
             ===================================================================== */}
         <div className="lg:col-span-5 space-y-6">
           {/* Card 3: Today's Timetable with REAL active lesson highlight */}
-          <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-4">
+          <div className="card-surface nb-stationary rounded-2xl p-5 sm:p-6 space-y-4">
+            {isNotebook && <TapeStrip tilt="left" />}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl card-third flex items-center justify-center text-[var(--primary-action)]">
@@ -417,6 +547,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
 
           {/* Card 4: Featured Study Resource (Links to Literature Module) */}
           <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-3">
+            {isNotebook && <PinDot />}
             <div className="flex items-center justify-between text-xs">
               <span className="text-[11px] font-semibold text-[var(--primary-action)]">
                 სასწავლო მოდული &bull; არქივი

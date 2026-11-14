@@ -65,7 +65,7 @@ export const AuthModal: React.FC = () => {
       onClick={closeAuthModal}
     >
       <div
-        className="card-surface rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[var(--border-subtle)] relative overflow-hidden text-[var(--text-primary)] max-h-[90vh] overflow-y-auto"
+        className="card-surface nb-stationary rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-[var(--border-subtle)] relative overflow-hidden text-[var(--text-primary)] max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start justify-between gap-4 mb-5">

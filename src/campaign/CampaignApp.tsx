@@ -15,6 +15,12 @@ import { BackgroundClassPhotos } from './components/BackgroundClassPhotos';
 import { LockedSectionPreview } from './components/LockedSectionPreview';
 import { isSectionLocked } from './config/features';
 import { Megaphone, Shield } from 'lucide-react';
+import {
+  DesignPreviewProvider,
+  DesignPreviewSwitcher,
+  useDesignPreview,
+} from './context/DesignPreviewContext';
+import './styles/notebookPreview.css';
 
 export interface CampaignAppProps {
   onSwitchToFantasy?: () => void;
@@ -72,29 +78,31 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
-      const saved = localStorage.getItem('class11_5_theme');
+      const saved = localStorage.getItem('class11_5_notebook_theme');
       if (saved === 'light' || saved === 'dark') return saved;
     } catch {}
-    return 'dark';
+    return 'light';
   });
+
+  const { isNotebook } = useDesignPreview();
 
   const { isAdmin, canModerate, platform, openAdminModal } = usePlatform();
 
   useEffect(() => {
     try {
-      localStorage.setItem('class11_5_theme', theme);
+      localStorage.setItem('class11_5_notebook_theme', theme);
       const metaTheme = document.querySelector('meta[name="theme-color"]');
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
         document.documentElement.classList.remove('light');
-        if (metaTheme) metaTheme.setAttribute('content', '#0B1422');
+        if (metaTheme) metaTheme.setAttribute('content', isNotebook ? '#131722' : '#0B1422');
       } else {
         document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
-        if (metaTheme) metaTheme.setAttribute('content', '#F5F1E8');
+        if (metaTheme) metaTheme.setAttribute('content', isNotebook ? '#fdfbf7' : '#F5F1E8');
       }
     } catch {}
-  }, [theme]);
+  }, [theme, isNotebook]);
 
   // Synchronize hash on browser navigation (Back / Forward)
   useEffect(() => {
@@ -126,7 +134,10 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
     platform.announcement?.text?.includes('საიტზე ყველა მასალის ნახვა');
 
   return (
-    <div className="relative min-h-screen min-h-[100dvh] font-sans flex flex-col justify-between transition-colors duration-300 bg-[var(--bg-page)] text-[var(--text-primary)] overflow-x-clip">
+    <div
+      data-design-preview={isNotebook ? 'notebook' : undefined}
+      className="nb-app-root relative min-h-screen min-h-[100dvh] font-sans flex flex-col justify-between transition-colors duration-300 bg-[var(--bg-page)] text-[var(--text-primary)] overflow-x-clip"
+    >
       {/* Restored animated springy scattered class photography layer (continuous background) */}
       <BackgroundClassPhotos activeTab={activeTab} />
 
@@ -308,6 +319,9 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
         onSelectTab={handleSelectTab}
       />
 
+      {/* Local-Only Reversible Design Experiment Switcher */}
+      <DesignPreviewSwitcher />
+
       <AuthModal />
       <AdminDashboardModal />
     </div>
@@ -317,7 +331,9 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
 export const CampaignApp: React.FC<CampaignAppProps> = (props) => {
   return (
     <PlatformProvider>
-      <CampaignAppInner {...props} />
+      <DesignPreviewProvider>
+        <CampaignAppInner {...props} />
+      </DesignPreviewProvider>
     </PlatformProvider>
   );
 };

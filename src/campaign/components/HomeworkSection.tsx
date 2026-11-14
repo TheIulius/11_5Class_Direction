@@ -749,7 +749,7 @@ export const HomeworkSection: React.FC = () => {
           </div>
 
           {/* Desktop Full Weekly Table */}
-          <div className="hidden md:block overflow-x-auto card-surface p-1 shadow-sm min-w-0">
+          <div className="hidden md:block overflow-x-auto card-surface nb-stationary p-1 shadow-sm min-w-0">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="border-b border-slate-200/80 dark:border-white/10 font-semibold text-slate-500 dark:text-slate-400">

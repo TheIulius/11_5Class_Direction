@@ -2616,9 +2616,9 @@ export const QuizPrepSection: React.FC<QuizPrepSectionProps> = ({ onBack }) => {
   };
 
   return (
-    <section className="max-w-4xl mx-auto px-2.5 sm:px-5 py-1.5 sm:py-3 space-y-2.5">
+    <section className="nb-study-workspace max-w-4xl mx-auto px-2.5 sm:px-5 py-1.5 sm:py-3 space-y-2.5">
       {/* COMPACT 2-ROW CONTROL DOCK: IDENTICAL COMPACT SHORT LABELS ON MOBILE & DESKTOP */}
-      <div className="max-w-2xl mx-auto rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 space-y-1.5 shadow-lg backdrop-blur-xl">
+      <div className="nb-study-dock max-w-2xl mx-auto rounded-2xl bg-[#141522]/95 border border-[#f5f2eb]/15 p-1.5 space-y-1.5 shadow-lg backdrop-blur-xl">
         {/* Row 1: Compact Poem Selector Pills + Discreet Icon Triggers */}
         <div className="flex items-center justify-between gap-1">
           {/* Scroll Left Button (Mouse click navigation) */}
