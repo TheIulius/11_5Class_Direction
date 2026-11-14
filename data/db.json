@@ -33378,7 +33378,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 44,
+    "visits": 45,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33475,7 +33475,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-10T18:47:39.534Z"
+    "lastUpdated": "2026-11-14T07:11:45.279Z"
   },
   "platform": {
     "updatedAt": 1794331135104,
@@ -34328,6 +34328,15 @@
         "isAdmin": true,
         "createdAt": "2026-11-10T17:17:44.868Z"
       }
+    },
+    "backgroundPhysics": {
+      "stiffness": 520,
+      "damping": 15,
+      "mass": 0.08,
+      "adaptiveFastScroll": true,
+      "parallaxDeep": 0.2,
+      "parallaxMid": 0.32,
+      "parallaxNear": 0.45
     }
   }
 }
