@@ -4893,9 +4893,12 @@ app.post('/api/platform/push/subscribe', (req: Request, res: Response) => {
 
 app.post('/api/platform/push/client-status', (req: Request, res: Response) => {
   const data = db.getData();
-  initPlatformCMS(data);
+  const p = initPlatformCMS(data);
   const auth = getPlatformAuthUser(req);
-  const { isStandalone } = req.body || {};
+  const { isStandalone, endpoint } = req.body || {};
+
+  let shouldSave = false;
+  let saveReason = '';
 
   if (auth?.user && isStandalone) {
     const alreadyRecorded = Boolean(auth.user.pwaInstalled);
@@ -4903,8 +4906,27 @@ app.post('/api/platform/push/client-status', (req: Request, res: Response) => {
     auth.user.pwaInstalledAt = auth.user.pwaInstalledAt || new Date().toISOString();
     auth.user.pwaDevice = detectDeviceLabel(String(req.headers['user-agent'] || ''));
     if (!alreadyRecorded) {
-      savePlatformCMS(data, 'PWA Home Screen install recorded for @' + auth.user.username);
+      shouldSave = true;
+      saveReason = 'PWA Home Screen install recorded for @' + auth.user.username;
     }
+  }
+
+  if (auth?.user && endpoint && Array.isArray(p.pushSubscriptions)) {
+    const sub = p.pushSubscriptions.find((s) => s.endpoint === endpoint);
+    if (sub && (!sub.userId || sub.userId !== auth.user.id || (isStandalone && !sub.isStandalone))) {
+      sub.userId = auth.user.id;
+      sub.username = auth.user.username;
+      sub.role = auth.role;
+      sub.canModerate = auth.canModerate;
+      if (isStandalone) sub.isStandalone = true;
+      sub.updatedAt = new Date().toISOString();
+      shouldSave = true;
+      saveReason = saveReason || 'Linked push subscription to @' + auth.user.username;
+    }
+  }
+
+  if (shouldSave) {
+    savePlatformCMS(data, saveReason);
   }
 
   res.json({ success: true });
@@ -4948,7 +4970,18 @@ app.post('/api/platform/push/test', async (req: Request, res: Response) => {
     (s) => (endpoint && s.endpoint === endpoint) || (auth && s.userId === auth.user.id)
   );
   if (!sub) {
-    return res.status(404).json({ error: 'ამ მოწყობილობაზე შეტყობინებები ჯერ არ არის გააქტიურებული.' });
+    return res.status(404).json({
+      error:
+        'ამ მოწყობილობაზე შეტყობინებები ჯერ არ არის ჩართული — დააჭირეთ ზედა პანელში ზარის ღილაკს 🔔 ჩასართავად!',
+    });
+  }
+
+  if (auth?.user && (!sub.userId || sub.userId !== auth.user.id)) {
+    sub.userId = auth.user.id;
+    sub.username = auth.user.username;
+    sub.role = auth.role;
+    sub.canModerate = auth.canModerate;
+    savePlatformCMS(data, 'Linked push subscription on test for @' + auth.user.username);
   }
 
   try {
@@ -4965,6 +4998,10 @@ app.post('/api/platform/push/test', async (req: Request, res: Response) => {
     );
     return res.json({ success: true, sent: 1 });
   } catch (err: any) {
+    if ((err?.statusCode === 404 || err?.statusCode === 410) && Array.isArray(p.pushSubscriptions)) {
+      p.pushSubscriptions = p.pushSubscriptions.filter((s) => s.endpoint !== sub.endpoint);
+      savePlatformCMS(data, 'Removed expired push subscription');
+    }
     return res.status(500).json({ error: 'შეტყობინების გაგზავნა ვერ მოხერხდა: ' + (err?.message || 'Unknown error') });
   }
 });

@@ -71,6 +71,7 @@ export const AdminDashboardModal: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'approvals' | 'users' | 'announcement' | 'analytics' | 'physics'>(adminModalTab);
   const [users, setUsers] = useState<ManagedUser[]>([]);
+  const [totalSubscribedDevices, setTotalSubscribedDevices] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const analyticsStats = usePlatformAnalytics();
   const [isRefreshingAnalytics, setIsRefreshingAnalytics] = useState(false);
@@ -135,6 +136,10 @@ export const AdminDashboardModal: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         setUsers(data.users || []);
+        setTotalSubscribedDevices(
+          data.summary?.totalSubscribedDevices ??
+            (data.users || []).reduce((acc: number, u: ManagedUser) => acc + (u.pushDevicesCount || 0), 0)
+        );
       }
     } catch (e) {
       console.warn('Failed to fetch users', e);
@@ -192,7 +197,9 @@ export const AdminDashboardModal: React.FC = () => {
           <div className="text-xl font-black text-slate-900 mt-1">
             {pushUsersCount} / {users.length}
           </div>
-          <div className="text-[11px] text-slate-500">მომხმარებელი</div>
+          <div className="text-[11px] text-slate-500">
+            მომხმარებელი &bull; სულ აქტიური მოწყობილობა: {totalSubscribedDevices}
+          </div>
         </div>
 
         <div className="p-3.5 rounded-xl bg-sky-50/70 border border-sky-200/80">

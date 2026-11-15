@@ -26,8 +26,16 @@ const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
   return outputArray;
 };
 
+const uint8ArraysEqual = (a: Uint8Array, b: Uint8Array): boolean => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+};
+
 export const PwaNotificationButton: React.FC = () => {
-  const { user } = usePlatform();
+  const { user, token: contextToken } = usePlatform();
   const dialogId = useId();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const installBtnRef = useRef<HTMLButtonElement | null>(null);
@@ -48,8 +56,13 @@ export const PwaNotificationButton: React.FC = () => {
   const [guideOs, setGuideOs] = useState<'ios' | 'android'>('ios');
 
   const getToken = () => {
+    if (contextToken) return contextToken;
     try {
-      return localStorage.getItem('class11_5_auth_token') || '';
+      return (
+        localStorage.getItem('class11_5_auth_token_v1') ||
+        localStorage.getItem('class11_5_auth_token') ||
+        ''
+      );
     } catch {
       return '';
     }
@@ -121,22 +134,22 @@ export const PwaNotificationButton: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, user?.role, isStandalone]);
+  }, [user?.id, user?.role, contextToken, isStandalone]);
 
-  // Record Home Screen standalone usage for logged-in user
+  // Record Home Screen standalone usage and link push endpoint for logged-in user
   useEffect(() => {
-    if (!isStandalone || !user?.id) return;
-    const token = getToken();
-    if (!token) return;
+    if (!user?.id || (!isStandalone && !currentEndpoint)) return;
+    const authToken = getToken();
+    if (!authToken) return;
     fetch('/api/platform/push/client-status', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ isStandalone: true }),
+      body: JSON.stringify({ isStandalone, endpoint: currentEndpoint }),
     }).catch(() => {});
-  }, [isStandalone, user?.id]);
+  }, [isStandalone, user?.id, contextToken, currentEndpoint]);
 
   // Sync native <dialog>
   useEffect(() => {
@@ -226,11 +239,19 @@ export const PwaNotificationButton: React.FC = () => {
         return;
       }
 
+      const expectedKey = urlBase64ToUint8Array(keyData.publicKey);
       let sub = await reg.pushManager.getSubscription();
+      if (sub && sub.options?.applicationServerKey) {
+        const currentKey = new Uint8Array(sub.options.applicationServerKey);
+        if (!uint8ArraysEqual(currentKey, expectedKey)) {
+          await sub.unsubscribe().catch(() => {});
+          sub = null;
+        }
+      }
       if (!sub) {
         sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: urlBase64ToUint8Array(keyData.publicKey) as unknown as BufferSource,
+          applicationServerKey: expectedKey as unknown as BufferSource,
         });
       }
 
