@@ -33376,7 +33376,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 72,
+    "visits": 73,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33481,10 +33481,10 @@
         }
       }
     },
-    "lastUpdated": "2026-11-15T11:00:37.074Z"
+    "lastUpdated": "2026-11-15T11:01:21.367Z"
   },
   "platform": {
-    "updatedAt": 1794739979204,
+    "updatedAt": 1794740481083,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34676,6 +34676,18 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T10:42:24.266Z"
+      },
+      "user_1794740481082_806": {
+        "id": "user_1794740481082_806",
+        "username": "lizichachua",
+        "fullName": "ლიზი ჩაჩუა",
+        "passwordHash": "3cfa40eac6277b4b8c9d1995f6b61a18fd7ef0c79096680f53ec491f106cb7f9aaacc1e44ac74d09cbb6342c5613431bd143e9ba54ad3faf65a4374cb61fa2de",
+        "salt": "630482b4303dcf6f8d7ebe1ed5b0a8b7",
+        "token": "bf0e2e910f5c6ff95a69977ec77ab4da99d0b2ba8fb706cd152870b4b34fc77d",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T11:01:21.083Z"
       }
     },
     "backgroundPhysics": {
