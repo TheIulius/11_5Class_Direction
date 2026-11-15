@@ -33473,19 +33473,19 @@
       "averageSeconds": 0
     },
     "videoStats": {
-      "totalPlays": 5,
+      "totalPlays": 6,
       "totalCompletes": 0,
       "totalSeconds": 0,
       "averageSeconds": 0,
       "byVideo": {
         "edemi": {
-          "plays": 5,
+          "plays": 6,
           "completes": 0,
           "totalSeconds": 0
         }
       }
     },
-    "lastUpdated": "2026-11-15T12:03:01.166Z"
+    "lastUpdated": "2026-11-15T12:15:50.981Z"
   },
   "platform": {
     "updatedAt": 1794744873810,
