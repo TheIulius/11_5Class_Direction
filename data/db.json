@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T11:34:45.787Z"
   },
   "platform": {
-    "updatedAt": 1794742592329,
+    "updatedAt": 1794743260203,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34775,7 +34775,8 @@
         "role": "user",
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Safari/605.1.15",
-        "updatedAt": "2026-11-15T11:36:32.329Z"
+        "isStandalone": false,
+        "updatedAt": "2026-11-15T11:47:40.203Z"
       }
     ]
   }
