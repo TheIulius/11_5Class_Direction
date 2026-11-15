@@ -33483,7 +33483,7 @@
     "lastUpdated": "2026-11-15T10:31:24.290Z"
   },
   "platform": {
-    "updatedAt": 1794738687232,
+    "updatedAt": 1794738707520,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34468,6 +34468,19 @@
         "content": "მადლობა ბატონ დავით-გიორგის ფოტოებისთვის!",
         "createdAt": "2026-11-15T10:00:30.423Z",
         "isPinned": true
+      },
+      {
+        "id": "cmt_1794738707520_523",
+        "targetType": "homework",
+        "targetId": "hw_1794734310205",
+        "authorId": "user_1794738648316_525",
+        "authorName": "dgi09",
+        "authorUsername": "dgi09",
+        "isAdmin": false,
+        "isModerator": true,
+        "content": "დეფისი არ უნდა",
+        "createdAt": "2026-11-15T10:31:47.520Z",
+        "isPinned": false
       }
     ],
     "archivePacks": [
