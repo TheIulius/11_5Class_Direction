@@ -33495,12 +33495,12 @@
     "lastUpdated": "2026-11-15T19:55:40.850Z"
   },
   "platform": {
-    "updatedAt": 1794773197593,
+    "updatedAt": 1794773209569,
     "announcement": {
       "text": "დააყენე app-ად & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
-      "type": "info",
-      "updatedAt": "2026-11-15T20:06:37.593Z"
+      "type": "urgent",
+      "updatedAt": "2026-11-15T20:06:49.569Z"
     },
     "calendarEvents": [
       {
