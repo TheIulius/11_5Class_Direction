@@ -786,8 +786,135 @@ dialog:modal {
 dialog::backdrop {
   overflow: hidden;
   overscroll-behavior: contain;
-  background-color: rgba(15, 23, 42, 0.78);
-  backdrop-filter: blur(3px);
+  background-color: rgba(15, 23, 42, 0.52);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+}
+
+/* ==========================================================================
+   9B. 10FPS CARTOON NOTEBOOK PAGE-FLIP ANIMATION (Media Viewer)
+   4 discrete steps over 380ms (~10.5 fps) for an authentic hand-drawn
+   sketchbook / cartoon page-turn feel on both mobile swipe & desktop arrows.
+   ========================================================================== */
+
+@keyframes nbCartoonFlipNext {
+  0% {
+    transform: perspective(1200px) rotateY(-32deg) rotateZ(2.4deg) translateX(18%) scale(0.93);
+    box-shadow: 22px 12px 0 var(--nb-ink), inset -28px 0 0 rgba(255, 249, 196, 0.55);
+    filter: contrast(1.04) brightness(0.97);
+  }
+  25% {
+    transform: perspective(1200px) rotateY(-18deg) rotateZ(-1.6deg) translateX(9%) scale(0.97);
+    box-shadow: 14px 8px 0 var(--nb-ink), inset -16px 0 0 rgba(255, 249, 196, 0.35);
+    filter: contrast(1.02) brightness(0.99);
+  }
+  50% {
+    transform: perspective(1200px) rotateY(6deg) rotateZ(0.9deg) translateX(-3%) scale(1.01);
+    box-shadow: -6px 5px 0 var(--nb-ink);
+    filter: none;
+  }
+  75% {
+    transform: perspective(1200px) rotateY(-2deg) rotateZ(-0.4deg) translateX(1%) scale(1);
+    box-shadow: 4px 4px 0 var(--nb-ink);
+  }
+  100% {
+    transform: perspective(1200px) rotateY(0deg) rotateZ(0deg) translateX(0) scale(1);
+    box-shadow: 4px 4px 0 var(--nb-ink);
+  }
+}
+
+@keyframes nbCartoonFlipPrev {
+  0% {
+    transform: perspective(1200px) rotateY(32deg) rotateZ(-2.4deg) translateX(-18%) scale(0.93);
+    box-shadow: -22px 12px 0 var(--nb-ink), inset 28px 0 0 rgba(255, 249, 196, 0.55);
+    filter: contrast(1.04) brightness(0.97);
+  }
+  25% {
+    transform: perspective(1200px) rotateY(18deg) rotateZ(1.6deg) translateX(-9%) scale(0.97);
+    box-shadow: -14px 8px 0 var(--nb-ink), inset 16px 0 0 rgba(255, 249, 196, 0.35);
+    filter: contrast(1.02) brightness(0.99);
+  }
+  50% {
+    transform: perspective(1200px) rotateY(-6deg) rotateZ(-0.9deg) translateX(3%) scale(1.01);
+    box-shadow: 6px 5px 0 var(--nb-ink);
+    filter: none;
+  }
+  75% {
+    transform: perspective(1200px) rotateY(2deg) rotateZ(0.4deg) translateX(-1%) scale(1);
+    box-shadow: 4px 4px 0 var(--nb-ink);
+  }
+  100% {
+    transform: perspective(1200px) rotateY(0deg) rotateZ(0deg) translateX(0) scale(1);
+    box-shadow: 4px 4px 0 var(--nb-ink);
+  }
+}
+
+@keyframes nbCartoonCurlSweepNext {
+  0% {
+    opacity: 0.9;
+    transform: translateX(45%) skewX(-10deg);
+  }
+  50% {
+    opacity: 0.45;
+    transform: translateX(-15%) skewX(-4deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-95%) skewX(0deg);
+  }
+}
+
+@keyframes nbCartoonCurlSweepPrev {
+  0% {
+    opacity: 0.9;
+    transform: translateX(-45%) skewX(10deg);
+  }
+  50% {
+    opacity: 0.45;
+    transform: translateX(15%) skewX(4deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(95%) skewX(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .nb-page-flip-next {
+    transform-origin: left center;
+    animation: nbCartoonFlipNext 380ms steps(4, end) both;
+    will-change: transform;
+  }
+
+  .nb-page-flip-prev {
+    transform-origin: right center;
+    animation: nbCartoonFlipPrev 380ms steps(4, end) both;
+    will-change: transform;
+  }
+
+  .nb-page-flip-next::after,
+  .nb-page-flip-prev::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 15;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(253, 251, 247, 0.72) 44%,
+      rgba(45, 45, 45, 0.28) 50%,
+      transparent 58%
+    );
+  }
+
+  .nb-page-flip-next::after {
+    animation: nbCartoonCurlSweepNext 380ms steps(4, end) forwards;
+  }
+
+  .nb-page-flip-prev::after {
+    animation: nbCartoonCurlSweepPrev 380ms steps(4, end) forwards;
+  }
 }
 
 /* ==========================================================================

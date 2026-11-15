@@ -237,7 +237,24 @@ export const HomeworkSection: React.FC = () => {
     }
   });
 
-  const [expandedHwId, setExpandedHwId] = useState<string | null>(null);
+  // Homeworks with attached materials or comments are OPEN by default; user can still collapse them
+  const [collapsedHwIds, setCollapsedHwIds] = useState<Record<string, boolean>>({});
+  const [manuallyOpenedHwIds, setManuallyOpenedHwIds] = useState<Record<string, boolean>>({});
+
+  const checkIsHwExpanded = (hwId: string, hasAttachmentsOrComments: boolean): boolean => {
+    if (hasAttachmentsOrComments) {
+      return !collapsedHwIds[hwId];
+    }
+    return Boolean(manuallyOpenedHwIds[hwId]);
+  };
+
+  const toggleHwExpanded = (hwId: string, hasAttachmentsOrComments: boolean) => {
+    if (hasAttachmentsOrComments) {
+      setCollapsedHwIds((prev) => ({ ...prev, [hwId]: !prev[hwId] }));
+    } else {
+      setManuallyOpenedHwIds((prev) => ({ ...prev, [hwId]: !prev[hwId] }));
+    }
+  };
 
   // Add / Edit Homework Modal
   const [isAddHwOpen, setIsAddHwOpen] = useState(false);
@@ -745,18 +762,19 @@ export const HomeworkSection: React.FC = () => {
                     <div key={block.key} className="space-y-2 min-w-0">
                       {blockHomeworks.map((hw, hwIdx) => {
                         const isDone = Boolean(completedMap[hw.id]);
-                        const isExpanded = expandedHwId === hw.id;
                         const resCount = platform.resources.filter(
                           (r) => r.targetType === 'homework' && r.targetId === hw.id
                         ).length;
                         const comCount = platform.comments.filter(
                           (c) => c.targetType === 'homework' && c.targetId === hw.id
                         ).length;
+                        const hasAttachmentsOrComments = resCount > 0 || comCount > 0;
+                        const isExpanded = checkIsHwExpanded(hw.id, hasAttachmentsOrComments);
 
                         return (
                           <div
                             key={hw.id}
-                            className={`card-surface p-4 sm:p-5 space-y-3 transition-all min-w-0 ${
+                            className={`card-surface p-3.5 sm:p-4 space-y-2.5 transition-all min-w-0 ${
                               isDone
                                 ? 'border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/10'
                                 : ''
@@ -764,7 +782,7 @@ export const HomeworkSection: React.FC = () => {
                           >
                             {/* Unified Timetable Slot Strip */}
                             {hwIdx === 0 && (
-                              <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-dashed border-[var(--border-subtle)] text-[11px]">
+                              <div className="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-dashed border-[var(--border-subtle)] text-[11px]">
                                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                                   <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-slate-900 text-white dark:bg-white/15 dark:text-slate-100 text-[10px]">
                                     {block.periodLabel}
@@ -797,8 +815,8 @@ export const HomeworkSection: React.FC = () => {
                               </div>
                             )}
 
-                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
-                              <div className="space-y-1.5 min-w-0 flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 min-w-0">
+                              <div className="space-y-1 min-w-0 flex-1">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                                     {hw.subject}
@@ -837,7 +855,7 @@ export const HomeworkSection: React.FC = () => {
                               </div>
 
                               {/* Completion Button & Actions */}
-                              <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+                              <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
                                 {canModerate && hw.status === 'pending' && (
                                   <button
                                     onClick={() => moderateHomework(hw.id, 'approved')}
@@ -849,7 +867,7 @@ export const HomeworkSection: React.FC = () => {
 
                                 <button
                                   onClick={() => handleToggleComplete(hw.id)}
-                                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                                  className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
                                     isDone
                                       ? 'bg-emerald-600 text-white'
                                       : 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/15'
@@ -894,10 +912,11 @@ export const HomeworkSection: React.FC = () => {
                               </div>
                             </div>
 
-                            {/* Expandable Resource & Comment Bar */}
-                            <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                            {/* Expandable Resource & Comment Bar (Open by default when resources/comments exist!) */}
+                            <div className="pt-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
                               <button
-                                onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
+                                type="button"
+                                onClick={() => toggleHwExpanded(hw.id, hasAttachmentsOrComments)}
                                 className="font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-3 cursor-pointer"
                               >
                                 <span className="flex items-center gap-1">
@@ -909,22 +928,29 @@ export const HomeworkSection: React.FC = () => {
                                   <span>კომენტარები ({comCount})</span>
                                 </span>
                               </button>
-                              <ChevronDown
-                                onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
-                                className={`w-4 h-4 text-slate-400 transition-transform cursor-pointer ${
-                                  isExpanded ? 'rotate-180' : ''
-                                }`}
-                              />
+                              <button
+                                type="button"
+                                onClick={() => toggleHwExpanded(hw.id, hasAttachmentsOrComments)}
+                                className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-flex items-center gap-1 cursor-pointer"
+                              >
+                                <span>{isExpanded ? 'ჩაკეცვა' : 'გახსნა'}</span>
+                                <ChevronDown
+                                  className={`w-3.5 h-3.5 transition-transform ${
+                                    isExpanded ? 'rotate-180' : ''
+                                  }`}
+                                />
+                              </button>
                             </div>
 
-                            {/* Expanded Section */}
+                            {/* Expanded Section (Always open by default when resources/comments exist, ultra-compact) */}
                             {isExpanded && (
-                              <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4">
+                              <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-2">
                                 <ResourceSection
                                   targetType="homework"
                                   targetId={hw.id}
                                   targetTitle={`${hw.subject}: ${hw.title}`}
                                   defaultSubject={hw.subject}
+                                  compact
                                 />
                                 <CommentsThread targetType="homework" targetId={hw.id} compact />
                               </div>
@@ -939,25 +965,26 @@ export const HomeworkSection: React.FC = () => {
                 {/* Any extra homework on this date whose subject isn't in that day's standard timetable */}
                 {unmatchedHomeworks.map((hw) => {
                   const isDone = Boolean(completedMap[hw.id]);
-                  const isExpanded = expandedHwId === hw.id;
                   const resCount = platform.resources.filter(
                     (r) => r.targetType === 'homework' && r.targetId === hw.id
                   ).length;
                   const comCount = platform.comments.filter(
                     (c) => c.targetType === 'homework' && c.targetId === hw.id
                   ).length;
+                  const hasAttachmentsOrComments = resCount > 0 || comCount > 0;
+                  const isExpanded = checkIsHwExpanded(hw.id, hasAttachmentsOrComments);
 
                   return (
                     <div
                       key={hw.id}
-                      className={`card-surface p-4 sm:p-5 space-y-3 transition-all min-w-0 ${
+                      className={`card-surface p-3.5 sm:p-4 space-y-2.5 transition-all min-w-0 ${
                         isDone
                           ? 'border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/10'
                           : ''
                       }`}
                     >
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
-                        <div className="space-y-1.5 min-w-0 flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 min-w-0">
+                        <div className="space-y-1 min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                               {hw.subject}
@@ -988,10 +1015,10 @@ export const HomeworkSection: React.FC = () => {
                           )}
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+                        <div className="flex items-center gap-1.5 shrink-0 self-start sm:self-auto">
                           <button
                             onClick={() => handleToggleComplete(hw.id)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
                               isDone
                                 ? 'bg-emerald-600 text-white'
                                 : 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/15'
@@ -1034,9 +1061,10 @@ export const HomeworkSection: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                      <div className="pt-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
                         <button
-                          onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
+                          type="button"
+                          onClick={() => toggleHwExpanded(hw.id, hasAttachmentsOrComments)}
                           className="font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-3 cursor-pointer"
                         >
                           <span className="flex items-center gap-1">
@@ -1048,21 +1076,28 @@ export const HomeworkSection: React.FC = () => {
                             <span>კომენტარები ({comCount})</span>
                           </span>
                         </button>
-                        <ChevronDown
-                          onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
-                          className={`w-4 h-4 text-slate-400 transition-transform cursor-pointer ${
-                            isExpanded ? 'rotate-180' : ''
-                          }`}
-                        />
+                        <button
+                          type="button"
+                          onClick={() => toggleHwExpanded(hw.id, hasAttachmentsOrComments)}
+                          className="text-[11px] font-semibold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>{isExpanded ? 'ჩაკეცვა' : 'გახსნა'}</span>
+                          <ChevronDown
+                            className={`w-3.5 h-3.5 transition-transform ${
+                              isExpanded ? 'rotate-180' : ''
+                            }`}
+                          />
+                        </button>
                       </div>
 
                       {isExpanded && (
-                        <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4">
+                        <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-2">
                           <ResourceSection
                             targetType="homework"
                             targetId={hw.id}
                             targetTitle={`${hw.subject}: ${hw.title}`}
                             defaultSubject={hw.subject}
+                            compact
                           />
                           <CommentsThread targetType="homework" targetId={hw.id} compact />
                         </div>
@@ -1075,44 +1110,47 @@ export const HomeworkSection: React.FC = () => {
               <div className="space-y-3 min-w-0">
                 {activeDayHomeworks.map((hw) => {
                   const isDone = Boolean(completedMap[hw.id]);
-                  const isExpanded = expandedHwId === hw.id;
                   const resCount = platform.resources.filter(
                     (r) => r.targetType === 'homework' && r.targetId === hw.id
                   ).length;
                   const comCount = platform.comments.filter(
                     (c) => c.targetType === 'homework' && c.targetId === hw.id
                   ).length;
+                  const hasAttachmentsOrComments = resCount > 0 || comCount > 0;
+                  const isExpanded = checkIsHwExpanded(hw.id, hasAttachmentsOrComments);
                   return (
-                    <div key={hw.id} className="card-surface p-4 sm:p-5 space-y-3 min-w-0">
+                    <div key={hw.id} className="card-surface p-3.5 sm:p-4 space-y-2.5 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <span className="text-xs font-bold">{hw.subject} — {hw.title}</span>
                         <button
                           onClick={() => handleToggleComplete(hw.id)}
-                          className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-white/10"
+                          className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-white/10"
                         >
                           {isDone ? 'შესრულებულია' : 'მონიშვნა'}
                         </button>
                       </div>
-                      {isExpanded && (
-                        <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4">
-                          <ResourceSection
-                            targetType="homework"
-                            targetId={hw.id}
-                            targetTitle={`${hw.subject}: ${hw.title}`}
-                            defaultSubject={hw.subject}
-                          />
-                          <CommentsThread targetType="homework" targetId={hw.id} compact />
-                        </div>
-                      )}
-                      <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                      <div className="pt-1.5 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
                         <button
-                          onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
+                          type="button"
+                          onClick={() => toggleHwExpanded(hw.id, hasAttachmentsOrComments)}
                           className="font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-3 cursor-pointer"
                         >
                           <span>მასალები ({resCount})</span>
                           <span>კომენტარები ({comCount})</span>
                         </button>
                       </div>
+                      {isExpanded && (
+                        <div className="pt-2 border-t border-slate-100 dark:border-white/5 space-y-2">
+                          <ResourceSection
+                            targetType="homework"
+                            targetId={hw.id}
+                            targetTitle={`${hw.subject}: ${hw.title}`}
+                            defaultSubject={hw.subject}
+                            compact
+                          />
+                          <CommentsThread targetType="homework" targetId={hw.id} compact />
+                        </div>
+                      )}
                     </div>
                   );
                 })}

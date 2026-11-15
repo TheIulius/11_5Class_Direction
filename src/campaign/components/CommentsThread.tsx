@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquare, Send, Pin, Trash2, Shield, LogIn } from 'lucide-react';
+import { MessageSquare, Send, Pin, Trash2, Shield, LogIn, ChevronDown } from 'lucide-react';
 import { usePlatform, PlatformComment } from '../context/PlatformContext';
 
 interface CommentsThreadProps {
@@ -19,6 +19,7 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
     usePlatform();
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAllComments, setShowAllComments] = useState(false);
 
   const threadComments = platform.comments
     .filter((c) => c.targetType === targetType && c.targetId === targetId)
@@ -27,6 +28,10 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
       if (!a.isPinned && b.isPinned) return 1;
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
     });
+
+  const visibleComments =
+    compact && !showAllComments ? threadComments.slice(0, 1) : threadComments;
+  const hiddenCommentsCount = Math.max(0, threadComments.length - visibleComments.length);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,27 +45,33 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
   };
 
   return (
-    <div className={compact ? 'space-y-3' : 'space-y-4'}>
-      <div className="flex items-center justify-between">
-        <h4 className="text-xs font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
-          <MessageSquare className="w-3.5 h-3.5 text-[var(--primary-action)]" />
-          {title} ({threadComments.length})
-        </h4>
-      </div>
+    <div className={compact ? 'space-y-2' : 'space-y-4'}>
+      {!compact && (
+        <div className="flex items-center justify-between">
+          <h4 className="text-xs font-black uppercase tracking-wider text-[var(--text-muted)] flex items-center gap-1.5">
+            <MessageSquare className="w-3.5 h-3.5 text-[var(--primary-action)]" />
+            {title} ({threadComments.length})
+          </h4>
+        </div>
+      )}
 
       {/* Comments List */}
       {threadComments.length === 0 ? (
-        <div className="p-3.5 rounded-2xl card-third border border-[var(--border-subtle)] text-xs text-[var(--text-muted)] text-center">
-          ჯერ კომენტარი არ დაწერილა. იყავი პირველი!
-        </div>
+        !compact ? (
+          <div className="p-3.5 rounded-2xl card-third border border-[var(--border-subtle)] text-xs text-[var(--text-muted)] text-center">
+            ჯერ კომენტარი არ დაწერილა. იყავი პირველი!
+          </div>
+        ) : null
       ) : (
-        <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
-          {threadComments.map((c) => {
+        <div className={compact ? 'space-y-1.5' : 'space-y-2.5 max-h-72 overflow-y-auto pr-1'}>
+          {visibleComments.map((c) => {
             const canDelete = isAdmin || (canModerate && !c.isAdmin) || (user && user.id === c.authorId);
             return (
               <div
                 key={c.id}
-                className={`p-3 rounded-2xl border text-xs transition-all ${
+                className={`${
+                  compact ? 'px-2.5 py-1.5 rounded-xl' : 'p-3 rounded-2xl'
+                } border text-xs transition-all ${
                   c.isPinned
                     ? 'bg-amber-500/15 border-amber-500/30'
                     : c.isAdmin || c.isModerator
@@ -68,8 +79,8 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
                     : 'card-surface border-[var(--border-subtle)]'
                 }`}
               >
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <div className="flex items-center gap-1.5 flex-wrap">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 flex-wrap min-w-0">
                     <span className="font-black text-[var(--text-primary)]">{c.authorName}</span>
                     {c.isAdmin && (
                       <span className="px-1.5 py-0.5 rounded-md btn-primary text-white text-[9px] font-black uppercase inline-flex items-center gap-0.5">
@@ -89,20 +100,25 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
                         მიმაგრებული
                       </span>
                     )}
+                    {compact && (
+                      <span className="text-[var(--text-secondary)] leading-snug break-words">
+                        — {c.content}
+                      </span>
+                    )}
                   </div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-0.5 shrink-0">
                     {canModerate && (
                       <button
                         type="button"
                         onClick={() => pinComment(c.id)}
                         title={c.isPinned ? 'მიმაგრების მოხსნა' : 'კომენტარის მიმაგრება'}
-                        className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                        className={`p-1 rounded-lg transition-colors cursor-pointer ${
                           c.isPinned
                             ? 'text-amber-700 dark:text-amber-300 bg-amber-500/20'
                             : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-black/5 dark:hover:bg-white/5'
                         }`}
                       >
-                        <Pin className="w-3.5 h-3.5" />
+                        <Pin className="w-3 h-3" />
                       </button>
                     )}
                     {canDelete && (
@@ -111,41 +127,66 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
                         onClick={() => deleteComment(c.id)}
                         title="კომენტარის წაშლა"
                         aria-label="კომენტარის წაშლა"
-                        className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        className="p-1 rounded-lg text-[var(--text-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     )}
                   </div>
                 </div>
-                <p className="text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap">{c.content}</p>
+                {!compact && (
+                  <p className="text-[var(--text-secondary)] leading-relaxed whitespace-pre-wrap mt-1">
+                    {c.content}
+                  </p>
+                )}
               </div>
             );
           })}
+
+          {compact && threadComments.length > 1 && (
+            <button
+              type="button"
+              onClick={() => setShowAllComments((prev) => !prev)}
+              className="px-2.5 py-0.5 rounded-lg bg-[var(--primary-action-light)] text-[var(--primary-action)] border border-[var(--primary-action)]/25 text-[11px] font-black inline-flex items-center gap-1 cursor-pointer"
+            >
+              <ChevronDown
+                className={`w-3 h-3 transition-transform ${showAllComments ? 'rotate-180' : ''}`}
+              />
+              <span>
+                {showAllComments
+                  ? 'კომენტარების შეკვეცა'
+                  : `+${hiddenCommentsCount} კომენტარი (ყველას ნახვა)`}
+              </span>
+            </button>
+          )}
         </div>
       )}
 
       {/* Add Comment Input or Guest Sign-In Prompt */}
       {user ? (
-        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <form onSubmit={handleSubmit} className="flex items-center gap-1.5">
           <input
             type="text"
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder={`დაწერე კომენტარი როგორც ${user.fullName}...`}
+            placeholder="დაწერე კომენტარი..."
             aria-label="კომენტარის დაწერა"
-            className="flex-1 px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs card-third text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)] min-h-[44px]"
+            className={`flex-1 ${
+              compact ? 'px-2.5 py-1.5 min-h-[36px]' : 'px-3.5 py-2.5 min-h-[44px]'
+            } rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs card-third text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]`}
           />
           <button
             type="submit"
             disabled={isSubmitting || !content.trim()}
-            className="min-h-[44px] px-4 py-2 rounded-xl btn-primary disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 transition-all shadow-xs cursor-pointer"
+            className={`${
+              compact ? 'min-h-[36px] px-3 py-1.5' : 'min-h-[44px] px-4 py-2'
+            } rounded-xl btn-primary disabled:opacity-50 text-white text-xs font-bold flex items-center justify-center gap-1 shrink-0 transition-all shadow-xs cursor-pointer`}
           >
             <Send className="w-3.5 h-3.5" />
-            <span>გაგზავნა</span>
+            <span className={compact ? 'hidden sm:inline' : ''}>გაგზავნა</span>
           </button>
         </form>
-      ) : (
+      ) : !compact ? (
         <div className="p-3.5 rounded-2xl bg-[var(--primary-action-light)] border border-[var(--primary-action)]/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <span className="text-xs text-[var(--text-secondary)] font-medium">
             კომენტარის დასატოვებლად საჭიროა აქაუნთზე შესვლა
@@ -159,7 +200,7 @@ export const CommentsThread: React.FC<CommentsThreadProps> = ({
             <span>შესვლა / რეგისტრაცია</span>
           </button>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };
