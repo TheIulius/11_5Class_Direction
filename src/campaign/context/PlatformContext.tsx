@@ -183,6 +183,7 @@ interface PlatformContextValue {
   updateTimetable: (timetable: DaySchedule[]) => Promise<boolean>;
   // Resources / Study Notes
   submitResource: (res: Partial<PlatformResource>) => Promise<{ success: boolean; isPending?: boolean; error?: string }>;
+  updateResource: (id: string, res: Partial<PlatformResource>) => Promise<boolean>;
   moderateResource: (id: string, status: 'approved' | 'rejected') => Promise<boolean>;
   deleteResource: (id: string) => Promise<boolean>;
   upvoteResource: (id: string) => Promise<boolean>;
@@ -563,6 +564,19 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return { success: false, error: data.error || 'მასალის ატვირთვა ვერ მოხერხდა' };
   };
 
+  const updateResource = async (id: string, resource: Partial<PlatformResource>) => {
+    const res = await fetch(`/api/platform/resources/${id}`, {
+      method: 'PUT',
+      headers: getHeaders(),
+      body: JSON.stringify(resource),
+    });
+    if (res.ok) {
+      await refreshPlatform();
+      return true;
+    }
+    return false;
+  };
+
   const moderateResource = async (id: string, status: 'approved' | 'rejected') => {
     const res = await fetch(`/api/platform/resources/${id}/status`, {
       method: 'POST',
@@ -922,6 +936,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         deleteHomework,
         updateTimetable,
         submitResource,
+        updateResource,
         moderateResource,
         deleteResource,
         upvoteResource,

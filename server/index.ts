@@ -5223,8 +5223,8 @@ app.post('/api/platform/homework', (req: Request, res: Response) => {
 
 app.put('/api/platform/homework/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.canModerate) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ დავალების რედაქტირება.' });
+  if (!auth) {
+    return res.status(401).json({ error: 'ავტორიზაცია სავალდებულოა.' });
   }
   const { id } = req.params;
   const data = db.getData();
@@ -5232,7 +5232,12 @@ app.put('/api/platform/homework/:id', (req: Request, res: Response) => {
   const idx = p.homeworks.findIndex((h: any) => h.id === id);
   if (idx === -1) return res.status(404).json({ error: 'დავალება ვერ მოიძებნა.' });
 
-  p.homeworks[idx] = { ...p.homeworks[idx], ...req.body, id };
+  const existing = p.homeworks[idx] as any;
+  if (!auth.canModerate && existing.authorUsername !== auth.user.username) {
+    return res.status(403).json({ error: 'მხოლოდ ავტორს, მოდერატორს ან ადმინს შეუძლია დავალების რედაქტირება.' });
+  }
+
+  p.homeworks[idx] = { ...existing, ...req.body, id };
   savePlatformCMS(data, `Homework updated: ${p.homeworks[idx].title}`);
   res.json({ success: true, homework: p.homeworks[idx], homeworks: p.homeworks });
 });
@@ -5295,12 +5300,6 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
     return res.status(401).json({ error: 'მასალის/კონსპექტის ასატვირთად გთხოვთ შეხვიდეთ აქაუნთზე.' });
   }
   const body = req.body || {};
-  if (!body.title || !body.description) {
-    return res.status(400).json({ error: 'სათაური და მოკლე აღწერა სავალდებულოა.' });
-  }
-
-  const data = db.getData();
-  const p = initPlatformCMS(data);
 
   const parsedAttachments = Array.isArray(body.attachments)
     ? body.attachments
@@ -5314,11 +5313,25 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
     : undefined;
 
   const firstAtt = parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments[0] : undefined;
+  const hasAnyContent =
+    Boolean(firstAtt) ||
+    Boolean(body.attachmentDataUrl) ||
+    Boolean(body.title && String(body.title).trim()) ||
+    Boolean(body.description && String(body.description).trim()) ||
+    Boolean(body.content && String(body.content).trim()) ||
+    Boolean(body.linkUrl && String(body.linkUrl).trim());
+
+  if (!hasAnyContent) {
+    return res.status(400).json({ error: 'გთხოვთ მიამაგროთ ფაილი/ფოტო ან ჩაწეროთ ტექსტი/ბმული.' });
+  }
+
+  const data = db.getData();
+  const p = initPlatformCMS(data);
 
   const newResource: PlatformResource = {
     id: 'res_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
-    title: String(body.title).trim(),
-    description: String(body.description).trim(),
+    title: body.title ? String(body.title).trim() : '',
+    description: body.description ? String(body.description).trim() : '',
     content: body.content ? String(body.content).trim() : undefined,
     linkUrl: body.linkUrl ? String(body.linkUrl).trim() : undefined,
     attachmentName: body.attachmentName ? String(body.attachmentName).trim() : firstAtt?.name,
@@ -5340,8 +5353,54 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
   };
 
   p.resources.unshift(newResource);
-  savePlatformCMS(data, `Resource uploaded (${newResource.status}): ${newResource.title} by @${auth.user.username}`);
+  savePlatformCMS(data, `Resource uploaded (${newResource.status}): ${newResource.title || 'untitled'} by @${auth.user.username}`);
   res.json({ success: true, resource: newResource, resources: p.resources });
+});
+
+app.put('/api/platform/resources/:id', (req: Request, res: Response) => {
+  const auth = getPlatformAuthUser(req);
+  if (!auth) {
+    return res.status(401).json({ error: 'ავტორიზაცია სავალდებულოა.' });
+  }
+  const { id } = req.params;
+  const body = req.body || {};
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const idx = p.resources.findIndex((r) => r.id === id);
+  if (idx === -1) return res.status(404).json({ error: 'მასალა ვერ მოიძებნა.' });
+
+  const existing = p.resources[idx];
+  if (!auth.canModerate && existing.authorId !== auth.user.id && existing.authorUsername !== auth.user.username) {
+    return res.status(403).json({ error: 'მხოლოდ ავტორს, მოდერატორს ან ადმინს შეუძლია მასალის რედაქტირება.' });
+  }
+
+  const parsedAttachments = Array.isArray(body.attachments)
+    ? body.attachments
+        .filter((a: any) => a && a.name && a.dataUrl)
+        .map((a: any) => ({
+          name: String(a.name).trim(),
+          dataUrl: String(a.dataUrl),
+          size: typeof a.size === 'number' ? a.size : undefined,
+          mimeType: a.mimeType ? String(a.mimeType) : undefined,
+        }))
+    : existing.attachments;
+
+  const firstAtt = parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments[0] : undefined;
+
+  p.resources[idx] = {
+    ...existing,
+    title: body.title !== undefined ? String(body.title).trim() : existing.title,
+    description: body.description !== undefined ? String(body.description).trim() : existing.description,
+    content: body.content !== undefined ? (body.content ? String(body.content).trim() : undefined) : existing.content,
+    linkUrl: body.linkUrl !== undefined ? (body.linkUrl ? String(body.linkUrl).trim() : undefined) : existing.linkUrl,
+    resourceType: body.resourceType || existing.resourceType,
+    attachments: parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments : undefined,
+    attachmentName: firstAtt?.name,
+    attachmentDataUrl: firstAtt?.dataUrl,
+  };
+
+  savePlatformCMS(data, `Resource updated: ${p.resources[idx].title || id}`);
+  res.json({ success: true, resource: p.resources[idx], resources: p.resources });
 });
 
 app.post('/api/platform/resources/:id/status', (req: Request, res: Response) => {

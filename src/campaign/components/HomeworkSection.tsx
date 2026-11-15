@@ -68,6 +68,7 @@ export const HomeworkSection: React.FC = () => {
     canModerate,
     platform,
     addHomework,
+    updateHomework,
     deleteHomework,
     moderateHomework,
     updateTimetable,
@@ -133,14 +134,25 @@ export const HomeworkSection: React.FC = () => {
 
   const [expandedHwId, setExpandedHwId] = useState<string | null>(null);
 
-  // Add Homework Modal
+  // Add / Edit Homework Modal
   const [isAddHwOpen, setIsAddHwOpen] = useState(false);
+  const [editingHwId, setEditingHwId] = useState<string | null>(null);
   const [hwDate, setHwDate] = useState(() => tbilisiNow.dateString);
   const [hwSubject, setHwSubject] = useState('მათემატიკა');
   const [hwTeacher, setHwTeacher] = useState('ნანა ჯაფარიძე');
   const [hwTitle, setHwTitle] = useState('');
   const [hwNotes, setHwNotes] = useState('');
   const [submitBanner, setSubmitBanner] = useState<string | null>(null);
+
+  const openEditHomeworkModal = (hw: any) => {
+    setEditingHwId(hw.id);
+    setHwDate(hw.date || selectedDate);
+    setHwSubject(hw.subject || 'მათემატიკა');
+    setHwTeacher(hw.teacher || '');
+    setHwTitle(hw.title || '');
+    setHwNotes(hw.notes || '');
+    setIsAddHwOpen(true);
+  };
 
   // Mobile timetable selected day tab
   const [mobileTimetableDay, setMobileTimetableDay] = useState<string>(() => {
@@ -199,6 +211,30 @@ export const HomeworkSection: React.FC = () => {
     e.preventDefault();
     if (!hwTitle.trim()) return;
     const { displayDate, dayOfWeek } = formatGeoDate(hwDate);
+
+    if (editingHwId) {
+      const ok = await updateHomework(editingHwId, {
+        date: hwDate,
+        displayDate,
+        dayOfWeek,
+        subject: hwSubject.trim(),
+        teacher: hwTeacher.trim() || 'მასწავლებელი',
+        title: hwTitle.trim(),
+        notes: hwNotes.trim(),
+      });
+      if (ok) {
+        soundEffects.success();
+        setSelectedDate(hwDate);
+        setEditingHwId(null);
+        setHwTitle('');
+        setHwNotes('');
+        setIsAddHwOpen(false);
+        setSubmitBanner('დავალება წარმატებით განახლდა!');
+        setTimeout(() => setSubmitBanner(null), 4000);
+      }
+      return;
+    }
+
     const res = await addHomework({
       date: hwDate,
       displayDate,
@@ -308,6 +344,9 @@ export const HomeworkSection: React.FC = () => {
                   openAuthModal('login');
                   return;
                 }
+                setEditingHwId(null);
+                setHwTitle('');
+                setHwNotes('');
                 setHwDate(selectedDate);
                 setIsAddHwOpen(true);
               }}
@@ -406,14 +445,38 @@ export const HomeworkSection: React.FC = () => {
                         </p>
                       )}
                     </div>
-                    <button
-                      onClick={() => handleToggleComplete(hw.id)}
-                      className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-xs font-bold shrink-0 cursor-pointer self-start sm:self-center flex items-center justify-center gap-1.5 shadow-xs"
-                      aria-label="დავალების დასრულება"
-                    >
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>დასრულება</span>
-                    </button>
+                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
+                      <button
+                        onClick={() => handleToggleComplete(hw.id)}
+                        className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-xs font-bold shrink-0 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
+                        aria-label="დავალების დასრულება"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>დასრულება</span>
+                      </button>
+                      {(canModerate || (user && hw.authorUsername === user.username)) && (
+                        <button
+                          type="button"
+                          onClick={() => openEditHomeworkModal(hw)}
+                          className="p-2 rounded-xl card-surface border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--primary-action)] transition-colors cursor-pointer"
+                          title="რედაქტირება"
+                          aria-label="დავალების რედაქტირება"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                        </button>
+                      )}
+                      {canModerate && (
+                        <button
+                          type="button"
+                          onClick={() => deleteHomework(hw.id)}
+                          className="p-2 rounded-xl card-surface border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
+                          title="წაშლა"
+                          aria-label="დავალების წაშლა"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -569,11 +632,25 @@ export const HomeworkSection: React.FC = () => {
                             )}
                           </button>
 
+                          {(canModerate || (user && hw.authorUsername === user.username)) && (
+                            <button
+                              type="button"
+                              onClick={() => openEditHomeworkModal(hw)}
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--primary-action)] transition-colors cursor-pointer"
+                              title="რედაქტირება"
+                              aria-label="დავალების რედაქტირება"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                          )}
+
                           {canModerate && (
                             <button
+                              type="button"
                               onClick={() => deleteHomework(hw.id)}
-                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 transition-colors"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                               title="წაშლა"
+                              aria-label="დავალების წაშლა"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -861,10 +938,13 @@ export const HomeworkSection: React.FC = () => {
             >
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  საშინაო დავალების დამატება
+                  {editingHwId ? 'დავალების რედაქტირება' : 'საშინაო დავალების დამატება'}
                 </h3>
                 <button
-                  onClick={() => setIsAddHwOpen(false)}
+                  onClick={() => {
+                    setEditingHwId(null);
+                    setIsAddHwOpen(false);
+                  }}
                   className="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white"
                 >
                   <X className="w-4 h-4" />
@@ -943,7 +1023,10 @@ export const HomeworkSection: React.FC = () => {
                 <div className="pt-2 flex justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() => setIsAddHwOpen(false)}
+                    onClick={() => {
+                      setEditingHwId(null);
+                      setIsAddHwOpen(false);
+                    }}
                     className="px-3.5 py-2 rounded-xl text-xs text-slate-500"
                   >
                     გაუქმება
@@ -952,7 +1035,7 @@ export const HomeworkSection: React.FC = () => {
                     type="submit"
                     className="px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer"
                   >
-                    დამატება
+                    {editingHwId ? 'შენახვა' : 'დამატება'}
                   </button>
                 </div>
               </form>

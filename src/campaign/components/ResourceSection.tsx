@@ -1,4 +1,4 @@
-import React, { useState, useId } from 'react';
+import React, { useState, useId, useRef, useEffect, useMemo } from 'react';
 import {
   FileText,
   Upload,
@@ -13,6 +13,12 @@ import {
   X,
   Image as ImageIcon,
   Paperclip,
+  Edit3,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Film,
+  ChevronDown,
 } from 'lucide-react';
 import { usePlatform, PlatformResource, ResourceAttachment } from '../context/PlatformContext';
 
@@ -31,6 +37,18 @@ const formatFileSize = (bytes?: number) => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
+export const isImageAttachment = (att: ResourceAttachment): boolean => {
+  if (att.mimeType?.startsWith('image/')) return true;
+  if (att.dataUrl.startsWith('data:image/')) return true;
+  return /\.(png|jpe?g|webp|gif|heic|svg)$/i.test(att.name || '');
+};
+
+export const isVideoAttachment = (att: ResourceAttachment): boolean => {
+  if (att.mimeType?.startsWith('video/')) return true;
+  if (att.dataUrl.startsWith('data:video/')) return true;
+  return /\.(mp4|mov|webm|m4v|ogg)$/i.test(att.name || '');
+};
+
 const getResourceAttachments = (r: PlatformResource): ResourceAttachment[] => {
   if (Array.isArray(r.attachments) && r.attachments.length > 0) {
     return r.attachments;
@@ -46,6 +64,13 @@ const getResourceAttachments = (r: PlatformResource): ResourceAttachment[] => {
   return [];
 };
 
+interface GalleryMediaItem {
+  attachment: ResourceAttachment;
+  resourceId: string;
+  resourceTitle?: string;
+  authorName: string;
+}
+
 export const ResourceSection: React.FC<ResourceSectionProps> = ({
   targetType,
   targetId,
@@ -58,6 +83,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     canModerate,
     platform,
     submitResource,
+    updateResource,
     moderateResource,
     deleteResource,
     upvoteResource,
@@ -65,30 +91,146 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
   } = usePlatform();
 
   const fileInputId = useId();
+  const dialogTitleId = useId();
+  const galleryDialogRef = useRef<HTMLDialogElement | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [editingResourceId, setEditingResourceId] = useState<string | null>(null);
+  const [showAdvancedFields, setShowAdvancedFields] = useState(false);
   const [resTitle, setResTitle] = useState('');
-  const [resDesc, setResDesc] = useState('');
   const [resContent, setResContent] = useState('');
   const [resLink, setResLink] = useState('');
-  const [resType, setResType] = useState<PlatformResource['resourceType']>('კონსპექტი');
+  const [resType, setResType] = useState<PlatformResource['resourceType']>('დავალების ამოხსნა');
   const [attachments, setAttachments] = useState<ResourceAttachment[]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [expandedResId, setExpandedResId] = useState<string | null>(null);
-  const [previewAttachment, setPreviewAttachment] = useState<ResourceAttachment | null>(null);
+
+  // Unified gallery state across all photos & videos attached to this homework/target
+  const [activeGalleryIdx, setActiveGalleryIdx] = useState<number | null>(null);
 
   // Filter resources matching this target
-  const matchingResources = platform.resources.filter((r) => {
-    if (targetId) {
-      if (r.targetId !== targetId) return false;
-    } else if (r.targetType !== targetType) {
-      return false;
+  const matchingResources = useMemo(
+    () =>
+      platform.resources.filter((r) => {
+        if (targetId) {
+          if (r.targetId !== targetId) return false;
+        } else if (r.targetType !== targetType) {
+          return false;
+        }
+        if (r.status === 'approved') return true;
+        if (r.status === 'pending' && (canModerate || (user && user.id === r.authorId))) return true;
+        return false;
+      }),
+    [platform.resources, targetId, targetType, canModerate, user]
+  );
+
+  // Build flat list of all photos & videos across all matching resources for this homework/target
+  const allTargetMediaItems = useMemo<GalleryMediaItem[]>(() => {
+    const list: GalleryMediaItem[] = [];
+    for (const r of matchingResources) {
+      const atts = getResourceAttachments(r);
+      for (const att of atts) {
+        if (isImageAttachment(att) || isVideoAttachment(att)) {
+          list.push({
+            attachment: att,
+            resourceId: r.id,
+            resourceTitle: r.title || r.description || undefined,
+            authorName: r.authorName,
+          });
+        }
+      }
     }
-    // Public sees approved resources; admins, moderators and the author also see pending resources
-    if (r.status === 'approved') return true;
-    if (r.status === 'pending' && (canModerate || (user && user.id === r.authorId))) return true;
-    return false;
-  });
+    return list;
+  }, [matchingResources]);
+
+  const openGalleryAt = (resourceId: string, attachmentDataUrl: string) => {
+    const idx = allTargetMediaItems.findIndex(
+      (m) => m.resourceId === resourceId && m.attachment.dataUrl === attachmentDataUrl
+    );
+    setActiveGalleryIdx(idx >= 0 ? idx : 0);
+  };
+
+  const closeGallery = () => {
+    const dlg = galleryDialogRef.current;
+    if (dlg && dlg.open) {
+      dlg.close();
+    }
+    setActiveGalleryIdx(null);
+  };
+
+  const goPrevMedia = () => {
+    if (allTargetMediaItems.length <= 1) return;
+    setActiveGalleryIdx((prev) =>
+      prev === null ? 0 : (prev - 1 + allTargetMediaItems.length) % allTargetMediaItems.length
+    );
+  };
+
+  const goNextMedia = () => {
+    if (allTargetMediaItems.length <= 1) return;
+    setActiveGalleryIdx((prev) =>
+      prev === null ? 0 : (prev + 1) % allTargetMediaItems.length
+    );
+  };
+
+  // Sync native <dialog> open/close and keyboard Left/Right navigation
+  useEffect(() => {
+    const dlg = galleryDialogRef.current;
+    if (!dlg) return;
+
+    if (activeGalleryIdx !== null) {
+      if (!dlg.open) {
+        try {
+          dlg.showModal();
+        } catch {}
+      }
+    } else if (dlg.open) {
+      dlg.close();
+    }
+  }, [activeGalleryIdx]);
+
+  // Fallback for browsers without native dialog[closedby="any"] + keyboard Left/Right arrows
+  useEffect(() => {
+    const dlg = galleryDialogRef.current;
+    if (!dlg) return;
+
+    const handleClose = () => {
+      setActiveGalleryIdx(null);
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!dlg.open) return;
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        goPrevMedia();
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        goNextMedia();
+      }
+    };
+    const handleBackdropClick = (event: MouseEvent) => {
+      if ('closedBy' in HTMLDialogElement.prototype) return;
+      if (event.target !== dlg) return;
+      const rect = dlg.getBoundingClientRect();
+      const isDialogContent =
+        rect.top <= event.clientY &&
+        event.clientY <= rect.top + rect.height &&
+        rect.left <= event.clientX &&
+        event.clientX <= rect.left + rect.width;
+      if (!isDialogContent) {
+        dlg.close();
+      }
+    };
+
+    dlg.addEventListener('close', handleClose);
+    dlg.addEventListener('keydown', handleKeyDown);
+    dlg.addEventListener('click', handleBackdropClick);
+    return () => {
+      dlg.removeEventListener('close', handleClose);
+      dlg.removeEventListener('keydown', handleKeyDown);
+      dlg.removeEventListener('click', handleBackdropClick);
+    };
+  }, [allTargetMediaItems.length]);
 
   const readFileAsDataUrl = (file: File): Promise<ResourceAttachment> =>
     new Promise((resolve, reject) => {
@@ -115,12 +257,14 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     setFileError(null);
 
     const selectedFiles = Array.from(fileList);
-    const MAX_PER_FILE = 10 * 1024 * 1024; // 10 MB per file
-    const MAX_TOTAL = 30 * 1024 * 1024; // 30 MB total
+    const MAX_PER_FILE = 20 * 1024 * 1024; // 20 MB per photo/video/file
+    const MAX_TOTAL = 40 * 1024 * 1024; // 40 MB total
 
     const oversized = selectedFiles.find((f) => f.size > MAX_PER_FILE);
     if (oversized) {
-      setFileError(`ფაილი „${oversized.name}“ აღემატება 10 MB-ს. გთხოვთ ატვირთოთ უფრო მცირე ფაილი ან ჩასვათ Google Drive ბმული.`);
+      setFileError(
+        `ფაილი „${oversized.name}“ აღემატება 20 MB-ს. გთხოვთ ატვირთოთ უფრო მცირე ფაილი ან ჩასვათ ბმული.`
+      );
       e.target.value = '';
       return;
     }
@@ -128,7 +272,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     const currentTotal = attachments.reduce((sum, a) => sum + (a.size || 0), 0);
     const newTotal = selectedFiles.reduce((sum, f) => sum + f.size, 0);
     if (currentTotal + newTotal > MAX_TOTAL) {
-      setFileError('მიმაგრებული ფაილების ჯამური მოცულობა არ უნდა აღემატებოდეს 30 MB-ს.');
+      setFileError('მიმაგრებული ფაილების ჯამური მოცულობა არ უნდა აღემატებოდეს 40 MB-ს.');
       e.target.value = '';
       return;
     }
@@ -146,7 +290,6 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     } catch {
       setFileError('ზოგიერთი ფაილის წაკითხვა ვერ მოხერხდა.');
     } finally {
-      // Reset input value so selecting the same or additional files triggers onChange again
       e.target.value = '';
     }
   };
@@ -155,14 +298,67 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     setAttachments((prev) => prev.filter((_, idx) => idx !== index));
   };
 
+  const resetForm = () => {
+    setEditingResourceId(null);
+    setResTitle('');
+    setResContent('');
+    setResLink('');
+    setResType('დავალების ამოხსნა');
+    setAttachments([]);
+    setFileError(null);
+    setShowAdvancedFields(false);
+    setShowUploadForm(false);
+  };
+
+  const handleStartEdit = (r: PlatformResource) => {
+    setEditingResourceId(r.id);
+    setResTitle(r.title || r.description || '');
+    setResContent(r.content || '');
+    setResLink(r.linkUrl || '');
+    setResType(r.resourceType || 'დავალების ამოხსნა');
+    setAttachments(getResourceAttachments(r));
+    setShowAdvancedFields(Boolean(r.content || r.linkUrl));
+    setFileError(null);
+    setShowUploadForm(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!resTitle.trim() || !resDesc.trim()) return;
+    const hasAnyContent =
+      attachments.length > 0 ||
+      Boolean(resTitle.trim()) ||
+      Boolean(resContent.trim()) ||
+      Boolean(resLink.trim());
+
+    if (!hasAnyContent) {
+      setFileError('გთხოვთ აირჩიოთ ფოტო/ვიდეო/ფაილი ან ჩაწეროთ ტექსტი.');
+      return;
+    }
 
     const firstAtt = attachments[0];
+
+    if (editingResourceId) {
+      const ok = await updateResource(editingResourceId, {
+        title: resTitle.trim(),
+        description: '',
+        content: resContent.trim() || undefined,
+        linkUrl: resLink.trim() || undefined,
+        attachmentName: firstAtt?.name || undefined,
+        attachmentDataUrl: firstAtt?.dataUrl || undefined,
+        attachments,
+        resourceType: resType,
+      });
+      if (ok) {
+        resetForm();
+        setFeedbackMsg('მასალა წარმატებით განახლდა!');
+        setTimeout(() => setFeedbackMsg(null), 4000);
+      }
+      return;
+    }
+
     const result = await submitResource({
       title: resTitle.trim(),
-      description: resDesc.trim(),
+      description: '',
       content: resContent.trim() || undefined,
       linkUrl: resLink.trim() || undefined,
       attachmentName: firstAtt?.name || undefined,
@@ -176,21 +372,22 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     });
 
     if (result.success) {
-      setResTitle('');
-      setResDesc('');
-      setResContent('');
-      setResLink('');
-      setAttachments([]);
-      setFileError(null);
-      setShowUploadForm(false);
+      resetForm();
       setFeedbackMsg(
         result.isPending
           ? 'მასალა გაიგზავნა! ადმინისტრატორის დადასტურებისთანავე გამოჩნდება ყველასთვის.'
-          : 'მასალა წარმატებით დაემატა და გამოქვეყნდა!'
+          : 'მასალა წარმატებით დაემატა!'
       );
       setTimeout(() => setFeedbackMsg(null), 5000);
+    } else if (result.error) {
+      setFileError(result.error);
     }
   };
+
+  const currentMedia =
+    activeGalleryIdx !== null && allTargetMediaItems[activeGalleryIdx]
+      ? allTargetMediaItems[activeGalleryIdx]
+      : null;
 
   return (
     <div className="space-y-3">
@@ -207,159 +404,88 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
               openAuthModal('login');
               return;
             }
-            setShowUploadForm((prev) => !prev);
+            if (showUploadForm) {
+              resetForm();
+            } else {
+              setShowUploadForm(true);
+            }
           }}
-          className="min-h-[44px] px-3.5 py-2 rounded-xl card-third hover:opacity-90 text-[var(--primary-action)] text-xs font-bold flex items-center gap-1.5 border border-[var(--border-subtle)] transition-opacity cursor-pointer"
+          className="min-h-[42px] px-3.5 py-2 rounded-xl card-third hover:opacity-90 text-[var(--primary-action)] text-xs font-bold flex items-center gap-1.5 border border-[var(--border-subtle)] transition-opacity cursor-pointer"
         >
           {showUploadForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showUploadForm ? 'დახურვა' : 'კონსპექტის / მასალის ატვირთვა'}
+          {showUploadForm ? 'დახურვა' : 'ფოტოს / მასალის ატვირთვა'}
         </button>
       </div>
 
       {feedbackMsg && (
-        <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2">
+        <div
+          role="status"
+          className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-bold flex items-center gap-2"
+        >
           <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
           <span>{feedbackMsg}</span>
         </div>
       )}
 
-      {/* Upload Form */}
+      {/* Fast, Minimal Upload / Edit Form (Zero Mandatory Text Fields!) */}
       {showUploadForm && user && (
         <form
           onSubmit={handleSubmit}
-          className="p-4 rounded-2xl card-third border border-[var(--border-subtle)] space-y-3 animate-fadeIn"
+          className="p-3.5 sm:p-4 rounded-2xl card-third border border-[var(--border-subtle)] space-y-3 animate-fadeIn"
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <span className="text-xs font-black text-[var(--text-primary)] flex items-center gap-1.5">
               <Upload className="w-3.5 h-3.5 text-[var(--primary-action)]" />
-              ახალი სასწავლო მასალის / კონსპექტის დამატება
+              {editingResourceId
+                ? 'ატვირთული მასალის რედაქტირება'
+                : 'ფოტოების, ვიდეოს ან მასალის სწრაფი ატვირთვა'}
             </span>
-            {!canModerate && (
+            {!canModerate && !editingResourceId && (
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/20">
                 გამოქვეყნდება დადასტურების შემდეგ
               </span>
             )}
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-            <div className="sm:col-span-2">
-              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
-                სათაური *
-              </label>
+          {/* 1. Primary Action: Select Photos / Videos / Files (No Title Required!) */}
+          <div className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
               <input
-                type="text"
-                required
-                value={resTitle}
-                onChange={(e) => setResTitle(e.target.value)}
-                placeholder="მაგ: ტრიგონომეტრიის ფორმულების კონსპექტი"
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
+                id={fileInputId}
+                type="file"
+                multiple
+                accept="image/*,video/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
+                onChange={handleFileChange}
+                className="sr-only peer"
               />
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
-                მასალის ტიპი
-              </label>
-              <select
-                value={resType}
-                onChange={(e) => setResType(e.target.value as any)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary-action)] min-h-[44px]"
-              >
-                <option value="კონსპექტი">კონსპექტი</option>
-                <option value="დავალების ამოხსნა">დავალების ამოხსნა</option>
-                <option value="ტესტი/მასალა">ტესტი / სავარჯიშო</option>
-                <option value="პრეზენტაცია">პრეზენტაცია</option>
-                <option value="ბმული">სასარგებლო ბმული</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
-              მოკლე აღწერა *
-            </label>
-            <input
-              type="text"
-              required
-              value={resDesc}
-              onChange={(e) => setResDesc(e.target.value)}
-              placeholder="რა საკითხებს მოიცავს ეს მასალა?"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
-              კონსპექტის ტექსტი / ფორმულები (სურვილისამებრ)
-            </label>
-            <textarea
-              rows={4}
-              value={resContent}
-              onChange={(e) => setResContent(e.target.value)}
-              placeholder="ჩაწერეთ კონსპექტი, საკვანძო თეზისები ან ამოხსნა პირდაპირ აქ..."
-              className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-start">
-            <div>
-              <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
-                გარე ბმული (Google Docs, Drive, PDF, YouTube)
-              </label>
-              <input
-                type="url"
-                value={resLink}
-                onChange={(e) => setResLink(e.target.value)}
-                placeholder="https://docs.google.com/..."
-                autoCorrect="off"
-                autoCapitalize="none"
-                spellCheck={false}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
-              />
-            </div>
-            <div>
               <label
                 htmlFor={fileInputId}
-                className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1"
+                className="min-h-[44px] px-4 py-2.5 rounded-xl btn-primary text-white text-xs sm:text-sm font-bold inline-flex items-center gap-2 cursor-pointer select-none peer-focus-visible:outline-3 peer-focus-visible:outline-[var(--primary-action)] peer-focus-visible:outline-offset-2"
               >
-                ფაილების მიმაგრება (შეგიძლიათ აირჩიოთ ბევრი ფოტო, PDF, Word — თითო მაქს. 10MB)
+                <ImageIcon className="w-4 h-4 shrink-0" aria-hidden="true" />
+                <span>
+                  {attachments.length === 0
+                    ? 'ფოტოების / ვიდეოს / ფაილების არჩევა'
+                    : `+ კიდევ ფაილების დამატება (${attachments.length})`}
+                </span>
               </label>
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  id={fileInputId}
-                  type="file"
-                  multiple
-                  accept=".pdf,.png,.jpg,.jpeg,.webp,.heic,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt"
-                  onChange={handleFileChange}
-                  className="sr-only peer"
-                />
-                <label
-                  htmlFor={fileInputId}
-                  className="min-h-[42px] px-3.5 py-2 rounded-xl btn-primary text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer select-none peer-focus-visible:outline-3 peer-focus-visible:outline-[var(--primary-action)] peer-focus-visible:outline-offset-2"
-                >
-                  <Paperclip className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                  <span>
-                    {attachments.length === 0
-                      ? 'ფაილების არჩევა (რამდენიმე ერთად)'
-                      : `+ კიდევ ფაილების დამატება (${attachments.length})`}
-                  </span>
-                </label>
-                {attachments.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => setAttachments([])}
-                    className="min-h-[38px] px-2.5 py-1.5 rounded-xl card-surface border border-[var(--border-subtle)] text-[11px] font-bold text-rose-600 hover:bg-rose-500/10 cursor-pointer"
-                  >
-                    ყველას წაშლა
-                  </button>
-                )}
-              </div>
 
-              {fileError && (
-                <p role="alert" className="text-[11px] font-bold text-rose-600 mt-1.5">
-                  {fileError}
-                </p>
+              {attachments.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => setAttachments([])}
+                  className="min-h-[40px] px-3 py-1.5 rounded-xl card-surface border border-[var(--border-subtle)] text-xs font-bold text-rose-600 hover:bg-rose-500/10 cursor-pointer"
+                >
+                  ყველას წაშლა
+                </button>
               )}
             </div>
+
+            {fileError && (
+              <p role="alert" className="text-xs font-bold text-rose-600">
+                {fileError}
+              </p>
+            )}
           </div>
 
           {/* Attached Files Preview Grid */}
@@ -368,51 +494,58 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-[var(--text-secondary)] flex items-center gap-1.5">
                   <Paperclip className="w-3.5 h-3.5 text-[var(--primary-action)]" />
-                  მიმაგრებული ფაილები ({attachments.length})
+                  არჩეული ფაილები ({attachments.length})
                 </span>
                 <span className="text-[10px] text-[var(--text-muted)]">
-                  ჯამში: {formatFileSize(attachments.reduce((s, a) => s + (a.size || 0), 0))}
+                  {formatFileSize(attachments.reduce((s, a) => s + (a.size || 0), 0))}
                 </span>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                 {attachments.map((att, idx) => {
-                  const isImg = att.dataUrl.startsWith('data:image/');
+                  const isImg = isImageAttachment(att);
+                  const isVid = isVideoAttachment(att);
                   return (
                     <div
                       key={`${att.name}-${idx}`}
-                      className="flex items-center justify-between gap-2 p-2 rounded-xl card-third border border-[var(--border-subtle)] min-w-0"
+                      className="relative group flex flex-col justify-between p-2 rounded-xl card-third border border-[var(--border-subtle)] min-w-0"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        {isImg ? (
-                          <img
-                            src={att.dataUrl}
-                            alt={att.name}
-                            className="w-10 h-10 rounded-lg object-cover border border-[var(--border-subtle)] shrink-0 bg-white"
-                          />
-                        ) : (
-                          <div className="w-10 h-10 rounded-lg bg-[var(--primary-action-light)] text-[var(--primary-action)] flex items-center justify-center shrink-0">
-                            <FileText className="w-5 h-5" />
-                          </div>
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-[var(--text-primary)] truncate" title={att.name}>
-                            {att.name}
-                          </p>
-                          {att.size ? (
-                            <p className="text-[10px] text-[var(--text-muted)]">
-                              {formatFileSize(att.size)}
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
                       <button
                         type="button"
                         onClick={() => handleRemoveAttachment(idx)}
                         aria-label={`ფაილის წაშლა: ${att.name}`}
-                        className="w-8 h-8 min-w-[32px] min-h-[32px] rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:text-rose-600 hover:bg-rose-500/10 cursor-pointer shrink-0"
+                        className="absolute top-1.5 right-1.5 z-10 w-7 h-7 rounded-full bg-black/75 text-white flex items-center justify-center hover:bg-rose-600 cursor-pointer"
                       >
-                        <X className="w-4 h-4" />
+                        <X className="w-3.5 h-3.5" />
                       </button>
+
+                      {isImg ? (
+                        <img
+                          src={att.dataUrl}
+                          alt={att.name}
+                          className="w-full h-24 rounded-lg object-cover border border-[var(--border-subtle)] bg-white"
+                        />
+                      ) : isVid ? (
+                        <div className="w-full h-24 rounded-lg bg-slate-900 text-white flex flex-col items-center justify-center gap-1">
+                          <Film className="w-6 h-6 text-purple-400" />
+                          <span className="text-[10px] font-bold">ვიდეო</span>
+                        </div>
+                      ) : (
+                        <div className="w-full h-24 rounded-lg bg-[var(--primary-action-light)] text-[var(--primary-action)] flex flex-col items-center justify-center gap-1">
+                          <FileText className="w-6 h-6" />
+                          <span className="text-[10px] font-bold">ფაილი</span>
+                        </div>
+                      )}
+
+                      <div className="pt-1.5 min-w-0">
+                        <p className="text-[11px] font-bold text-[var(--text-primary)] truncate" title={att.name}>
+                          {att.name}
+                        </p>
+                        {att.size ? (
+                          <p className="text-[10px] text-[var(--text-muted)]">
+                            {formatFileSize(att.size)}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
                   );
                 })}
@@ -420,19 +553,106 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
             </div>
           )}
 
+          {/* 2. Single Optional Title / Caption Input */}
+          <div>
+            <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
+              სათაური ან მოკლე მინაწერი (არასავალდებულო — შეგიძლიათ ცარიელი დატოვოთ)
+            </label>
+            <input
+              type="text"
+              value={resTitle}
+              onChange={(e) => setResTitle(e.target.value)}
+              placeholder="მაგ: ამოცანა #56-ის ამოხსნა (ან დატოვეთ ცარიელი უსათაურო ფოტოსთვის)"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
+            />
+          </div>
+
+          {/* 3. Optional Expandable Text / External Link Section */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowAdvancedFields((prev) => !prev)}
+              className="text-xs font-bold text-[var(--primary-action)] hover:underline inline-flex items-center gap-1 cursor-pointer"
+            >
+              <ChevronDown
+                className={`w-3.5 h-3.5 transition-transform ${showAdvancedFields ? 'rotate-180' : ''}`}
+              />
+              <span>
+                {showAdvancedFields
+                  ? 'დამატებითი ველების დამალვა'
+                  : '+ ტექსტური კონსპექტის ან გარე ბმულის დამატება (სურვილისამებრ)'}
+              </span>
+            </button>
+
+            {showAdvancedFields && (
+              <div className="mt-2.5 space-y-2.5 pt-2.5 border-t border-[var(--border-subtle)]">
+                <div>
+                  <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
+                    კონსპექტის ტექსტი / ფორმულები (არასავალდებულო)
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={resContent}
+                    onChange={(e) => setResContent(e.target.value)}
+                    placeholder="ჩაწერეთ კონსპექტი ან ამოხსნა პირდაპირ აქ..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
+                      გარე ბმული (Google Drive, Docs, YouTube)
+                    </label>
+                    <input
+                      type="url"
+                      value={resLink}
+                      onChange={(e) => setResLink(e.target.value)}
+                      placeholder="https://..."
+                      autoCorrect="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-[var(--primary-action)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-[var(--text-secondary)] mb-1">
+                      მასალის კატეგორია
+                    </label>
+                    <select
+                      value={resType}
+                      onChange={(e) => setResType(e.target.value as any)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[var(--border-subtle)] text-base sm:text-xs bg-[var(--surface-card)] text-[var(--text-primary)] focus:outline-none focus:border-[var(--primary-action)] min-h-[42px]"
+                    >
+                      <option value="დავალების ამოხსნა">დავალების ამოხსნა</option>
+                      <option value="კონსპექტი">კონსპექტი</option>
+                      <option value="ტესტი/მასალა">ტესტი / სავარჯიშო</option>
+                      <option value="პრეზენტაცია">პრეზენტაცია</option>
+                      <option value="ბმული">სასარგებლო ბმული</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-2 pt-1">
             <button
               type="button"
-              onClick={() => setShowUploadForm(false)}
-              className="min-h-[44px] px-4 py-2 rounded-xl card-surface border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold hover:text-[var(--text-primary)] cursor-pointer"
+              onClick={resetForm}
+              className="min-h-[42px] px-4 py-2 rounded-xl card-surface border border-[var(--border-subtle)] text-[var(--text-secondary)] text-xs font-bold hover:text-[var(--text-primary)] cursor-pointer"
             >
               გაუქმება
             </button>
             <button
               type="submit"
-              className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-xs cursor-pointer"
+              className="min-h-[42px] px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-xs cursor-pointer"
             >
-              {canModerate ? 'ატვირთვა და გამოქვეყნება' : 'ატვირთვა (დასადასტურებლად გაგზავნა)'}
+              {editingResourceId
+                ? 'ცვლილებების შენახვა'
+                : canModerate
+                ? 'ატვირთვა და გამოქვეყნება'
+                : 'ატვირთვა'}
             </button>
           </div>
         </form>
@@ -441,7 +661,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
       {/* Resources List */}
       {matchingResources.length === 0 ? (
         <div className="p-3.5 rounded-2xl card-third border border-[var(--border-subtle)] text-xs text-[var(--text-muted)] flex items-center justify-between gap-2">
-          <span>ამ აქტივობაზე კონსპექტი ჯერ არ არის ატვირთული.</span>
+          <span>ამ დავალებაზე ფოტო ან მასალა ჯერ არ არის ატვირთული.</span>
           {!user && (
             <button
               type="button"
@@ -456,9 +676,17 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
         <div className="space-y-2.5">
           {matchingResources.map((r) => {
             const isExpanded = expandedResId === r.id;
-            const canDelete = canModerate || (user && user.id === r.authorId);
+            const canModify =
+              canModerate ||
+              (user && (user.id === r.authorId || user.username === r.authorUsername));
             const resAttachments = getResourceAttachments(r);
-            const imageAttachments = resAttachments.filter((a) => a.dataUrl.startsWith('data:image/'));
+            const mediaAttachments = resAttachments.filter(
+              (a) => isImageAttachment(a) || isVideoAttachment(a)
+            );
+            const docAttachments = resAttachments.filter(
+              (a) => !isImageAttachment(a) && !isVideoAttachment(a)
+            );
+
             return (
               <div
                 key={r.id}
@@ -469,7 +697,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1 flex-1 min-w-0">
+                  <div className="space-y-1.5 flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-1.5">
                       <span className="px-2 py-0.5 rounded-md bg-[var(--primary-action-light)] text-[var(--primary-action)] text-[10px] font-black border border-[var(--primary-action)]/20">
                         {r.resourceType}
@@ -483,44 +711,71 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                       {r.status === 'pending' && (
                         <span className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300 text-[10px] font-black inline-flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          ელოდება ადმინის დადასტურებას
+                          ელოდება დადასტურებას
                         </span>
                       )}
                       <span className="text-[11px] text-[var(--text-muted)]">
-                        • ავტორი: <strong className="text-[var(--text-secondary)]">{r.authorName}</strong>
+                        • <strong className="text-[var(--text-secondary)]">{r.authorName}</strong>
                       </span>
                     </div>
 
-                    <h5 className="text-xs sm:text-sm font-black text-[var(--text-primary)]">{r.title}</h5>
-                    <p className="text-xs text-[var(--text-secondary)]">{r.description}</p>
+                    {r.title && (
+                      <h5 className="text-xs sm:text-sm font-black text-[var(--text-primary)]">
+                        {r.title}
+                      </h5>
+                    )}
+                    {r.description && r.description !== r.title && (
+                      <p className="text-xs text-[var(--text-secondary)]">{r.description}</p>
+                    )}
 
-                    {/* Image Attachment Thumbnails Strip */}
-                    {imageAttachments.length > 0 && (
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {imageAttachments.map((imgAtt, imgIdx) => (
-                          <button
-                            key={`${r.id}-img-${imgIdx}`}
-                            type="button"
-                            onClick={() => setPreviewAttachment(imgAtt)}
-                            className="group relative rounded-xl overflow-hidden border-2 border-[var(--border-subtle)] hover:border-[var(--primary-action)] transition-all bg-white cursor-pointer"
-                            title={`გადიდება: ${imgAtt.name}`}
-                          >
-                            <img
-                              src={imgAtt.dataUrl}
-                              alt={imgAtt.name}
-                              className="w-20 h-20 sm:w-24 sm:h-24 object-cover group-hover:scale-105 transition-transform"
-                            />
-                            <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/70 text-white text-[9px] font-bold flex items-center gap-0.5">
-                              <ImageIcon className="w-2.5 h-2.5" />
-                              {imgIdx + 1}
-                            </span>
-                          </button>
-                        ))}
+                    {/* Interactive Photo & Video Gallery Grid (Click to Open In-Site Viewer!) */}
+                    {mediaAttachments.length > 0 && (
+                      <div className="flex flex-wrap gap-2 pt-1">
+                        {mediaAttachments.map((mediaAtt, mIdx) => {
+                          const isVid = isVideoAttachment(mediaAtt);
+                          return (
+                            <button
+                              key={`${r.id}-media-${mIdx}`}
+                              type="button"
+                              onClick={() => openGalleryAt(r.id, mediaAtt.dataUrl)}
+                              className="group relative rounded-xl overflow-hidden border-2 border-[var(--border-subtle)] hover:border-[var(--primary-action)] transition-all bg-slate-900/5 cursor-pointer"
+                              aria-label={`საიტზევე გახსნა: ${mediaAtt.name || `ფოტო ${mIdx + 1}`}`}
+                            >
+                              {isVid ? (
+                                <div className="w-24 h-24 sm:w-28 sm:h-28 bg-slate-900 text-white flex flex-col items-center justify-center gap-1 relative">
+                                  <video
+                                    src={mediaAtt.dataUrl}
+                                    preload="metadata"
+                                    muted
+                                    playsInline
+                                    className="absolute inset-0 w-full h-full object-cover opacity-70"
+                                  />
+                                  <span className="relative z-10 w-9 h-9 rounded-full bg-purple-600/90 text-white flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                    <Play className="w-4 h-4 fill-white ml-0.5" />
+                                  </span>
+                                  <span className="relative z-10 text-[9px] font-bold px-1.5 py-0.5 rounded bg-black/70">
+                                    ვიდეო
+                                  </span>
+                                </div>
+                              ) : (
+                                <img
+                                  src={mediaAtt.dataUrl}
+                                  alt={mediaAtt.name || `ფოტო ${mIdx + 1}`}
+                                  className="w-24 h-24 sm:w-28 sm:h-28 object-cover group-hover:scale-105 transition-transform bg-white"
+                                />
+                              )}
+                              <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/75 text-white text-[9px] font-bold flex items-center gap-0.5">
+                                <ImageIcon className="w-2.5 h-2.5" />
+                                {mIdx + 1}/{mediaAttachments.length}
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     )}
 
-                    {/* Action Links & All File Downloads */}
-                    <div className="flex flex-wrap items-center gap-2.5 pt-1.5">
+                    {/* Action Links & Non-Media Document Downloads */}
+                    <div className="flex flex-wrap items-center gap-2.5 pt-1">
                       {r.content && (
                         <button
                           type="button"
@@ -528,7 +783,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                           className="text-xs font-bold text-[var(--primary-action)] hover:opacity-80 flex items-center gap-1 cursor-pointer"
                         >
                           <Sparkles className="w-3.5 h-3.5" />
-                          {isExpanded ? 'კონსპექტის დამალვა' : 'კონსპექტის წაკითხვა'}
+                          {isExpanded ? 'ტექსტის დამალვა' : 'ტექსტის წაკითხვა'}
                         </button>
                       )}
                       {r.linkUrl && (
@@ -542,9 +797,9 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                           ბმულზე გადასვლა
                         </a>
                       )}
-                      {resAttachments.map((att, attIdx) => (
+                      {docAttachments.map((att, attIdx) => (
                         <a
-                          key={`${r.id}-att-${attIdx}`}
+                          key={`${r.id}-doc-${attIdx}`}
                           href={att.dataUrl}
                           download={att.name || `masala-${attIdx + 1}`}
                           className="px-2.5 py-1 rounded-lg card-third border border-[var(--border-subtle)] text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:underline inline-flex items-center gap-1.5"
@@ -564,7 +819,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                     )}
                   </div>
 
-                  {/* Right Actions */}
+                  {/* Right Actions (Approve, Upvote, Edit, Delete) */}
                   <div className="flex items-center gap-1.5 shrink-0">
                     {r.status === 'pending' && canModerate && (
                       <button
@@ -586,12 +841,24 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                       <span>{r.upvotes || 0}</span>
                     </button>
 
-                    {canDelete && (
+                    {canModify && (
+                      <button
+                        type="button"
+                        onClick={() => handleStartEdit(r)}
+                        title="რედაქტირება"
+                        aria-label="მასალის რედაქტირება"
+                        className="p-2 rounded-xl card-third hover:bg-purple-500/10 text-[var(--text-muted)] hover:text-[var(--primary-action)] transition-colors cursor-pointer"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    {canModify && (
                       <button
                         type="button"
                         onClick={() => deleteResource(r.id)}
                         title="წაშლა"
-                        aria-label="წაშლა"
+                        aria-label="მასალის წაშლა"
                         className="p-2 rounded-xl card-third hover:bg-rose-500/10 text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -605,49 +872,149 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
         </div>
       )}
 
-      {/* Lightbox Modal for Previewing Uploaded Image Attachments */}
-      {previewAttachment && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-xs flex items-center justify-center p-4"
-          onClick={() => setPreviewAttachment(null)}
-        >
+      {/* Native <dialog> In-Site Media Lightbox Gallery (Swipe + Prev/Next across all photos/videos on this homework) */}
+      <dialog
+        ref={galleryDialogRef}
+        closedby="any"
+        aria-labelledby={dialogTitleId}
+        className="nb-media-dialog m-auto w-[calc(100vw-1rem)] sm:w-[calc(100vw-3rem)] max-w-4xl max-h-[92dvh] rounded-2xl p-0 bg-transparent border-0 overflow-visible"
+      >
+        {currentMedia && (
           <div
-            className="relative max-w-4xl w-full max-h-[90vh] card-surface p-3 sm:p-4 rounded-2xl flex flex-col gap-3"
-            onClick={(e) => e.stopPropagation()}
+            className="card-surface nb-stationary p-3 sm:p-4 rounded-2xl flex flex-col gap-3 max-h-[90dvh] overflow-hidden"
+            onTouchStart={(e) => {
+              touchStartXRef.current = e.touches[0]?.clientX ?? null;
+            }}
+            onTouchEnd={(e) => {
+              if (touchStartXRef.current === null) return;
+              const endX = e.changedTouches[0]?.clientX ?? touchStartXRef.current;
+              const deltaX = endX - touchStartXRef.current;
+              touchStartXRef.current = null;
+              if (Math.abs(deltaX) > 45) {
+                if (deltaX < 0) goNextMedia();
+                else goPrevMedia();
+              }
+            }}
           >
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate">
-                {previewAttachment.name}
-              </span>
+            {/* Top Bar: Counter, Title/Author, Download & Close */}
+            <div className="flex items-center justify-between gap-2 pb-2 border-b border-[var(--border-subtle)]">
+              <div className="min-w-0 flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded-lg btn-primary text-white text-xs font-bold shrink-0">
+                  {(activeGalleryIdx ?? 0) + 1} / {allTargetMediaItems.length}
+                </span>
+                <div className="min-w-0">
+                  <h3
+                    id={dialogTitleId}
+                    className="text-xs sm:text-sm font-bold text-[var(--text-primary)] truncate"
+                  >
+                    {currentMedia.resourceTitle || currentMedia.attachment.name || 'მიმაგრებული ფოტო / ვიდეო'}
+                  </h3>
+                  <p className="text-[11px] text-[var(--text-muted)] truncate">
+                    ავტორი: {currentMedia.authorName}
+                  </p>
+                </div>
+              </div>
+
               <div className="flex items-center gap-2 shrink-0">
                 <a
-                  href={previewAttachment.dataUrl}
-                  download={previewAttachment.name || 'image'}
-                  className="px-3 py-1.5 rounded-xl btn-primary text-white text-xs font-bold inline-flex items-center gap-1.5"
+                  href={currentMedia.attachment.dataUrl}
+                  download={currentMedia.attachment.name || 'media'}
+                  className="min-h-[40px] px-3 py-1.5 rounded-xl card-third text-[var(--text-primary)] text-xs font-bold inline-flex items-center gap-1.5"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  <span>ჩამოტვირთვა</span>
+                  <span className="hidden sm:inline">ჩამოტვირთვა</span>
                 </a>
                 <button
                   type="button"
-                  onClick={() => setPreviewAttachment(null)}
-                  aria-label="დახურვა"
-                  className="w-9 h-9 rounded-xl card-third flex items-center justify-center text-[var(--text-primary)] cursor-pointer"
+                  onClick={closeGallery}
+                  aria-label="გალერეის დახურვა"
+                  className="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl card-third flex items-center justify-center text-[var(--text-primary)] cursor-pointer"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
-            <div className="overflow-auto flex-1 flex items-center justify-center bg-black/5 rounded-xl p-2">
-              <img
-                src={previewAttachment.dataUrl}
-                alt={previewAttachment.name}
-                className="max-h-[75vh] w-auto object-contain rounded-lg"
-              />
+
+            {/* Main Media Stage with Left / Right Navigation Arrows */}
+            <div className="relative flex-1 min-h-[260px] max-h-[68dvh] bg-slate-950/90 rounded-xl flex items-center justify-center overflow-hidden select-none p-2">
+              {allTargetMediaItems.length > 1 && (
+                <button
+                  type="button"
+                  onClick={goPrevMedia}
+                  aria-label="წინა ფოტო ან ვიდეო"
+                  className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full btn-primary text-white flex items-center justify-center cursor-pointer shadow-lg"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+              )}
+
+              {isVideoAttachment(currentMedia.attachment) ? (
+                <video
+                  key={currentMedia.attachment.dataUrl}
+                  src={currentMedia.attachment.dataUrl}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="max-h-[64dvh] max-w-full rounded-lg"
+                />
+              ) : (
+                <img
+                  key={currentMedia.attachment.dataUrl}
+                  src={currentMedia.attachment.dataUrl}
+                  alt={currentMedia.attachment.name}
+                  className="max-h-[64dvh] max-w-full w-auto object-contain rounded-lg"
+                />
+              )}
+
+              {allTargetMediaItems.length > 1 && (
+                <button
+                  type="button"
+                  onClick={goNextMedia}
+                  aria-label="შემდეგი ფოტო ან ვიდეო"
+                  className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-20 w-11 h-11 min-w-[44px] min-h-[44px] rounded-full btn-primary text-white flex items-center justify-center cursor-pointer shadow-lg"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              )}
             </div>
+
+            {/* Bottom Thumbnail Strip for Fast Jumping Between Attached Photos/Videos */}
+            {allTargetMediaItems.length > 1 && (
+              <div className="flex items-center gap-2 overflow-x-auto py-1 px-1">
+                {allTargetMediaItems.map((item, idx) => {
+                  const isActive = idx === activeGalleryIdx;
+                  const isVid = isVideoAttachment(item.attachment);
+                  return (
+                    <button
+                      key={`thumb-${item.resourceId}-${idx}`}
+                      type="button"
+                      onClick={() => setActiveGalleryIdx(idx)}
+                      aria-label={`ფაილი ${idx + 1}`}
+                      className={`relative w-14 h-14 rounded-xl overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                        isActive
+                          ? 'border-[var(--primary-action)] scale-105 shadow-sm'
+                          : 'border-transparent opacity-65 hover:opacity-100'
+                      }`}
+                    >
+                      {isVid ? (
+                        <div className="w-full h-full bg-slate-900 text-white flex items-center justify-center">
+                          <Play className="w-4 h-4 fill-white" />
+                        </div>
+                      ) : (
+                        <img
+                          src={item.attachment.dataUrl}
+                          alt={item.attachment.name}
+                          className="w-full h-full object-cover bg-white"
+                        />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </dialog>
     </div>
   );
 };

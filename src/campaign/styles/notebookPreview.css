@@ -778,6 +778,18 @@ html[data-design-preview="notebook"] ::selection {
   transform: rotate(-1.2deg);
 }
 
+/* Native <dialog> Modal Media Lightbox Scroll Containment & Backdrop */
+dialog:modal {
+  overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+  overflow: hidden;
+  overscroll-behavior: contain;
+  background-color: rgba(15, 23, 42, 0.78);
+  backdrop-filter: blur(3px);
+}
+
 /* ==========================================================================
    10. REDUCED MOTION COMPLIANCE
    Keep non-motion color/background transitions enabled; disable spatial tilt/move
