@@ -33481,7 +33481,7 @@
     "lastUpdated": "2026-11-15T10:24:44.197Z"
   },
   "platform": {
-    "updatedAt": 1794738202348,
+    "updatedAt": 1794738299610,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34525,6 +34525,18 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T09:28:48.132Z"
+      },
+      "user_1794738299609_625": {
+        "id": "user_1794738299609_625",
+        "username": "demna bakradze",
+        "fullName": "დემნა ბაქრაძე",
+        "passwordHash": "56b37962eca6dd0db355052dd17f9f5b4c5aaa7fdfdd9c615210a3c2ab36534c0d9654ffac804f49ed302cd1be91edaf271f8c60e3b37a302b8643b09e4ecceb",
+        "salt": "ea732c31a3aa80f2dfb32f171852eff1",
+        "token": "76af4ba2f670992ddcf6de8a3aea3b23c06601d3a25a28218e16d432dba6fef2",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T10:24:59.610Z"
       }
     },
     "backgroundPhysics": {
