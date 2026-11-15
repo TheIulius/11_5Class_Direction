@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T11:54:44.270Z"
   },
   "platform": {
-    "updatedAt": 1794743642577,
+    "updatedAt": 1794743693972,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34582,9 +34582,12 @@
         "salt": "bf561a201267f9bc1552d255a30d0ce4",
         "role": "admin",
         "isAdmin": true,
-        "token": "ff72d55f721c682dc3fcee4b3eb3305515636adda71d88069e770ad7603c0223",
+        "token": "d960deb21ee3bb5656bd00a111646442b5f8836e7c51ea3e911b610f40de104b",
         "createdAt": "2026-09-25T16:18:23.548Z",
-        "isModerator": false
+        "isModerator": false,
+        "pwaInstalled": true,
+        "pwaInstalledAt": "2026-11-15T11:54:53.972Z",
+        "pwaDevice": "iPhone / iOS"
       },
       "user_1794734928131_978": {
         "id": "user_1794734928131_978",
