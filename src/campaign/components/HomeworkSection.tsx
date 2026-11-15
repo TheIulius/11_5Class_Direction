@@ -16,7 +16,8 @@ import {
   Save,
   MessageSquare,
   FileText,
-  ChevronDown
+  ChevronDown,
+  Layers
 } from 'lucide-react';
 import { DaySchedule, TimetableSlot } from '../data/campaignData';
 import { soundEffects } from '../utils/soundEffects';
@@ -24,7 +25,111 @@ import { usePlatform } from '../context/PlatformContext';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
 import { getTbilisiNow, formatGeorgianDate } from '../utils/tbilisiDate';
-import { SubjectAutocomplete } from './SubjectAutocomplete';
+import { SubjectAutocomplete, CLASS_11_5_SUBJECTS } from './SubjectAutocomplete';
+
+interface GroupedLessonBlock {
+  key: string;
+  periods: number[];
+  lessonCount: number;
+  periodLabel: string;
+  subject: string;
+  canonicalSubject: string;
+  teacher: string;
+  canonicalTeacher: string;
+  timeRange: string;
+  slots: TimetableSlot[];
+}
+
+function resolveCanonicalSubjectInfo(rawSubject: string, fallbackTeacher = ''): {
+  subject: string;
+  teacher: string;
+} {
+  const norm = rawSubject.trim().toLowerCase();
+  if (!norm) return { subject: rawSubject.trim(), teacher: fallbackTeacher };
+
+  for (const item of CLASS_11_5_SUBJECTS) {
+    if (
+      item.name.toLowerCase() === norm ||
+      (item.aliases && item.aliases.some((a) => a.toLowerCase() === norm))
+    ) {
+      return { subject: item.name, teacher: item.teacher || fallbackTeacher };
+    }
+  }
+
+  if (norm.includes('საქ') && norm.includes('ისტ')) {
+    const found = CLASS_11_5_SUBJECTS.find((i) => i.name === 'საქ.ისტორია');
+    return {
+      subject: 'საქ.ისტორია',
+      teacher: found?.teacher || fallbackTeacher,
+    };
+  }
+
+  if (norm === 'ისტორია' || norm.includes('მსოფლიო ისტ')) {
+    const found = CLASS_11_5_SUBJECTS.find((i) => i.name === 'ისტორია');
+    return {
+      subject: 'ისტორია',
+      teacher: found?.teacher || fallbackTeacher,
+    };
+  }
+
+  for (const item of CLASS_11_5_SUBJECTS) {
+    if (item.name === 'ისტორია' && norm.includes('საქ')) continue;
+    if (
+      norm.includes(item.name.toLowerCase()) ||
+      item.name.toLowerCase().includes(norm) ||
+      (item.aliases && item.aliases.some((a) => norm.includes(a.toLowerCase())))
+    ) {
+      return { subject: item.name, teacher: item.teacher || fallbackTeacher };
+    }
+  }
+
+  return { subject: rawSubject.trim(), teacher: fallbackTeacher };
+}
+
+function buildGroupedLessonBlocks(slots: TimetableSlot[]): GroupedLessonBlock[] {
+  if (!slots || slots.length === 0) return [];
+  const sorted = [...slots].sort((a, b) => a.period - b.period);
+  const groups: GroupedLessonBlock[] = [];
+
+  for (const slot of sorted) {
+    const canonical = resolveCanonicalSubjectInfo(slot.subject, slot.teacher || '');
+    const prev = groups[groups.length - 1];
+
+    if (
+      prev &&
+      prev.canonicalSubject.toLowerCase() === canonical.subject.toLowerCase()
+    ) {
+      prev.periods.push(slot.period);
+      prev.slots.push(slot);
+      prev.lessonCount = prev.periods.length;
+      const firstPeriod = prev.periods[0];
+      const lastPeriod = prev.periods[prev.periods.length - 1];
+      prev.periodLabel = `${firstPeriod}–${lastPeriod} გაკვ.`;
+
+      const firstStart = prev.slots[0].time.split('-')[0]?.trim();
+      const lastEnd = slot.time.split('-')[1]?.trim();
+      if (firstStart && lastEnd) {
+        prev.timeRange = `${firstStart} - ${lastEnd}`;
+      }
+      prev.key = `${prev.periods.join('-')}-${prev.canonicalSubject}`;
+    } else {
+      groups.push({
+        key: `${slot.period}-${canonical.subject}`,
+        periods: [slot.period],
+        lessonCount: 1,
+        periodLabel: `${slot.period} გაკვ.`,
+        subject: slot.subject,
+        canonicalSubject: canonical.subject,
+        teacher: slot.teacher || '',
+        canonicalTeacher: canonical.teacher || slot.teacher || '',
+        timeRange: slot.time,
+        slots: [slot],
+      });
+    }
+  }
+
+  return groups;
+}
 
 const DAY_NAMES_BY_INDEX = [
   'კვირა',
@@ -206,6 +311,44 @@ export const HomeworkSection: React.FC = () => {
   }, [visibleHomeworks, todayString, completedMap]);
 
   const activeDaySchedule = timetable.find((d) => d.dayId === currentSelectedDayInfo.dayName);
+
+  const groupedScheduleBlocks = useMemo(() => {
+    return buildGroupedLessonBlocks(activeDaySchedule?.slots || []);
+  }, [activeDaySchedule]);
+
+  const { scheduledLessonEntries, unmatchedHomeworks } = useMemo(() => {
+    const usedIds = new Set<string>();
+    const entries = groupedScheduleBlocks.map((block) => {
+      const matched = activeDayHomeworks.filter((hw) => {
+        if (usedIds.has(hw.id)) return false;
+        const hwCanonical = resolveCanonicalSubjectInfo(hw.subject).subject.toLowerCase();
+        return hwCanonical === block.canonicalSubject.toLowerCase();
+      });
+      matched.forEach((m) => usedIds.add(m.id));
+      return {
+        block,
+        homeworks: matched,
+      };
+    });
+
+    const unmatched = activeDayHomeworks.filter((hw) => !usedIds.has(hw.id));
+    return { scheduledLessonEntries: entries, unmatchedHomeworks: unmatched };
+  }, [groupedScheduleBlocks, activeDayHomeworks]);
+
+  const openAddForLessonBlock = (block: GroupedLessonBlock) => {
+    if (!user) {
+      openAuthModal('login');
+      return;
+    }
+    soundEffects.click();
+    setEditingHwId(null);
+    setHwDate(selectedDate);
+    setHwSubject(block.canonicalSubject || block.subject);
+    setHwTeacher(block.canonicalTeacher || block.teacher);
+    setHwTitle('');
+    setHwNotes('');
+    setIsAddHwOpen(true);
+  };
 
   const handleCreateHomework = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -532,17 +675,269 @@ export const HomeworkSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Active Day Homework List */}
+          {/* Active Day Homework List (Ordered by Timetable, Merged Consecutive Lessons) */}
           <div className="space-y-3.5 min-w-0">
-            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500 dark:text-slate-400">
               <span className="font-semibold text-slate-700 dark:text-slate-300">
                 {currentSelectedDayInfo.dayName}, {currentSelectedDayInfo.label} ({activeDayHomeworks.length} დავალება)
               </span>
+              {activeDaySchedule && (
+                <span className="text-[11px] text-slate-400 dark:text-slate-500">
+                  ცხრილის მიხედვით • {activeDaySchedule.slots.length} გაკვეთილი ({scheduledLessonEntries.length} საგნობრივი ბლოკი)
+                </span>
+              )}
             </div>
 
-            {activeDayHomeworks.length > 0 ? (
-              <div className="space-y-3 min-w-0">
-                {activeDayHomeworks.map((hw) => {
+            {scheduledLessonEntries.length > 0 ? (
+              <div className="space-y-2.5 min-w-0">
+                {scheduledLessonEntries.map(({ block, homeworks: blockHomeworks }) => {
+                  if (blockHomeworks.length === 0) {
+                    // Compact grayed-out single-line row ("პატარა line") for lessons without homework
+                    return (
+                      <div
+                        key={block.key}
+                        className="group px-3 py-2 rounded-xl border border-dashed border-slate-300/80 dark:border-white/10 bg-slate-100/50 dark:bg-white/[0.02] text-slate-400 dark:text-slate-500 opacity-65 hover:opacity-100 transition-all flex items-center gap-2 sm:gap-2.5 min-w-0"
+                      >
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-200/75 dark:bg-white/10 text-slate-500 dark:text-slate-400 shrink-0">
+                          {block.periodLabel}
+                        </span>
+
+                        {block.lessonCount > 1 && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-200/80 dark:bg-white/10 text-slate-600 dark:text-slate-300 border border-slate-300/70 dark:border-white/10 shrink-0"
+                            title={`გაერთიანებულია ${block.lessonCount} მიმდევრობითი გაკვეთილი (${block.periods.map((p) => `#${p}`).join(', ')})`}
+                          >
+                            <Layers className="w-3 h-3" />
+                            <span>{block.lessonCount} გაკვეთილი</span>
+                          </span>
+                        )}
+
+                        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 truncate shrink-0 max-w-[130px] sm:max-w-none">
+                          {block.subject}
+                        </span>
+
+                        <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 hidden md:inline shrink-0">
+                          {block.timeRange}
+                        </span>
+
+                        {/* Subtle horizontal divider line ("პატარა line") */}
+                        <div className="flex-1 border-b border-dashed border-slate-300/90 dark:border-white/10 min-w-[12px] mx-1" />
+
+                        <span className="text-[11px] italic text-slate-400 dark:text-slate-500 shrink-0 hidden xs:inline sm:inline">
+                          დავალება არ არის
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => openAddForLessonBlock(block)}
+                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-500 hover:text-[var(--primary-action)] hover:bg-white dark:hover:bg-white/10 border border-transparent hover:border-slate-200 dark:hover:border-white/10 transition-colors cursor-pointer shrink-0"
+                          title={`${block.subject} — დავალების დამატება`}
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span className="hidden sm:inline">დამატება</span>
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  // Lesson block WITH uploaded homework(s) — unified for consecutive lessons
+                  return (
+                    <div key={block.key} className="space-y-2 min-w-0">
+                      {blockHomeworks.map((hw, hwIdx) => {
+                        const isDone = Boolean(completedMap[hw.id]);
+                        const isExpanded = expandedHwId === hw.id;
+                        const resCount = platform.resources.filter(
+                          (r) => r.targetType === 'homework' && r.targetId === hw.id
+                        ).length;
+                        const comCount = platform.comments.filter(
+                          (c) => c.targetType === 'homework' && c.targetId === hw.id
+                        ).length;
+
+                        return (
+                          <div
+                            key={hw.id}
+                            className={`card-surface p-4 sm:p-5 space-y-3 transition-all min-w-0 ${
+                              isDone
+                                ? 'border-emerald-300/80 dark:border-emerald-500/30 bg-emerald-50/20 dark:bg-emerald-950/10'
+                                : ''
+                            }`}
+                          >
+                            {/* Unified Timetable Slot Strip */}
+                            {hwIdx === 0 && (
+                              <div className="flex flex-wrap items-center justify-between gap-2 pb-2.5 border-b border-dashed border-[var(--border-subtle)] text-[11px]">
+                                <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                                  <span className="font-mono font-bold px-2 py-0.5 rounded-md bg-slate-900 text-white dark:bg-white/15 dark:text-slate-100 text-[10px]">
+                                    {block.periodLabel}
+                                  </span>
+
+                                  {block.lessonCount > 1 && (
+                                    <span className="inline-flex items-center gap-1 font-bold px-2.5 py-0.5 rounded-md bg-purple-500/15 text-purple-800 dark:text-purple-200 border border-purple-500/30 text-[10px]">
+                                      <Layers className="w-3 h-3" />
+                                      <span>
+                                        {block.lessonCount} გაკვეთილი ({block.periods.map((p) => `#${p}`).join(', ')})
+                                      </span>
+                                    </span>
+                                  )}
+
+                                  <span className="inline-flex items-center gap-1 text-slate-500 dark:text-slate-400 font-mono text-[10px]">
+                                    <Clock className="w-3 h-3" />
+                                    <span>{block.timeRange}</span>
+                                  </span>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => openAddForLessonBlock(block)}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-500 hover:text-[var(--primary-action)] hover:bg-slate-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                                  title={`${block.subject} — კიდევ ერთი დავალების დამატება`}
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  <span>+ დავალება</span>
+                                </button>
+                              </div>
+                            )}
+
+                            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 min-w-0">
+                              <div className="space-y-1.5 min-w-0 flex-1">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20">
+                                    {hw.subject}
+                                  </span>
+                                  {(hw.teacher || block.teacher) && (
+                                    <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                      {hw.teacher || block.teacher}
+                                    </span>
+                                  )}
+                                  <span className="text-[11px] text-slate-400">•</span>
+                                  <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                                    {hw.displayDate}
+                                  </span>
+                                  {hw.status === 'pending' && (
+                                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">
+                                      დასადასტურებელი
+                                    </span>
+                                  )}
+                                </div>
+
+                                <h3
+                                  className={`text-sm sm:text-base font-bold leading-snug ${
+                                    isDone
+                                      ? 'line-through text-slate-400 dark:text-slate-500'
+                                      : 'text-slate-900 dark:text-slate-100'
+                                  }`}
+                                >
+                                  {hw.title}
+                                </h3>
+
+                                {hw.notes && (
+                                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                                    {hw.notes}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Completion Button & Actions */}
+                              <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
+                                {canModerate && hw.status === 'pending' && (
+                                  <button
+                                    onClick={() => moderateHomework(hw.id, 'approved')}
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold"
+                                  >
+                                    დადასტურება
+                                  </button>
+                                )}
+
+                                <button
+                                  onClick={() => handleToggleComplete(hw.id)}
+                                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
+                                    isDone
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-white/15'
+                                  }`}
+                                >
+                                  {isDone ? (
+                                    <>
+                                      <CheckCircle2 className="w-3.5 h-3.5" />
+                                      <span>შესრულებულია</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Circle className="w-3.5 h-3.5" />
+                                      <span>მონიშვნა</span>
+                                    </>
+                                  )}
+                                </button>
+
+                                {(canModerate || (user && hw.authorUsername === user.username)) && (
+                                  <button
+                                    type="button"
+                                    onClick={() => openEditHomeworkModal(hw)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--primary-action)] transition-colors cursor-pointer"
+                                    title="რედაქტირება"
+                                    aria-label="დავალების რედაქტირება"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                  </button>
+                                )}
+
+                                {canModerate && (
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteHomework(hw.id)}
+                                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
+                                    title="წაშლა"
+                                    aria-label="დავალების წაშლა"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Expandable Resource & Comment Bar */}
+                            <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                              <button
+                                onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
+                                className="font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-3 cursor-pointer"
+                              >
+                                <span className="flex items-center gap-1">
+                                  <FileText className="w-3.5 h-3.5" />
+                                  <span>მასალები ({resCount})</span>
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MessageSquare className="w-3.5 h-3.5" />
+                                  <span>კომენტარები ({comCount})</span>
+                                </span>
+                              </button>
+                              <ChevronDown
+                                onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
+                                className={`w-4 h-4 text-slate-400 transition-transform cursor-pointer ${
+                                  isExpanded ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </div>
+
+                            {/* Expanded Section */}
+                            {isExpanded && (
+                              <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4">
+                                <ResourceSection
+                                  targetType="homework"
+                                  targetId={hw.id}
+                                  targetTitle={`${hw.subject}: ${hw.title}`}
+                                  defaultSubject={hw.subject}
+                                />
+                                <CommentsThread targetType="homework" targetId={hw.id} compact />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+
+                {/* Any extra homework on this date whose subject isn't in that day's standard timetable */}
+                {unmatchedHomeworks.map((hw) => {
                   const isDone = Boolean(completedMap[hw.id]);
                   const isExpanded = expandedHwId === hw.id;
                   const resCount = platform.resources.filter(
@@ -576,13 +971,7 @@ export const HomeworkSection: React.FC = () => {
                             <span className="text-[11px] text-slate-500 dark:text-slate-400">
                               {hw.displayDate}
                             </span>
-                            {hw.status === 'pending' && (
-                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800">
-                                დასადასტურებელი
-                              </span>
-                            )}
                           </div>
-
                           <h3
                             className={`text-sm sm:text-base font-bold leading-snug ${
                               isDone
@@ -592,7 +981,6 @@ export const HomeworkSection: React.FC = () => {
                           >
                             {hw.title}
                           </h3>
-
                           {hw.notes && (
                             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                               {hw.notes}
@@ -600,17 +988,7 @@ export const HomeworkSection: React.FC = () => {
                           )}
                         </div>
 
-                        {/* Completion Button & Actions */}
                         <div className="flex items-center gap-2 shrink-0 self-start sm:self-auto">
-                          {canModerate && hw.status === 'pending' && (
-                            <button
-                              onClick={() => moderateHomework(hw.id, 'approved')}
-                              className="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold"
-                            >
-                              დადასტურება
-                            </button>
-                          )}
-
                           <button
                             onClick={() => handleToggleComplete(hw.id)}
                             className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors ${
@@ -638,7 +1016,6 @@ export const HomeworkSection: React.FC = () => {
                               onClick={() => openEditHomeworkModal(hw)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-[var(--primary-action)] transition-colors cursor-pointer"
                               title="რედაქტირება"
-                              aria-label="დავალების რედაქტირება"
                             >
                               <Edit3 className="w-4 h-4" />
                             </button>
@@ -650,7 +1027,6 @@ export const HomeworkSection: React.FC = () => {
                               onClick={() => deleteHomework(hw.id)}
                               className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
                               title="წაშლა"
-                              aria-label="დავალების წაშლა"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -658,7 +1034,6 @@ export const HomeworkSection: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Expandable Resource & Comment Bar */}
                       <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
                         <button
                           onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
@@ -681,7 +1056,6 @@ export const HomeworkSection: React.FC = () => {
                         />
                       </div>
 
-                      {/* Expanded Section (Preserves card context, no sudden jump!) */}
                       {isExpanded && (
                         <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4">
                           <ResourceSection
@@ -697,10 +1071,56 @@ export const HomeworkSection: React.FC = () => {
                   );
                 })}
               </div>
+            ) : activeDayHomeworks.length > 0 ? (
+              <div className="space-y-3 min-w-0">
+                {activeDayHomeworks.map((hw) => {
+                  const isDone = Boolean(completedMap[hw.id]);
+                  const isExpanded = expandedHwId === hw.id;
+                  const resCount = platform.resources.filter(
+                    (r) => r.targetType === 'homework' && r.targetId === hw.id
+                  ).length;
+                  const comCount = platform.comments.filter(
+                    (c) => c.targetType === 'homework' && c.targetId === hw.id
+                  ).length;
+                  return (
+                    <div key={hw.id} className="card-surface p-4 sm:p-5 space-y-3 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-xs font-bold">{hw.subject} — {hw.title}</span>
+                        <button
+                          onClick={() => handleToggleComplete(hw.id)}
+                          className="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-100 dark:bg-white/10"
+                        >
+                          {isDone ? 'შესრულებულია' : 'მონიშვნა'}
+                        </button>
+                      </div>
+                      {isExpanded && (
+                        <div className="pt-3 border-t border-slate-100 dark:border-white/5 space-y-4">
+                          <ResourceSection
+                            targetType="homework"
+                            targetId={hw.id}
+                            targetTitle={`${hw.subject}: ${hw.title}`}
+                            defaultSubject={hw.subject}
+                          />
+                          <CommentsThread targetType="homework" targetId={hw.id} compact />
+                        </div>
+                      )}
+                      <div className="pt-2 border-t border-[var(--border-subtle)] flex items-center justify-between text-xs">
+                        <button
+                          onClick={() => setExpandedHwId(isExpanded ? null : hw.id)}
+                          className="font-semibold text-[var(--primary-action)] hover:underline flex items-center gap-3 cursor-pointer"
+                        >
+                          <span>მასალები ({resCount})</span>
+                          <span>კომენტარები ({comCount})</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
               <div className="card-surface p-8 text-center space-y-2">
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                  {currentSelectedDayInfo.dayName}სთვის დავალება ატვირთული არ არის.
+                  {currentSelectedDayInfo.dayName}სთვის ცხრილი ან დავალება არ მოიძებნა.
                 </p>
                 <button
                   onClick={() => {
