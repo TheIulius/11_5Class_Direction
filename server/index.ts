@@ -3,8 +3,11 @@ import cors from 'cors';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import webpush from 'web-push';
+import { createRequire } from 'node:module';
 import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PlatformUserAccount, PlatformPushSubscription, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData, PlatformCMSData, PlatformComment, PlatformResource, ArchiveStudyPack } from './db';
+
+const require = createRequire(import.meta.url);
+const webpush = require('web-push') as typeof import('web-push');
 import {
   INITIAL_CALENDAR_EVENTS,
   INITIAL_HOMEWORKS,
