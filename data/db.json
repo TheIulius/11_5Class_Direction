@@ -33482,7 +33482,7 @@
     "lastUpdated": "2026-11-15T10:43:01.647Z"
   },
   "platform": {
-    "updatedAt": 1794739411582,
+    "updatedAt": 1794739441810,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34528,6 +34528,19 @@
         "isModerator": true,
         "content": "დეფისი არ უნდა",
         "createdAt": "2026-11-15T10:31:47.520Z",
+        "isPinned": false
+      },
+      {
+        "id": "cmt_1794739441810_402",
+        "targetType": "homework",
+        "targetId": "hw_1794734580082",
+        "authorId": "user_1794734928131_978",
+        "authorName": "test",
+        "authorUsername": "test",
+        "isAdmin": false,
+        "isModerator": false,
+        "content": "იკა გოათ",
+        "createdAt": "2026-11-15T10:44:01.810Z",
         "isPinned": false
       }
     ],
