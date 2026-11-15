@@ -33494,7 +33494,7 @@
     "lastUpdated": "2026-11-15T14:30:40.059Z"
   },
   "platform": {
-    "updatedAt": 1794752508284,
+    "updatedAt": 1794753114859,
     "announcement": {
       "text": "ქიმიის დამოუკიდებელი! tip: დააყენე როგორც აპი & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34610,11 +34610,15 @@
         "fullName": "დემნა ბაქრაძე",
         "passwordHash": "56b37962eca6dd0db355052dd17f9f5b4c5aaa7fdfdd9c615210a3c2ab36534c0d9654ffac804f49ed302cd1be91edaf271f8c60e3b37a302b8643b09e4ecceb",
         "salt": "ea732c31a3aa80f2dfb32f171852eff1",
-        "token": "76af4ba2f670992ddcf6de8a3aea3b23c06601d3a25a28218e16d432dba6fef2",
+        "token": "1cbbc65c8b518ca99591b7c609372362d3fc60374a80f8b492c28b20d968a39a",
         "role": "user",
         "isAdmin": false,
         "isModerator": false,
-        "createdAt": "2026-11-15T10:24:59.610Z"
+        "createdAt": "2026-11-15T10:24:59.610Z",
+        "tokens": [
+          "76af4ba2f670992ddcf6de8a3aea3b23c06601d3a25a28218e16d432dba6fef2",
+          "1cbbc65c8b518ca99591b7c609372362d3fc60374a80f8b492c28b20d968a39a"
+        ]
       },
       "user_1794738399105_1": {
         "id": "user_1794738399105_1",
