@@ -33479,7 +33479,7 @@
     "lastUpdated": "2026-11-15T10:06:29.133Z"
   },
   "platform": {
-    "updatedAt": 1794737488741,
+    "updatedAt": 1794737492305,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -34343,10 +34343,9 @@
         "status": "approved",
         "createdAt": "2026-11-15T09:59:56.786Z",
         "approvedBy": "theiulius",
-        "upvotes": 2,
+        "upvotes": 1,
         "upvotedBy": [
-          "user_theiulius_115",
-          "5.178.197.148"
+          "user_theiulius_115"
         ]
       },
       {
