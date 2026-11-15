@@ -33479,7 +33479,7 @@
     "lastUpdated": "2026-11-15T09:32:05.577Z"
   },
   "platform": {
-    "updatedAt": 1794736796786,
+    "updatedAt": 1794736830423,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -34447,6 +34447,19 @@
         "isModerator": false,
         "content": "ქიმიის ტესტიი!?😨",
         "createdAt": "2026-11-15T09:39:21.034Z",
+        "isPinned": false
+      },
+      {
+        "id": "cmt_1794736830423_562",
+        "targetType": "homework",
+        "targetId": "hw_1794734310205",
+        "authorId": "user_theiulius_115",
+        "authorName": "theiulius",
+        "authorUsername": "theiulius",
+        "isAdmin": true,
+        "isModerator": false,
+        "content": "მადლობა ბატონ დავით-გიორგის ფოტოებისთვის!",
+        "createdAt": "2026-11-15T10:00:30.423Z",
         "isPinned": false
       }
     ],
