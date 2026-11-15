@@ -33485,7 +33485,7 @@
     "lastUpdated": "2026-11-15T11:21:16.566Z"
   },
   "platform": {
-    "updatedAt": 1794740799080,
+    "updatedAt": 1794741764140,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34583,17 +34583,6 @@
         "createdAt": "2026-09-25T16:18:23.548Z",
         "isModerator": false
       },
-      "user_1794331064867_659": {
-        "id": "user_1794331064867_659",
-        "username": "dgi",
-        "fullName": "დავით გიორგი ინანეიშვილი",
-        "passwordHash": "7cd0ea89652a2c172a0bb60a86ee38ad0763b2321ac06d227547b56644c4d047089019768a536b1a32df2eb6b00a3e14814baf5e1b3c99b636f093e33d9d883a",
-        "salt": "5600e8dd5902091426cf38e256d20d7f",
-        "token": "f44e746834d850c1476d14c7653934f3d3347cf873b2bc2d90e1e14b7bf64f9d",
-        "role": "admin",
-        "isAdmin": true,
-        "createdAt": "2026-11-10T17:17:44.868Z"
-      },
       "user_1794734928131_978": {
         "id": "user_1794734928131_978",
         "username": "test",
@@ -34723,6 +34712,11 @@
       "parallaxDeep": 0.2,
       "parallaxMid": 0.32,
       "parallaxNear": 0.45
-    }
+    },
+    "vapidKeys": {
+      "publicKey": "BDuU_4cQ7J34exKRno_g00PpBwKGcL1xi4N0uCtd9b-Q9eooNBiLHtV0sWZgo24sKUIW-uFZWkLt8PdR81BnxUU",
+      "privateKey": "yGaRdYNz_R2S_AvWrovPRuC-EANtFQgTdlY_MJd4dkY"
+    },
+    "pushSubscriptions": []
   }
 }
