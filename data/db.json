@@ -33376,7 +33376,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 87,
+    "visits": 88,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33485,10 +33485,10 @@
         }
       }
     },
-    "lastUpdated": "2026-11-15T11:34:45.787Z"
+    "lastUpdated": "2026-11-15T11:49:10.095Z"
   },
   "platform": {
-    "updatedAt": 1794743329694,
+    "updatedAt": 1794743352691,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34680,7 +34680,10 @@
         "role": "user",
         "isAdmin": false,
         "isModerator": false,
-        "createdAt": "2026-11-15T11:01:21.083Z"
+        "createdAt": "2026-11-15T11:01:21.083Z",
+        "pwaInstalled": true,
+        "pwaInstalledAt": "2026-11-15T11:49:10.203Z",
+        "pwaDevice": "iPhone / iOS"
       },
       "user_1794740515692_678": {
         "id": "user_1794740515692_678",
@@ -34742,7 +34745,8 @@
         "role": "user",
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
-        "updatedAt": "2026-11-15T11:34:46.187Z"
+        "isStandalone": true,
+        "updatedAt": "2026-11-15T11:49:12.691Z"
       },
       {
         "endpoint": "https://fcm.googleapis.com/fcm/send/d-reqs7o2Zg:APA91bG344KBtS0RGOMxFPsI6GyzvyupigorOD5qmCWvB1zgU5v98JHifSaa3CV9frZEj2M0xTKlAXmhCOCmLpckwwQ2tkpQHErBLpMiflPxU3YB9jxz8tdSU6ceXgz5DWi2dAj9S9sM",
@@ -34761,10 +34765,13 @@
           "p256dh": "BGsEEWybTqoFOH7AJRR7dn_0MM8YJEM3-43gZ8Eg_WF-lepJz1-bwRqRLLYlX-xkIr9qQXR2VPJn5LOCho3MjNg",
           "auth": "lvysVSklSGxnzzJH9wO7lA"
         },
+        "userId": "user_1794740481082_806",
+        "username": "lizichachua",
         "role": "user",
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Mobile/15E148 Safari/604.1",
-        "updatedAt": "2026-11-15T11:31:11.836Z"
+        "isStandalone": true,
+        "updatedAt": "2026-11-15T11:49:10.609Z"
       },
       {
         "endpoint": "https://web.push.apple.com/QK0JyCJODh4qoa-nyP13l2BlVdA3q2_toDM4Go_ICfHxFRQi4pF9QCbVHHI-bfDG4AdRT7EXBeAbJ5VilrzugytAtbV5zjBDL8kBlXWOk6Z9YqU4rCSsRJIAHj-pxR6164UOINaPOZZKJP0tDwC8SD32YbLvYOaXG3D0AxqTQmg",
