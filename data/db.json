@@ -33479,7 +33479,7 @@
     "lastUpdated": "2026-11-15T09:19:58.477Z"
   },
   "platform": {
-    "updatedAt": 1794734878795,
+    "updatedAt": 1794734928132,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -34446,6 +34446,18 @@
         "role": "admin",
         "isAdmin": true,
         "createdAt": "2026-11-10T17:17:44.868Z"
+      },
+      "user_1794734928131_978": {
+        "id": "user_1794734928131_978",
+        "username": "test",
+        "fullName": "test",
+        "passwordHash": "188f4af1f68a32cdb8db66c4613b6ed1ffb17734b98ef0e9f17db0653bfb4902f5c4d8c7ff3edbe4c93e17853c4eca743283ef21d139e1d64dfa06fde15f34c7",
+        "salt": "0406a6730961bb2f45f8667eab3c505a",
+        "token": "98d8d695775d6976c90511b968e2fcd1b27d36ea60469c01e32022222e52b624",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T09:28:48.132Z"
       }
     },
     "backgroundPhysics": {
