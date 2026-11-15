@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T11:30:44.745Z"
   },
   "platform": {
-    "updatedAt": 1794742082822,
+    "updatedAt": 1794742259830,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34676,7 +34676,7 @@
         "fullName": "ლიზი ჩაჩუა",
         "passwordHash": "3cfa40eac6277b4b8c9d1995f6b61a18fd7ef0c79096680f53ec491f106cb7f9aaacc1e44ac74d09cbb6342c5613431bd143e9ba54ad3faf65a4374cb61fa2de",
         "salt": "630482b4303dcf6f8d7ebe1ed5b0a8b7",
-        "token": "d1bdad3a770fba0f26ecc1bd286eff750ee80557ef8dd0e965e4005f1b39d0b3",
+        "token": "4b26ddff9dc73d8caf5f2340733495df2efaa6eb55381ede463a725a5c8845b0",
         "role": "user",
         "isAdmin": false,
         "isModerator": false,
