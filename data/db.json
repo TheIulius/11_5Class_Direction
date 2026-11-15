@@ -33487,7 +33487,7 @@
     "lastUpdated": "2026-11-15T11:24:33.339Z"
   },
   "platform": {
-    "updatedAt": 1794741860563,
+    "updatedAt": 1794741920945,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34719,6 +34719,18 @@
       "publicKey": "BDuU_4cQ7J34exKRno_g00PpBwKGcL1xi4N0uCtd9b-Q9eooNBiLHtV0sWZgo24sKUIW-uFZWkLt8PdR81BnxUU",
       "privateKey": "yGaRdYNz_R2S_AvWrovPRuC-EANtFQgTdlY_MJd4dkY"
     },
-    "pushSubscriptions": []
+    "pushSubscriptions": [
+      {
+        "endpoint": "https://web.push.apple.com/QImjU2PwgZSPy2bCVfC5j7h3Ddd9XFuUvdMlpKLa8F4mpg8BsNXSoHFSJy-9Hwie8QkQIqhIL9MrWgqHQ87J2oxHyUhh8UqGC8WWnaxkQdicTgZzFuKSaRB_O2HAdO5gtZdobOF2FHgeoRij4mZ9lz2-0baAdNRP-oYs542VrzI",
+        "keys": {
+          "p256dh": "BHisq__0CdtQOX3xogZD-9oaq-kyh6n0470ce7jwuFxzOtA2NUtzH_kOkQI25kwIXA4nkOuXZzI1OY0KILB23dE",
+          "auth": "sQidi43s3ytDgNwtdGVSOg"
+        },
+        "role": "user",
+        "canModerate": false,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Safari/605.1.15",
+        "updatedAt": "2026-11-15T11:25:20.945Z"
+      }
+    ]
   }
 }
