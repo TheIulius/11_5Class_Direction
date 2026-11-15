@@ -33485,7 +33485,7 @@
     "lastUpdated": "2026-11-15T11:05:50.365Z"
   },
   "platform": {
-    "updatedAt": 1794740515692,
+    "updatedAt": 1794740799080,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34701,6 +34701,18 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T11:01:55.692Z"
+      },
+      "user_1794740799079_548": {
+        "id": "user_1794740799079_548",
+        "username": "dvalodvalo",
+        "fullName": "ანანო დვალიძე",
+        "passwordHash": "ffdc6827c338f43fd266ae49416ee02a1c402ca7f27a48e10bc58210e6fd351e919be74293f10fac933ac54933c23b767062f2d88e7e8409b410232b0ccc8cd8",
+        "salt": "ad792ab13aebfb72369bc6d656ff8430",
+        "token": "2988100b898af6373b6158fbabe66af437f96134258cf4f009f40f6d469dd65d",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T11:06:39.080Z"
       }
     },
     "backgroundPhysics": {
