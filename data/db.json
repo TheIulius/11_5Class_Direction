@@ -33487,7 +33487,7 @@
     "lastUpdated": "2026-11-15T11:25:56.313Z"
   },
   "platform": {
-    "updatedAt": 1794741964531,
+    "updatedAt": 1794741971199,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34742,6 +34742,17 @@
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Safari/605.1.15",
         "updatedAt": "2026-11-15T11:25:20.945Z"
+      },
+      {
+        "endpoint": "https://web.push.apple.com/QHLlBBf_RC7Oowj7POR0Dkg15m6UrnNLNUveBni7X19oYMGgxO6sG96mXco5cQj2MoL75-1bZyObVR42pnkvAKVYQWaVuk7jiKanA4LExxNKNzGAxcQEOvimqMoK_USY1yH0M7zxicNSe5_t0c_CKlLI5gbbP3pSW88QUZKUk2I",
+        "keys": {
+          "p256dh": "BKUTLgDGduXVY-V-o2hJ_kqM4vhbpjUMagjyETFjC0ftBON-skF9OSd0oM8UIiLy2WSqrb3M5Ytyyo-vv6EbM2I",
+          "auth": "wGF4-qxafNvLBOxTbzQdYg"
+        },
+        "role": "user",
+        "canModerate": false,
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
+        "updatedAt": "2026-11-15T11:26:11.199Z"
       }
     ]
   }
