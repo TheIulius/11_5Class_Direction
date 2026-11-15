@@ -33495,12 +33495,12 @@
     "lastUpdated": "2026-11-15T19:55:40.850Z"
   },
   "platform": {
-    "updatedAt": 1794772540963,
+    "updatedAt": 1794773197593,
     "announcement": {
-      "text": "ქიმიის დამოუკიდებელი! tip: დააყენე როგორც აპი & ჩართე შეტყობინებები. დააწექი -> 🔔",
+      "text": "დააყენე app-ად & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
-      "type": "urgent",
-      "updatedAt": "2026-11-15T13:19:11.806Z"
+      "type": "info",
+      "updatedAt": "2026-11-15T20:06:37.593Z"
     },
     "calendarEvents": [
       {
