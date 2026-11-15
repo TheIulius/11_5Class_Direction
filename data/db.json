@@ -33495,7 +33495,7 @@
     "lastUpdated": "2026-11-15T18:37:42.970Z"
   },
   "platform": {
-    "updatedAt": 1794765954966,
+    "updatedAt": 1794767905039,
     "announcement": {
       "text": "ქიმიის დამოუკიდებელი! tip: დააყენე როგორც აპი & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34792,6 +34792,21 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T18:05:54.966Z"
+      },
+      "user_1794767905037_584": {
+        "id": "user_1794767905037_584",
+        "username": "nika_b",
+        "fullName": "ნიკოლოზ გოგობერიშვილი",
+        "passwordHash": "47731f2a52c97cabc8620e35ce17c8bfba7dbd3b679b93974389a243afe94ffb8aa3a77a059c3b9573a44e71a34cf39e1827068f1ca78c7bf7a78a98f5d9260f",
+        "salt": "c25aec3c7c110c7879f98c27811de783",
+        "token": "ce49a44a968f88886de2c1b33b2ff3b2fdc709bc2dccad1e2fb5d5fb784a5ddb",
+        "tokens": [
+          "ce49a44a968f88886de2c1b33b2ff3b2fdc709bc2dccad1e2fb5d5fb784a5ddb"
+        ],
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T18:38:25.039Z"
       }
     },
     "backgroundPhysics": {
