@@ -4834,11 +4834,18 @@ app.get('/api/platform/push/vapid-public-key', (req: Request, res: Response) => 
   res.json({ publicKey: p.vapidKeys?.publicKey || '' });
 });
 
+function detectDeviceLabel(ua: string): string {
+  if (/iPhone|iPad|iPod/i.test(ua)) return 'iPhone / iOS';
+  if (/Android/i.test(ua)) return 'Android';
+  if (/Macintosh|Windows|Linux/i.test(ua)) return 'PC / Mac';
+  return 'Browser';
+}
+
 app.post('/api/platform/push/subscribe', (req: Request, res: Response) => {
   const data = db.getData();
   const p = initPlatformCMS(data);
   const auth = getPlatformAuthUser(req);
-  const { subscription } = req.body || {};
+  const { subscription, isStandalone } = req.body || {};
 
   if (!subscription || !subscription.endpoint || !subscription.keys?.p256dh || !subscription.keys?.auth) {
     return res.status(400).json({ error: 'არასწორი Push გამოწერის მონაცემები.' });
@@ -4848,6 +4855,7 @@ app.post('/api/platform/push/subscribe', (req: Request, res: Response) => {
     p.pushSubscriptions = [];
   }
 
+  const ua = String(req.headers['user-agent'] || '').slice(0, 180);
   const newEntry: PlatformPushSubscription = {
     endpoint: String(subscription.endpoint),
     keys: {
@@ -4858,9 +4866,16 @@ app.post('/api/platform/push/subscribe', (req: Request, res: Response) => {
     username: auth?.user.username,
     role: auth?.role || 'user',
     canModerate: auth?.canModerate || false,
-    userAgent: String(req.headers['user-agent'] || '').slice(0, 180),
+    userAgent: ua,
+    isStandalone: Boolean(isStandalone),
     updatedAt: new Date().toISOString(),
   };
+
+  if (auth?.user && isStandalone) {
+    auth.user.pwaInstalled = true;
+    auth.user.pwaInstalledAt = auth.user.pwaInstalledAt || new Date().toISOString();
+    auth.user.pwaDevice = detectDeviceLabel(ua);
+  }
 
   const existingIdx = p.pushSubscriptions.findIndex((s) => s.endpoint === newEntry.endpoint);
   if (existingIdx >= 0) {
@@ -4874,6 +4889,25 @@ app.post('/api/platform/push/subscribe', (req: Request, res: Response) => {
     success: true,
     totalSubscriptions: p.pushSubscriptions.length,
   });
+});
+
+app.post('/api/platform/push/client-status', (req: Request, res: Response) => {
+  const data = db.getData();
+  initPlatformCMS(data);
+  const auth = getPlatformAuthUser(req);
+  const { isStandalone } = req.body || {};
+
+  if (auth?.user && isStandalone) {
+    const alreadyRecorded = Boolean(auth.user.pwaInstalled);
+    auth.user.pwaInstalled = true;
+    auth.user.pwaInstalledAt = auth.user.pwaInstalledAt || new Date().toISOString();
+    auth.user.pwaDevice = detectDeviceLabel(String(req.headers['user-agent'] || ''));
+    if (!alreadyRecorded) {
+      savePlatformCMS(data, 'PWA Home Screen install recorded for @' + auth.user.username);
+    }
+  }
+
+  res.json({ success: true });
 });
 
 app.post('/api/platform/push/unsubscribe', (req: Request, res: Response) => {
@@ -5136,16 +5170,31 @@ app.get('/api/platform/auth/me', (req: Request, res: Response) => {
   });
 });
 
-// 5. Admin: List All 11/5 Class Accounts (Strictly isolated from KCL)
+// 5. Admin & Moderator: List All 11/5 Class Accounts with PWA / Push Activation Stats
 app.get('/api/platform/admin/users', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
-  if (!auth || !auth.isAdmin) {
-    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებს აქვთ წვდომა.' });
+  if (!auth || !auth.canModerate) {
+    return res.status(403).json({ error: 'მხოლოდ ადმინისტრატორებსა და მოდერატორებს აქვთ წვდომა.' });
   }
   const data = db.getData();
   const p = initPlatformCMS(data);
+  const subs = p.pushSubscriptions || [];
   const users = Object.values(p.users || {}).map((u) => {
     const roles = resolvePlatformRoles(u);
+    const userSubs = subs.filter(
+      (s) => s.userId === u.id || (s.username && s.username.toLowerCase() === u.username.toLowerCase())
+    );
+    const pushEnabled = userSubs.length > 0;
+    const pwaInstalled = Boolean(u.pwaInstalled || userSubs.some((s) => s.isStandalone));
+    const devices = Array.from(
+      new Set([
+        ...(u.pwaDevice ? [u.pwaDevice] : []),
+        ...userSubs.map((s) => detectDeviceLabel(s.userAgent || '')),
+      ])
+    );
+    const lastActivePushAt =
+      userSubs.map((s) => s.updatedAt).sort().pop() || u.pwaInstalledAt || null;
+
     return {
       id: u.id,
       username: u.username,
@@ -5154,9 +5203,24 @@ app.get('/api/platform/admin/users', (req: Request, res: Response) => {
       isAdmin: roles.isAdmin,
       isModerator: roles.isModerator,
       createdAt: u.createdAt,
+      pushEnabled,
+      pushDevicesCount: userSubs.length,
+      pwaInstalled,
+      devices,
+      lastActivePushAt,
     };
   });
-  res.json({ users });
+
+  res.json({
+    users,
+    summary: {
+      totalUsers: users.length,
+      pushUsersCount: users.filter((u) => u.pushEnabled).length,
+      pwaUsersCount: users.filter((u) => u.pwaInstalled).length,
+      bothEnabledCount: users.filter((u) => u.pushEnabled && u.pwaInstalled).length,
+      totalSubscribedDevices: subs.length,
+    },
+  });
 });
 
 // Admin: Create Moderator or Student Account for 11/5 Classmate (Admin role cannot be granted)

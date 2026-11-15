@@ -109,7 +109,7 @@ export const PwaNotificationButton: React.FC = () => {
               'Content-Type': 'application/json',
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
-            body: JSON.stringify({ subscription: sub.toJSON() }),
+            body: JSON.stringify({ subscription: sub.toJSON(), isStandalone }),
           }).catch(() => {});
         } else {
           setIsSubscribed(false);
@@ -121,7 +121,22 @@ export const PwaNotificationButton: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, user?.role]);
+  }, [user?.id, user?.role, isStandalone]);
+
+  // Record Home Screen standalone usage for logged-in user
+  useEffect(() => {
+    if (!isStandalone || !user?.id) return;
+    const token = getToken();
+    if (!token) return;
+    fetch('/api/platform/push/client-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ isStandalone: true }),
+    }).catch(() => {});
+  }, [isStandalone, user?.id]);
 
   // Sync native <dialog>
   useEffect(() => {
@@ -226,7 +241,7 @@ export const PwaNotificationButton: React.FC = () => {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ subscription: sub.toJSON() }),
+        body: JSON.stringify({ subscription: sub.toJSON(), isStandalone }),
       });
 
       if (!subRes.ok) {

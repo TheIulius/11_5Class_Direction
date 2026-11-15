@@ -29,6 +29,7 @@ import {
   Activity,
   BellRing,
   Send,
+  Smartphone,
 } from 'lucide-react';
 import { usePlatform, DEFAULT_BACKGROUND_PHYSICS, BackgroundPhysicsSettings } from '../context/PlatformContext';
 import { usePlatformAnalytics, refreshAnalytics } from '../services/analytics';
@@ -41,6 +42,11 @@ interface ManagedUser {
   isAdmin: boolean;
   isModerator?: boolean;
   createdAt?: string;
+  pushEnabled?: boolean;
+  pushDevicesCount?: number;
+  pwaInstalled?: boolean;
+  devices?: string[];
+  lastActivePushAt?: string | null;
 }
 
 export const AdminDashboardModal: React.FC = () => {
@@ -120,7 +126,7 @@ export const AdminDashboardModal: React.FC = () => {
   }, [platform.announcement]);
 
   const fetchUsers = useCallback(async () => {
-    if (!token || !isAdmin) return;
+    if (!token || !canModerate) return;
     setLoadingUsers(true);
     try {
       const res = await fetch('/api/platform/admin/users', {
@@ -135,15 +141,133 @@ export const AdminDashboardModal: React.FC = () => {
     } finally {
       setLoadingUsers(false);
     }
-  }, [token, isAdmin]);
+  }, [token, canModerate]);
 
   useEffect(() => {
-    if (isAdminModalOpen && activeTab === 'users' && isAdmin) {
+    if (
+      isAdminModalOpen &&
+      canModerate &&
+      (activeTab === 'users' || activeTab === 'announcement' || activeTab === 'analytics')
+    ) {
       fetchUsers();
     }
-  }, [isAdminModalOpen, activeTab, fetchUsers, isAdmin]);
+  }, [isAdminModalOpen, activeTab, fetchUsers, canModerate]);
 
   if (!isAdminModalOpen || !canModerate) return null;
+
+  const pushUsersCount = users.filter((u) => u.pushEnabled).length;
+  const pwaUsersCount = users.filter((u) => u.pwaInstalled).length;
+  const bothEnabledCount = users.filter((u) => u.pushEnabled && u.pwaInstalled).length;
+  const sortedUsersForActivation = [...users].sort((a, b) => {
+    const scoreA = (a.pushEnabled ? 2 : 0) + (a.pwaInstalled ? 1 : 0);
+    const scoreB = (b.pushEnabled ? 2 : 0) + (b.pwaInstalled ? 1 : 0);
+    if (scoreB !== scoreA) return scoreB - scoreA;
+    return (a.fullName || a.username).localeCompare(b.fullName || b.username);
+  });
+
+  const renderFeatureActivationStats = () => (
+    <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Smartphone className="w-4 h-4 text-indigo-600" aria-hidden="true" />
+          <h3 className="text-sm font-black text-slate-900">
+            აპის &amp; Push-შეტყობინებების სტატისტიკა (მომხმარებლების მიხედვით)
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={fetchUsers}
+          disabled={loadingUsers}
+          className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-700 inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3 h-3 ${loadingUsers ? 'animate-spin' : ''}`} aria-hidden="true" />
+          <span>განახლება</span>
+        </button>
+      </div>
+
+      {/* Top 3 Summary Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
+          <div className="text-xs font-bold text-amber-900">🔔 Push ჩართულია</div>
+          <div className="text-xl font-black text-slate-900 mt-1">
+            {pushUsersCount} / {users.length}
+          </div>
+          <div className="text-[11px] text-slate-500">მომხმარებელი</div>
+        </div>
+
+        <div className="p-3.5 rounded-xl bg-sky-50/70 border border-sky-200/80">
+          <div className="text-xs font-bold text-sky-900">📱 Home Screen აპი</div>
+          <div className="text-xl font-black text-slate-900 mt-1">
+            {pwaUsersCount} / {users.length}
+          </div>
+          <div className="text-[11px] text-slate-500">მომხმარებელი</div>
+        </div>
+
+        <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
+          <div className="text-xs font-bold text-emerald-900">✅ ორივე გააქტიურებულია</div>
+          <div className="text-xl font-black text-slate-900 mt-1">
+            {bothEnabledCount} / {users.length}
+          </div>
+          <div className="text-[11px] text-slate-500">მომხმარებელი</div>
+        </div>
+      </div>
+
+      {loadingUsers && users.length === 0 ? (
+        <p className="text-xs text-slate-400 py-6 text-center">იტვირთება სტატისტიკა...</p>
+      ) : sortedUsersForActivation.length === 0 ? (
+        <p className="text-xs text-slate-400 py-4 text-center">მომხმარებლები ვერ მოიძებნა.</p>
+      ) : (
+        <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+          {sortedUsersForActivation.map((u) => (
+            <div
+              key={u.id}
+              className="p-3 rounded-xl border border-slate-200/80 bg-slate-50/60 flex flex-wrap items-center justify-between gap-2.5"
+            >
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs font-black text-slate-900 truncate">
+                    {u.fullName}
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-mono">@{u.username}</span>
+                  {(u.devices || []).map((dev) => (
+                    <span
+                      key={dev}
+                      className="px-1.5 py-0.5 rounded-md bg-slate-200/80 text-slate-700 text-[10px] font-bold"
+                    >
+                      {dev}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold ${
+                    u.pushEnabled
+                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      : 'bg-slate-200/70 text-slate-500'
+                  }`}
+                >
+                  {u.pushEnabled
+                    ? `🔔 Push ჩართულია (${u.pushDevicesCount || 1} მოწყ.)`
+                    : '🔕 Push გამორთულია'}
+                </span>
+                <span
+                  className={`px-2 py-1 rounded-lg text-[10px] font-bold ${
+                    u.pwaInstalled
+                      ? 'bg-sky-100 text-sky-800 border border-sky-200'
+                      : 'bg-slate-200/70 text-slate-500'
+                  }`}
+                >
+                  {u.pwaInstalled ? '📱 აპი დაყენებულია' : '📱 აპის გარეშე'}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 
   const pendingResources = platform.resources.filter((r) => r.status === 'pending');
   const pendingHomeworks = platform.homeworks.filter((h) => h.status === 'pending');
@@ -828,7 +952,27 @@ export const AdminDashboardModal: React.FC = () => {
                                   {u.isAdmin ? 'ადმინი' : isMod ? 'მოდერატორი' : 'მოსწავლე'}
                                 </span>
                               </div>
-                              <div className="text-xs text-slate-500 font-mono">@{u.username}</div>
+                              <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                                <span className="text-xs text-slate-500 font-mono">@{u.username}</span>
+                                <span
+                                  className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                                    u.pushEnabled
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : 'bg-slate-100 text-slate-400'
+                                  }`}
+                                >
+                                  {u.pushEnabled ? `🔔 Push (${u.pushDevicesCount || 1})` : '🔕 Push'}
+                                </span>
+                                <span
+                                  className={`px-1.5 py-0.5 rounded-md text-[10px] font-bold ${
+                                    u.pwaInstalled
+                                      ? 'bg-sky-100 text-sky-800'
+                                      : 'bg-slate-100 text-slate-400'
+                                  }`}
+                                >
+                                  {u.pwaInstalled ? '📱 აპი ✓' : '📱 აპი —'}
+                                </span>
+                              </div>
                             </div>
                           </div>
 
@@ -877,7 +1021,8 @@ export const AdminDashboardModal: React.FC = () => {
           )}
 
           {activeTab === 'announcement' && (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <form
                 onSubmit={handleSaveAnnouncement}
                 className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4"
@@ -1041,6 +1186,9 @@ export const AdminDashboardModal: React.FC = () => {
                   <span>{pushBusy ? 'იგზავნება...' : 'ყველა მოსწავლესთან გაგზავნა'}</span>
                 </button>
               </form>
+              </div>
+
+              {renderFeatureActivationStats()}
             </div>
           )}
 
@@ -1070,7 +1218,7 @@ export const AdminDashboardModal: React.FC = () => {
                   disabled={isRefreshingAnalytics}
                   onClick={async () => {
                     setIsRefreshingAnalytics(true);
-                    await refreshAnalytics();
+                    await Promise.all([refreshAnalytics(), fetchUsers()]);
                     setIsRefreshingAnalytics(false);
                   }}
                   className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
@@ -1079,6 +1227,8 @@ export const AdminDashboardModal: React.FC = () => {
                   <span>განახლება</span>
                 </button>
               </div>
+
+              {renderFeatureActivationStats()}
 
               {/* Primary Stat Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

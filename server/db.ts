@@ -186,6 +186,9 @@ export interface PlatformUserAccount {
   isModerator?: boolean;
   token?: string;
   createdAt: string;
+  pwaInstalled?: boolean;
+  pwaInstalledAt?: string;
+  pwaDevice?: string;
 }
 
 export interface BackgroundPhysicsSettings {
@@ -209,6 +212,7 @@ export interface PlatformPushSubscription {
   role?: 'admin' | 'moderator' | 'user';
   canModerate?: boolean;
   userAgent?: string;
+  isStandalone?: boolean;
   updatedAt: string;
 }
 
