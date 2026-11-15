@@ -33491,7 +33491,7 @@
     "lastUpdated": "2026-11-15T13:48:24.809Z"
   },
   "platform": {
-    "updatedAt": 1794749940912,
+    "updatedAt": 1794750540298,
     "announcement": {
       "text": "ქიმიის დამოუკიდებელი! tip: დააყენე როგორც აპი & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34743,6 +34743,21 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T12:03:27.168Z"
+      },
+      "user_1794750540297_846": {
+        "id": "user_1794750540297_846",
+        "username": "masser",
+        "fullName": "ალექსანდრე ფუტკარაძე",
+        "passwordHash": "d6e9e161fa097b1022f16534c857dadc4eb4509b668116f8955ab2cecd441be717a11d1a6edafa62c4601459b1d694fb9f2ecfc7f78b897a2fead0b8e2e95eca",
+        "salt": "8d6ec1353c282635cb6741e04991e317",
+        "token": "428beeabe0dae63b39b8b1b412ed22cc1eb7f7a94096d611d36ee6e541c09690",
+        "tokens": [
+          "428beeabe0dae63b39b8b1b412ed22cc1eb7f7a94096d611d36ee6e541c09690"
+        ],
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T13:49:00.298Z"
       }
     },
     "backgroundPhysics": {
