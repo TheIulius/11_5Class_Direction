@@ -11,9 +11,22 @@ import {
   Sparkles,
   ShieldAlert,
   MoreVertical,
+  Laptop,
 } from 'lucide-react';
 import { usePlatform } from '../context/PlatformContext';
 import { soundEffects } from '../utils/soundEffects';
+
+const requestBrowserNotificationPermission = (): Promise<NotificationPermission> =>
+  new Promise((resolve, reject) => {
+    try {
+      const maybePromise = Notification.requestPermission((result) => resolve(result));
+      if (maybePromise && typeof maybePromise.then === 'function') {
+        maybePromise.then(resolve, reject);
+      }
+    } catch (err) {
+      reject(err);
+    }
+  });
 
 const urlBase64ToUint8Array = (base64String: string): Uint8Array => {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -52,8 +65,17 @@ export const PwaNotificationButton: React.FC = () => {
   const [supportsWebInstall, setSupportsWebInstall] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIosDevice, setIsIosDevice] = useState(false);
+  const [isAndroidDevice, setIsAndroidDevice] = useState(false);
+  const [isMacDevice, setIsMacDevice] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
-  const [guideOs, setGuideOs] = useState<'ios' | 'android'>('ios');
+  const [guideOs, setGuideOs] = useState<'ios' | 'android' | 'macos'>('ios');
+  const [notifPermission, setNotifPermission] = useState<
+    NotificationPermission | 'unsupported'
+  >(() =>
+    typeof window !== 'undefined' && 'Notification' in window
+      ? Notification.permission
+      : 'unsupported'
+  );
 
   const getToken = () => {
     if (contextToken) return contextToken;
@@ -81,11 +103,30 @@ export const PwaNotificationButton: React.FC = () => {
     const ios =
       /iPad|iPhone|iPod/.test(ua) ||
       (window.navigator.platform === 'MacIntel' && window.navigator.maxTouchPoints > 1);
-    const mobile = ios || /Android/i.test(ua);
+    const android = /Android/i.test(ua);
+    const macDesktop =
+      !ios && (/Macintosh|Mac OS X/i.test(ua) || /Mac/i.test(window.navigator.platform || ''));
+    const mobile = ios || android;
 
     setIsIosDevice(ios);
+    setIsAndroidDevice(android);
+    setIsMacDevice(macDesktop);
     setIsMobileDevice(mobile);
-    setGuideOs(ios ? 'ios' : 'android');
+    setGuideOs(ios ? 'ios' : macDesktop ? 'macos' : 'android');
+
+    const syncPermissionState = () => {
+      if (!('Notification' in window)) {
+        setNotifPermission('unsupported');
+        return;
+      }
+      const next = Notification.permission;
+      setNotifPermission(next);
+      if (next === 'granted') {
+        setErrorMsg((prev) => (prev && prev.includes('ნებართვა') ? null : prev));
+      }
+    };
+
+    syncPermissionState();
 
     const hasNativeInstall = typeof (Navigator.prototype as any).install === 'function';
     setSupportsWebInstall(hasNativeInstall);
@@ -95,9 +136,33 @@ export const PwaNotificationButton: React.FC = () => {
       setDeferredInstallPrompt(event);
     };
 
+    const onFocusOrVisible = () => {
+      if (document.visibilityState !== 'hidden') {
+        syncPermissionState();
+      }
+    };
+
+    let permStatus: PermissionStatus | null = null;
+    if ('permissions' in navigator && typeof navigator.permissions?.query === 'function') {
+      navigator.permissions
+        .query({ name: 'notifications' as PermissionName })
+        .then((status) => {
+          permStatus = status;
+          status.onchange = syncPermissionState;
+        })
+        .catch(() => {});
+    }
+
     window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+    window.addEventListener('focus', syncPermissionState);
+    document.addEventListener('visibilitychange', onFocusOrVisible);
     return () => {
       window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
+      window.removeEventListener('focus', syncPermissionState);
+      document.removeEventListener('visibilitychange', onFocusOrVisible);
+      if (permStatus) {
+        permStatus.onchange = null;
+      }
     };
   }, []);
 
@@ -151,6 +216,16 @@ export const PwaNotificationButton: React.FC = () => {
     }).catch(() => {});
   }, [isStandalone, user?.id, contextToken, currentEndpoint]);
 
+  // Re-check Notification.permission whenever dialog opens
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined' || !('Notification' in window)) return;
+    const perm = Notification.permission;
+    setNotifPermission(perm);
+    if (perm === 'granted') {
+      setErrorMsg((prev) => (prev && prev.includes('ნებართვა') ? null : prev));
+    }
+  }, [isOpen]);
+
   // Sync native <dialog>
   useEffect(() => {
     const dlg = dialogRef.current;
@@ -171,7 +246,27 @@ export const PwaNotificationButton: React.FC = () => {
     if (!dlg) return;
     const handleClose = () => setIsOpen(false);
     dlg.addEventListener('close', handleClose);
-    return () => dlg.removeEventListener('close', handleClose);
+
+    // Light-dismiss fallback for browsers without <dialog closedby="any"> support (e.g. Safari)
+    const supportsClosedBy = 'closedBy' in HTMLDialogElement.prototype;
+    const handleBackdropClick = (event: MouseEvent) => {
+      if (supportsClosedBy || event.target !== dlg) return;
+      const rect = dlg.getBoundingClientRect();
+      const insideDialog =
+        rect.top <= event.clientY &&
+        event.clientY <= rect.top + rect.height &&
+        rect.left <= event.clientX &&
+        event.clientX <= rect.left + rect.width;
+      if (!insideDialog) {
+        dlg.close();
+      }
+    };
+
+    dlg.addEventListener('click', handleBackdropClick);
+    return () => {
+      dlg.removeEventListener('close', handleClose);
+      dlg.removeEventListener('click', handleBackdropClick);
+    };
   }, []);
 
   const handleInstallClick = async () => {
@@ -208,24 +303,49 @@ export const PwaNotificationButton: React.FC = () => {
     }
   };
 
+  const getDeniedPermissionHint = (): string => {
+    if (isMacDevice && isStandalone) {
+      return 'Mac Dock აპს ცალკე ნებართვა სჭირდება Safari-სგან დამოუკიდებლად: გახსენი  → System Settings → Notifications → „11⁵ კლასი“ და ჩართე Allow Notifications (თუ მაინც ბლოკავს, წაშალე Dock აპი და Safari-დან თავიდან გააკეთე File → Add to Dock).';
+    }
+    if (isIosDevice && isStandalone) {
+      return 'iPhone-ზე გახსენი Settings → Notifications → „11⁵ კლასი“ და ჩართე Allow Notifications.';
+    }
+    if (isAndroidDevice) {
+      return 'Chrome-ში დააჭირე მისამართის ზოლის 🔒/პარამეტრების ხატულას → Permissions → Notifications → Allow.';
+    }
+    if (isMacDevice) {
+      return 'Safari → Settings → Websites → Notifications (ან Chrome-ის 🔒 ხატულიდან) აირჩიე Allow. თუ Mac Dock აპს იყენებ, იქ ნებართვა  → System Settings → Notifications → „11⁵ კლასი“-დან ირთვება.';
+    }
+    return 'ნებართვა უარყოფილია — დაუშვი Notifications ბრაუზერის პარამეტრებიდან.';
+  };
+
   const handleEnableNotifications = async () => {
     setBusy(true);
     setErrorMsg(null);
     setStatusMsg(null);
 
     try {
-      if (!('serviceWorker' in navigator) || !('Notification' in window)) {
+      if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window)) {
         if (isIosDevice && !isStandalone) {
-          setErrorMsg('iPhone-ზე ჯერ დაამატე მთავარ ეკრანზე (Share → Add to Home Screen)!');
+          setErrorMsg('Safari (iOS)-ზე ჯერ დაამატე მთავარ ეკრანზე (Share → Add to Home Screen) და იქიდან გახსენი!');
         } else {
           setErrorMsg('ბრაუზერი არ უჭერს მხარს Push შეტყობინებებს.');
         }
         return;
       }
 
-      const permission = await Notification.requestPermission();
+      let permission: NotificationPermission = Notification.permission;
       if (permission !== 'granted') {
-        setErrorMsg('ნებართვა უარყოფილია — დაუშვი Notifications პარამეტრებიდან.');
+        permission = await requestBrowserNotificationPermission();
+      }
+      setNotifPermission(permission);
+
+      if (permission === 'default') {
+        setErrorMsg('ნებართვის მოთხოვნა დაიხურა — დააჭირე „შეტყობინებების ჩართვა“-ს და აირჩიე Allow.');
+        return;
+      }
+      if (permission !== 'granted') {
+        setErrorMsg(getDeniedPermissionHint());
         return;
       }
 
@@ -450,6 +570,12 @@ export const PwaNotificationButton: React.FC = () => {
               მიიღე შეტყობინება შემაჯამებლებზე, დავალებებსა და სიახლეებზე.
             </p>
 
+            {!isSubscribed && notifPermission === 'denied' && !errorMsg && (
+              <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] font-semibold text-amber-900 dark:text-amber-200 leading-relaxed">
+                {getDeniedPermissionHint()}
+              </div>
+            )}
+
             <div className="flex flex-wrap items-center gap-2">
               {!isSubscribed ? (
                 <button
@@ -500,11 +626,11 @@ export const PwaNotificationButton: React.FC = () => {
                 )}
               </div>
 
-              {/* OS Switcher Pill */}
+              {/* OS / Browser Switcher Pill */}
               <div
-                className="inline-flex p-0.5 rounded-xl card-surface border border-[var(--border-subtle)] text-[11px] font-bold"
+                className="inline-flex flex-wrap p-0.5 rounded-xl card-surface border border-[var(--border-subtle)] text-[11px] font-bold"
                 role="group"
-                aria-label="მოწყობილობის არჩევა"
+                aria-label="ბრაუზერის და მოწყობილობის არჩევა"
               >
                 <button
                   type="button"
@@ -516,7 +642,7 @@ export const PwaNotificationButton: React.FC = () => {
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
-                  🍎 iPhone
+                  Safari (iOS)
                 </button>
                 <button
                   type="button"
@@ -528,7 +654,20 @@ export const PwaNotificationButton: React.FC = () => {
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
-                  🤖 Android
+                  Chrome (Android)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGuideOs('macos')}
+                  aria-pressed={guideOs === 'macos'}
+                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer inline-flex items-center gap-1 ${
+                    guideOs === 'macos'
+                      ? 'btn-primary text-white'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <Laptop className="w-3 h-3" aria-hidden="true" />
+                  <span>Mac</span>
                 </button>
               </div>
             </div>
@@ -547,7 +686,7 @@ export const PwaNotificationButton: React.FC = () => {
 
             {/* Visual Screen Guide */}
             {guideOs === 'ios' ? (
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 <div className="grid grid-cols-2 gap-2.5">
                   {/* iOS Screen 1: Safari Share button */}
                   <div className="p-2.5 rounded-xl card-surface border border-[var(--border-subtle)] flex flex-col justify-between gap-2">
@@ -620,12 +759,24 @@ export const PwaNotificationButton: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <p className="text-center text-[10px] font-bold text-[var(--text-muted)]">
-                  მერე გახსენი 11⁵ ეკრანიდან და ჩართე 🔔
-                </p>
+
+                <ol className="p-2.5 rounded-xl card-surface border border-[var(--border-subtle)] space-y-1.5 text-[11px] text-[var(--text-secondary)] leading-relaxed list-decimal list-inside">
+                  <li>
+                    გახსენი საიტი <strong className="text-[var(--text-primary)]">Safari</strong>-ში (არა Chrome-ში ან Instagram/Messenger-ის ბრაუზერში).
+                  </li>
+                  <li>
+                    დააჭირე ქვედა პანელზე <strong className="text-[var(--text-primary)]">Share (↑)</strong> ღილაკს (ან ზედა მარჯვნივ iPad-ზე).
+                  </li>
+                  <li>
+                    ჩამოსქროლე, აირჩიე <strong className="text-[var(--text-primary)]">Add to Home Screen</strong> და დააჭირე <strong className="text-[var(--text-primary)]">Add</strong>.
+                  </li>
+                  <li>
+                    გახსენი მთავარ ეკრანზე გაჩენილი <strong className="text-[var(--text-primary)]">11⁵ კლასი</strong> აპი და იქ დააჭირე <strong className="text-[var(--text-primary)]">„შეტყობინებების ჩართვა“-ს → Allow</strong>.
+                  </li>
+                </ol>
               </div>
-            ) : (
-              <div className="space-y-2">
+            ) : guideOs === 'android' ? (
+              <div className="space-y-2.5">
                 <div className="grid grid-cols-2 gap-2.5">
                   {/* Android Screen 1: Chrome 3-dots */}
                   <div className="p-2.5 rounded-xl card-surface border border-[var(--border-subtle)] flex flex-col justify-between gap-2">
@@ -690,9 +841,97 @@ export const PwaNotificationButton: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <p className="text-center text-[10px] font-bold text-[var(--text-muted)]">
-                  ან დააჭირე ზემოთ „აპლიკაციის დაყენება“-ს
-                </p>
+
+                <ol className="p-2.5 rounded-xl card-surface border border-[var(--border-subtle)] space-y-1.5 text-[11px] text-[var(--text-secondary)] leading-relaxed list-decimal list-inside">
+                  <li>
+                    გახსენი საიტი <strong className="text-[var(--text-primary)]">Google Chrome</strong>-ში (არა Incognito რეჟიმში).
+                  </li>
+                  <li>
+                    დააჭირე ზემოთ <strong className="text-[var(--text-primary)]">„აპლიკაციის დაყენება (1 დაჭერით)“</strong> ღილაკს, ან ზედა მარჯვნივ <strong className="text-[var(--text-primary)]">⋮ მენიუს</strong>.
+                  </li>
+                  <li>
+                    აირჩიე <strong className="text-[var(--text-primary)]">Install app</strong> (ან <strong className="text-[var(--text-primary)]">Add to Home screen</strong>) → დაადასტურე <strong className="text-[var(--text-primary)]">Install</strong>.
+                  </li>
+                  <li>
+                    გახსენი <strong className="text-[var(--text-primary)]">11⁵ კლასი</strong> ეკრანიდან და დააჭირე <strong className="text-[var(--text-primary)]">„შეტყობინებების ჩართვა“-ს → Allow</strong>.
+                  </li>
+                </ol>
+              </div>
+            ) : (
+              <div className="space-y-2.5">
+                <div className="grid grid-cols-2 gap-2.5">
+                  {/* Mac Screen 1: Safari File -> Add to Dock */}
+                  <div className="p-2.5 rounded-xl card-surface border border-[var(--border-subtle)] flex flex-col justify-between gap-2">
+                    <div
+                      aria-hidden="true"
+                      className="rounded-xl border-2 border-slate-800/80 dark:border-slate-600 bg-slate-100 dark:bg-slate-900 overflow-hidden flex flex-col justify-between h-28 select-none"
+                    >
+                      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-2 py-1 flex items-center gap-2 text-[7px] font-bold text-slate-600 dark:text-slate-300">
+                        <span className="font-black">Safari</span>
+                        <span className="px-1 rounded bg-slate-200 dark:bg-slate-700">File</span>
+                      </div>
+                      <div className="mx-2 my-auto bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-700 p-1.5 space-y-1 shadow-sm">
+                        <div className="text-[7px] text-slate-400 px-1">Share…</div>
+                        <div className="px-1.5 py-0.5 rounded bg-violet-600 text-white ring-2 ring-amber-400 text-[8px] font-black truncate">
+                          Add to Dock…
+                        </div>
+                      </div>
+                      <div className="mx-auto mb-1 px-2 py-0.5 rounded-full bg-white/80 dark:bg-slate-800/80 border border-slate-300/70 dark:border-slate-700 flex items-center gap-1">
+                        <span className="w-3 h-3 rounded bg-violet-600 text-white text-[6px] font-black flex items-center justify-center">
+                          11⁵
+                        </span>
+                        <span className="w-2.5 h-2.5 rounded bg-slate-300 dark:bg-slate-600" />
+                      </div>
+                    </div>
+                    <div className="text-center text-[11px] font-black text-[var(--text-primary)]">
+                      Safari → File → Add to Dock
+                    </div>
+                  </div>
+
+                  {/* Mac Screen 2: Chrome Install */}
+                  <div className="p-2.5 rounded-xl card-surface border border-[var(--border-subtle)] flex flex-col justify-between gap-2">
+                    <div
+                      aria-hidden="true"
+                      className="rounded-xl border-2 border-slate-800/80 dark:border-slate-600 bg-slate-100 dark:bg-slate-900 overflow-hidden flex flex-col justify-between h-28 select-none"
+                    >
+                      <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-2 py-1 flex items-center justify-between gap-1">
+                        <span className="text-[7px] font-mono text-slate-500 dark:text-slate-300 truncate">
+                          class11-5...
+                        </span>
+                        <span className="px-1 rounded bg-violet-600 text-white text-[7px] font-black">
+                          ⋮
+                        </span>
+                      </div>
+                      <div className="m-1.5 bg-white dark:bg-slate-800 rounded-lg border border-slate-300 dark:border-slate-700 p-1.5 space-y-1 shadow-sm">
+                        <div className="text-[7px] text-slate-400 px-1 truncate">
+                          Cast, save, and share
+                        </div>
+                        <div className="px-1.5 py-0.5 rounded bg-violet-600 text-white ring-2 ring-amber-400 text-[8px] font-black flex items-center gap-1">
+                          <Download className="w-2.5 h-2.5 shrink-0" />
+                          <span className="truncate">Install page as app…</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-center text-[11px] font-black text-[var(--text-primary)]">
+                      Chrome → ⋮ → Install app
+                    </div>
+                  </div>
+                </div>
+
+                <ol className="p-2.5 rounded-xl card-surface border border-[var(--border-subtle)] space-y-1.5 text-[11px] text-[var(--text-secondary)] leading-relaxed list-decimal list-inside">
+                  <li>
+                    <strong className="text-[var(--text-primary)]">Safari-დან:</strong> ზედა მენიუდან <strong className="text-[var(--text-primary)]">File → Add to Dock…</strong> → <strong className="text-[var(--text-primary)]">Add</strong>.
+                  </li>
+                  <li>
+                    <strong className="text-[var(--text-primary)]">Chrome-დან:</strong> ზედა მარჯვენა <strong className="text-[var(--text-primary)]">⋮ → Cast, save, and share → Install page as app…</strong> → <strong className="text-[var(--text-primary)]">Install</strong>.
+                  </li>
+                  <li>
+                    <strong className="text-[var(--text-primary)]">მნიშვნელოვანია Mac Safari Dock აპზე:</strong> Dock-ში დამატებული აპი Safari-სგან დამოუკიდებელი აპია (Safari-ს Allow იქ ავტომატურად არ გადადის) — გახსენი აპი Dock-დან და შიგნით დააჭირე <strong className="text-[var(--text-primary)]">„შეტყობინებების ჩართვა“-ს</strong>.
+                  </li>
+                  <li>
+                    <strong className="text-[var(--text-primary)]">თუ წერს „ნებართვა უარყოფილია“:</strong> გახსენი <strong className="text-[var(--text-primary)]"> → System Settings → Notifications → 11⁵ კლასი</strong> და ჩართე <strong className="text-[var(--text-primary)]">Allow Notifications</strong> (თუ მაინც ბლოკავს, წაშალე Dock აპი და Safari-დან თავიდან დაამატე <strong className="text-[var(--text-primary)]">Add to Dock</strong>).
+                  </li>
+                </ol>
               </div>
             )}
           </div>
