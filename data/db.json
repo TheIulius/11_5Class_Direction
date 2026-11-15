@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T12:03:01.166Z"
   },
   "platform": {
-    "updatedAt": 1794744870088,
+    "updatedAt": 1794744873810,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34583,12 +34583,16 @@
         "salt": "bf561a201267f9bc1552d255a30d0ce4",
         "role": "admin",
         "isAdmin": true,
-        "token": "d960deb21ee3bb5656bd00a111646442b5f8836e7c51ea3e911b610f40de104b",
+        "token": "eea7381db6dcffa9ba1646980e39934280a705c5a0bfbf7efa0c4cd2adb5f17a",
         "createdAt": "2026-09-25T16:18:23.548Z",
         "isModerator": false,
         "pwaInstalled": true,
         "pwaInstalledAt": "2026-11-15T11:54:53.972Z",
-        "pwaDevice": "iPhone / iOS"
+        "pwaDevice": "iPhone / iOS",
+        "tokens": [
+          "d960deb21ee3bb5656bd00a111646442b5f8836e7c51ea3e911b610f40de104b",
+          "eea7381db6dcffa9ba1646980e39934280a705c5a0bfbf7efa0c4cd2adb5f17a"
+        ]
       },
       "user_1794734928131_978": {
         "id": "user_1794734928131_978",
@@ -34795,11 +34799,13 @@
           "p256dh": "BI2xR-psIeJ1DKQihWSdtzk2bmu4VMJISy1q_E-V0efPZV54wE8By5_kh2oFD8avp9WZaYc1h3ugxJr04cXfde0",
           "auth": "HAvPPQr4fqEJ2I_Kf3jK8A"
         },
-        "role": "user",
-        "canModerate": false,
+        "userId": "user_theiulius_115",
+        "username": "theiulius",
+        "role": "admin",
+        "canModerate": true,
         "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Safari/605.1.15",
         "isStandalone": false,
-        "updatedAt": "2026-11-15T12:14:30.088Z"
+        "updatedAt": "2026-11-15T12:14:33.809Z"
       },
       {
         "endpoint": "https://web.push.apple.com/QPYLD1Uqt2A50mjqyGuNiOJguyJzfTxNzOCwYtIWIsZA8u3Mn8Evwfg7DULCUWffsV07JnFAvvsL9bfRX0AuqhrWd5sD1q6OEzy0rFCouQthJeoSu1fcQhBZpHRIqeOKXz1J7XgYCOPA2Y5i2mr91Y6fNiGYu-uCiYII6krfeDk",
