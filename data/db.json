@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T11:53:16.661Z"
   },
   "platform": {
-    "updatedAt": 1794743399619,
+    "updatedAt": 1794743642577,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34582,7 +34582,7 @@
         "salt": "bf561a201267f9bc1552d255a30d0ce4",
         "role": "admin",
         "isAdmin": true,
-        "token": "0003eb53a435b5de954ce527ccc3a66a88734bcc5a7fa692c6e494d08a614a7c",
+        "token": "ff72d55f721c682dc3fcee4b3eb3305515636adda71d88069e770ad7603c0223",
         "createdAt": "2026-09-25T16:18:23.548Z",
         "isModerator": false
       },
