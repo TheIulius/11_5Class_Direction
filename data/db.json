@@ -33376,7 +33376,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 86,
+    "visits": 87,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33485,10 +33485,10 @@
         }
       }
     },
-    "lastUpdated": "2026-11-15T11:30:44.745Z"
+    "lastUpdated": "2026-11-15T11:34:45.787Z"
   },
   "platform": {
-    "updatedAt": 1794742330695,
+    "updatedAt": 1794742486187,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34742,7 +34742,7 @@
         "role": "user",
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
-        "updatedAt": "2026-11-15T11:26:11.199Z"
+        "updatedAt": "2026-11-15T11:34:46.187Z"
       },
       {
         "endpoint": "https://fcm.googleapis.com/fcm/send/d-reqs7o2Zg:APA91bG344KBtS0RGOMxFPsI6GyzvyupigorOD5qmCWvB1zgU5v98JHifSaa3CV9frZEj2M0xTKlAXmhCOCmLpckwwQ2tkpQHErBLpMiflPxU3YB9jxz8tdSU6ceXgz5DWi2dAj9S9sM",
