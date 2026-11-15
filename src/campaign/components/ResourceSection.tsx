@@ -73,6 +73,133 @@ interface GalleryMediaItem {
   authorName: string;
 }
 
+type PeelDirection = 'next' | 'prev';
+type PeelPose = 1 | 2 | 3 | 4;
+
+interface PeelSession {
+  turnId: number;
+  fromItem: GalleryMediaItem;
+  toItem: GalleryMediaItem;
+  dir: PeelDirection;
+  pose: PeelPose;
+}
+
+interface PaperPeelGeometry {
+  clipPolygon: string;
+  contactShadowPath: string;
+  flapShadowPath: string;
+  undersidePath: string;
+  foldEdgeStrokePath: string;
+  creaseStrokePath: string;
+  innerCreaseHighlightPath: string;
+  gradStart: { x: string; y: string };
+  gradEnd: { x: string; y: string };
+  shadowGradStart: { x: string; y: string };
+  shadowGradEnd: { x: string; y: string };
+}
+
+const sampleQuadBezier = (
+  x1: number,
+  y1: number,
+  cx: number,
+  cy: number,
+  x2: number,
+  y2: number,
+  steps = 10
+): Array<[number, number]> => {
+  const pts: Array<[number, number]> = [];
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const mt = 1 - t;
+    const x = mt * mt * x1 + 2 * mt * t * cx + t * t * x2;
+    const y = mt * mt * y1 + 2 * mt * t * cy + t * t * y2;
+    pts.push([x, y]);
+  }
+  return pts;
+};
+
+const computePaperPeelGeometry = (pose: PeelPose, dir: PeelDirection): PaperPeelGeometry => {
+  const mx = (x: number) => (dir === 'prev' ? 1000 - x : x);
+  const pt = (x: number, y: number) => `${mx(x).toFixed(1)},${y.toFixed(1)}`;
+  const toPolygon = (pts: Array<[number, number]>) =>
+    `polygon(${pts.map(([x, y]) => `${(mx(x) / 10).toFixed(2)}% ${(y / 10).toFixed(2)}%`).join(', ')})`;
+
+  const gradStart = { x: dir === 'prev' ? '20%' : '80%', y: '80%' };
+  const gradEnd = { x: dir === 'prev' ? '75%' : '25%', y: '25%' };
+  const shadowGradStart = { x: dir === 'prev' ? '60%' : '40%', y: '40%' };
+  const shadowGradEnd = { x: dir === 'prev' ? '15%' : '85%', y: '85%' };
+
+  if (pose === 1) {
+    // 1. Corner lift: Most of the old page is still visible. A small curled corner exposes the first sliver of the next page.
+    const creasePts = sampleQuadBezier(1000, 740, 860, 866, 730, 1000, 10);
+    return {
+      clipPolygon: toPolygon([[0, 0], [1000, 0], ...creasePts, [0, 1000]]),
+      contactShadowPath: `M ${pt(1000, 740)} Q ${pt(862, 868)} ${pt(730, 1000)} L ${pt(788, 1000)} Q ${pt(898, 900)} ${pt(1000, 798)} Z`,
+      flapShadowPath: `M ${pt(730, 1000)} Q ${pt(648, 830)} ${pt(660, 660)} Q ${pt(828, 634)} ${pt(1000, 740)} Q ${pt(835, 655)} ${pt(685, 680)} Q ${pt(668, 835)} ${pt(730, 1000)} Z`,
+      undersidePath: `M ${pt(1000, 740)} Q ${pt(862, 868)} ${pt(730, 1000)} Q ${pt(668, 835)} ${pt(685, 680)} Q ${pt(835, 655)} ${pt(1000, 740)} Z`,
+      foldEdgeStrokePath: `M ${pt(730, 1000)} Q ${pt(668, 835)} ${pt(685, 680)} Q ${pt(835, 655)} ${pt(1000, 740)}`,
+      creaseStrokePath: `M ${pt(1000, 740)} Q ${pt(862, 868)} ${pt(730, 1000)}`,
+      innerCreaseHighlightPath: `M ${pt(990, 744)} Q ${pt(852, 860)} ${pt(734, 990)}`,
+      gradStart,
+      gradEnd,
+      shadowGradStart,
+      shadowGradEnd,
+    };
+  }
+
+  if (pose === 2) {
+    // 2. Fold grows: The crease travels inward and the next page is clearly visible behind it.
+    const creasePts = sampleQuadBezier(1000, 360, 668, 678, 350, 1000, 10);
+    return {
+      clipPolygon: toPolygon([[0, 0], [1000, 0], ...creasePts, [0, 1000]]),
+      contactShadowPath: `M ${pt(1000, 360)} Q ${pt(670, 680)} ${pt(350, 1000)} L ${pt(430, 1000)} Q ${pt(720, 724)} ${pt(1000, 440)} Z`,
+      flapShadowPath: `M ${pt(350, 1000)} C ${pt(248, 730)} ${pt(316, 460)} ${pt(422, 400)} C ${pt(536, 336)} ${pt(750, 266)} ${pt(1000, 360)} C ${pt(765, 290)} ${pt(555, 360)} ${pt(445, 425)} C ${pt(340, 485)} ${pt(275, 740)} ${pt(350, 1000)} Z`,
+      undersidePath: `M ${pt(1000, 360)} Q ${pt(670, 680)} ${pt(350, 1000)} C ${pt(275, 740)} ${pt(340, 485)} ${pt(445, 425)} C ${pt(555, 360)} ${pt(765, 290)} ${pt(1000, 360)} Z`,
+      foldEdgeStrokePath: `M ${pt(350, 1000)} C ${pt(275, 740)} ${pt(340, 485)} ${pt(445, 425)} C ${pt(555, 360)} ${pt(765, 290)} ${pt(1000, 360)}`,
+      creaseStrokePath: `M ${pt(1000, 360)} Q ${pt(670, 680)} ${pt(350, 1000)}`,
+      innerCreaseHighlightPath: `M ${pt(988, 366)} Q ${pt(658, 670)} ${pt(356, 988)}`,
+      gradStart,
+      gradEnd,
+      shadowGradStart,
+      shadowGradEnd,
+    };
+  }
+
+  if (pose === 3) {
+    // 3. Sweep: The fold crosses the center. The old photo is still visible on the unpeeled part, and the paper underside travels with the crease.
+    const creasePts = sampleQuadBezier(720, 0, 358, 368, 0, 730, 10);
+    return {
+      clipPolygon: toPolygon([[0, 0], ...creasePts]),
+      contactShadowPath: `M ${pt(720, 0)} Q ${pt(360, 370)} ${pt(0, 730)} L ${pt(0, 804)} Q ${pt(404, 414)} ${pt(794, 0)} Z`,
+      flapShadowPath: `M ${pt(0, 470)} L ${pt(0, 436)} Q ${pt(164, 154)} ${pt(426, 0)} L ${pt(460, 0)} Q ${pt(185, 175)} ${pt(0, 470)} Z`,
+      undersidePath: `M ${pt(720, 0)} Q ${pt(360, 370)} ${pt(0, 730)} L ${pt(0, 470)} Q ${pt(185, 175)} ${pt(460, 0)} L ${pt(720, 0)} Z`,
+      foldEdgeStrokePath: `M ${pt(0, 470)} Q ${pt(185, 175)} ${pt(460, 0)}`,
+      creaseStrokePath: `M ${pt(720, 0)} Q ${pt(360, 370)} ${pt(0, 730)}`,
+      innerCreaseHighlightPath: `M ${pt(708, 8)} Q ${pt(350, 360)} ${pt(8, 718)}`,
+      gradStart,
+      gradEnd,
+      shadowGradStart,
+      shadowGradEnd,
+    };
+  }
+
+  // 4. Finish: A thin piece of the old sheet remains near the opposite side.
+  const creasePts = sampleQuadBezier(310, 0, 150, 156, 0, 320, 10);
+  return {
+    clipPolygon: toPolygon([[0, 0], ...creasePts]),
+    contactShadowPath: `M ${pt(310, 0)} Q ${pt(152, 158)} ${pt(0, 320)} L ${pt(0, 378)} Q ${pt(184, 190)} ${pt(368, 0)} Z`,
+    flapShadowPath: `M ${pt(0, 130)} L ${pt(0, 106)} Q ${pt(35, 35)} ${pt(100, 0)} L ${pt(125, 0)} Q ${pt(48, 48)} ${pt(0, 130)} Z`,
+    undersidePath: `M ${pt(310, 0)} Q ${pt(152, 158)} ${pt(0, 320)} L ${pt(0, 130)} Q ${pt(48, 48)} ${pt(125, 0)} L ${pt(310, 0)} Z`,
+    foldEdgeStrokePath: `M ${pt(0, 130)} Q ${pt(48, 48)} ${pt(125, 0)}`,
+    creaseStrokePath: `M ${pt(310, 0)} Q ${pt(152, 158)} ${pt(0, 320)}`,
+    innerCreaseHighlightPath: `M ${pt(298, 8)} Q ${pt(142, 148)} ${pt(8, 308)}`,
+    gradStart,
+    gradEnd,
+    shadowGradStart,
+    shadowGradEnd,
+  };
+};
+
 export const ResourceSection: React.FC<ResourceSectionProps> = ({
   targetType,
   targetId,
@@ -96,9 +223,14 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
   const fileInputId = useId();
   const dialogTitleId = useId();
+  const svgFilterPrefix = useId().replace(/:/g, '');
   const galleryDialogRef = useRef<HTMLDialogElement | null>(null);
+  const deskStageRef = useRef<HTMLDivElement | null>(null);
   const touchStartRef = useRef<{ x: number; y: number; multi: boolean } | null>(null);
   const pointerStartXRef = useRef<number | null>(null);
+  const turnIdRef = useRef<number>(0);
+  const peelTimersRef = useRef<number[]>([]);
+  const preloadedImagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
 
   const [showUploadForm, setShowUploadForm] = useState(false);
   const [editingResourceId, setEditingResourceId] = useState<string | null>(null);
@@ -115,7 +247,22 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
   // Unified gallery state across all photos & videos attached to this homework/target
   const [activeGalleryIdx, setActiveGalleryIdx] = useState<number | null>(null);
-  const [flipAnim, setFlipAnim] = useState<{ dir: 'next' | 'prev'; seq: number } | null>(null);
+  const [peelSession, setPeelSession] = useState<PeelSession | null>(null);
+  const [stageSize, setStageSize] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
+  const [imageDims, setImageDims] = useState<Record<string, { w: number; h: number }>>({});
+
+  const clearPeelTimers = () => {
+    for (const id of peelTimersRef.current) {
+      window.clearTimeout(id);
+    }
+    peelTimersRef.current = [];
+  };
+
+  useEffect(() => {
+    return () => {
+      clearPeelTimers();
+    };
+  }, []);
 
   // Filter resources matching this target
   const matchingResources = useMemo(
@@ -152,39 +299,195 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     return list;
   }, [matchingResources]);
 
+  // Preload image attachments and cache their natural dimensions so page turns start immediately
+  useEffect(() => {
+    for (const item of allTargetMediaItems) {
+      if (!isImageAttachment(item.attachment)) continue;
+      const url = item.attachment.dataUrl;
+      if (!url || preloadedImagesRef.current.has(url)) continue;
+      const img = new Image();
+      img.onload = () => {
+        if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+          setImageDims((prev) =>
+            prev[url] ? prev : { ...prev, [url]: { w: img.naturalWidth, h: img.naturalHeight } }
+          );
+        }
+      };
+      img.src = url;
+      preloadedImagesRef.current.set(url, img);
+      if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+        setImageDims((prev) =>
+          prev[url] ? prev : { ...prev, [url]: { w: img.naturalWidth, h: img.naturalHeight } }
+        );
+      }
+    }
+  }, [allTargetMediaItems]);
+
+  // Measure the inner desk stage area so the centered page sheet matches the photo bounds
+  useEffect(() => {
+    if (activeGalleryIdx === null) return;
+    const el = deskStageRef.current;
+    if (!el) return;
+
+    const updateSize = () => {
+      const style = window.getComputedStyle(el);
+      const padX = parseFloat(style.paddingLeft || '0') + parseFloat(style.paddingRight || '0');
+      const padY = parseFloat(style.paddingTop || '0') + parseFloat(style.paddingBottom || '0');
+      const availW = Math.max(0, el.clientWidth - padX);
+      const availH = Math.max(0, el.clientHeight - padY);
+      if (availW > 0 && availH > 0) {
+        setStageSize((prev) =>
+          prev.w === availW && prev.h === availH ? prev : { w: availW, h: availH }
+        );
+      }
+    };
+
+    updateSize();
+    const rafId = window.requestAnimationFrame(updateSize);
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(updateSize) : null;
+    ro?.observe(el);
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      ro?.disconnect();
+    };
+  }, [activeGalleryIdx !== null]);
+
+  const navigateToGalleryIndex = (targetIdx: number, explicitDir?: PeelDirection) => {
+    if (allTargetMediaItems.length <= 1) return;
+    if (activeGalleryIdx === null || targetIdx === activeGalleryIdx) return;
+
+    const fromItem = allTargetMediaItems[activeGalleryIdx];
+    const toItem = allTargetMediaItems[targetIdx];
+    if (!fromItem || !toItem) return;
+
+    const dir: PeelDirection = explicitDir ?? (targetIdx > activeGalleryIdx ? 'next' : 'prev');
+
+    turnIdRef.current += 1;
+    const currentTurnId = turnIdRef.current;
+    clearPeelTimers();
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    if (
+      prefersReducedMotion ||
+      !isImageAttachment(fromItem.attachment) ||
+      !isImageAttachment(toItem.attachment)
+    ) {
+      setPeelSession(null);
+      setActiveGalleryIdx(targetIdx);
+      return;
+    }
+
+    const startSteppedPeel = () => {
+      if (turnIdRef.current !== currentTurnId) return;
+      // Hold each of the 4 moving poses for 120ms (total 480ms, ~8.33 fps stop-motion feel)
+      const POSE_HOLD_MS = 120;
+      setActiveGalleryIdx(targetIdx);
+      setPeelSession({
+        turnId: currentTurnId,
+        fromItem,
+        toItem,
+        dir,
+        pose: 1,
+      });
+
+      const t2 = window.setTimeout(() => {
+        if (turnIdRef.current !== currentTurnId) return;
+        setPeelSession((prev) =>
+          prev && prev.turnId === currentTurnId ? { ...prev, pose: 2 } : prev
+        );
+      }, POSE_HOLD_MS);
+
+      const t3 = window.setTimeout(() => {
+        if (turnIdRef.current !== currentTurnId) return;
+        setPeelSession((prev) =>
+          prev && prev.turnId === currentTurnId ? { ...prev, pose: 3 } : prev
+        );
+      }, POSE_HOLD_MS * 2);
+
+      const t4 = window.setTimeout(() => {
+        if (turnIdRef.current !== currentTurnId) return;
+        setPeelSession((prev) =>
+          prev && prev.turnId === currentTurnId ? { ...prev, pose: 4 } : prev
+        );
+      }, POSE_HOLD_MS * 3);
+
+      const tRest = window.setTimeout(() => {
+        if (turnIdRef.current !== currentTurnId) return;
+        setPeelSession((prev) => (prev && prev.turnId === currentTurnId ? null : prev));
+      }, POSE_HOLD_MS * 4);
+
+      peelTimersRef.current = [t2, t3, t4, tRest];
+    };
+
+    const targetUrl = toItem.attachment.dataUrl;
+    let cached = preloadedImagesRef.current.get(targetUrl);
+    if (!cached) {
+      cached = new Image();
+      cached.src = targetUrl;
+      preloadedImagesRef.current.set(targetUrl, cached);
+    }
+
+    if (cached.complete && cached.naturalWidth > 0) {
+      if (!imageDims[targetUrl]) {
+        setImageDims((prev) => ({
+          ...prev,
+          [targetUrl]: { w: cached!.naturalWidth, h: cached!.naturalHeight },
+        }));
+      }
+      startSteppedPeel();
+    } else {
+      cached.onload = () => {
+        if (cached && cached.naturalWidth > 0 && cached.naturalHeight > 0) {
+          setImageDims((prev) => ({
+            ...prev,
+            [targetUrl]: { w: cached!.naturalWidth, h: cached!.naturalHeight },
+          }));
+        }
+        startSteppedPeel();
+      };
+      cached.onerror = () => {
+        startSteppedPeel();
+      };
+    }
+  };
+
   const openGalleryAt = (resourceId: string, attachmentDataUrl: string) => {
     const idx = allTargetMediaItems.findIndex(
       (m) => m.resourceId === resourceId && m.attachment.dataUrl === attachmentDataUrl
     );
-    setFlipAnim(null);
+    turnIdRef.current += 1;
+    clearPeelTimers();
+    setPeelSession(null);
     setActiveGalleryIdx(idx >= 0 ? idx : 0);
   };
 
   const closeGallery = () => {
+    turnIdRef.current += 1;
+    clearPeelTimers();
     const dlg = galleryDialogRef.current;
     if (dlg && dlg.open) {
       dlg.close();
     }
     setActiveGalleryIdx(null);
-    setFlipAnim(null);
+    setPeelSession(null);
   };
 
   const goPrevMedia = () => {
-    if (allTargetMediaItems.length <= 1) return;
+    if (allTargetMediaItems.length <= 1 || activeGalleryIdx === null) return;
     soundEffects.click();
-    setFlipAnim({ dir: 'prev', seq: Date.now() });
-    setActiveGalleryIdx((prev) =>
-      prev === null ? 0 : (prev - 1 + allTargetMediaItems.length) % allTargetMediaItems.length
-    );
+    const prevIdx = (activeGalleryIdx - 1 + allTargetMediaItems.length) % allTargetMediaItems.length;
+    navigateToGalleryIndex(prevIdx, 'prev');
   };
 
   const goNextMedia = () => {
-    if (allTargetMediaItems.length <= 1) return;
+    if (allTargetMediaItems.length <= 1 || activeGalleryIdx === null) return;
     soundEffects.click();
-    setFlipAnim({ dir: 'next', seq: Date.now() });
-    setActiveGalleryIdx((prev) =>
-      prev === null ? 0 : (prev + 1) % allTargetMediaItems.length
-    );
+    const nextIdx = (activeGalleryIdx + 1) % allTargetMediaItems.length;
+    navigateToGalleryIndex(nextIdx, 'next');
   };
 
   // Sync native <dialog> open/close
@@ -213,20 +516,17 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
         e.stopPropagation();
         if (allTargetMediaItems.length > 1) {
           soundEffects.click();
-          setFlipAnim({ dir: 'prev', seq: Date.now() });
-          setActiveGalleryIdx((prev) =>
-            prev === null ? 0 : (prev - 1 + allTargetMediaItems.length) % allTargetMediaItems.length
-          );
+          const prevIdx =
+            (activeGalleryIdx - 1 + allTargetMediaItems.length) % allTargetMediaItems.length;
+          navigateToGalleryIndex(prevIdx, 'prev');
         }
       } else if (e.key === 'ArrowRight') {
         e.preventDefault();
         e.stopPropagation();
         if (allTargetMediaItems.length > 1) {
           soundEffects.click();
-          setFlipAnim({ dir: 'next', seq: Date.now() });
-          setActiveGalleryIdx((prev) =>
-            prev === null ? 0 : (prev + 1) % allTargetMediaItems.length
-          );
+          const nextIdx = (activeGalleryIdx + 1) % allTargetMediaItems.length;
+          navigateToGalleryIndex(nextIdx, 'next');
         }
       }
     };
@@ -235,7 +535,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     return () => {
       window.removeEventListener('keydown', handleWindowKeyDown, true);
     };
-  }, [activeGalleryIdx !== null, allTargetMediaItems.length]);
+  }, [activeGalleryIdx, allTargetMediaItems]);
 
   // Fallback for browsers without native dialog[closedby="any"]
   useEffect(() => {
@@ -243,8 +543,10 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     if (!dlg) return;
 
     const handleClose = () => {
+      turnIdRef.current += 1;
+      clearPeelTimers();
       setActiveGalleryIdx(null);
-      setFlipAnim(null);
+      setPeelSession(null);
     };
     const handleBackdropClick = (event: MouseEvent) => {
       if ('closedBy' in HTMLDialogElement.prototype) return;
@@ -424,6 +726,25 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     activeGalleryIdx !== null && allTargetMediaItems[activeGalleryIdx]
       ? allTargetMediaItems[activeGalleryIdx]
       : null;
+
+  const currentImgDim = currentMedia
+    ? imageDims[currentMedia.attachment.dataUrl]
+    : undefined;
+
+  const currentPageBox = useMemo(() => {
+    if (!currentImgDim || currentImgDim.w <= 0 || currentImgDim.h <= 0) return null;
+    if (stageSize.w <= 0 || stageSize.h <= 0) return null;
+    const scale = Math.min(stageSize.w / currentImgDim.w, stageSize.h / currentImgDim.h);
+    return {
+      w: Math.max(1, Math.round(currentImgDim.w * scale)),
+      h: Math.max(1, Math.round(currentImgDim.h * scale)),
+    };
+  }, [currentImgDim, stageSize]);
+
+  const peelGeom = useMemo(
+    () => (peelSession ? computePaperPeelGeometry(peelSession.pose, peelSession.dir) : null),
+    [peelSession]
+  );
 
   const visibleResources =
     isCompact && !showAllResources ? matchingResources.slice(0, 1) : matchingResources;
@@ -1064,16 +1385,11 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
               </div>
             </div>
 
-            {/* Full-Bleed Paper Media Stage (Supports Native Browser Pinch-Zoom + 10fps Cartoon Page-Flip) */}
+            {/* Stationary Desk Stage (.nb-viewer-desk) + Centered Book Page Sheet (.nb-page-sheet)
+                The peel happens strictly inside the bounds of the centered page photo. */}
             <div
-              key={`${activeGalleryIdx}-${flipAnim?.seq ?? 0}`}
-              className={`relative flex-1 min-h-0 w-full rounded-xl bg-[#f3efe6] dark:bg-slate-950/90 border border-[var(--border-subtle)] flex items-center justify-center overflow-auto ${
-                flipAnim?.dir === 'next'
-                  ? 'nb-page-flip-next'
-                  : flipAnim?.dir === 'prev'
-                  ? 'nb-page-flip-prev'
-                  : ''
-              }`}
+              ref={deskStageRef}
+              className="nb-viewer-desk relative flex-1 min-h-0 w-full rounded-xl bg-[#f3efe6] dark:bg-slate-950/90 border border-[var(--border-subtle)] flex items-center justify-center overflow-auto p-1 sm:p-2"
               style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
               onTouchStart={(e) => {
                 if (e.touches.length !== 1) {
@@ -1134,14 +1450,168 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                   className="w-full h-full max-h-full max-w-full object-contain rounded-lg"
                 />
               ) : (
-                <img
-                  key={currentMedia.attachment.dataUrl}
-                  src={currentMedia.attachment.dataUrl}
-                  alt={currentMedia.attachment.name}
-                  draggable={false}
-                  style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
-                  className="w-full h-full max-h-full max-w-full object-contain rounded-lg"
-                />
+                <div
+                  data-testid="nb-page-sheet"
+                  data-peel-pose={peelSession ? peelSession.pose : 'rest'}
+                  data-peel-dir={peelSession ? peelSession.dir : 'none'}
+                  className="nb-page-sheet"
+                  style={
+                    currentPageBox
+                      ? {
+                          width: `${currentPageBox.w}px`,
+                          height: `${currentPageBox.h}px`,
+                          touchAction: 'pan-x pan-y pinch-zoom',
+                        }
+                      : {
+                          width: '100%',
+                          height: '100%',
+                          maxWidth: '100%',
+                          maxHeight: '100%',
+                          touchAction: 'pan-x pan-y pinch-zoom',
+                        }
+                  }
+                >
+                  {/* Base Layer: Target (NEW) Page Photo — already centered, upright, and at its final size */}
+                  <img
+                    src={currentMedia.attachment.dataUrl}
+                    alt={currentMedia.attachment.name}
+                    draggable={false}
+                    onLoad={(e) => {
+                      const imgEl = e.currentTarget;
+                      const url = currentMedia.attachment.dataUrl;
+                      if (imgEl.naturalWidth > 0 && imgEl.naturalHeight > 0 && !imageDims[url]) {
+                        setImageDims((prev) => ({
+                          ...prev,
+                          [url]: { w: imgEl.naturalWidth, h: imgEl.naturalHeight },
+                        }));
+                      }
+                    }}
+                    style={{ touchAction: 'pan-x pan-y pinch-zoom' }}
+                    className="nb-page-new-photo w-full h-full object-contain block select-none"
+                  />
+
+                  {/* Top Peel Layer: Outgoing (OLD) Page Photo + Cut-Paper Fold Underside & Contact Shadow */}
+                  {peelSession && peelGeom && (
+                    <div className="nb-peel-layer" aria-hidden="true">
+                      {/* Outgoing (OLD) Page Photo clipped to the unpeeled region of the sheet */}
+                      <img
+                        src={peelSession.fromItem.attachment.dataUrl}
+                        alt=""
+                        draggable={false}
+                        className="nb-page-old-photo absolute inset-0 w-full h-full object-contain bg-[var(--nb-bg-paper,#fdfbf7)] dark:bg-[var(--nb-surface,#232936)] block select-none z-10"
+                        style={{
+                          clipPath: peelGeom.clipPolygon,
+                          WebkitClipPath: peelGeom.clipPolygon,
+                        }}
+                      />
+
+                      {/* Cut-Paper Cartoon Fold Overlay: Contact Shadow, Matte Underside Flap & Crease Line */}
+                      <svg
+                        viewBox="0 0 1000 1000"
+                        preserveAspectRatio="none"
+                        className="nb-page-peel-svg absolute inset-0 w-full h-full z-20 pointer-events-none"
+                      >
+                        <defs>
+                          <linearGradient
+                            id={`${svgFilterPrefix}-underside-grad`}
+                            x1={peelGeom.gradStart.x}
+                            y1={peelGeom.gradStart.y}
+                            x2={peelGeom.gradEnd.x}
+                            y2={peelGeom.gradEnd.y}
+                          >
+                            <stop offset="0%" stopColor="var(--nb-peel-underside)" />
+                            <stop offset="68%" stopColor="var(--nb-peel-underside)" />
+                            <stop offset="100%" stopColor="var(--nb-peel-underside-shade)" />
+                          </linearGradient>
+
+                          <linearGradient
+                            id={`${svgFilterPrefix}-contact-shadow-grad`}
+                            x1={peelGeom.shadowGradStart.x}
+                            y1={peelGeom.shadowGradStart.y}
+                            x2={peelGeom.shadowGradEnd.x}
+                            y2={peelGeom.shadowGradEnd.y}
+                          >
+                            <stop offset="0%" stopColor="var(--nb-peel-contact-shadow)" />
+                            <stop offset="100%" stopColor="transparent" />
+                          </linearGradient>
+
+                          <pattern
+                            id={`${svgFilterPrefix}-underside-rules`}
+                            width="100"
+                            height="45"
+                            patternUnits="userSpaceOnUse"
+                            patternTransform={peelSession.dir === 'prev' ? 'rotate(28)' : 'rotate(-28)'}
+                          >
+                            <line
+                              x1="0"
+                              y1="22"
+                              x2="100"
+                              y2="22"
+                              stroke="var(--nb-peel-rule)"
+                              strokeWidth="2.5"
+                            />
+                          </pattern>
+                        </defs>
+
+                        {/* 1. Faint Contact Shadow right beside the moving fold (cast onto the new page) */}
+                        <path
+                          d={peelGeom.contactShadowPath}
+                          fill={`url(#${svgFilterPrefix}-contact-shadow-grad)`}
+                        />
+
+                        {/* 2. Subtle Flap Shadow cast by the curved fold edge onto the old page */}
+                        <path
+                          d={peelGeom.flapShadowPath}
+                          fill="var(--nb-peel-flap-shadow)"
+                        />
+
+                        {/* 3. Matte Paper Underside of the lifted sheet */}
+                        <path
+                          d={peelGeom.undersidePath}
+                          fill={`url(#${svgFilterPrefix}-underside-grad)`}
+                        />
+
+                        {/* Faint notebook ruled texture on the paper underside */}
+                        <path
+                          d={peelGeom.undersidePath}
+                          fill={`url(#${svgFilterPrefix}-underside-rules)`}
+                        />
+
+                        {/* 4. Subtle paper highlight right inside the crease */}
+                        <path
+                          d={peelGeom.innerCreaseHighlightPath}
+                          fill="none"
+                          stroke="var(--nb-peel-highlight)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+
+                        {/* 5. Gently curved outer fold edge outline */}
+                        <path
+                          d={peelGeom.foldEdgeStrokePath}
+                          fill="none"
+                          stroke="var(--nb-peel-crease)"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+
+                        {/* 6. Simple crease line along the fold boundary */}
+                        <path
+                          d={peelGeom.creaseStrokePath}
+                          fill="none"
+                          stroke="var(--nb-peel-crease)"
+                          strokeWidth="2.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
 
@@ -1158,11 +1628,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                       onClick={() => {
                         if (idx === activeGalleryIdx) return;
                         soundEffects.click();
-                        setFlipAnim({
-                          dir: idx > (activeGalleryIdx ?? 0) ? 'next' : 'prev',
-                          seq: Date.now(),
-                        });
-                        setActiveGalleryIdx(idx);
+                        navigateToGalleryIndex(idx);
                       }}
                       aria-label={`გვერდი ${idx + 1}`}
                       className={`relative w-11 h-11 rounded-lg overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${

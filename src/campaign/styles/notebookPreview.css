@@ -792,128 +792,68 @@ dialog::backdrop {
 }
 
 /* ==========================================================================
-   9B. 10FPS CARTOON NOTEBOOK PAGE-FLIP ANIMATION (Media Viewer)
-   4 discrete steps over 380ms (~10.5 fps) for an authentic hand-drawn
-   sketchbook / cartoon page-turn feel on both mobile swipe & desktop arrows.
+   9B. CUT-PAPER CARTOON PAGE-PEEL TRANSITION (Media / Document Viewer)
+   Two stacked page layers inside the centered page sheet (.nb-page-sheet).
+   The surrounding viewer desk (.nb-viewer-desk) remains completely stationary.
+   4 stepped poses (~120ms each, 480ms total, ~8.3fps stop-motion feel) + Rest.
    ========================================================================== */
 
-@keyframes nbCartoonFlipNext {
-  0% {
-    transform: perspective(1200px) rotateY(-32deg) rotateZ(2.4deg) translateX(18%) scale(0.93);
-    box-shadow: 22px 12px 0 var(--nb-ink), inset -28px 0 0 rgba(255, 249, 196, 0.55);
-    filter: contrast(1.04) brightness(0.97);
-  }
-  25% {
-    transform: perspective(1200px) rotateY(-18deg) rotateZ(-1.6deg) translateX(9%) scale(0.97);
-    box-shadow: 14px 8px 0 var(--nb-ink), inset -16px 0 0 rgba(255, 249, 196, 0.35);
-    filter: contrast(1.02) brightness(0.99);
-  }
-  50% {
-    transform: perspective(1200px) rotateY(6deg) rotateZ(0.9deg) translateX(-3%) scale(1.01);
-    box-shadow: -6px 5px 0 var(--nb-ink);
-    filter: none;
-  }
-  75% {
-    transform: perspective(1200px) rotateY(-2deg) rotateZ(-0.4deg) translateX(1%) scale(1);
-    box-shadow: 4px 4px 0 var(--nb-ink);
-  }
-  100% {
-    transform: perspective(1200px) rotateY(0deg) rotateZ(0deg) translateX(0) scale(1);
-    box-shadow: 4px 4px 0 var(--nb-ink);
-  }
+:root,
+html[data-design-preview="notebook"] {
+  --nb-peel-underside: #f4ecdc;
+  --nb-peel-underside-shade: #e2d6bf;
+  --nb-peel-crease: #2d2d2d;
+  --nb-peel-contact-shadow: rgba(45, 45, 45, 0.24);
+  --nb-peel-flap-shadow: rgba(45, 45, 45, 0.15);
+  --nb-peel-highlight: rgba(255, 253, 247, 0.75);
+  --nb-peel-rule: rgba(45, 45, 45, 0.09);
 }
 
-@keyframes nbCartoonFlipPrev {
-  0% {
-    transform: perspective(1200px) rotateY(32deg) rotateZ(-2.4deg) translateX(-18%) scale(0.93);
-    box-shadow: -22px 12px 0 var(--nb-ink), inset 28px 0 0 rgba(255, 249, 196, 0.55);
-    filter: contrast(1.04) brightness(0.97);
-  }
-  25% {
-    transform: perspective(1200px) rotateY(18deg) rotateZ(1.6deg) translateX(-9%) scale(0.97);
-    box-shadow: -14px 8px 0 var(--nb-ink), inset 16px 0 0 rgba(255, 249, 196, 0.35);
-    filter: contrast(1.02) brightness(0.99);
-  }
-  50% {
-    transform: perspective(1200px) rotateY(-6deg) rotateZ(-0.9deg) translateX(3%) scale(1.01);
-    box-shadow: 6px 5px 0 var(--nb-ink);
-    filter: none;
-  }
-  75% {
-    transform: perspective(1200px) rotateY(2deg) rotateZ(0.4deg) translateX(-1%) scale(1);
-    box-shadow: 4px 4px 0 var(--nb-ink);
-  }
-  100% {
-    transform: perspective(1200px) rotateY(0deg) rotateZ(0deg) translateX(0) scale(1);
-    box-shadow: 4px 4px 0 var(--nb-ink);
-  }
+html.dark,
+html.dark[data-design-preview="notebook"] {
+  --nb-peel-underside: #2b3344;
+  --nb-peel-underside-shade: #1e2432;
+  --nb-peel-crease: #f3efe6;
+  --nb-peel-contact-shadow: rgba(9, 11, 16, 0.52);
+  --nb-peel-flap-shadow: rgba(9, 11, 16, 0.42);
+  --nb-peel-highlight: rgba(243, 239, 230, 0.22);
+  --nb-peel-rule: rgba(243, 239, 230, 0.1);
 }
 
-@keyframes nbCartoonCurlSweepNext {
-  0% {
-    opacity: 0.9;
-    transform: translateX(45%) skewX(-10deg);
-  }
-  50% {
-    opacity: 0.45;
-    transform: translateX(-15%) skewX(-4deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-95%) skewX(0deg);
-  }
+.nb-viewer-desk {
+  position: relative;
+  background-color: var(--nb-bg-soft, #f3efe6);
 }
 
-@keyframes nbCartoonCurlSweepPrev {
-  0% {
-    opacity: 0.9;
-    transform: translateX(-45%) skewX(10deg);
-  }
-  50% {
-    opacity: 0.45;
-    transform: translateX(15%) skewX(4deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(95%) skewX(0deg);
-  }
+html.dark .nb-viewer-desk {
+  background-color: var(--nb-bg-paper, #161922);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .nb-page-flip-next {
-    transform-origin: left center;
-    animation: nbCartoonFlipNext 380ms steps(4, end) both;
-    will-change: transform;
-  }
+.nb-page-sheet {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  background-color: var(--nb-bg-paper, #fdfbf7);
+  box-shadow: 0 2px 10px rgba(45, 45, 45, 0.12), 0 0 0 1.5px rgba(45, 45, 45, 0.18);
+  flex-shrink: 0;
+}
 
-  .nb-page-flip-prev {
-    transform-origin: right center;
-    animation: nbCartoonFlipPrev 380ms steps(4, end) both;
-    will-change: transform;
-  }
+html.dark .nb-page-sheet {
+  background-color: var(--nb-surface, #232936);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45), 0 0 0 1.5px rgba(243, 239, 230, 0.2);
+}
 
-  .nb-page-flip-next::after,
-  .nb-page-flip-prev::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 15;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(253, 251, 247, 0.72) 44%,
-      rgba(45, 45, 45, 0.28) 50%,
-      transparent 58%
-    );
-  }
+.nb-peel-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
 
-  .nb-page-flip-next::after {
-    animation: nbCartoonCurlSweepNext 380ms steps(4, end) forwards;
-  }
-
-  .nb-page-flip-prev::after {
-    animation: nbCartoonCurlSweepPrev 380ms steps(4, end) forwards;
+@media (prefers-reduced-motion: reduce) {
+  .nb-peel-layer {
+    display: none !important;
   }
 }
 
