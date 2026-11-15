@@ -33480,7 +33480,7 @@
     "lastUpdated": "2026-11-15T09:19:58.477Z"
   },
   "platform": {
-    "updatedAt": 1794734862560,
+    "updatedAt": 1794734878795,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -33957,20 +33957,6 @@
         "authorUsername": "theiulius",
         "status": "approved",
         "createdAt": "2026-11-15T09:23:00.082Z"
-      },
-      {
-        "id": "hw_1794734580817",
-        "date": "2026-11-09",
-        "displayDate": "9 ნოემბერი",
-        "dayOfWeek": "ორშაბათი",
-        "subject": "ქიმია",
-        "teacher": "ლ. ბუბაშვილი",
-        "title": "შემაჯამებელი!!!",
-        "notes": "",
-        "authorName": "theiulius",
-        "authorUsername": "theiulius",
-        "status": "approved",
-        "createdAt": "2026-11-15T09:23:00.817Z"
       }
     ],
     "timetable": [
