@@ -34,8 +34,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: payload.body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
+    icon: '/icons/icon-192.png?v=2',
+    badge: '/icons/badge-96.png?v=2',
     tag: payload.tag || 'class11-5-notif-' + Date.now(),
     renotify: true,
     data: {

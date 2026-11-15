@@ -1,8 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="112" fill="#fdfbf7"/>
-  <rect x="44" y="44" width="432" height="432" rx="92" fill="#2d2d2d"/>
-  <rect x="32" y="32" width="432" height="432" rx="92" fill="#7b2ff7" stroke="#2d2d2d" stroke-width="18"/>
-  <rect x="176" y="16" width="144" height="36" rx="8" fill="#fff9c4" stroke="#2d2d2d" stroke-width="10" transform="rotate(-2 248 34)"/>
-  <text x="208" y="328" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="900" font-size="220" fill="#ffffff" letter-spacing="-8">11</text>
-  <text x="358" y="218" text-anchor="middle" font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif" font-weight="900" font-size="132" fill="#fff9c4">5</text>
+  <g transform="rotate(-2.5 250 248)">
+    <!-- Solid offset charcoal ink shadow (zero blur) -->
+    <path
+      d="M 124 60 Q 244 50 366 58 Q 424 62 428 118 Q 436 242 428 362 Q 424 418 366 424 Q 244 432 126 424 Q 62 418 58 358 Q 50 242 58 122 Q 62 66 124 60 Z"
+      transform="translate(30 34)"
+      fill="#2d2d2d"
+      stroke="#2d2d2d"
+      stroke-width="24"
+      stroke-linejoin="round"
+    />
+
+    <!-- Purple hand-drawn notebook badge -->
+    <path
+      d="M 124 60 Q 244 50 366 58 Q 424 62 428 118 Q 436 242 428 362 Q 424 418 366 424 Q 244 432 126 424 Q 62 418 58 358 Q 50 242 58 122 Q 62 66 124 60 Z"
+      fill="#7b2ff7"
+      stroke="#2d2d2d"
+      stroke-width="24"
+      stroke-linejoin="round"
+    />
+
+    <!-- Handwritten 11^5 white numerals matching navbar badge -->
+    <g
+      fill="none"
+      stroke="#ffffff"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <!-- First '1' -->
+      <path d="M 134 226 L 174 184 L 166 318" stroke-width="23" />
+      <!-- Second '1' -->
+      <path d="M 206 226 L 246 184 L 238 318" stroke-width="23" />
+      <!-- Superscript '5' -->
+      <path
+        d="M 340 136 L 298 138 L 293 174 C 330 168 349 186 344 210 C 338 232 308 237 286 225"
+        stroke-width="15"
+      />
+    </g>
+  </g>
 </svg>
