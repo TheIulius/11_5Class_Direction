@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T11:54:44.270Z"
   },
   "platform": {
-    "updatedAt": 1794744066181,
+    "updatedAt": 1794744127797,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34358,9 +34358,10 @@
         "status": "approved",
         "createdAt": "2026-11-15T10:41:41.794Z",
         "approvedBy": "ikakabadze989@gmail.com",
-        "upvotes": 1,
+        "upvotes": 2,
         "upvotedBy": [
-          "user_1794739215210_938"
+          "user_1794739215210_938",
+          "5.178.197.148"
         ]
       },
       {
