@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T11:30:44.745Z"
   },
   "platform": {
-    "updatedAt": 1794742271836,
+    "updatedAt": 1794742330695,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34734,17 +34734,6 @@
     },
     "pushSubscriptions": [
       {
-        "endpoint": "https://web.push.apple.com/QImjU2PwgZSPy2bCVfC5j7h3Ddd9XFuUvdMlpKLa8F4mpg8BsNXSoHFSJy-9Hwie8QkQIqhIL9MrWgqHQ87J2oxHyUhh8UqGC8WWnaxkQdicTgZzFuKSaRB_O2HAdO5gtZdobOF2FHgeoRij4mZ9lz2-0baAdNRP-oYs542VrzI",
-        "keys": {
-          "p256dh": "BHisq__0CdtQOX3xogZD-9oaq-kyh6n0470ce7jwuFxzOtA2NUtzH_kOkQI25kwIXA4nkOuXZzI1OY0KILB23dE",
-          "auth": "sQidi43s3ytDgNwtdGVSOg"
-        },
-        "role": "user",
-        "canModerate": false,
-        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Safari/605.1.15",
-        "updatedAt": "2026-11-15T11:25:20.945Z"
-      },
-      {
         "endpoint": "https://web.push.apple.com/QHLlBBf_RC7Oowj7POR0Dkg15m6UrnNLNUveBni7X19oYMGgxO6sG96mXco5cQj2MoL75-1bZyObVR42pnkvAKVYQWaVuk7jiKanA4LExxNKNzGAxcQEOvimqMoK_USY1yH0M7zxicNSe5_t0c_CKlLI5gbbP3pSW88QUZKUk2I",
         "keys": {
           "p256dh": "BKUTLgDGduXVY-V-o2hJ_kqM4vhbpjUMagjyETFjC0ftBON-skF9OSd0oM8UIiLy2WSqrb3M5Ytyyo-vv6EbM2I",
@@ -34776,6 +34765,17 @@
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Mobile/15E148 Safari/604.1",
         "updatedAt": "2026-11-15T11:31:11.836Z"
+      },
+      {
+        "endpoint": "https://web.push.apple.com/QK0JyCJODh4qoa-nyP13l2BlVdA3q2_toDM4Go_ICfHxFRQi4pF9QCbVHHI-bfDG4AdRT7EXBeAbJ5VilrzugytAtbV5zjBDL8kBlXWOk6Z9YqU4rCSsRJIAHj-pxR6164UOINaPOZZKJP0tDwC8SD32YbLvYOaXG3D0AxqTQmg",
+        "keys": {
+          "p256dh": "BI2xR-psIeJ1DKQihWSdtzk2bmu4VMJISy1q_E-V0efPZV54wE8By5_kh2oFD8avp9WZaYc1h3ugxJr04cXfde0",
+          "auth": "HAvPPQr4fqEJ2I_Kf3jK8A"
+        },
+        "role": "user",
+        "canModerate": false,
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Safari/605.1.15",
+        "updatedAt": "2026-11-15T11:32:10.695Z"
       }
     ]
   }
