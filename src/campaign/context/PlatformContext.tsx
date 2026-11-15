@@ -350,13 +350,21 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (data.pendingCounts) {
           setPendingCounts(data.pendingCounts);
         }
+        const sentToken = overrideToken !== undefined ? overrideToken : token;
         if (data.currentUser) {
           setUser(data.currentUser);
           try {
             localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(data.currentUser));
           } catch {}
-        } else if (overrideToken === null) {
+        } else if (overrideToken === null || (sentToken && data.currentUser === null)) {
           setUser(null);
+          if (sentToken) {
+            setToken(null);
+            try {
+              localStorage.removeItem(TOKEN_STORAGE_KEY);
+              localStorage.removeItem(USER_STORAGE_KEY);
+            } catch {}
+          }
         }
       } catch (e) {
         console.warn('[PlatformContext] Failed to fetch state:', e);
@@ -364,7 +372,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         setIsLoading(false);
       }
     },
-    [getHeaders]
+    [getHeaders, token]
   );
 
   useEffect(() => {

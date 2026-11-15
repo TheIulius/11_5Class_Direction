@@ -4660,6 +4660,7 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
       role: 'admin',
       isAdmin: true,
       token: kclIlia?.token,
+      tokens: kclIlia?.token ? [kclIlia.token] : [],
       createdAt: kclIlia?.createdAt || new Date().toISOString(),
     };
   }
@@ -4694,6 +4695,17 @@ function resolvePlatformRoles(u: Pick<PlatformUserAccount, 'username' | 'role' |
   return { isAdmin, isModerator, canModerate, role };
 }
 
+function addPlatformUserToken(user: PlatformUserAccount, token: string): void {
+  const existing = Array.isArray(user.tokens) ? user.tokens.filter(Boolean) : [];
+  if (user.token && !existing.includes(user.token)) {
+    existing.push(user.token);
+  }
+  const deduped = existing.filter((t) => t !== token);
+  deduped.push(token);
+  user.tokens = deduped.slice(-10);
+  user.token = token;
+}
+
 function getPlatformAuthUser(req: Request): {
   user: PlatformUserAccount;
   isAdmin: boolean;
@@ -4711,16 +4723,20 @@ function getPlatformAuthUser(req: Request): {
   const p = initPlatformCMS(data);
   if (!p.users) p.users = {};
 
-  // 1. Search in strictly isolated 11/5 platform accounts
-  let user = Object.values(p.users).find((u) => u.token === token);
+  // 1. Search in strictly isolated 11/5 platform accounts (supports multiple concurrent device sessions)
+  let user = Object.values(p.users).find(
+    (u) => u.token === token || (Array.isArray(u.tokens) && u.tokens.includes(token))
+  );
 
   // 2. Seamless session bridge: if @theiulius has an existing active login token, preserve their admin session
   if (!user && data.users) {
-    const kclUser = Object.values(data.users).find((u) => u.token === token && u.username.toLowerCase() === 'theiulius');
+    const kclUser = Object.values(data.users).find(
+      (u) => u.token === token && u.username.toLowerCase() === 'theiulius'
+    );
     if (kclUser) {
       const ilia = Object.values(p.users).find((u) => u.username.toLowerCase() === 'theiulius');
       if (ilia) {
-        ilia.token = token;
+        addPlatformUserToken(ilia, token);
         user = ilia;
       }
     }
@@ -5080,6 +5096,7 @@ app.post('/api/platform/auth/register', (req: Request, res: Response) => {
     passwordHash: hashed.hash,
     salt: hashed.salt,
     token,
+    tokens: [token],
     role: isAdmin ? 'admin' : 'user',
     isAdmin,
     isModerator: false,
@@ -5155,7 +5172,7 @@ app.post('/api/platform/auth/login', async (req: Request, res: Response) => {
   }
 
   const token = generateToken();
-  user.token = token;
+  addPlatformUserToken(user, token);
   const roles = resolvePlatformRoles(user);
   if (roles.isAdmin) {
     user.role = 'admin';
@@ -5376,6 +5393,8 @@ app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) =
     const hashed = hashPassword(String(newPassword).trim());
     target.passwordHash = hashed.hash;
     target.salt = hashed.salt;
+    target.token = undefined;
+    target.tokens = [];
   }
 
   savePlatformCMS(data, `Admin updated 11/5 user @${target.username}`);

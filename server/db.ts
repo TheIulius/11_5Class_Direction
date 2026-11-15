@@ -185,6 +185,7 @@ export interface PlatformUserAccount {
   isAdmin: boolean;
   isModerator?: boolean;
   token?: string;
+  tokens?: string[];
   createdAt: string;
   pwaInstalled?: boolean;
   pwaInstalledAt?: string;

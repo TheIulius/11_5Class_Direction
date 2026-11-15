@@ -60,6 +60,8 @@ export const AdminDashboardModal: React.FC = () => {
     isAdminModalOpen,
     adminModalTab,
     closeAdminModal,
+    openAuthModal,
+    logout,
     moderateResource,
     deleteResource,
     moderateHomework,
@@ -73,6 +75,8 @@ export const AdminDashboardModal: React.FC = () => {
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [totalSubscribedDevices, setTotalSubscribedDevices] = useState(0);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [usersError, setUsersError] = useState<string | null>(null);
+  const [usersAuthInvalid, setUsersAuthInvalid] = useState(false);
   const analyticsStats = usePlatformAnalytics();
   const [isRefreshingAnalytics, setIsRefreshingAnalytics] = useState(false);
 
@@ -129,20 +133,46 @@ export const AdminDashboardModal: React.FC = () => {
   const fetchUsers = useCallback(async () => {
     if (!token || !canModerate) return;
     setLoadingUsers(true);
+    setUsersError(null);
+    setUsersAuthInvalid(false);
     try {
-      const res = await fetch('/api/platform/admin/users', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUsers(data.users || []);
-        setTotalSubscribedDevices(
-          data.summary?.totalSubscribedDevices ??
-            (data.users || []).reduce((acc: number, u: ManagedUser) => acc + (u.pushDevicesCount || 0), 0)
-        );
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch('/api/platform/admin/users', {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (res.status >= 500 && attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 1200));
+            continue;
+          }
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            setUsers(data.users || []);
+            setTotalSubscribedDevices(
+              data.summary?.totalSubscribedDevices ??
+                (data.users || []).reduce(
+                  (acc: number, u: ManagedUser) => acc + (u.pushDevicesCount || 0),
+                  0
+                )
+            );
+            return;
+          }
+          const isAuthErr = res.status === 401 || res.status === 403;
+          setUsersAuthInvalid(isAuthErr);
+          setUsersError(
+            isAuthErr
+              ? data?.error || 'სესია განახლებას საჭიროებს — გამოდით და შედით თავიდან.'
+              : data?.error || 'მომხმარებლების სტატისტიკის ჩატვირთვა ვერ მოხერხდა.'
+          );
+          return;
+        } catch {
+          if (attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 1200));
+            continue;
+          }
+          setUsersError('სერვერთან დაკავშირება ვერ მოხერხდა. სცადეთ განახლება.');
+        }
       }
-    } catch (e) {
-      console.warn('Failed to fetch users', e);
     } finally {
       setLoadingUsers(false);
     }
@@ -170,6 +200,43 @@ export const AdminDashboardModal: React.FC = () => {
     return (a.fullName || a.username).localeCompare(b.fullName || b.username);
   });
 
+  const statsUnavailable = Boolean(usersError && users.length === 0);
+  const statsLoadingInitial = loadingUsers && users.length === 0;
+
+  const handleReloginFromUsersError = () => {
+    logout();
+    closeAdminModal();
+    openAuthModal('login');
+  };
+
+  const renderUsersErrorBanner = () => {
+    if (!usersError) return null;
+    return (
+      <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200/80 flex flex-wrap items-center justify-between gap-2.5">
+        <p className="text-xs font-bold text-rose-800">{usersError}</p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={fetchUsers}
+            disabled={loadingUsers}
+            className="px-2.5 py-1 rounded-lg bg-white border border-rose-200 hover:bg-rose-100/70 text-[11px] font-bold text-rose-800 cursor-pointer disabled:opacity-50"
+          >
+            ხელახლა ცდა
+          </button>
+          {usersAuthInvalid && (
+            <button
+              type="button"
+              onClick={handleReloginFromUsersError}
+              className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-[11px] font-bold text-white cursor-pointer"
+            >
+              თავიდან შესვლა
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   const renderFeatureActivationStats = () => (
     <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -195,17 +262,18 @@ export const AdminDashboardModal: React.FC = () => {
         <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80">
           <div className="text-xs font-bold text-amber-900">🔔 Push ჩართულია</div>
           <div className="text-xl font-black text-slate-900 mt-1">
-            {pushUsersCount} / {users.length}
+            {statsLoadingInitial ? '...' : statsUnavailable ? '—' : `${pushUsersCount} / ${users.length}`}
           </div>
           <div className="text-[11px] text-slate-500">
-            მომხმარებელი &bull; სულ აქტიური მოწყობილობა: {totalSubscribedDevices}
+            მომხმარებელი &bull; სულ აქტიური მოწყობილობა:{' '}
+            {statsLoadingInitial ? '...' : statsUnavailable ? '—' : totalSubscribedDevices}
           </div>
         </div>
 
         <div className="p-3.5 rounded-xl bg-sky-50/70 border border-sky-200/80">
           <div className="text-xs font-bold text-sky-900">📱 Home Screen აპი</div>
           <div className="text-xl font-black text-slate-900 mt-1">
-            {pwaUsersCount} / {users.length}
+            {statsLoadingInitial ? '...' : statsUnavailable ? '—' : `${pwaUsersCount} / ${users.length}`}
           </div>
           <div className="text-[11px] text-slate-500">მომხმარებელი</div>
         </div>
@@ -213,14 +281,18 @@ export const AdminDashboardModal: React.FC = () => {
         <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80">
           <div className="text-xs font-bold text-emerald-900">✅ ორივე გააქტიურებულია</div>
           <div className="text-xl font-black text-slate-900 mt-1">
-            {bothEnabledCount} / {users.length}
+            {statsLoadingInitial ? '...' : statsUnavailable ? '—' : `${bothEnabledCount} / ${users.length}`}
           </div>
           <div className="text-[11px] text-slate-500">მომხმარებელი</div>
         </div>
       </div>
 
+      {usersError && users.length > 0 && renderUsersErrorBanner()}
+
       {loadingUsers && users.length === 0 ? (
         <p className="text-xs text-slate-400 py-6 text-center">იტვირთება სტატისტიკა...</p>
+      ) : usersError && users.length === 0 ? (
+        renderUsersErrorBanner()
       ) : sortedUsersForActivation.length === 0 ? (
         <p className="text-xs text-slate-400 py-4 text-center">მომხმარებლები ვერ მოიძებნა.</p>
       ) : (
@@ -915,8 +987,12 @@ export const AdminDashboardModal: React.FC = () => {
                   </button>
                 </div>
 
-                {loadingUsers ? (
+                {usersError && users.length > 0 && renderUsersErrorBanner()}
+
+                {loadingUsers && users.length === 0 ? (
                   <p className="text-xs text-slate-400 py-8 text-center">იტვირთება მომხმარებლები...</p>
+                ) : usersError && users.length === 0 ? (
+                  renderUsersErrorBanner()
                 ) : (
                   <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                     {users.map((u) => {
