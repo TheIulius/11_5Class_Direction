@@ -33480,7 +33480,7 @@
     "lastUpdated": "2026-11-15T09:16:54.712Z"
   },
   "platform": {
-    "updatedAt": 1794734310205,
+    "updatedAt": 1794734395127,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -33895,6 +33895,20 @@
         "authorUsername": "theiulius",
         "status": "approved",
         "createdAt": "2026-11-15T09:18:30.205Z"
+      },
+      {
+        "id": "hw_1794734395127",
+        "date": "2026-11-09",
+        "displayDate": "9 ნოემბერი",
+        "dayOfWeek": "ორშაბათი",
+        "subject": "ქართული",
+        "teacher": "თ. თვალჭრელიძე",
+        "title": "გვ 138 შინაარსი დასაწერად",
+        "notes": "",
+        "authorName": "theiulius",
+        "authorUsername": "theiulius",
+        "status": "approved",
+        "createdAt": "2026-11-15T09:19:55.127Z"
       }
     ],
     "timetable": [
