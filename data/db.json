@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T11:34:45.787Z"
   },
   "platform": {
-    "updatedAt": 1794743325722,
+    "updatedAt": 1794743329694,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34582,7 +34582,7 @@
         "salt": "bf561a201267f9bc1552d255a30d0ce4",
         "role": "admin",
         "isAdmin": true,
-        "token": "47730b0a448d4d6b52ed2144910eab22a69c1e24297997d25e8bde695cef1d96",
+        "token": "0003eb53a435b5de954ce527ccc3a66a88734bcc5a7fa692c6e494d08a614a7c",
         "createdAt": "2026-09-25T16:18:23.548Z",
         "isModerator": false
       },
@@ -34772,11 +34772,13 @@
           "p256dh": "BI2xR-psIeJ1DKQihWSdtzk2bmu4VMJISy1q_E-V0efPZV54wE8By5_kh2oFD8avp9WZaYc1h3ugxJr04cXfde0",
           "auth": "HAvPPQr4fqEJ2I_Kf3jK8A"
         },
-        "role": "user",
-        "canModerate": false,
+        "userId": "user_theiulius_115",
+        "username": "theiulius",
+        "role": "admin",
+        "canModerate": true,
         "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Safari/605.1.15",
         "isStandalone": false,
-        "updatedAt": "2026-11-15T11:48:45.722Z"
+        "updatedAt": "2026-11-15T11:48:49.694Z"
       }
     ]
   }
