@@ -25,6 +25,7 @@ import {
   getTbilisiTodayString,
   getCurrentActivePeriod,
   formatGeorgianDate,
+  getDaysBetweenDateStrings,
   LESSON_PERIOD_TIMES,
 } from '../utils/tbilisiDate';
 import { getCategoryStyle } from '../utils/calendarCategories';
@@ -67,8 +68,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
   const [tbilisiTime, setTbilisiTime] = useState(() => getTbilisiNow());
   const [completedHw, setCompletedHw] = useState<Record<string, boolean>>(() => {
     try {
-      const saved = localStorage.getItem('class11_5_completed_homework');
-      return saved ? JSON.parse(saved) : {};
+      const savedV1 = localStorage.getItem('class11_5_hw_completed_v1');
+      const savedLegacy = localStorage.getItem('class11_5_completed_homework');
+      return {
+        ...(savedLegacy ? JSON.parse(savedLegacy) : {}),
+        ...(savedV1 ? JSON.parse(savedV1) : {}),
+      };
     } catch {
       return {};
     }
@@ -100,7 +105,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
     setCompletedHw((prev) => {
       const next = { ...prev, [id]: !prev[id] };
       try {
-        localStorage.setItem('class11_5_completed_homework', JSON.stringify(next));
+        const serialized = JSON.stringify(next);
+        localStorage.setItem('class11_5_hw_completed_v1', serialized);
+        localStorage.setItem('class11_5_completed_homework', serialized);
       } catch {}
       return next;
     });
@@ -135,10 +142,23 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
   // Active / Upcoming Homework items (due today or in future)
   const activeHomeworks = useMemo(() => {
     return platform.homeworks
-      .filter((h) => h.status !== 'rejected')
+      .filter((h) => h.status !== 'rejected' && (h.date || '') >= todayString)
       .sort((a, b) => (a.date || '').localeCompare(b.date || ''))
-      .slice(0, 3);
-  }, [platform.homeworks]);
+      .slice(0, 4);
+  }, [platform.homeworks, todayString]);
+
+  // Overdue Homework items on the Home page:
+  // Automatically expire/cancel overdue items once more than 10 days (1–2 weeks) have passed!
+  const overdueHomeworks = useMemo(() => {
+    return platform.homeworks
+      .filter((h) => {
+        if (h.status === 'rejected' || !h.date) return false;
+        if (completedHw[h.id]) return false;
+        const daysElapsed = getDaysBetweenDateStrings(h.date, todayString);
+        return daysElapsed > 0 && daysElapsed <= 10;
+      })
+      .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  }, [platform.homeworks, todayString, completedHw]);
 
   // Next Alumni Session (if in future)
   const nextOpportunity = useMemo(() => {
@@ -398,6 +418,53 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                 })
               )}
             </div>
+
+            {/* Overdue Homeworks moved to Home page (auto-expires after 10 days / 1-2 weeks) */}
+            {overdueHomeworks.length > 0 && (
+              <div className="pt-3 border-t border-dashed border-[var(--border-subtle)] space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-rose-600 dark:text-rose-400">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    <span>ვადაგასული დავალებები ({overdueHomeworks.length})</span>
+                  </span>
+                  <span className="text-[10px] font-normal text-[var(--text-muted)]">
+                    ავტომატურად იხსნება 1–2 კვირაში
+                  </span>
+                </div>
+                <div className="space-y-1.5">
+                  {overdueHomeworks.map((hw) => (
+                    <div
+                      key={hw.id}
+                      onClick={() => onNavigateTab('homework')}
+                      className="p-2.5 sm:p-3 rounded-xl card-third text-xs flex items-center justify-between gap-2.5 cursor-pointer hover:opacity-95"
+                    >
+                      <div className="space-y-0.5 min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span className="font-bold text-rose-600 dark:text-rose-400 text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 shrink-0">
+                            {hw.subject}
+                          </span>
+                          <span className="text-[10px] font-mono text-[var(--text-muted)]">
+                            {hw.displayDate || formatGeorgianDate(hw.date)}
+                          </span>
+                        </div>
+                        <h4 className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                          {hw.title}
+                        </h4>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => toggleHomeworkComplete(hw.id, e)}
+                        className="px-3 py-1.5 rounded-xl btn-primary text-white text-[11px] font-bold shrink-0 cursor-pointer flex items-center gap-1 shadow-xs"
+                        aria-label="დავალების დასრულება"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>დასრულება</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Card 2: Upcoming Assessments (Real dynamic date filtering) */}

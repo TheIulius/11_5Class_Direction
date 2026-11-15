@@ -161,6 +161,44 @@ export function compareDateStrings(a: string, b: string): number {
 }
 
 /**
+ * Calculate the exact number of calendar days from `fromDateStr` to `toDateStr` ("YYYY-MM-DD").
+ * Positive when `toDateStr` is after `fromDateStr`.
+ */
+export function getDaysBetweenDateStrings(fromDateStr: string, toDateStr: string): number {
+  const from = parseDateOnly(fromDateStr);
+  const to = parseDateOnly(toDateStr);
+  if (!from || !to) return 0;
+  const fromUtc = Date.UTC(from.year, from.month - 1, from.day);
+  const toUtc = Date.UTC(to.year, to.month - 1, to.day);
+  return Math.round((toUtc - fromUtc) / 86_400_000);
+}
+
+/**
+ * Return the next school day (Monday–Friday) as a "YYYY-MM-DD" string in Tbilisi time.
+ * - Mon (1) .. Thu (4) -> next day (+1)
+ * - Fri (5) -> next Monday (+3)
+ * - Sat (6) -> next Monday (+2)
+ * - Sun (7) -> next Monday (+1)
+ */
+export function getNextSchoolDayDateString(nowInfo?: TbilisiDateInfo): string {
+  const info = nowInfo || getTbilisiNow();
+  const daysToAdd =
+    info.weekday === 5
+      ? 3
+      : info.weekday === 6
+      ? 2
+      : info.weekday === 7
+      ? 1
+      : 1;
+
+  const d = new Date(Date.UTC(info.year, info.month - 1, info.day + daysToAdd));
+  const y = d.getUTCFullYear();
+  const m = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(d.getUTCDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+/**
  * Format a "YYYY-MM-DD" string into Georgian display format (e.g. "9 ნოემბერი" or "2026 წლის 9 ნოემბერი").
  */
 export function formatGeorgianDate(dateStr: string, includeYear = false): string {

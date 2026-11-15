@@ -24,7 +24,12 @@ import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
 import { ResourceSection } from './ResourceSection';
 import { CommentsThread } from './CommentsThread';
-import { getTbilisiNow, formatGeorgianDate } from '../utils/tbilisiDate';
+import {
+  getTbilisiNow,
+  formatGeorgianDate,
+  getNextSchoolDayDateString,
+  parseDateOnly,
+} from '../utils/tbilisiDate';
 import { SubjectAutocomplete, CLASS_11_5_SUBJECTS } from './SubjectAutocomplete';
 
 interface GroupedLessonBlock {
@@ -181,13 +186,25 @@ export const HomeworkSection: React.FC = () => {
   } = usePlatform();
 
   const tbilisiNow = useMemo(() => getTbilisiNow(), []);
-  const todayString = tbilisiNow.dateString;
+  const defaultNextSchoolDate = useMemo(
+    () => getNextSchoolDayDateString(tbilisiNow),
+    [tbilisiNow]
+  );
 
-  // Calculate current school week Monday through Friday
+  const [viewMode, setViewMode] = useState<'homework' | 'timetable'>('homework');
+  const [selectedDate, setSelectedDate] = useState<string>(() => defaultNextSchoolDate);
+
+  // Calculate the Monday–Friday school week corresponding to `selectedDate`
+  // (if `selectedDate` is Saturday/Sunday, roll forward to the upcoming Monday–Friday week)
   const baseWeekDays = useMemo(() => {
-    const currentW = tbilisiNow.weekday; // 1 (Mon) .. 7 (Sun)
-    const offsetToMonday = 1 - currentW;
-    const nowRef = new Date(tbilisiNow.year, tbilisiNow.month - 1, tbilisiNow.day);
+    const parsed = parseDateOnly(selectedDate);
+    const refDate = parsed
+      ? new Date(parsed.year, parsed.month - 1, parsed.day, 12, 0, 0)
+      : new Date(tbilisiNow.year, tbilisiNow.month - 1, tbilisiNow.day, 12, 0, 0);
+
+    const jsDay = refDate.getDay(); // 0 = Sun, 1 = Mon .. 6 = Sat
+    const offsetToMonday =
+      jsDay === 0 ? 1 : jsDay === 6 ? 2 : 1 - jsDay;
 
     const days: {
       date: string;
@@ -202,8 +219,8 @@ export const HomeworkSection: React.FC = () => {
     const MONTH_SHORTS = ['იანვ', 'თებ', 'მარტ', 'აპრ', 'მაის', 'ივნ', 'ივლ', 'აგვ', 'სექტ', 'ოქტ', 'ნოემ', 'დეკ'];
 
     for (let i = 0; i < 5; i++) {
-      const d = new Date(nowRef);
-      d.setDate(nowRef.getDate() + offsetToMonday + i);
+      const d = new Date(refDate);
+      d.setDate(refDate.getDate() + offsetToMonday + i);
       const y = d.getFullYear();
       const m = d.getMonth() + 1;
       const dayNum = d.getDate();
@@ -218,20 +235,16 @@ export const HomeworkSection: React.FC = () => {
       });
     }
     return days;
-  }, [tbilisiNow]);
-
-  const [viewMode, setViewMode] = useState<'homework' | 'timetable'>('homework');
-  const [selectedDate, setSelectedDate] = useState<string>(() => {
-    if (tbilisiNow.weekday >= 1 && tbilisiNow.weekday <= 5) {
-      return tbilisiNow.dateString;
-    }
-    return baseWeekDays[0]?.date || tbilisiNow.dateString;
-  });
+  }, [selectedDate, tbilisiNow]);
 
   const [completedMap, setCompletedMap] = useState<Record<string, boolean>>(() => {
     try {
-      const saved = localStorage.getItem('class11_5_hw_completed_v1');
-      return saved ? JSON.parse(saved) : {};
+      const savedV1 = localStorage.getItem('class11_5_hw_completed_v1');
+      const savedLegacy = localStorage.getItem('class11_5_completed_homework');
+      return {
+        ...(savedLegacy ? JSON.parse(savedLegacy) : {}),
+        ...(savedV1 ? JSON.parse(savedV1) : {}),
+      };
     } catch {
       return {};
     }
@@ -259,7 +272,7 @@ export const HomeworkSection: React.FC = () => {
   // Add / Edit Homework Modal
   const [isAddHwOpen, setIsAddHwOpen] = useState(false);
   const [editingHwId, setEditingHwId] = useState<string | null>(null);
-  const [hwDate, setHwDate] = useState(() => tbilisiNow.dateString);
+  const [hwDate, setHwDate] = useState(() => defaultNextSchoolDate);
   const [hwSubject, setHwSubject] = useState('მათემატიკა');
   const [hwTeacher, setHwTeacher] = useState('ნანა ჯაფარიძე');
   const [hwTitle, setHwTitle] = useState('');
@@ -276,11 +289,9 @@ export const HomeworkSection: React.FC = () => {
     setIsAddHwOpen(true);
   };
 
-  // Mobile timetable selected day tab
+  // Mobile timetable selected day tab (defaults to next school day's weekday)
   const [mobileTimetableDay, setMobileTimetableDay] = useState<string>(() => {
-    return tbilisiNow.weekday >= 1 && tbilisiNow.weekday <= 5
-      ? tbilisiNow.weekdayGeorgian
-      : 'ორშაბათი';
+    return formatGeoDate(defaultNextSchoolDate).dayOfWeek || 'ორშაბათი';
   });
 
   // Admin Timetable Editing
@@ -295,7 +306,9 @@ export const HomeworkSection: React.FC = () => {
     setCompletedMap((prev) => {
       const updated = { ...prev, [id]: !prev[id] };
       try {
-        localStorage.setItem('class11_5_hw_completed_v1', JSON.stringify(updated));
+        const serialized = JSON.stringify(updated);
+        localStorage.setItem('class11_5_hw_completed_v1', serialized);
+        localStorage.setItem('class11_5_completed_homework', serialized);
       } catch {}
       return updated;
     });
@@ -321,11 +334,6 @@ export const HomeworkSection: React.FC = () => {
   const activeDayHomeworks = useMemo(() => {
     return visibleHomeworks.filter((h) => h.date === selectedDate);
   }, [visibleHomeworks, selectedDate]);
-
-  // Separate overdue homework from upcoming work with persistent completion state
-  const overdueHomeworks = useMemo(() => {
-    return visibleHomeworks.filter((h) => h.date < todayString && !completedMap[h.id]);
-  }, [visibleHomeworks, todayString, completedMap]);
 
   const activeDaySchedule = timetable.find((d) => d.dayId === currentSelectedDayInfo.dayName);
 
@@ -566,84 +574,7 @@ export const HomeworkSection: React.FC = () => {
           ========================================================================= */}
       {viewMode === 'homework' && (
         <div className="space-y-6 min-w-0">
-          {/* Overdue Homework Banner (Separated from upcoming work with persistent state) */}
-          {overdueHomeworks.length > 0 && (
-            <div className="card-surface p-4 rounded-2xl border border-rose-500/20 bg-rose-500/5 space-y-2.5">
-              <div className="flex items-center justify-between text-xs font-bold text-rose-600 dark:text-rose-400">
-                <span className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>ვადაგასული დავალებები ({overdueHomeworks.length})</span>
-                </span>
-                <span className="text-[11px] font-normal text-[var(--text-muted)]">
-                  გთხოვთ მონიშნოთ დასრულებისას
-                </span>
-              </div>
-              <div className="space-y-2">
-                {overdueHomeworks.map((hw) => (
-                  <div
-                    key={hw.id}
-                    className="p-3.5 rounded-xl card-third text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                  >
-                    <div className="space-y-1 min-w-0 flex-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-bold text-rose-600 dark:text-rose-400 text-[10px] px-2 py-0.5 rounded-md bg-rose-500/10 shrink-0">
-                          {hw.subject}
-                        </span>
-                        <span className="text-[11px] font-mono text-[var(--text-muted)]">
-                          {hw.displayDate}
-                        </span>
-                        <span className="text-[10px] font-bold text-rose-500 bg-rose-500/10 px-1.5 py-0.2 rounded">
-                          ვადაგასული
-                        </span>
-                      </div>
-                      <h4 className="text-xs sm:text-sm font-semibold text-[var(--text-primary)] leading-snug break-words">
-                        {hw.title}
-                      </h4>
-                      {hw.notes && (
-                        <p className="text-[11px] text-[var(--text-secondary)] line-clamp-1">
-                          {hw.notes}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0 self-start sm:self-center">
-                      <button
-                        onClick={() => handleToggleComplete(hw.id)}
-                        className="min-h-[44px] px-4 py-2 rounded-xl btn-primary text-xs font-bold shrink-0 cursor-pointer flex items-center justify-center gap-1.5 shadow-xs"
-                        aria-label="დავალების დასრულება"
-                      >
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>დასრულება</span>
-                      </button>
-                      {(canModerate || (user && hw.authorUsername === user.username)) && (
-                        <button
-                          type="button"
-                          onClick={() => openEditHomeworkModal(hw)}
-                          className="p-2 rounded-xl card-surface border border-[var(--border-subtle)] text-[var(--text-secondary)] hover:text-[var(--primary-action)] transition-colors cursor-pointer"
-                          title="რედაქტირება"
-                          aria-label="დავალების რედაქტირება"
-                        >
-                          <Edit3 className="w-4 h-4" />
-                        </button>
-                      )}
-                      {canModerate && (
-                        <button
-                          type="button"
-                          onClick={() => deleteHomework(hw.id)}
-                          className="p-2 rounded-xl card-surface border border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-rose-500 transition-colors cursor-pointer"
-                          title="წაშლა"
-                          aria-label="დავალების წაშლა"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Weekday Strip + Date Control */}
+          {/* Weekday Strip + Date Control (Defaults to Next School Day) */}
           <div className="card-surface p-3 sm:p-4 space-y-2.5 shadow-sm min-w-0">
             <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
               <span className="font-semibold text-[var(--text-primary)]">
