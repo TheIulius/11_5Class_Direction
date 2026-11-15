@@ -33495,7 +33495,7 @@
     "lastUpdated": "2026-11-15T15:08:21.861Z"
   },
   "platform": {
-    "updatedAt": 1794754015548,
+    "updatedAt": 1794765954966,
     "announcement": {
       "text": "ქიმიის დამოუკიდებელი! tip: დააყენე როგორც აპი & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34777,6 +34777,21 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T14:07:10.817Z"
+      },
+      "user_1794765954964_565": {
+        "id": "user_1794765954964_565",
+        "username": "barb",
+        "fullName": "ბარბარე კაკულაშვილი",
+        "passwordHash": "ceed420fabd41487fca1ef781c3328a07faa5a192e4b1c310ff254ce1c1a4692eb33833936e20c27d588b29788fab419fc91933a8bcb6a492c31312f89c7ebc0",
+        "salt": "f513cb67dee2b7614f749e03f6973fc7",
+        "token": "506ddd43c42821ed0852ce74d53df98834ed635c7c88c3c5d433d41102ae4ff4",
+        "tokens": [
+          "506ddd43c42821ed0852ce74d53df98834ed635c7c88c3c5d433d41102ae4ff4"
+        ],
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T18:05:54.966Z"
       }
     },
     "backgroundPhysics": {
