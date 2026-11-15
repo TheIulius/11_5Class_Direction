@@ -33494,7 +33494,7 @@
     "lastUpdated": "2026-11-15T14:11:58.409Z"
   },
   "platform": {
-    "updatedAt": 1794751897470,
+    "updatedAt": 1794751924012,
     "announcement": {
       "text": "ქიმიის დამოუკიდებელი! tip: დააყენე როგორც აპი & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34606,11 +34606,15 @@
         "fullName": "test",
         "passwordHash": "188f4af1f68a32cdb8db66c4613b6ed1ffb17734b98ef0e9f17db0653bfb4902f5c4d8c7ff3edbe4c93e17853c4eca743283ef21d139e1d64dfa06fde15f34c7",
         "salt": "0406a6730961bb2f45f8667eab3c505a",
-        "token": "ccb62afb5462b90153b13dd31ae9f62dfc8be8044c6735fcb11c3e792d178283",
+        "token": "2b90ca136dc58b6d98dda791b96b01e416c57e8665842598d0a6fdf932e15302",
         "role": "user",
         "isAdmin": false,
         "isModerator": false,
-        "createdAt": "2026-11-15T09:28:48.132Z"
+        "createdAt": "2026-11-15T09:28:48.132Z",
+        "tokens": [
+          "ccb62afb5462b90153b13dd31ae9f62dfc8be8044c6735fcb11c3e792d178283",
+          "2b90ca136dc58b6d98dda791b96b01e416c57e8665842598d0a6fdf932e15302"
+        ]
       },
       "user_1794738299609_625": {
         "id": "user_1794738299609_625",
