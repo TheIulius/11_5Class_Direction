@@ -33483,7 +33483,7 @@
     "lastUpdated": "2026-11-15T10:29:12.686Z"
   },
   "platform": {
-    "updatedAt": 1794738399106,
+    "updatedAt": 1794738576401,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34551,6 +34551,18 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T10:26:39.106Z"
+      },
+      "user_1794738576400_72": {
+        "id": "user_1794738576400_72",
+        "username": "mzakvruli",
+        "fullName": "რატი თომაძე",
+        "passwordHash": "0251eea7ff03406e66a69df8f64f07113f8d9d18c3c7ef21a4558674f7b92e726c8f73d2ee12d01d7931777c38700771845b79352b6efc38bbaa360e1805b555",
+        "salt": "c4fdac13ed449a25329137758e508463",
+        "token": "d48aa1ebacca47ae9a8e93ea43f67fbb79c09ffc49beea6037a8bbff2cad5f2e",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T10:29:36.401Z"
       }
     },
     "backgroundPhysics": {
