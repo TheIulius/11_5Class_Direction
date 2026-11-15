@@ -33494,7 +33494,7 @@
     "lastUpdated": "2026-11-15T14:17:34.130Z"
   },
   "platform": {
-    "updatedAt": 1794752241899,
+    "updatedAt": 1794752508284,
     "announcement": {
       "text": "ქიმიის დამოუკიდებელი! tip: დააყენე როგორც აპი & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34503,19 +34503,6 @@
         "content": "ამ შემაჯამებელზე ძირითადი აქცენტი იქნება ტრიგონომეტრიულ განტოლებებსა და დაყვანის ფორმულებზე. ზემოთ მიმაგრებულია ფორმულების კონსპექტი!",
         "createdAt": "2026-11-09T15:06:50.611Z",
         "isPinned": true
-      },
-      {
-        "id": "cmt_1794735561034_450",
-        "targetType": "homework",
-        "targetId": "hw_1794734580082",
-        "authorId": "user_theiulius_115",
-        "authorName": "theiulius",
-        "authorUsername": "theiulius",
-        "isAdmin": true,
-        "isModerator": false,
-        "content": "ქიმიის ტესტიი!?😨",
-        "createdAt": "2026-11-15T09:39:21.034Z",
-        "isPinned": false
       },
       {
         "id": "cmt_1794736830423_562",
