@@ -128,6 +128,13 @@ export interface PlatformComment {
   isPinned?: boolean;
 }
 
+export interface ResourceAttachment {
+  name: string;
+  dataUrl: string;
+  size?: number;
+  mimeType?: string;
+}
+
 export interface PlatformResource {
   id: string;
   title: string;
@@ -136,6 +143,7 @@ export interface PlatformResource {
   linkUrl?: string;
   attachmentName?: string;
   attachmentDataUrl?: string;
+  attachments?: ResourceAttachment[];
   resourceType: 'კონსპექტი' | 'დავალების ამოხსნა' | 'პრეზენტაცია' | 'ტესტი/მასალა' | 'ბმული';
   subject?: string;
   targetType: 'event' | 'homework' | 'archive' | 'general';

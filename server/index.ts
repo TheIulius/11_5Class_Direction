@@ -29,8 +29,8 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', true);
 
 app.use(cors());
-app.use(express.json({ limit: '25mb' }));
-app.use(express.urlencoded({ limit: '25mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Moderator / Admin privilege designations
 export const ADMIN_USERNAMES = ['theiulius', 'chaga', 'admin'];
@@ -5302,14 +5302,28 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
   const data = db.getData();
   const p = initPlatformCMS(data);
 
+  const parsedAttachments = Array.isArray(body.attachments)
+    ? body.attachments
+        .filter((a: any) => a && a.name && a.dataUrl)
+        .map((a: any) => ({
+          name: String(a.name).trim(),
+          dataUrl: String(a.dataUrl),
+          size: typeof a.size === 'number' ? a.size : undefined,
+          mimeType: a.mimeType ? String(a.mimeType) : undefined,
+        }))
+    : undefined;
+
+  const firstAtt = parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments[0] : undefined;
+
   const newResource: PlatformResource = {
     id: 'res_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
     title: String(body.title).trim(),
     description: String(body.description).trim(),
     content: body.content ? String(body.content).trim() : undefined,
     linkUrl: body.linkUrl ? String(body.linkUrl).trim() : undefined,
-    attachmentName: body.attachmentName ? String(body.attachmentName).trim() : undefined,
-    attachmentDataUrl: body.attachmentDataUrl ? String(body.attachmentDataUrl) : undefined,
+    attachmentName: body.attachmentName ? String(body.attachmentName).trim() : firstAtt?.name,
+    attachmentDataUrl: body.attachmentDataUrl ? String(body.attachmentDataUrl) : firstAtt?.dataUrl,
+    attachments: parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments : undefined,
     resourceType: body.resourceType || 'კონსპექტი',
     subject: body.subject ? String(body.subject).trim() : 'ზოგადი',
     targetType: body.targetType || 'general',

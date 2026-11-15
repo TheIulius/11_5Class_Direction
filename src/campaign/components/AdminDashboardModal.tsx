@@ -427,6 +427,31 @@ export const AdminDashboardModal: React.FC = () => {
                               ბმულის გახსნა
                             </a>
                           )}
+                          {(Array.isArray(res.attachments) && res.attachments.length > 0
+                            ? res.attachments
+                            : res.attachmentDataUrl
+                            ? [{ name: res.attachmentName || 'ფაილი', dataUrl: res.attachmentDataUrl }]
+                            : []
+                          ).length > 0 && (
+                            <div className="flex flex-wrap items-center gap-2 pt-1">
+                              {(Array.isArray(res.attachments) && res.attachments.length > 0
+                                ? res.attachments
+                                : res.attachmentDataUrl
+                                ? [{ name: res.attachmentName || 'ფაილი', dataUrl: res.attachmentDataUrl }]
+                                : []
+                              ).map((att, attIdx) => (
+                                <a
+                                  key={`${res.id}-att-${attIdx}`}
+                                  href={att.dataUrl}
+                                  download={att.name || `masala-${attIdx + 1}`}
+                                  className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-xs font-bold text-emerald-700 hover:underline inline-flex items-center gap-1"
+                                >
+                                  <FileText className="w-3.5 h-3.5 shrink-0" />
+                                  <span className="truncate max-w-[180px]">{att.name || `ფაილი ${attIdx + 1}`}</span>
+                                </a>
+                              ))}
+                            </div>
+                          )}
                           <div className="text-[11px] text-slate-500 pt-1">
                             ავტორი: <span className="font-bold text-slate-700">{res.authorName}</span> (@{res.authorUsername})
                           </div>
