@@ -33488,7 +33488,7 @@
     "lastUpdated": "2026-11-15T12:03:01.166Z"
   },
   "platform": {
-    "updatedAt": 1794744177265,
+    "updatedAt": 1794744207168,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34724,6 +34724,18 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T11:26:04.531Z"
+      },
+      "user_1794744207167_572": {
+        "id": "user_1794744207167_572",
+        "username": "vshekishvili09@gmail.com",
+        "fullName": "Vato Shekishvili",
+        "passwordHash": "f94ecd1b47ffee2aed1b683318533371fa2140e3ffd329535bf3c44eb1de0c09e344091f68d1d43586ef2da73e5e23676ee4e2e1f3e9d054939c7d377237fb16",
+        "salt": "82f645b39602196e2f859315faba0272",
+        "token": "7012e1623515c6f2af2e03297bbe5196e7a91d427d7d549ecec9cac374f81e30",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T12:03:27.168Z"
       }
     },
     "backgroundPhysics": {
