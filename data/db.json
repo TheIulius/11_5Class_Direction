@@ -33376,7 +33376,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 97,
+    "visits": 98,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33406,9 +33406,10 @@
       "aa339c0551c2494c",
       "967f44492c31d89a",
       "af0b1d3220afa440",
-      "c6afd7df9f5e5e85"
+      "c6afd7df9f5e5e85",
+      "d52928101199cd3c"
     ],
-    "uniqueIpsCount": 28,
+    "uniqueIpsCount": 29,
     "tabClicks": {
       "overview": 0,
       "poem": 0,
@@ -33487,7 +33488,7 @@
         }
       }
     },
-    "lastUpdated": "2026-11-15T13:39:11.708Z"
+    "lastUpdated": "2026-11-15T13:48:24.809Z"
   },
   "platform": {
     "updatedAt": 1794749940912,
