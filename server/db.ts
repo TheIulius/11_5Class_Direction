@@ -198,6 +198,20 @@ export interface BackgroundPhysicsSettings {
   parallaxNear: number;
 }
 
+export interface PlatformPushSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
+  userId?: string;
+  username?: string;
+  role?: 'admin' | 'moderator' | 'user';
+  canModerate?: boolean;
+  userAgent?: string;
+  updatedAt: string;
+}
+
 export interface PlatformCMSData {
   updatedAt: number;
   announcement?: {
@@ -208,6 +222,11 @@ export interface PlatformCMSData {
     updatedAt: string;
   };
   users?: Record<string, PlatformUserAccount>;
+  vapidKeys?: {
+    publicKey: string;
+    privateKey: string;
+  };
+  pushSubscriptions?: PlatformPushSubscription[];
   backgroundPhysics?: BackgroundPhysicsSettings;
   calendarEvents: any[];
   homeworks: any[];

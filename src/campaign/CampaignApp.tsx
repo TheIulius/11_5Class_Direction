@@ -71,8 +71,15 @@ const hashToTab = (hash: string): ActiveTab => {
 
 const CampaignAppInner: React.FC<CampaignAppProps> = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>(() => {
-    if (typeof window !== 'undefined' && window.location.hash) {
-      return hashToTab(window.location.hash);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const queryTab = params.get('tab');
+      if (queryTab) {
+        return hashToTab(queryTab);
+      }
+      if (window.location.hash) {
+        return hashToTab(window.location.hash);
+      }
     }
     return 'home';
   });

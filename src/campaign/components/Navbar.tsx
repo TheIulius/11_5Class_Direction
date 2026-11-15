@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { soundEffects } from '../utils/soundEffects';
 import { usePlatform } from '../context/PlatformContext';
+import { PwaNotificationButton } from './PwaNotificationButton';
 
 export type ActiveTab =
   | 'home'
@@ -107,6 +108,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Action Controls */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          {/* Home Screen App (PWA) & Web Push Notifications Button */}
+          <PwaNotificationButton />
+
           {/* Theme Toggle Button */}
           <button
             onClick={onToggleTheme}

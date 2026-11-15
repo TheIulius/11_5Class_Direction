@@ -3,7 +3,8 @@ import cors from 'cors';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PlatformUserAccount, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData, PlatformCMSData, PlatformComment, PlatformResource, ArchiveStudyPack } from './db';
+import webpush from 'web-push';
+import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PlatformUserAccount, PlatformPushSubscription, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData, PlatformCMSData, PlatformComment, PlatformResource, ArchiveStudyPack } from './db';
 import {
   INITIAL_CALENDAR_EVENTS,
   INITIAL_HOMEWORKS,
@@ -2810,12 +2811,45 @@ export function mergeDatabases(local: DatabaseSchema, remote: any): boolean {
 
   // 10. Merge Platform CMS Data (11/5 Class Hub)
   if (remote.platform && typeof remote.platform === 'object') {
+    // Purge deleted admin account @dgi from remote snapshot before merging
+    if (remote.platform.users && typeof remote.platform.users === 'object') {
+      for (const [uid, acc] of Object.entries(remote.platform.users as Record<string, any>)) {
+        if (uid === 'user_1794331064867_659' || (acc?.username && String(acc.username).trim().toLowerCase() === 'dgi')) {
+          delete remote.platform.users[uid];
+        }
+      }
+    }
+
+    const prevSubs = Array.isArray(local.platform?.pushSubscriptions) ? local.platform!.pushSubscriptions! : [];
+    const remoteSubs = Array.isArray(remote.platform.pushSubscriptions) ? remote.platform.pushSubscriptions : [];
+    const prevVapid = local.platform?.vapidKeys || remote.platform.vapidKeys;
+
     if (!local.platform) {
       local.platform = remote.platform;
       changed = true;
     } else if ((remote.platform.updatedAt || 0) > (local.platform.updatedAt || 0)) {
       local.platform = remote.platform;
       changed = true;
+    }
+
+    if (local.platform) {
+      if (prevVapid && !local.platform.vapidKeys) {
+        local.platform.vapidKeys = prevVapid;
+      }
+      if (prevSubs.length > 0 || remoteSubs.length > 0) {
+        const mergedMap = new Map<string, PlatformPushSubscription>();
+        for (const s of [...remoteSubs, ...prevSubs]) {
+          if (s && s.endpoint) mergedMap.set(s.endpoint, s);
+        }
+        local.platform.pushSubscriptions = Array.from(mergedMap.values());
+      }
+      if (local.platform.users) {
+        for (const [uid, acc] of Object.entries(local.platform.users)) {
+          if (uid === 'user_1794331064867_659' || (acc?.username && String(acc.username).trim().toLowerCase() === 'dgi')) {
+            delete local.platform.users[uid];
+          }
+        }
+      }
     }
   }
 
@@ -4577,6 +4611,35 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
     p.users = {};
   }
 
+  // Permanently purge deleted admin account @dgi
+  for (const [uid, acc] of Object.entries(p.users)) {
+    if (uid === 'user_1794331064867_659' || (acc?.username && acc.username.trim().toLowerCase() === 'dgi')) {
+      delete p.users[uid];
+    }
+  }
+
+  // Ensure VAPID keys & pushSubscriptions exist for Web Push Notifications
+  if (!p.vapidKeys || !p.vapidKeys.publicKey || !p.vapidKeys.privateKey) {
+    const generated = webpush.generateVAPIDKeys();
+    p.vapidKeys = {
+      publicKey: process.env.VAPID_PUBLIC_KEY || generated.publicKey,
+      privateKey: process.env.VAPID_PRIVATE_KEY || generated.privateKey,
+    };
+  }
+  try {
+    webpush.setVapidDetails(
+      'mailto:admin@komarovi115.ge',
+      p.vapidKeys.publicKey,
+      p.vapidKeys.privateKey
+    );
+  } catch (e) {
+    console.warn('[WebPush] Failed to configure VAPID details:', e);
+  }
+
+  if (!Array.isArray(p.pushSubscriptions)) {
+    p.pushSubscriptions = [];
+  }
+
   // Ensure primary 11/5 Platform admin (@theiulius) exists in 11/5 accounts
   if (!Object.values(p.users).some((u) => u.username.toLowerCase() === 'theiulius')) {
     const kclIlia = Object.values(data.users || {}).find(
@@ -4674,6 +4737,201 @@ function savePlatformCMS(data: DatabaseSchema, reason: string) {
   scheduleAutoSyncToGitHub(reason);
 }
 
+async function sendPlatformPushNotification(
+  data: DatabaseSchema,
+  options: {
+    title: string;
+    body: string;
+    url?: string;
+    tag?: string;
+    audience: 'all' | 'moderators' | { userId?: string; username?: string };
+  }
+): Promise<{ sent: number; failed: number }> {
+  const p = initPlatformCMS(data);
+  const subs = p.pushSubscriptions || [];
+  if (subs.length === 0) return { sent: 0, failed: 0 };
+
+  const targetSubs = subs.filter((sub) => {
+    // Resolve latest user role from p.users if userId or username is linked
+    let isModOrAdmin = Boolean(sub.canModerate);
+    if (p.users) {
+      const matchedUser =
+        (sub.userId && p.users[sub.userId]) ||
+        (sub.username
+          ? Object.values(p.users).find(
+              (u) => u.username.toLowerCase() === sub.username!.toLowerCase()
+            )
+          : undefined);
+      if (matchedUser) {
+        isModOrAdmin = resolvePlatformRoles(matchedUser).canModerate;
+      }
+    }
+
+    if (options.audience === 'all') return true;
+    if (options.audience === 'moderators') return isModOrAdmin;
+    if (typeof options.audience === 'object') {
+      if (options.audience.userId && sub.userId === options.audience.userId) return true;
+      if (
+        options.audience.username &&
+        sub.username &&
+        sub.username.toLowerCase() === options.audience.username.toLowerCase()
+      ) {
+        return true;
+      }
+    }
+    return false;
+  });
+
+  if (targetSubs.length === 0) return { sent: 0, failed: 0 };
+
+  const payloadStr = JSON.stringify({
+    title: options.title,
+    body: options.body,
+    url: options.url || '/',
+    tag: options.tag || 'class11-5-' + Date.now(),
+  });
+
+  let sent = 0;
+  let failed = 0;
+  const expiredEndpoints = new Set<string>();
+
+  await Promise.all(
+    targetSubs.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: sub.keys,
+          },
+          payloadStr,
+          { TTL: 86400 }
+        );
+        sent += 1;
+      } catch (err: any) {
+        failed += 1;
+        if (err?.statusCode === 404 || err?.statusCode === 410) {
+          expiredEndpoints.add(sub.endpoint);
+        }
+      }
+    })
+  );
+
+  if (expiredEndpoints.size > 0 && p.pushSubscriptions) {
+    p.pushSubscriptions = p.pushSubscriptions.filter((s) => !expiredEndpoints.has(s.endpoint));
+    db.saveSilent();
+  }
+
+  return { sent, failed };
+}
+
+// Web Push Notification Endpoints (VAPID Public Key, Subscribe, Unsubscribe, Test)
+app.get('/api/platform/push/vapid-public-key', (req: Request, res: Response) => {
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  res.json({ publicKey: p.vapidKeys?.publicKey || '' });
+});
+
+app.post('/api/platform/push/subscribe', (req: Request, res: Response) => {
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const auth = getPlatformAuthUser(req);
+  const { subscription } = req.body || {};
+
+  if (!subscription || !subscription.endpoint || !subscription.keys?.p256dh || !subscription.keys?.auth) {
+    return res.status(400).json({ error: 'არასწორი Push გამოწერის მონაცემები.' });
+  }
+
+  if (!Array.isArray(p.pushSubscriptions)) {
+    p.pushSubscriptions = [];
+  }
+
+  const newEntry: PlatformPushSubscription = {
+    endpoint: String(subscription.endpoint),
+    keys: {
+      p256dh: String(subscription.keys.p256dh),
+      auth: String(subscription.keys.auth),
+    },
+    userId: auth?.user.id,
+    username: auth?.user.username,
+    role: auth?.role || 'user',
+    canModerate: auth?.canModerate || false,
+    userAgent: String(req.headers['user-agent'] || '').slice(0, 180),
+    updatedAt: new Date().toISOString(),
+  };
+
+  const existingIdx = p.pushSubscriptions.findIndex((s) => s.endpoint === newEntry.endpoint);
+  if (existingIdx >= 0) {
+    p.pushSubscriptions[existingIdx] = newEntry;
+  } else {
+    p.pushSubscriptions.push(newEntry);
+  }
+
+  savePlatformCMS(data, `Push subscription registered for @${auth?.user.username || 'guest'}`);
+  res.json({
+    success: true,
+    totalSubscriptions: p.pushSubscriptions.length,
+  });
+});
+
+app.post('/api/platform/push/unsubscribe', (req: Request, res: Response) => {
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const { endpoint } = req.body || {};
+  if (!endpoint) return res.status(400).json({ error: 'Endpoint სავალდებულოა.' });
+
+  if (Array.isArray(p.pushSubscriptions)) {
+    p.pushSubscriptions = p.pushSubscriptions.filter((s) => s.endpoint !== endpoint);
+    savePlatformCMS(data, 'Push subscription removed');
+  }
+  res.json({ success: true });
+});
+
+app.post('/api/platform/push/test', async (req: Request, res: Response) => {
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const auth = getPlatformAuthUser(req);
+  const { endpoint, broadcast, title, body } = req.body || {};
+
+  if (broadcast) {
+    if (!auth || !auth.canModerate) {
+      return res.status(403).json({ error: 'მხოლოდ ადმინებს და მოდერატორებს შეუძლიათ საერთო შეტყობინების გაგზავნა.' });
+    }
+    const result = await sendPlatformPushNotification(data, {
+      title: title ? String(title).trim() : '🔔 11⁵ კლასი • შეტყობინება',
+      body: body ? String(body).trim() : 'შეტყობინებების სისტემა წარმატებით მუშაობს!',
+      url: '/',
+      tag: 'class11-5-broadcast-' + Date.now(),
+      audience: 'all',
+    });
+    return res.json({ success: true, ...result });
+  }
+
+  // Single-device test notification
+  const sub = (p.pushSubscriptions || []).find(
+    (s) => (endpoint && s.endpoint === endpoint) || (auth && s.userId === auth.user.id)
+  );
+  if (!sub) {
+    return res.status(404).json({ error: 'ამ მოწყობილობაზე შეტყობინებები ჯერ არ არის გააქტიურებული.' });
+  }
+
+  try {
+    await webpush.sendNotification(
+      { endpoint: sub.endpoint, keys: sub.keys },
+      JSON.stringify({
+        title: '🔔 11⁵ კლასი • შეტყობინებები ჩართულია!',
+        body: auth?.canModerate
+          ? 'თქვენ მყისიერად მიიღებთ შეტყობინებას დასადასტურებელ მასალებზე, შემაჯამებლებსა და განცხადებებზე.'
+          : 'თქვენ მყისიერად მიიღებთ შეტყობინებას ახალ შემაჯამებლებსა და მნიშვნელოვან განცხადებებზე.',
+        url: '/',
+        tag: 'class11-5-test-' + Date.now(),
+      })
+    );
+    return res.json({ success: true, sent: 1 });
+  } catch (err: any) {
+    return res.status(500).json({ error: 'შეტყობინების გაგზავნა ვერ მოხერხდა: ' + (err?.message || 'Unknown error') });
+  }
+});
+
 // 1. Get Full Platform State (Public — Guests can view all approved content!)
 app.get('/api/platform/state', (req: Request, res: Response) => {
   const data = db.getData();
@@ -4684,7 +4942,7 @@ app.get('/api/platform/state', (req: Request, res: Response) => {
   const pendingHomeworksCount = p.homeworks.filter((h: any) => h.status === 'pending').length;
   const pendingClubsCount = p.clubs.filter((c: any) => c.status === 'განხილვაშია').length;
 
-  const { users: _omittedUsers, ...publicPlatform } = p;
+  const { users: _omittedUsers, vapidKeys: _omittedVapid, pushSubscriptions: _omittedSubs, ...publicPlatform } = p;
 
   res.json({
     platform: publicPlatform,
@@ -5020,7 +5278,7 @@ app.post('/api/platform/admin/users/:id/update', (req: Request, res: Response) =
   res.json({ success: true });
 });
 
-// Admin: Delete Non-Admin 11/5 Class User Account (Strictly Admin-only)
+// Admin: Delete 11/5 Class User Account (Strictly Admin-only; primary @theiulius account is protected)
 app.delete('/api/platform/admin/users/:id', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth || !auth.isAdmin) {
@@ -5032,8 +5290,9 @@ app.delete('/api/platform/admin/users/:id', (req: Request, res: Response) => {
   const target = p.users?.[id];
   if (!target) return res.status(404).json({ error: 'მომხმარებელი ვერ მოიძებნა.' });
   const targetRoles = resolvePlatformRoles(target);
-  if (targetRoles.isAdmin) {
-    return res.status(403).json({ error: 'ადმინისტრატორის აქაუნთის წაშლა დაუშვებელია.' });
+  const isOwner = auth.user.username.toLowerCase() === 'theiulius';
+  if (target.username.toLowerCase() === 'theiulius' || (targetRoles.isAdmin && !isOwner)) {
+    return res.status(403).json({ error: 'მთავარი ადმინისტრატორის აქაუნთის წაშლა დაუშვებელია.' });
   }
   delete p.users[id];
   savePlatformCMS(data, `Admin deleted 11/5 user @${target.username}`);
@@ -5057,6 +5316,15 @@ app.put('/api/platform/announcement', (req: Request, res: Response) => {
     updatedAt: new Date().toISOString(),
   };
   savePlatformCMS(data, `${auth.isAdmin ? 'Admin' : 'Moderator'} updated announcement banner`);
+  if (p.announcement.active && p.announcement.text) {
+    sendPlatformPushNotification(data, {
+      title: '📢 11/5 კლასის განცხადება',
+      body: p.announcement.text,
+      url: p.announcement.linkTab ? `/?tab=${p.announcement.linkTab}` : '/',
+      tag: 'class11-5-announcement',
+      audience: 'all',
+    }).catch(() => {});
+  }
   res.json({ success: true, announcement: p.announcement });
 });
 
@@ -5138,6 +5406,13 @@ app.post('/api/platform/calendar', (req: Request, res: Response) => {
   p.calendarEvents.push(newEvent);
   p.calendarEvents.sort((a: any, b: any) => String(a.date).localeCompare(String(b.date)));
   savePlatformCMS(data, `Calendar event added: ${newEvent.title}`);
+  sendPlatformPushNotification(data, {
+    title: `📅 ${newEvent.category || 'შემაჯამებელი'}: ${newEvent.title}`,
+    body: `${newEvent.date} • ${newEvent.time}${newEvent.description ? ' — ' + newEvent.description : ''}`,
+    url: '/?tab=calendar',
+    tag: `class11-5-event-${newEvent.id}`,
+    audience: 'all',
+  }).catch(() => {});
   res.json({ success: true, event: newEvent, calendarEvents: p.calendarEvents });
 });
 
@@ -5218,6 +5493,15 @@ app.post('/api/platform/homework', (req: Request, res: Response) => {
 
   p.homeworks.push(newHw);
   savePlatformCMS(data, `Homework added (${newHw.status}): ${newHw.title}`);
+  if (newHw.status === 'pending') {
+    sendPlatformPushNotification(data, {
+      title: '📝 ახალი დავალება დასადასტურებლად!',
+      body: `${newHw.subject}: ${newHw.title} (@${auth.user.username})`,
+      url: '/?tab=homework',
+      tag: `class11-5-hw-pending-${newHw.id}`,
+      audience: 'moderators',
+    }).catch(() => {});
+  }
   res.json({ success: true, homework: newHw, homeworks: p.homeworks });
 });
 
@@ -5354,6 +5638,15 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
 
   p.resources.unshift(newResource);
   savePlatformCMS(data, `Resource uploaded (${newResource.status}): ${newResource.title || 'untitled'} by @${auth.user.username}`);
+  if (newResource.status === 'pending') {
+    sendPlatformPushNotification(data, {
+      title: '📥 ახალი მასალა დასადასტურებლად!',
+      body: `@${auth.user.username}-მ ატვირთა: ${newResource.title || newResource.subject || 'ფოტო / მასალა'}`,
+      url: '/?tab=homework',
+      tag: `class11-5-res-pending-${newResource.id}`,
+      audience: 'moderators',
+    }).catch(() => {});
+  }
   res.json({ success: true, resource: newResource, resources: p.resources });
 });
 
@@ -5420,6 +5713,13 @@ app.post('/api/platform/resources/:id/status', (req: Request, res: Response) => 
   } else {
     resItem.status = 'approved';
     resItem.approvedBy = auth.user.username;
+    sendPlatformPushNotification(data, {
+      title: '✅ შენი ატვირთული მასალა დადასტურდა!',
+      body: `${resItem.title || resItem.subject || 'მასალა'} უკვე ხელმისაწვდომია ყველასთვის.`,
+      url: '/?tab=homework',
+      tag: `class11-5-res-approved-${resItem.id}`,
+      audience: { userId: resItem.authorId, username: resItem.authorUsername },
+    }).catch(() => {});
   }
   savePlatformCMS(data, `${auth.isAdmin ? 'Admin' : 'Moderator'} ${status} resource: ${resItem.title}`);
   res.json({ success: true, resource: resItem, resources: p.resources });
@@ -5852,10 +6152,23 @@ async function startServer() {
   // Ensure all finished fixtures have their player stats and manager points fully calculated
   try {
     const data = db.getData();
+    const hadDgiBefore = Boolean(
+      data.platform?.users &&
+        Object.entries(data.platform.users).some(
+          ([uid, acc]) =>
+            uid === 'user_1794331064867_659' ||
+            (acc?.username && acc.username.trim().toLowerCase() === 'dgi')
+        )
+    );
+    initPlatformCMS(data);
     applyPositionChangesAndRemediation(data);
     const statsSynced = syncAllFinishedFixturesStats(data);
     recalculateAllManagersLeaguePoints(data);
-    db.saveSilent();
+    if (hadDgiBefore) {
+      savePlatformCMS(data, 'Removed admin account @dgi');
+    } else {
+      db.saveSilent();
+    }
     console.log('[Startup] Verified and synced player stats, positions, and manager points.');
   } catch (e) {
     console.warn('[Startup] Error auto-syncing finished fixtures stats:', e);
