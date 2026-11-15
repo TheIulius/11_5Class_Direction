@@ -33479,7 +33479,7 @@
     "lastUpdated": "2026-11-15T10:06:29.133Z"
   },
   "platform": {
-    "updatedAt": 1794738120920,
+    "updatedAt": 1794738202348,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34380,9 +34380,10 @@
         "status": "approved",
         "createdAt": "2026-11-15T09:38:52.249Z",
         "approvedBy": "theiulius",
-        "upvotes": 1,
+        "upvotes": 2,
         "upvotedBy": [
-          "user_theiulius_115"
+          "user_theiulius_115",
+          "5.178.197.148"
         ]
       },
       {
