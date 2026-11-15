@@ -33482,7 +33482,7 @@
     "lastUpdated": "2026-11-15T10:42:06.389Z"
   },
   "platform": {
-    "updatedAt": 1794739301794,
+    "updatedAt": 1794739344266,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34649,6 +34649,18 @@
         "isAdmin": false,
         "isModerator": true,
         "createdAt": "2026-11-15T10:40:15.211Z"
+      },
+      "user_1794739344264_700": {
+        "id": "user_1794739344264_700",
+        "username": "kvich_mqn",
+        "fullName": "საბა ხვიჩიქ",
+        "passwordHash": "2bbcbfd80d4a119062da0b43d514f6d4f62702f687272221adf72df5e7062622fa3f990707e6cca8a2ab6822c8f7bc33e1697e61ff75b03569b70aca0b38955d",
+        "salt": "c164950eeb5f4e9f6775124d3d6e1b16",
+        "token": "e500251ffc60eb8a0bfa4d0bfcc66e1f7f1c5e9ce981584045b2cca6dbadb175",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T10:42:24.266Z"
       }
     },
     "backgroundPhysics": {
