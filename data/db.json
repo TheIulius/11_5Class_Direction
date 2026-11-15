@@ -33483,7 +33483,7 @@
     "lastUpdated": "2026-11-15T10:34:50.089Z"
   },
   "platform": {
-    "updatedAt": 1794738804523,
+    "updatedAt": 1794739133838,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34455,7 +34455,7 @@
         "isModerator": false,
         "content": "ქიმიის ტესტიი!?😨",
         "createdAt": "2026-11-15T09:39:21.034Z",
-        "isPinned": true
+        "isPinned": false
       },
       {
         "id": "cmt_1794736830423_562",
