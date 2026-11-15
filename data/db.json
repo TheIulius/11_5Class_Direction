@@ -33487,7 +33487,7 @@
     "lastUpdated": "2026-11-15T11:25:56.313Z"
   },
   "platform": {
-    "updatedAt": 1794741920945,
+    "updatedAt": 1794741964531,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34704,6 +34704,18 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T11:06:39.080Z"
+      },
+      "user_1794741964529_174": {
+        "id": "user_1794741964529_174",
+        "username": "dachiza",
+        "fullName": "dachi zarn",
+        "passwordHash": "139177d5c6f4b66a112bf22ac5fbf9b25ddd827e72b7dcc1b81caa00daefb2201d5ea09b6eeff522c3e9e18ffdee5d951f37d9dd252bdda8fadefd45a6e45630",
+        "salt": "36cf690490f4aaeb41c6157d28432ed1",
+        "token": "986fea51fba71cfb8527ab73395bce85d5571b2a9caac1b802f129f2f49b3f87",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T11:26:04.531Z"
       }
     },
     "backgroundPhysics": {
