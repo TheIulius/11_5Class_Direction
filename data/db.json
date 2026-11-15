@@ -33479,7 +33479,7 @@
     "lastUpdated": "2026-11-15T09:32:05.577Z"
   },
   "platform": {
-    "updatedAt": 1794735532249,
+    "updatedAt": 1794735561034,
     "announcement": {
       "text": "კეთილი იყოს თქვენი მობრძანება 11/5 კლასის განახლებულ პლატფორმაზე! ყველა ჩანართი გახსნილია — შეგიძლიათ ატვირთოთ კონსპექტები, დავალებები და დატოვოთ კომენტარები.",
       "active": true,
@@ -34393,6 +34393,19 @@
         "content": "ამ შემაჯამებელზე ძირითადი აქცენტი იქნება ტრიგონომეტრიულ განტოლებებსა და დაყვანის ფორმულებზე. ზემოთ მიმაგრებულია ფორმულების კონსპექტი!",
         "createdAt": "2026-11-09T15:06:50.611Z",
         "isPinned": true
+      },
+      {
+        "id": "cmt_1794735561034_450",
+        "targetType": "homework",
+        "targetId": "hw_1794734580082",
+        "authorId": "user_theiulius_115",
+        "authorName": "theiulius",
+        "authorUsername": "theiulius",
+        "isAdmin": true,
+        "isModerator": false,
+        "content": "ქიმიის ტესტიი!?😨",
+        "createdAt": "2026-11-15T09:39:21.034Z",
+        "isPinned": false
       }
     ],
     "archivePacks": [
