@@ -33495,7 +33495,7 @@
     "lastUpdated": "2026-11-15T21:23:24.059Z"
   },
   "platform": {
-    "updatedAt": 1794773213756,
+    "updatedAt": 1794777880576,
     "announcement": {
       "text": "დააყენე app-ად & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34769,9 +34769,10 @@
         "fullName": "ანასტასია იზორია",
         "passwordHash": "cb6b2be33d5d0519091c542dcf759ef01f2dee5540a55e40486cf50cdc0ce3b76ce6ce234ea8efdb4efc5df37aa6a8c54ad915ed30ba1da362fbc32257051117",
         "salt": "afddd2d63d02cd8b7dd91a46a7e9bffe",
-        "token": "b3a1e2f1654040a4e7ff513697949505090e43147ad1fb434b7c912a807c886a",
+        "token": "58f7e57f66122daca9890955568433e514b27af862e920a772eaebbce3d045d8",
         "tokens": [
-          "b3a1e2f1654040a4e7ff513697949505090e43147ad1fb434b7c912a807c886a"
+          "b3a1e2f1654040a4e7ff513697949505090e43147ad1fb434b7c912a807c886a",
+          "58f7e57f66122daca9890955568433e514b27af862e920a772eaebbce3d045d8"
         ],
         "role": "user",
         "isAdmin": false,
