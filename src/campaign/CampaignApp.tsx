@@ -13,6 +13,7 @@ import { AdminDashboardModal } from './components/AdminDashboardModal';
 import { PlatformProvider, usePlatform } from './context/PlatformContext';
 import { BackgroundClassPhotos } from './components/BackgroundClassPhotos';
 import { LockedSectionPreview } from './components/LockedSectionPreview';
+import { GuestBlurGate } from './components/GuestBlurGate';
 import { isSectionLocked } from './config/features';
 import { Megaphone, Shield } from 'lucide-react';
 import {
@@ -202,7 +203,9 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                <RealCalendarView onOpenQuiz={() => handleSelectTab('materials')} />
+                <GuestBlurGate>
+                  <RealCalendarView onOpenQuiz={() => handleSelectTab('materials')} />
+                </GuestBlurGate>
               </motion.div>
             )}
 
@@ -215,7 +218,9 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                <HomeworkSection />
+                <GuestBlurGate>
+                  <HomeworkSection />
+                </GuestBlurGate>
               </motion.div>
             )}
 
@@ -228,11 +233,13 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                {isSectionLocked('opportunities') ? (
-                  <LockedSectionPreview sectionType="opportunities" />
-                ) : (
-                  <OpportunitiesSection />
-                )}
+                <GuestBlurGate>
+                  {isSectionLocked('opportunities') ? (
+                    <LockedSectionPreview sectionType="opportunities" />
+                  ) : (
+                    <OpportunitiesSection />
+                  )}
+                </GuestBlurGate>
               </motion.div>
             )}
 
@@ -245,11 +252,13 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                {isSectionLocked('ideas') ? (
-                  <LockedSectionPreview sectionType="ideas" />
-                ) : (
-                  <IdeaBoardSection />
-                )}
+                <GuestBlurGate>
+                  {isSectionLocked('ideas') ? (
+                    <LockedSectionPreview sectionType="ideas" />
+                  ) : (
+                    <IdeaBoardSection />
+                  )}
+                </GuestBlurGate>
               </motion.div>
             )}
 
@@ -262,11 +271,13 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                {isSectionLocked('clubs') ? (
-                  <LockedSectionPreview sectionType="clubs" />
-                ) : (
-                  <CommunityHubSection />
-                )}
+                <GuestBlurGate>
+                  {isSectionLocked('clubs') ? (
+                    <LockedSectionPreview sectionType="clubs" />
+                  ) : (
+                    <CommunityHubSection />
+                  )}
+                </GuestBlurGate>
               </motion.div>
             )}
 
@@ -279,7 +290,9 @@ const CampaignAppInner: React.FC<CampaignAppProps> = () => {
                 transition={{ duration: 0.18 }}
                 className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8"
               >
-                <ArchiveSection />
+                <GuestBlurGate>
+                  <ArchiveSection />
+                </GuestBlurGate>
               </motion.div>
             )}
           </AnimatePresence>

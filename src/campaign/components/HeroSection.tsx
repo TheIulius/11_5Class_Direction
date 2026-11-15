@@ -36,6 +36,7 @@ import {
   SketchBlueArrow,
   SketchPurpleSmiley,
 } from './NotebookDecorations';
+import { GuestBlurGate } from './GuestBlurGate';
 
 interface HeroSectionProps {
   onNavigateTab: (tab: ActiveTab) => void;
@@ -43,7 +44,7 @@ interface HeroSectionProps {
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenVideo }) => {
-  const { platform } = usePlatform();
+  const { user, platform, openAuthModal } = usePlatform();
   const { isNotebook } = useDesignPreview();
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [videoError, setVideoError] = useState(false);
@@ -167,35 +168,102 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
   }, [platform.opportunities, todayString]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-8">
+    <div className="max-w-6xl mx-auto px-3 sm:px-6 py-2.5 sm:py-8 space-y-3.5 sm:space-y-8">
       {/* =========================================================================
           TOP BAR OR KOMCLUB NOTEBOOK HERO + ACTIVE BOARD
           ========================================================================= */}
       {isNotebook ? (
         <section
           aria-label="11/5 კლასის მთავარი დაფა"
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center pt-2 pb-4"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-3 lg:gap-10 items-center pt-0.5 sm:pt-2 pb-1 sm:pb-4"
         >
           {/* Left: Expressive Wordmark, Sticky Eyebrow, Copy, Tactile CTAs & Dashed Blue Arrow */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="nb-eyebrow">
-              <span className="w-2 h-2 rounded-full bg-emerald-600" aria-hidden="true" />
-              <span>11/5 კლასი &bull; {tbilisiTime.formattedDisplay}</span>
+          <div className="lg:col-span-7 space-y-2 sm:space-y-4">
+            {/* Top row: Date eyebrow + Compact Mobile Active Board Pill Strip in top-right corner */}
+            <div className="flex items-center justify-between gap-1.5 flex-wrap">
+              <div className="nb-eyebrow !text-[10px] sm:!text-xs !py-1 !px-2.5">
+                <span className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-600" aria-hidden="true" />
+                <span>11/5 &bull; {tbilisiTime.formattedDisplay}</span>
+              </div>
+
+              {/* Compact Mobile Top-Corner "აქტიური დაფა" Pill Strip */}
+              <div
+                className="lg:hidden flex items-center gap-1 bg-[#f7f3ec] border-2 border-[#2d2d2d] rounded-xl px-1.5 py-0.5 shadow-[2px_2px_0_#2d2d2d]"
+                aria-label="აქტიური დაფის მოკლე მაჩვენებლები"
+              >
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.click();
+                    if (!user) openAuthModal('register');
+                    else onNavigateTab('homework');
+                  }}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-[#2d2d2d] hover:bg-[#fff9c4] cursor-pointer"
+                  title="მიმდინარე დავალებები"
+                >
+                  <CheckCircle2 className="w-3 h-3 text-[#7b2ff7]" />
+                  <span className={!user ? 'blur-[3px] select-none' : ''}>{activeHomeworks.length}</span>
+                </button>
+                <span className="text-[#2d2d2d]/30 text-[10px]">|</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.click();
+                    if (!user) openAuthModal('register');
+                    else onNavigateTab('calendar');
+                  }}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-[#2d2d2d] hover:bg-[#fff9c4] cursor-pointer"
+                  title="მოახლოებული შემაჯამებლები"
+                >
+                  <CalendarIcon className="w-3 h-3 text-[#d91b7a]" />
+                  <span className={!user ? 'blur-[3px] select-none' : ''}>{upcomingAssessments.length}</span>
+                </button>
+                <span className="text-[#2d2d2d]/30 text-[10px]">|</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    soundEffects.click();
+                    if (!user) openAuthModal('register');
+                    else onNavigateTab('materials');
+                  }}
+                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10px] font-bold text-[#2d2d2d] hover:bg-[#fff9c4] cursor-pointer"
+                  title="სასწავლო მოდულები"
+                >
+                  <BookOpen className="w-3 h-3 text-[#1d70b8]" />
+                  <span className={!user ? 'blur-[3px] select-none' : ''}>{platform.archivePacks.length}</span>
+                </button>
+              </div>
             </div>
 
-            <h1 className="nb-hero-wordmark">
-              კომაროვის{' '}
-              <span className="nb-hero-wordmark-magenta">11⁵ კლასი</span>
-              <span className="nb-hero-wordmark-bang" aria-hidden="true">
-                !
-              </span>
-            </h1>
+            {/* Compact Title Row on Mobile + Inline Video Trigger */}
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="nb-hero-wordmark !text-[1.45rem] sm:!text-[clamp(2.25rem,4.6vw,3.65rem)] !leading-tight">
+                კომაროვის{' '}
+                <span className="nb-hero-wordmark-magenta">11⁵ კლასი</span>
+                <span className="nb-hero-wordmark-bang" aria-hidden="true">
+                  !
+                </span>
+              </h1>
 
-            <p className="text-base sm:text-lg text-[var(--text-secondary)] max-w-xl leading-relaxed">
+              <button
+                type="button"
+                onClick={() => {
+                  soundEffects.click();
+                  if (onOpenVideo) onOpenVideo();
+                  else setIsVideoOpen(true);
+                }}
+                className="sm:hidden shrink-0 inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-[#f7f3ec] border-2 border-[#2d2d2d] shadow-[2px_2px_0_#2d2d2d] text-[11px] font-bold text-[#2d2d2d] cursor-pointer"
+              >
+                <Play className="w-3 h-3 text-[var(--primary-action)] fill-[var(--primary-action)]" aria-hidden="true" />
+                <span>რატომ ავირჩიოთ</span>
+              </button>
+            </div>
+
+            <p className="hidden sm:block text-base sm:text-lg text-[var(--text-secondary)] max-w-xl leading-relaxed">
               საშინაო დავალებები, შემაჯამებლების კალენდარი, მიმდინარე გაკვეთილების ცხრილი და სასწავლო მოდულები ერთ სივრცეში.
             </p>
 
-            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-1">
+            <div className="hidden sm:flex flex-wrap items-center gap-2.5 sm:gap-3.5 pt-1">
               <button
                 type="button"
                 onClick={() => {
@@ -225,8 +293,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
             </div>
           </div>
 
-          {/* Right: Crooked Paper Active Board ("11/5 კლასის აქტიური დაფა" — Ref Screenshot 1) */}
-          <div className="lg:col-span-5">
+          {/* Right (Desktop only at top): Crooked Paper Active Board ("11/5 კლასის აქტიური დაფა") */}
+          <div className="hidden lg:block lg:col-span-5">
             <div className="nb-active-board">
               <TapeStrip tilt="left" />
               <h2 className="nb-active-board-title">11/5 კლასის აქტიური დაფა</h2>
@@ -236,7 +304,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   type="button"
                   onClick={() => {
                     soundEffects.click();
-                    onNavigateTab('homework');
+                    if (!user) openAuthModal('register');
+                    else onNavigateTab('homework');
                   }}
                   className="nb-stat-tile"
                 >
@@ -245,7 +314,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   </span>
                   <span>
                     <span className="nb-stat-label">მიმდინარე დავალებები</span>
-                    <strong className="nb-stat-value">{activeHomeworks.length}</strong>
+                    <strong className={`nb-stat-value ${!user ? 'blur-[4px] select-none' : ''}`}>
+                      {activeHomeworks.length}
+                    </strong>
                   </span>
                 </button>
 
@@ -253,7 +324,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   type="button"
                   onClick={() => {
                     soundEffects.click();
-                    onNavigateTab('calendar');
+                    if (!user) openAuthModal('register');
+                    else onNavigateTab('calendar');
                   }}
                   className="nb-stat-tile"
                 >
@@ -262,7 +334,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   </span>
                   <span>
                     <span className="nb-stat-label">მოახლოებული შემაჯამებლები</span>
-                    <strong className="nb-stat-value">{upcomingAssessments.length}</strong>
+                    <strong className={`nb-stat-value ${!user ? 'blur-[4px] select-none' : ''}`}>
+                      {upcomingAssessments.length}
+                    </strong>
                   </span>
                 </button>
 
@@ -270,7 +344,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   type="button"
                   onClick={() => {
                     soundEffects.click();
-                    onNavigateTab('materials');
+                    if (!user) openAuthModal('register');
+                    else onNavigateTab('materials');
                   }}
                   className="nb-stat-tile"
                 >
@@ -279,7 +354,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
                   </span>
                   <span>
                     <span className="nb-stat-label">სასწავლო მოდულები</span>
-                    <strong className="nb-stat-value">{platform.archivePacks.length}</strong>
+                    <strong className={`nb-stat-value ${!user ? 'blur-[4px] select-none' : ''}`}>
+                      {platform.archivePacks.length}
+                    </strong>
                   </span>
                 </button>
               </div>
@@ -317,15 +394,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
       )}
 
       {/* =========================================================================
-          MAIN COMMAND CENTER GRID (2 COLUMNS)
+          MAIN COMMAND CENTER GRID (2 COLUMNS) — BLURRED FOR GUESTS
           ========================================================================= */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <GuestBlurGate>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         {/* =====================================================================
             LEFT COLUMN (7 COLS): DAILY TASKS & UPCOMING ASSESSMENTS
             ===================================================================== */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="lg:col-span-7 space-y-4 sm:space-y-6">
           {/* Card 1: Today's Homework */}
-          <div className="card-surface rounded-2xl p-5 sm:p-6 space-y-4">
+          <div className="card-surface rounded-2xl p-4 sm:p-6 space-y-4">
             {isNotebook && <TapeStrip tilt="right" />}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -644,8 +722,74 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onNavigateTab, onOpenV
               <span>მოდულის გახსნა</span>
             </button>
           </div>
+
+          {/* Mobile-only Active Board moved to the bottom so Homework & Assessments appear immediately at the top */}
+          {isNotebook && (
+            <div className="lg:hidden pt-1">
+              <div className="nb-active-board">
+                <TapeStrip tilt="left" />
+                <h2 className="nb-active-board-title">11/5 კლასის აქტიური დაფა</h2>
+
+                <div className="space-y-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.click();
+                      onNavigateTab('homework');
+                    }}
+                    className="nb-stat-tile"
+                  >
+                    <span className="nb-stat-icon" aria-hidden="true">
+                      <CheckCircle2 className="w-5 h-5" />
+                    </span>
+                    <span>
+                      <span className="nb-stat-label">მიმდინარე დავალებები</span>
+                      <strong className="nb-stat-value">{activeHomeworks.length}</strong>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.click();
+                      onNavigateTab('calendar');
+                    }}
+                    className="nb-stat-tile"
+                  >
+                    <span className="nb-stat-icon" aria-hidden="true">
+                      <CalendarIcon className="w-5 h-5" />
+                    </span>
+                    <span>
+                      <span className="nb-stat-label">მოახლოებული შემაჯამებლები</span>
+                      <strong className="nb-stat-value">{upcomingAssessments.length}</strong>
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      soundEffects.click();
+                      onNavigateTab('materials');
+                    }}
+                    className="nb-stat-tile"
+                  >
+                    <span className="nb-stat-icon" aria-hidden="true">
+                      <BookOpen className="w-5 h-5" />
+                    </span>
+                    <span>
+                      <span className="nb-stat-label">სასწავლო მოდულები</span>
+                      <strong className="nb-stat-value">{platform.archivePacks.length}</strong>
+                    </span>
+                  </button>
+                </div>
+
+                <SketchPurpleSmiley />
+              </div>
+            </div>
+          )}
         </div>
       </div>
+      </GuestBlurGate>
 
       {/* Video Modal */}
       <AnimatePresence>
