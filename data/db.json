@@ -33483,7 +33483,7 @@
     "lastUpdated": "2026-11-15T10:29:12.686Z"
   },
   "platform": {
-    "updatedAt": 1794738583327,
+    "updatedAt": 1794738648317,
     "announcement": {
       "text": "ქიმიის შემაჯამებელი ორშაბათს!!\nიხილე მასალები დავალებებში ან ატვირთე შენი",
       "active": true,
@@ -34564,6 +34564,18 @@
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T10:29:36.401Z"
+      },
+      "user_1794738648316_525": {
+        "id": "user_1794738648316_525",
+        "username": "dgi09",
+        "fullName": "დავით გიორგი ინანეიშვილი",
+        "passwordHash": "5f7fe8475417e2bd493f98b75ce0d327b7fd9d10547c0539ca156389a9309cd61addea80deec28e338caba0049d7468d6085a059ec8e22d9fae95c040e2cce71",
+        "salt": "6c6f59559d7a02092e794c171dabb6c4",
+        "token": "758b65915d71975c0c5dd238be00994ad7a94a5a1265169dcba9f9a7e1ec389e",
+        "role": "user",
+        "isAdmin": false,
+        "isModerator": false,
+        "createdAt": "2026-11-15T10:30:48.317Z"
       }
     },
     "backgroundPhysics": {
