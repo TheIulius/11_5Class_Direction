@@ -33376,7 +33376,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 127,
+    "visits": 128,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33494,10 +33494,10 @@
         }
       }
     },
-    "lastUpdated": "2026-11-16T13:11:27.030Z"
+    "lastUpdated": "2026-11-16T13:22:49.617Z"
   },
   "platform": {
-    "updatedAt": 1794833710833,
+    "updatedAt": 1794835372022,
     "announcement": {
       "text": "მათემატიკის დამოუკიდებელი ხვალ!",
       "active": true,
@@ -34937,7 +34937,8 @@
         "role": "user",
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
-        "updatedAt": "2026-11-15T11:27:03.618Z"
+        "isStandalone": false,
+        "updatedAt": "2026-11-16T13:22:52.022Z"
       },
       {
         "endpoint": "https://web.push.apple.com/QBuyBLHep8uOLm76JfR46XTbwFIuZPdvtntaavx_efVrJTj32iIRveg3QD1iIgHciuSPrbBvarxHWCa6uyWSlhuQ9ha2TXjWoV8G-UP_Q3W6Jn4ujp4NUpDNR3c5DwBPy4HsXUipKZPcp0AqYr7L9sly5VqaD4_n--HBmi0eNcw",
