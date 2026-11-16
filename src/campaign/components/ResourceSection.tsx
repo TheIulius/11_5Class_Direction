@@ -240,6 +240,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
   const [resLink, setResLink] = useState('');
   const [resType, setResType] = useState<PlatformResource['resourceType']>('დავალების ამოხსნა');
   const [attachments, setAttachments] = useState<ResourceAttachment[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
   const [feedbackMsg, setFeedbackMsg] = useState<string | null>(null);
   const [expandedResId, setExpandedResId] = useState<string | null>(null);
@@ -570,17 +571,69 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
     };
   }, []);
 
+  const compressImageDataUrlIfLarge = (
+    rawDataUrl: string,
+    fileName: string,
+    mimeType: string,
+    origSize: number
+  ): Promise<ResourceAttachment> =>
+    new Promise((resolve) => {
+      const compressible =
+        mimeType === 'image/jpeg' || mimeType === 'image/png' || mimeType === 'image/webp';
+      if (!compressible || origSize <= 350 * 1024) {
+        resolve({ name: fileName, dataUrl: rawDataUrl, size: origSize, mimeType: mimeType || undefined });
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const MAX_EDGE = 1920;
+          let { width, height } = img;
+          if (width > MAX_EDGE || height > MAX_EDGE) {
+            const scale = MAX_EDGE / Math.max(width, height);
+            width = Math.max(1, Math.round(width * scale));
+            height = Math.max(1, Math.round(height * scale));
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve({ name: fileName, dataUrl: rawDataUrl, size: origSize, mimeType: mimeType || undefined });
+            return;
+          }
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedUrl = canvas.toDataURL('image/jpeg', 0.82);
+          if (compressedUrl && compressedUrl.length < rawDataUrl.length) {
+            const approxBytes = Math.round((compressedUrl.length * 3) / 4);
+            const normalizedName = fileName.replace(/\.(png|webp)$/i, '.jpg');
+            resolve({
+              name: normalizedName,
+              dataUrl: compressedUrl,
+              size: approxBytes,
+              mimeType: 'image/jpeg',
+            });
+            return;
+          }
+        } catch {}
+        resolve({ name: fileName, dataUrl: rawDataUrl, size: origSize, mimeType: mimeType || undefined });
+      };
+      img.onerror = () =>
+        resolve({ name: fileName, dataUrl: rawDataUrl, size: origSize, mimeType: mimeType || undefined });
+      img.src = rawDataUrl;
+    });
+
   const readFileAsDataUrl = (file: File): Promise<ResourceAttachment> =>
     new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => {
         if (typeof reader.result === 'string') {
-          resolve({
-            name: file.name,
-            dataUrl: reader.result,
-            size: file.size,
-            mimeType: file.type || undefined,
-          });
+          void compressImageDataUrlIfLarge(
+            reader.result,
+            file.name,
+            file.type || '',
+            file.size
+          ).then(resolve);
         } else {
           reject(new Error('ფაილის წაკითხვა ვერ მოხერხდა'));
         }
@@ -662,6 +715,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     const hasAnyContent =
       attachments.length > 0 ||
       Boolean(resTitle.trim()) ||
@@ -673,52 +727,57 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
       return;
     }
 
-    const firstAtt = attachments[0];
+    setIsSubmitting(true);
+    try {
+      const firstAtt = attachments[0];
 
-    if (editingResourceId) {
-      const ok = await updateResource(editingResourceId, {
+      if (editingResourceId) {
+        const ok = await updateResource(editingResourceId, {
+          title: resTitle.trim(),
+          description: '',
+          content: resContent.trim() || undefined,
+          linkUrl: resLink.trim() || undefined,
+          attachmentName: firstAtt?.name || undefined,
+          attachmentDataUrl: firstAtt?.dataUrl || undefined,
+          attachments,
+          resourceType: resType,
+        });
+        if (ok) {
+          resetForm();
+          setFeedbackMsg('მასალა წარმატებით განახლდა!');
+          setTimeout(() => setFeedbackMsg(null), 4000);
+        }
+        return;
+      }
+
+      const result = await submitResource({
         title: resTitle.trim(),
         description: '',
         content: resContent.trim() || undefined,
         linkUrl: resLink.trim() || undefined,
         attachmentName: firstAtt?.name || undefined,
         attachmentDataUrl: firstAtt?.dataUrl || undefined,
-        attachments,
+        attachments: attachments.length > 0 ? attachments : undefined,
         resourceType: resType,
+        subject: defaultSubject,
+        targetType,
+        targetId,
+        targetTitle,
       });
-      if (ok) {
+
+      if (result.success) {
         resetForm();
-        setFeedbackMsg('მასალა წარმატებით განახლდა!');
-        setTimeout(() => setFeedbackMsg(null), 4000);
+        setFeedbackMsg(
+          result.isPending
+            ? 'მასალა გაიგზავნა! ადმინისტრატორის დადასტურებისთანავე გამოჩნდება ყველასთვის.'
+            : 'მასალა წარმატებით დაემატა!'
+        );
+        setTimeout(() => setFeedbackMsg(null), 5000);
+      } else if (result.error) {
+        setFileError(result.error);
       }
-      return;
-    }
-
-    const result = await submitResource({
-      title: resTitle.trim(),
-      description: '',
-      content: resContent.trim() || undefined,
-      linkUrl: resLink.trim() || undefined,
-      attachmentName: firstAtt?.name || undefined,
-      attachmentDataUrl: firstAtt?.dataUrl || undefined,
-      attachments: attachments.length > 0 ? attachments : undefined,
-      resourceType: resType,
-      subject: defaultSubject,
-      targetType,
-      targetId,
-      targetTitle,
-    });
-
-    if (result.success) {
-      resetForm();
-      setFeedbackMsg(
-        result.isPending
-          ? 'მასალა გაიგზავნა! ადმინისტრატორის დადასტურებისთანავე გამოჩნდება ყველასთვის.'
-          : 'მასალა წარმატებით დაემატა!'
-      );
-      setTimeout(() => setFeedbackMsg(null), 5000);
-    } else if (result.error) {
-      setFileError(result.error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -885,6 +944,8 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                         <img
                           src={att.dataUrl}
                           alt={att.name}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-24 rounded-lg object-cover border border-[var(--border-subtle)] bg-white"
                         />
                       ) : isVid ? (
@@ -1009,9 +1070,12 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
             </button>
             <button
               type="submit"
-              className="min-h-[42px] px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-xs cursor-pointer"
+              disabled={isSubmitting}
+              className="min-h-[42px] px-4 py-2 rounded-xl btn-primary text-white text-xs font-bold shadow-xs cursor-pointer disabled:opacity-60"
             >
-              {editingResourceId
+              {isSubmitting
+                ? 'იგზავნება...'
+                : editingResourceId
                 ? 'ცვლილებების შენახვა'
                 : canModerate
                 ? 'ატვირთვა და გამოქვეყნება'
@@ -1197,6 +1261,8 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
                             <img
                               src={mediaAtt.dataUrl}
                               alt={mediaAtt.name || `ფოტო ${mIdx + 1}`}
+                              loading="lazy"
+                              decoding="async"
                               className="w-16 h-16 sm:w-20 sm:h-20 object-cover group-hover:scale-105 transition-transform bg-white"
                             />
                           )}

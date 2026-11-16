@@ -277,6 +277,7 @@ export const HomeworkSection: React.FC = () => {
   const [hwTeacher, setHwTeacher] = useState('ნანა ჯაფარიძე');
   const [hwTitle, setHwTitle] = useState('');
   const [hwNotes, setHwNotes] = useState('');
+  const [isSubmittingHw, setIsSubmittingHw] = useState(false);
   const [submitBanner, setSubmitBanner] = useState<string | null>(null);
 
   const openEditHomeworkModal = (hw: any) => {
@@ -377,11 +378,35 @@ export const HomeworkSection: React.FC = () => {
 
   const handleCreateHomework = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!hwTitle.trim()) return;
-    const { displayDate, dayOfWeek } = formatGeoDate(hwDate);
+    if (!hwTitle.trim() || isSubmittingHw) return;
+    setIsSubmittingHw(true);
+    try {
+      const { displayDate, dayOfWeek } = formatGeoDate(hwDate);
 
-    if (editingHwId) {
-      const ok = await updateHomework(editingHwId, {
+      if (editingHwId) {
+        const ok = await updateHomework(editingHwId, {
+          date: hwDate,
+          displayDate,
+          dayOfWeek,
+          subject: hwSubject.trim(),
+          teacher: hwTeacher.trim() || 'მასწავლებელი',
+          title: hwTitle.trim(),
+          notes: hwNotes.trim(),
+        });
+        if (ok) {
+          soundEffects.success();
+          setSelectedDate(hwDate);
+          setEditingHwId(null);
+          setHwTitle('');
+          setHwNotes('');
+          setIsAddHwOpen(false);
+          setSubmitBanner('დავალება წარმატებით განახლდა!');
+          setTimeout(() => setSubmitBanner(null), 4000);
+        }
+        return;
+      }
+
+      const res = await addHomework({
         date: hwDate,
         displayDate,
         dayOfWeek,
@@ -390,41 +415,22 @@ export const HomeworkSection: React.FC = () => {
         title: hwTitle.trim(),
         notes: hwNotes.trim(),
       });
-      if (ok) {
+
+      if (res.success) {
         soundEffects.success();
         setSelectedDate(hwDate);
-        setEditingHwId(null);
         setHwTitle('');
         setHwNotes('');
         setIsAddHwOpen(false);
-        setSubmitBanner('დავალება წარმატებით განახლდა!');
+        setSubmitBanner(
+          res.isPending
+            ? 'დავალება გაიგზავნა დასადასტურებლად.'
+            : 'დავალება წარმატებით დაემატა!'
+        );
         setTimeout(() => setSubmitBanner(null), 4000);
       }
-      return;
-    }
-
-    const res = await addHomework({
-      date: hwDate,
-      displayDate,
-      dayOfWeek,
-      subject: hwSubject.trim(),
-      teacher: hwTeacher.trim() || 'მასწავლებელი',
-      title: hwTitle.trim(),
-      notes: hwNotes.trim(),
-    });
-
-    if (res.success) {
-      soundEffects.success();
-      setSelectedDate(hwDate);
-      setHwTitle('');
-      setHwNotes('');
-      setIsAddHwOpen(false);
-      setSubmitBanner(
-        res.isPending
-          ? 'დავალება გაიგზავნა დასადასტურებლად.'
-          : 'დავალება წარმატებით დაემატა!'
-      );
-      setTimeout(() => setSubmitBanner(null), 4000);
+    } finally {
+      setIsSubmittingHw(false);
     }
   };
 
@@ -1422,9 +1428,10 @@ export const HomeworkSection: React.FC = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer"
+                    disabled={isSubmittingHw}
+                    className="px-4 py-2 rounded-xl btn-primary text-xs font-bold cursor-pointer disabled:opacity-60"
                   >
-                    {editingHwId ? 'შენახვა' : 'დამატება'}
+                    {isSubmittingHw ? 'ინახება...' : editingHwId ? 'შენახვა' : 'დამატება'}
                   </button>
                 </div>
               </form>

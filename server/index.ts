@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import crypto from 'node:crypto';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { db, ManagerProfile, hashPassword, verifyPassword, generateToken, UserAccount, PlatformUserAccount, PlatformPushSubscription, PaymentSettings, ActivationCode, DatabaseSchema, DetailedAnalyticsData, PlatformCMSData, PlatformComment, PlatformResource, ArchiveStudyPack } from './db';
@@ -33,6 +34,36 @@ const PORT = process.env.PORT || 3000;
 app.set('trust proxy', true);
 
 app.use(cors());
+app.use('/api', (req: Request, res: Response, next: any) => {
+  const acceptEnc = String(req.headers['accept-encoding'] || '');
+  if (!acceptEnc.includes('gzip')) return next();
+
+  const origJson = res.json.bind(res);
+  res.json = ((body: any) => {
+    try {
+      const jsonStr = JSON.stringify(body);
+      if (jsonStr.length < 1024) {
+        return origJson(body);
+      }
+      zlib.gzip(Buffer.from(jsonStr, 'utf-8'), { level: 6 }, (err, gz) => {
+        if (res.headersSent) return;
+        if (err) {
+          origJson(body);
+          return;
+        }
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.setHeader('Content-Encoding', 'gzip');
+        res.setHeader('Vary', 'Accept-Encoding');
+        res.setHeader('Content-Length', String(gz.byteLength));
+        res.end(gz);
+      });
+      return res;
+    } catch {
+      return origJson(body);
+    }
+  }) as any;
+  next();
+});
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -3041,8 +3072,8 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
       }
     }
 
-    // 2. Commit the live in-memory database directly to GitHub
-    const contentStr = JSON.stringify(db.getData(), null, 2);
+    // 2. Commit the live in-memory database directly to GitHub (compact JSON reduces transfer & heap size)
+    const contentStr = JSON.stringify(db.getData());
     const base64Content = Buffer.from(contentStr, 'utf-8').toString('base64');
 
     const commitMsg = message.includes('[skip ci]') ? message : `${message} [skip ci]`;
@@ -4470,6 +4501,8 @@ app.post('/api/admin/match-events', (req: Request, res: Response) => {
 // 11/5 CLASS PLATFORM — FULL CMS, AUTH, ADMIN & STUDENT INTERACTION ENDPOINTS
 // ============================================================================
 
+let lastConfiguredVapidPublicKey = '';
+
 export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
   if (!data.platform) {
     const initialResources: PlatformResource[] = [
@@ -4582,7 +4615,21 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
   if (!Array.isArray(p.ideas)) p.ideas = JSON.parse(JSON.stringify(INITIAL_IDEAS));
   if (!Array.isArray(p.clubs)) p.clubs = JSON.parse(JSON.stringify(INITIAL_GREEN_LIGHT_CLUBS));
   if (!Array.isArray(p.studyPods)) p.studyPods = JSON.parse(JSON.stringify(INITIAL_STUDY_PODS));
-  if (!Array.isArray(p.resources)) p.resources = [];
+  if (!Array.isArray(p.resources)) {
+    p.resources = [];
+  } else {
+    // Strip redundant legacy attachmentDataUrl copies when attachments array already carries att[0]
+    for (const r of p.resources) {
+      if (
+        Array.isArray(r.attachments) &&
+        r.attachments.length > 0 &&
+        r.attachmentDataUrl &&
+        r.attachmentDataUrl === r.attachments[0]?.dataUrl
+      ) {
+        delete r.attachmentDataUrl;
+      }
+    }
+  }
   if (!Array.isArray(p.comments)) p.comments = [];
   if (!Array.isArray(p.archivePacks) || p.archivePacks.length === 0) {
     p.archivePacks = [
@@ -4621,7 +4668,7 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
     }
   }
 
-  // Ensure VAPID keys & pushSubscriptions exist for Web Push Notifications
+  // Ensure VAPID keys & pushSubscriptions exist for Web Push Notifications (configure once per keypair)
   if (!p.vapidKeys || !p.vapidKeys.publicKey || !p.vapidKeys.privateKey) {
     const generated = webpush.generateVAPIDKeys();
     p.vapidKeys = {
@@ -4629,14 +4676,17 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
       privateKey: process.env.VAPID_PRIVATE_KEY || generated.privateKey,
     };
   }
-  try {
-    webpush.setVapidDetails(
-      'mailto:admin@komarovi115.ge',
-      p.vapidKeys.publicKey,
-      p.vapidKeys.privateKey
-    );
-  } catch (e) {
-    console.warn('[WebPush] Failed to configure VAPID details:', e);
+  if (lastConfiguredVapidPublicKey !== p.vapidKeys.publicKey) {
+    try {
+      webpush.setVapidDetails(
+        'mailto:admin@komarovi115.ge',
+        p.vapidKeys.publicKey,
+        p.vapidKeys.privateKey
+      );
+      lastConfiguredVapidPublicKey = p.vapidKeys.publicKey;
+    } catch (e) {
+      console.warn('[WebPush] Failed to configure VAPID details:', e);
+    }
   }
 
   if (!Array.isArray(p.pushSubscriptions)) {
@@ -4754,6 +4804,92 @@ function savePlatformCMS(data: DatabaseSchema, reason: string) {
   }
   db.save(reason);
   scheduleAutoSyncToGitHub(reason);
+}
+
+function parseDataUrlMime(dataUrl?: string): string | undefined {
+  if (!dataUrl || !dataUrl.startsWith('data:')) return undefined;
+  const semiOrComma = dataUrl.search(/[;,]/);
+  if (semiOrComma <= 5) return undefined;
+  return dataUrl.slice(5, semiOrComma) || undefined;
+}
+
+function buildAttachmentUrl(
+  resourceId: string,
+  index: number,
+  att?: { name?: string; size?: number }
+): string {
+  const versionTag = att?.size
+    ? String(att.size)
+    : encodeURIComponent((att?.name || '').slice(0, 24));
+  return `/api/platform/resources/${encodeURIComponent(resourceId)}/attachment/${index}${
+    versionTag ? `?v=${versionTag}` : ''
+  }`;
+}
+
+function serializeResourceForClient(r: PlatformResource): PlatformResource {
+  const rawAtts = Array.isArray(r.attachments) ? r.attachments : undefined;
+  const serializedAtts = rawAtts?.map((att, idx) => {
+    const isInline = typeof att.dataUrl === 'string' && att.dataUrl.startsWith('data:');
+    return {
+      ...att,
+      mimeType: att.mimeType || parseDataUrlMime(att.dataUrl),
+      dataUrl: isInline ? buildAttachmentUrl(r.id, idx, att) : att.dataUrl,
+    };
+  });
+
+  const legacyIsInline =
+    typeof r.attachmentDataUrl === 'string' && r.attachmentDataUrl.startsWith('data:');
+  let serializedLegacyUrl = r.attachmentDataUrl;
+  if (legacyIsInline) {
+    serializedLegacyUrl = buildAttachmentUrl(
+      r.id,
+      0,
+      rawAtts?.[0] || { name: r.attachmentName }
+    );
+  } else if (!serializedLegacyUrl && serializedAtts && serializedAtts.length > 0) {
+    serializedLegacyUrl = serializedAtts[0].dataUrl;
+  }
+
+  return {
+    ...r,
+    attachments: serializedAtts,
+    attachmentDataUrl: serializedLegacyUrl,
+  };
+}
+
+function resolveEditedResourceAttachments(
+  existing: PlatformResource,
+  bodyAttachments: any[]
+) {
+  const urlPrefix = `/api/platform/resources/${encodeURIComponent(existing.id)}/attachment/`;
+  const altPrefix = `/api/platform/resources/${existing.id}/attachment/`;
+
+  return bodyAttachments
+    .filter((a: any) => a && a.name && a.dataUrl)
+    .map((a: any) => {
+      let resolvedDataUrl = String(a.dataUrl);
+      let matchedOriginal: { dataUrl?: string; size?: number; mimeType?: string } | undefined;
+
+      if (resolvedDataUrl.startsWith(urlPrefix) || resolvedDataUrl.startsWith(altPrefix)) {
+        const match = resolvedDataUrl.match(/\/attachment\/(\d+)/);
+        const origIdx = match ? Number(match[1]) : -1;
+        if (origIdx >= 0 && Array.isArray(existing.attachments) && existing.attachments[origIdx]) {
+          matchedOriginal = existing.attachments[origIdx];
+        } else if (origIdx === 0 && existing.attachmentDataUrl) {
+          matchedOriginal = { dataUrl: existing.attachmentDataUrl };
+        }
+        if (matchedOriginal?.dataUrl) {
+          resolvedDataUrl = matchedOriginal.dataUrl;
+        }
+      }
+
+      return {
+        name: String(a.name).trim(),
+        dataUrl: resolvedDataUrl,
+        size: typeof a.size === 'number' ? a.size : matchedOriginal?.size,
+        mimeType: a.mimeType ? String(a.mimeType) : matchedOriginal?.mimeType,
+      };
+    });
 }
 
 async function sendPlatformPushNotification(
@@ -5035,7 +5171,10 @@ app.get('/api/platform/state', (req: Request, res: Response) => {
   const { users: _omittedUsers, vapidKeys: _omittedVapid, pushSubscriptions: _omittedSubs, ...publicPlatform } = p;
 
   res.json({
-    platform: publicPlatform,
+    platform: {
+      ...publicPlatform,
+      resources: p.resources.map(serializeResourceForClient),
+    },
     pendingCounts: {
       resources: pendingResourcesCount,
       homeworks: pendingHomeworksCount,
@@ -5700,7 +5839,79 @@ app.put('/api/platform/timetable', (req: Request, res: Response) => {
   res.json({ success: true, timetable: p.timetable });
 });
 
-// 9. Study Resources / Summaries (კონსპექტები & მასალები) — Student Upload + Admin/Moderator Approval
+// 9. Study Resources / Summaries (კონსპექტები & მასალები) — Binary Attachment Serving + CRUD
+app.get('/api/platform/resources/:id/attachment/:index', (req: Request, res: Response) => {
+  const { id, index } = req.params;
+  const idx = Number(index);
+  if (!Number.isInteger(idx) || idx < 0) {
+    return res.status(400).json({ error: 'Invalid attachment index' });
+  }
+
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const resource = p.resources.find((r) => r.id === id);
+  if (!resource) {
+    return res.status(404).json({ error: 'მასალა ვერ მოიძებნა.' });
+  }
+
+  const att =
+    Array.isArray(resource.attachments) && resource.attachments.length > 0
+      ? resource.attachments[idx]
+      : idx === 0 && resource.attachmentDataUrl
+      ? { name: resource.attachmentName || 'file', dataUrl: resource.attachmentDataUrl }
+      : undefined;
+
+  if (!att || !att.dataUrl) {
+    return res.status(404).json({ error: 'ფაილი ვერ მოიძებნა.' });
+  }
+
+  if (!att.dataUrl.startsWith('data:')) {
+    return res.redirect(att.dataUrl);
+  }
+
+  const match = att.dataUrl.match(/^data:([^;,]+)?(?:;(base64))?,(.*)$/s);
+  if (!match) {
+    return res.status(400).json({ error: 'Malformed attachment data' });
+  }
+
+  const mime = att.mimeType || match[1] || 'application/octet-stream';
+  const isBase64 = Boolean(match[2]);
+  const buf = isBase64
+    ? Buffer.from(match[3], 'base64')
+    : Buffer.from(decodeURIComponent(match[3]), 'utf-8');
+
+  const safeDisposition =
+    mime.includes('svg') || mime.includes('html') || mime.includes('xml') ? 'attachment' : 'inline';
+
+  res.setHeader('Content-Type', mime);
+  res.setHeader('Accept-Ranges', 'bytes');
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+  if (att.name) {
+    res.setHeader(
+      'Content-Disposition',
+      `${safeDisposition}; filename*=UTF-8''${encodeURIComponent(att.name)}`
+    );
+  }
+
+  const rangeHeader = req.headers.range;
+  if (rangeHeader && rangeHeader.startsWith('bytes=')) {
+    const [startStr, endStr] = rangeHeader.replace('bytes=', '').split('-');
+    const total = buf.byteLength;
+    const start = startStr ? parseInt(startStr, 10) : Math.max(0, total - parseInt(endStr || '0', 10));
+    const end = endStr && startStr ? Math.min(total - 1, parseInt(endStr, 10)) : total - 1;
+    if (Number.isFinite(start) && Number.isFinite(end) && start >= 0 && start <= end && end < total) {
+      const chunk = buf.subarray(start, end + 1);
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${total}`);
+      res.setHeader('Content-Length', String(chunk.byteLength));
+      return res.end(chunk);
+    }
+  }
+
+  res.setHeader('Content-Length', String(buf.byteLength));
+  return res.end(buf);
+});
+
 app.post('/api/platform/resources', (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth) {
@@ -5742,7 +5953,12 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
     content: body.content ? String(body.content).trim() : undefined,
     linkUrl: body.linkUrl ? String(body.linkUrl).trim() : undefined,
     attachmentName: body.attachmentName ? String(body.attachmentName).trim() : firstAtt?.name,
-    attachmentDataUrl: body.attachmentDataUrl ? String(body.attachmentDataUrl) : firstAtt?.dataUrl,
+    // Do not duplicate attachments[0].dataUrl into legacy attachmentDataUrl when attachments array exists
+    attachmentDataUrl: parsedAttachments && parsedAttachments.length > 0
+      ? undefined
+      : body.attachmentDataUrl
+      ? String(body.attachmentDataUrl)
+      : undefined,
     attachments: parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments : undefined,
     resourceType: body.resourceType || 'კონსპექტი',
     subject: body.subject ? String(body.subject).trim() : 'ზოგადი',
@@ -5770,7 +5986,11 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
       audience: 'moderators',
     }).catch(() => {});
   }
-  res.json({ success: true, resource: newResource, resources: p.resources });
+  res.json({
+    success: true,
+    resource: serializeResourceForClient(newResource),
+    resources: p.resources.map(serializeResourceForClient),
+  });
 });
 
 app.put('/api/platform/resources/:id', (req: Request, res: Response) => {
@@ -5791,14 +6011,7 @@ app.put('/api/platform/resources/:id', (req: Request, res: Response) => {
   }
 
   const parsedAttachments = Array.isArray(body.attachments)
-    ? body.attachments
-        .filter((a: any) => a && a.name && a.dataUrl)
-        .map((a: any) => ({
-          name: String(a.name).trim(),
-          dataUrl: String(a.dataUrl),
-          size: typeof a.size === 'number' ? a.size : undefined,
-          mimeType: a.mimeType ? String(a.mimeType) : undefined,
-        }))
+    ? resolveEditedResourceAttachments(existing, body.attachments)
     : existing.attachments;
 
   const firstAtt = parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments[0] : undefined;
@@ -5812,11 +6025,15 @@ app.put('/api/platform/resources/:id', (req: Request, res: Response) => {
     resourceType: body.resourceType || existing.resourceType,
     attachments: parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments : undefined,
     attachmentName: firstAtt?.name,
-    attachmentDataUrl: firstAtt?.dataUrl,
+    attachmentDataUrl: parsedAttachments && parsedAttachments.length > 0 ? undefined : existing.attachmentDataUrl,
   };
 
   savePlatformCMS(data, `Resource updated: ${p.resources[idx].title || id}`);
-  res.json({ success: true, resource: p.resources[idx], resources: p.resources });
+  res.json({
+    success: true,
+    resource: serializeResourceForClient(p.resources[idx]),
+    resources: p.resources.map(serializeResourceForClient),
+  });
 });
 
 app.post('/api/platform/resources/:id/status', (req: Request, res: Response) => {
@@ -5845,7 +6062,11 @@ app.post('/api/platform/resources/:id/status', (req: Request, res: Response) => 
     }).catch(() => {});
   }
   savePlatformCMS(data, `${auth.isAdmin ? 'Admin' : 'Moderator'} ${status} resource: ${resItem.title}`);
-  res.json({ success: true, resource: resItem, resources: p.resources });
+  res.json({
+    success: true,
+    resource: serializeResourceForClient(resItem),
+    resources: p.resources.map(serializeResourceForClient),
+  });
 });
 
 app.delete('/api/platform/resources/:id', (req: Request, res: Response) => {
@@ -5861,7 +6082,7 @@ app.delete('/api/platform/resources/:id', (req: Request, res: Response) => {
   }
   p.resources = p.resources.filter((r) => r.id !== id);
   savePlatformCMS(data, `Resource deleted: ${target.title}`);
-  res.json({ success: true, resources: p.resources });
+  res.json({ success: true, resources: p.resources.map(serializeResourceForClient) });
 });
 
 app.post('/api/platform/resources/:id/upvote', (req: Request, res: Response) => {
@@ -5882,7 +6103,11 @@ app.post('/api/platform/resources/:id/upvote', (req: Request, res: Response) => 
     target.upvotes = (target.upvotes || 0) + 1;
   }
   savePlatformCMS(data, `Resource upvoted: ${target.title}`);
-  res.json({ success: true, resource: target, resources: p.resources });
+  res.json({
+    success: true,
+    resource: serializeResourceForClient(target),
+    resources: p.resources.map(serializeResourceForClient),
+  });
 });
 
 // 10. Universal Comments (Events, Homeworks, Resources, Ideas, Opportunities, Clubs, General)
@@ -6187,6 +6412,10 @@ app.use(express.static(clientDist, {
       res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
+    } else if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else if (filePath.endsWith(`${path.sep}sw.js`)) {
+      res.setHeader('Cache-Control', 'no-cache');
     }
   }
 }));
@@ -6303,6 +6532,13 @@ async function startServer() {
 }
 
 startServer();
+
+const handleGracefulShutdown = () => {
+  db.saveSyncSilent();
+  process.exit(0);
+};
+process.on('SIGTERM', handleGracefulShutdown);
+process.on('SIGINT', handleGracefulShutdown);
 
 // Periodic background sync from GitHub every 5 minutes only if server is completely idle (no pending local writes)
 setInterval(() => {

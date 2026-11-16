@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import {
   INITIAL_CALENDAR_EVENTS,
   INITIAL_HOMEWORKS,
@@ -220,6 +220,7 @@ interface PlatformContextValue {
 const TOKEN_STORAGE_KEY = 'class11_5_auth_token_v1';
 const USER_STORAGE_KEY = 'class11_5_auth_user_v1';
 const PHYSICS_STORAGE_KEY = 'class11_5_bg_physics_v1';
+const PLATFORM_CACHE_KEY = 'class11_5_platform_cache_v1';
 
 const getInitialBackgroundPhysics = (): BackgroundPhysicsSettings => {
   try {
@@ -227,6 +228,44 @@ const getInitialBackgroundPhysics = (): BackgroundPhysicsSettings => {
     if (stored) return { ...DEFAULT_BACKGROUND_PHYSICS, ...JSON.parse(stored) };
   } catch {}
   return DEFAULT_BACKGROUND_PHYSICS;
+};
+
+const readCachedPlatformState = (): PlatformDataState | null => {
+  try {
+    const raw = localStorage.getItem(PLATFORM_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return {
+      announcement: parsed.announcement,
+      backgroundPhysics: parsed.backgroundPhysics || getInitialBackgroundPhysics(),
+      calendarEvents: Array.isArray(parsed.calendarEvents) ? parsed.calendarEvents : INITIAL_CALENDAR_EVENTS,
+      homeworks: Array.isArray(parsed.homeworks) ? parsed.homeworks : INITIAL_HOMEWORKS,
+      timetable: Array.isArray(parsed.timetable) ? parsed.timetable : CLASS_TIMETABLE,
+      opportunities: Array.isArray(parsed.opportunities) ? parsed.opportunities : INITIAL_OPPORTUNITIES,
+      opportunityQuestions: Array.isArray(parsed.opportunityQuestions) ? parsed.opportunityQuestions : [],
+      ideas: Array.isArray(parsed.ideas) ? parsed.ideas : INITIAL_IDEAS,
+      clubs: Array.isArray(parsed.clubs) ? parsed.clubs : INITIAL_GREEN_LIGHT_CLUBS,
+      studyPods: Array.isArray(parsed.studyPods) ? parsed.studyPods : INITIAL_STUDY_PODS,
+      resources: Array.isArray(parsed.resources) ? parsed.resources : [],
+      comments: Array.isArray(parsed.comments) ? parsed.comments : [],
+      archivePacks:
+        Array.isArray(parsed.archivePacks) && parsed.archivePacks.length > 0
+          ? parsed.archivePacks
+          : defaultArchivePacks,
+    };
+  } catch {
+    return null;
+  }
+};
+
+const writeCachedPlatformState = (state: PlatformDataState): void => {
+  try {
+    const json = JSON.stringify(state);
+    if (json.length < 1_500_000) {
+      localStorage.setItem(PLATFORM_CACHE_KEY, json);
+    }
+  } catch {}
 };
 
 const defaultArchivePacks: ArchiveStudyPack[] = [
@@ -274,29 +313,38 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     }
   });
 
-  const [platform, setPlatform] = useState<PlatformDataState>({
-    backgroundPhysics: getInitialBackgroundPhysics(),
-    calendarEvents: INITIAL_CALENDAR_EVENTS,
-    homeworks: INITIAL_HOMEWORKS,
-    timetable: CLASS_TIMETABLE,
-    opportunities: INITIAL_OPPORTUNITIES,
-    opportunityQuestions: [],
-    ideas: INITIAL_IDEAS,
-    clubs: INITIAL_GREEN_LIGHT_CLUBS,
-    studyPods: INITIAL_STUDY_PODS,
-    resources: [],
-    comments: [],
-    archivePacks: defaultArchivePacks,
+  const [platform, setPlatform] = useState<PlatformDataState>(() => {
+    const cached = readCachedPlatformState();
+    if (cached) return cached;
+    return {
+      backgroundPhysics: getInitialBackgroundPhysics(),
+      calendarEvents: INITIAL_CALENDAR_EVENTS,
+      homeworks: INITIAL_HOMEWORKS,
+      timetable: CLASS_TIMETABLE,
+      opportunities: INITIAL_OPPORTUNITIES,
+      opportunityQuestions: [],
+      ideas: INITIAL_IDEAS,
+      clubs: INITIAL_GREEN_LIGHT_CLUBS,
+      studyPods: INITIAL_STUDY_PODS,
+      resources: [],
+      comments: [],
+      archivePacks: defaultArchivePacks,
+    };
   });
 
-  const [pendingCounts, setPendingCounts] = useState<PendingCounts>({
-    resources: 0,
-    homeworks: 0,
-    clubs: 0,
-    total: 0,
-  });
+  const pendingCounts = useMemo<PendingCounts>(() => {
+    const resCount = platform.resources.filter((r) => r.status === 'pending').length;
+    const hwCount = platform.homeworks.filter((h: any) => h.status === 'pending').length;
+    const clubCount = platform.clubs.filter((c: any) => c.status === 'განხილვაშია').length;
+    return {
+      resources: resCount,
+      homeworks: hwCount,
+      clubs: clubCount,
+      total: resCount + hwCount + clubCount,
+    };
+  }, [platform.resources, platform.homeworks, platform.clubs]);
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(() => !readCachedPlatformState());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalInitialMode, setAuthModalInitialMode] = useState<'login' | 'register'>('login');
   const [isAdminModalOpen, setIsAdminModalOpen] = useState<boolean>(false);
@@ -314,6 +362,31 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     [token]
   );
 
+  const applyServerPatch = useCallback((patch: Partial<PlatformDataState>) => {
+    setPlatform((prev) => {
+      const next: PlatformDataState = {
+        ...prev,
+        ...(patch.announcement !== undefined ? { announcement: patch.announcement } : {}),
+        ...(patch.backgroundPhysics !== undefined ? { backgroundPhysics: patch.backgroundPhysics } : {}),
+        ...(patch.calendarEvents !== undefined ? { calendarEvents: patch.calendarEvents } : {}),
+        ...(patch.homeworks !== undefined ? { homeworks: patch.homeworks } : {}),
+        ...(patch.timetable !== undefined ? { timetable: patch.timetable } : {}),
+        ...(patch.opportunities !== undefined ? { opportunities: patch.opportunities } : {}),
+        ...(patch.opportunityQuestions !== undefined ? { opportunityQuestions: patch.opportunityQuestions } : {}),
+        ...(patch.ideas !== undefined ? { ideas: patch.ideas } : {}),
+        ...(patch.clubs !== undefined ? { clubs: patch.clubs } : {}),
+        ...(patch.studyPods !== undefined ? { studyPods: patch.studyPods } : {}),
+        ...(patch.resources !== undefined ? { resources: patch.resources } : {}),
+        ...(patch.comments !== undefined ? { comments: patch.comments } : {}),
+        ...(patch.archivePacks !== undefined && patch.archivePacks.length > 0
+          ? { archivePacks: patch.archivePacks }
+          : {}),
+      };
+      writeCachedPlatformState(next);
+      return next;
+    });
+  }, []);
+
   const refreshPlatform = useCallback(
     async (overrideToken?: string | null) => {
       try {
@@ -328,7 +401,7 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               localStorage.setItem(PHYSICS_STORAGE_KEY, JSON.stringify(data.platform.backgroundPhysics));
             } catch {}
           }
-          setPlatform({
+          const nextState: PlatformDataState = {
             announcement: data.platform.announcement,
             backgroundPhysics: data.platform.backgroundPhysics || getInitialBackgroundPhysics(),
             calendarEvents: data.platform.calendarEvents || INITIAL_CALENDAR_EVENTS,
@@ -345,10 +418,9 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
               data.platform.archivePacks && data.platform.archivePacks.length > 0
                 ? data.platform.archivePacks
                 : defaultArchivePacks,
-          });
-        }
-        if (data.pendingCounts) {
-          setPendingCounts(data.pendingCounts);
+          };
+          setPlatform(nextState);
+          writeCachedPlatformState(nextState);
         }
         const sentToken = overrideToken !== undefined ? overrideToken : token;
         if (data.currentUser) {
@@ -454,442 +526,152 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     } catch {}
   };
 
-  // --- CRUD Mutations ---
-  const addCalendarEvent = async (ev: Partial<CalendarEvent>) => {
-    const res = await fetch('/api/platform/calendar', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(ev),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  // --- CRUD Mutations (apply returned server patch directly to eliminate blocking /state re-fetches) ---
+  const runPlatformMutation = useCallback(
+    async (url: string, method: string, body?: unknown): Promise<{ ok: boolean; data: any }> => {
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: getHeaders(),
+          ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          applyServerPatch(data);
+          return { ok: true, data };
+        }
+        return { ok: false, data };
+      } catch {
+        return { ok: false, data: {} };
+      }
+    },
+    [getHeaders, applyServerPatch]
+  );
 
-  const updateCalendarEvent = async (id: string, ev: Partial<CalendarEvent>) => {
-    const res = await fetch(`/api/platform/calendar/${id}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(ev),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const addCalendarEvent = async (ev: Partial<CalendarEvent>) =>
+    (await runPlatformMutation('/api/platform/calendar', 'POST', ev)).ok;
 
-  const deleteCalendarEvent = async (id: string) => {
-    const res = await fetch(`/api/platform/calendar/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateCalendarEvent = async (id: string, ev: Partial<CalendarEvent>) =>
+    (await runPlatformMutation(`/api/platform/calendar/${id}`, 'PUT', ev)).ok;
+
+  const deleteCalendarEvent = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/calendar/${id}`, 'DELETE')).ok;
 
   const addHomework = async (hw: any) => {
-    const res = await fetch('/api/platform/homework', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(hw),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok) {
-      await refreshPlatform();
+    const { ok, data } = await runPlatformMutation('/api/platform/homework', 'POST', hw);
+    if (ok) {
       return { success: true, isPending: data.homework?.status === 'pending' };
     }
     return { success: false, error: data.error || 'დავალების დამატება ვერ მოხერხდა' };
   };
 
-  const updateHomework = async (id: string, hw: any) => {
-    const res = await fetch(`/api/platform/homework/${id}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(hw),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateHomework = async (id: string, hw: any) =>
+    (await runPlatformMutation(`/api/platform/homework/${id}`, 'PUT', hw)).ok;
 
-  const moderateHomework = async (id: string, status: 'approved' | 'rejected') => {
-    const res = await fetch(`/api/platform/homework/${id}/status`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const moderateHomework = async (id: string, status: 'approved' | 'rejected') =>
+    (await runPlatformMutation(`/api/platform/homework/${id}/status`, 'POST', { status })).ok;
 
-  const deleteHomework = async (id: string) => {
-    const res = await fetch(`/api/platform/homework/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteHomework = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/homework/${id}`, 'DELETE')).ok;
 
-  const updateTimetable = async (timetable: DaySchedule[]) => {
-    const res = await fetch('/api/platform/timetable', {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify({ timetable }),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateTimetable = async (timetable: DaySchedule[]) =>
+    (await runPlatformMutation('/api/platform/timetable', 'PUT', { timetable })).ok;
 
   const submitResource = async (resource: Partial<PlatformResource>) => {
-    const res = await fetch('/api/platform/resources', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(resource),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok) {
-      await refreshPlatform();
+    const { ok, data } = await runPlatformMutation('/api/platform/resources', 'POST', resource);
+    if (ok) {
       return { success: true, isPending: data.resource?.status === 'pending' };
     }
     return { success: false, error: data.error || 'მასალის ატვირთვა ვერ მოხერხდა' };
   };
 
-  const updateResource = async (id: string, resource: Partial<PlatformResource>) => {
-    const res = await fetch(`/api/platform/resources/${id}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(resource),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateResource = async (id: string, resource: Partial<PlatformResource>) =>
+    (await runPlatformMutation(`/api/platform/resources/${id}`, 'PUT', resource)).ok;
 
-  const moderateResource = async (id: string, status: 'approved' | 'rejected') => {
-    const res = await fetch(`/api/platform/resources/${id}/status`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ status }),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const moderateResource = async (id: string, status: 'approved' | 'rejected') =>
+    (await runPlatformMutation(`/api/platform/resources/${id}/status`, 'POST', { status })).ok;
 
-  const deleteResource = async (id: string) => {
-    const res = await fetch(`/api/platform/resources/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteResource = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/resources/${id}`, 'DELETE')).ok;
 
-  const upvoteResource = async (id: string) => {
-    const res = await fetch(`/api/platform/resources/${id}/upvote`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const upvoteResource = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/resources/${id}/upvote`, 'POST')).ok;
 
   const addComment = async (
     targetType: PlatformComment['targetType'],
     targetId: string,
     content: string
   ) => {
-    const res = await fetch('/api/platform/comments', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ targetType, targetId, content }),
+    const { ok, data } = await runPlatformMutation('/api/platform/comments', 'POST', {
+      targetType,
+      targetId,
+      content,
     });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok) {
-      await refreshPlatform();
+    if (ok) {
       return { success: true };
     }
     return { success: false, error: data.error || 'კომენტარის დამატება ვერ მოხერხდა' };
   };
 
-  const deleteComment = async (id: string) => {
-    const res = await fetch(`/api/platform/comments/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteComment = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/comments/${id}`, 'DELETE')).ok;
 
-  const pinComment = async (id: string) => {
-    const res = await fetch(`/api/platform/comments/${id}/pin`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const pinComment = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/comments/${id}/pin`, 'POST')).ok;
 
-  const addOpportunity = async (opp: any) => {
-    const res = await fetch('/api/platform/opportunities', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(opp),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const addOpportunity = async (opp: any) =>
+    (await runPlatformMutation('/api/platform/opportunities', 'POST', opp)).ok;
 
-  const updateOpportunity = async (id: string, opp: any) => {
-    const res = await fetch(`/api/platform/opportunities/${id}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(opp),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateOpportunity = async (id: string, opp: any) =>
+    (await runPlatformMutation(`/api/platform/opportunities/${id}`, 'PUT', opp)).ok;
 
-  const deleteOpportunity = async (id: string) => {
-    const res = await fetch(`/api/platform/opportunities/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteOpportunity = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/opportunities/${id}`, 'DELETE')).ok;
 
-  const rsvpOpportunity = async (id: string) => {
-    const res = await fetch(`/api/platform/opportunities/${id}/rsvp`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const rsvpOpportunity = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/opportunities/${id}/rsvp`, 'POST')).ok;
 
-  const askOpportunityQuestion = async (id: string, question: string) => {
-    const res = await fetch(`/api/platform/opportunities/${id}/question`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ question }),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const askOpportunityQuestion = async (id: string, question: string) =>
+    (await runPlatformMutation(`/api/platform/opportunities/${id}/question`, 'POST', { question })).ok;
 
-  const addIdea = async (idea: any) => {
-    const res = await fetch('/api/platform/ideas', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(idea),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const addIdea = async (idea: any) =>
+    (await runPlatformMutation('/api/platform/ideas', 'POST', idea)).ok;
 
-  const updateIdea = async (id: string, idea: any) => {
-    const res = await fetch(`/api/platform/ideas/${id}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(idea),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateIdea = async (id: string, idea: any) =>
+    (await runPlatformMutation(`/api/platform/ideas/${id}`, 'PUT', idea)).ok;
 
-  const deleteIdea = async (id: string) => {
-    const res = await fetch(`/api/platform/ideas/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteIdea = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/ideas/${id}`, 'DELETE')).ok;
 
-  const upvoteIdea = async (id: string) => {
-    const res = await fetch(`/api/platform/ideas/${id}/upvote`, {
-      method: 'POST',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const upvoteIdea = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/ideas/${id}/upvote`, 'POST')).ok;
 
-  const addClub = async (club: any) => {
-    const res = await fetch('/api/platform/clubs', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(club),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const addClub = async (club: any) =>
+    (await runPlatformMutation('/api/platform/clubs', 'POST', club)).ok;
 
-  const updateClub = async (id: string, club: any) => {
-    const res = await fetch(`/api/platform/clubs/${id}`, {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(club),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateClub = async (id: string, club: any) =>
+    (await runPlatformMutation(`/api/platform/clubs/${id}`, 'PUT', club)).ok;
 
-  const deleteClub = async (id: string) => {
-    const res = await fetch(`/api/platform/clubs/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteClub = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/clubs/${id}`, 'DELETE')).ok;
 
-  const addStudyPod = async (pod: any) => {
-    const res = await fetch('/api/platform/study-pods', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(pod),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const addStudyPod = async (pod: any) =>
+    (await runPlatformMutation('/api/platform/study-pods', 'POST', pod)).ok;
 
-  const joinStudyPod = async (id: string, guestName?: string) => {
-    const res = await fetch(`/api/platform/study-pods/${id}/join`, {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify({ name: guestName }),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const joinStudyPod = async (id: string, guestName?: string) =>
+    (await runPlatformMutation(`/api/platform/study-pods/${id}/join`, 'POST', { name: guestName })).ok;
 
-  const deleteStudyPod = async (id: string) => {
-    const res = await fetch(`/api/platform/study-pods/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteStudyPod = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/study-pods/${id}`, 'DELETE')).ok;
 
-  const addArchivePack = async (pack: Partial<ArchiveStudyPack>) => {
-    const res = await fetch('/api/platform/archive', {
-      method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(pack),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const addArchivePack = async (pack: Partial<ArchiveStudyPack>) =>
+    (await runPlatformMutation('/api/platform/archive', 'POST', pack)).ok;
 
-  const deleteArchivePack = async (id: string) => {
-    const res = await fetch(`/api/platform/archive/${id}`, {
-      method: 'DELETE',
-      headers: getHeaders(),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const deleteArchivePack = async (id: string) =>
+    (await runPlatformMutation(`/api/platform/archive/${id}`, 'DELETE')).ok;
 
-  const updateAnnouncement = async (ann: Partial<PlatformAnnouncement>) => {
-    const res = await fetch('/api/platform/announcement', {
-      method: 'PUT',
-      headers: getHeaders(),
-      body: JSON.stringify(ann),
-    });
-    if (res.ok) {
-      await refreshPlatform();
-      return true;
-    }
-    return false;
-  };
+  const updateAnnouncement = async (ann: Partial<PlatformAnnouncement>) =>
+    (await runPlatformMutation('/api/platform/announcement', 'PUT', ann)).ok;
 
   const updateBackgroundPhysics = async (newSettings: BackgroundPhysicsSettings) => {
     setPlatform((prev) => ({ ...prev, backgroundPhysics: newSettings }));

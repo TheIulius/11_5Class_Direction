@@ -362,6 +362,8 @@ class Database {
   private data: DatabaseSchema;
   private onSaveCallback?: (reason?: string) => void;
   public isSyncing: boolean = false; // Safety lock to prevent auto-commits during startup/sync
+  private writeInProgress: boolean = false;
+  private writeDirty: boolean = false;
 
   constructor() {
     if (!fs.existsSync(DATA_DIR)) {
@@ -373,15 +375,15 @@ class Database {
         const raw = fs.readFileSync(DB_FILE, 'utf-8');
         this.data = JSON.parse(raw);
         this.sanitize();
-        this.saveSilent();
+        this.saveSyncSilent();
       } catch (err) {
         console.error('Error reading db.json, initializing with default data', err);
         this.data = getDefaultData();
-        this.saveSilent();
+        this.saveSyncSilent();
       }
     } else {
       this.data = getDefaultData();
-      this.saveSilent();
+      this.saveSyncSilent();
     }
   }
 
@@ -563,18 +565,48 @@ class Database {
     this.onSaveCallback = cb;
   }
 
-  public save(reason?: string, triggerCallback: boolean = true): void {
+  private async flushDiskWritesAsync(): Promise<void> {
+    if (this.writeInProgress) return;
+    this.writeInProgress = true;
     try {
-      const tempFile = DB_FILE + '.tmp';
-      fs.writeFileSync(tempFile, JSON.stringify(this.data, null, 2), 'utf-8');
-      fs.renameSync(tempFile, DB_FILE);
-
-      // Only invoke GitHub commit callback if NOT syncing and explicitly requested
-      if (triggerCallback && this.onSaveCallback && !this.isSyncing) {
-        this.onSaveCallback(reason);
+      while (this.writeDirty) {
+        this.writeDirty = false;
+        const tempFile = DB_FILE + '.tmp';
+        const serialized = JSON.stringify(this.data);
+        await fs.promises.writeFile(tempFile, serialized, 'utf-8');
+        await fs.promises.rename(tempFile, DB_FILE);
       }
     } catch (err) {
       console.error('Failed to save db.json', err);
+    } finally {
+      this.writeInProgress = false;
+      if (this.writeDirty) {
+        this.flushDiskWritesAsync();
+      }
+    }
+  }
+
+  public saveSyncSilent(): void {
+    try {
+      const tempFile = DB_FILE + '.tmp';
+      fs.writeFileSync(tempFile, JSON.stringify(this.data), 'utf-8');
+      fs.renameSync(tempFile, DB_FILE);
+      this.writeDirty = false;
+    } catch (err) {
+      console.error('Failed to sync save db.json', err);
+    }
+  }
+
+  public save(reason?: string, triggerCallback: boolean = true): void {
+    // Only invoke GitHub commit callback if NOT syncing and explicitly requested
+    if (triggerCallback && this.onSaveCallback && !this.isSyncing) {
+      this.onSaveCallback(reason);
+    }
+
+    // Persist compact JSON asynchronously so HTTP handlers never block on disk I/O
+    this.writeDirty = true;
+    if (!this.writeInProgress) {
+      void this.flushDiskWritesAsync();
     }
   }
 
