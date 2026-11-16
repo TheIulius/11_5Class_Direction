@@ -33496,7 +33496,7 @@
     "lastUpdated": "2026-11-16T12:21:17.129Z"
   },
   "platform": {
-    "updatedAt": 1794831677264,
+    "updatedAt": 1794831753458,
     "announcement": {
       "text": "დააყენე app-ად & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -33973,6 +33973,20 @@
         "authorUsername": "theiulius",
         "status": "approved",
         "createdAt": "2026-11-15T09:23:00.082Z"
+      },
+      {
+        "id": "hw_1794831753458",
+        "date": "2026-11-19",
+        "displayDate": "19 ნოემბერი",
+        "dayOfWeek": "ხუთშაბათი",
+        "subject": "მათემატიკა",
+        "teacher": "ნანა ჯაფარიძე",
+        "title": "გეომეტრია: თოფურია 21.93-128",
+        "notes": "",
+        "authorName": "theiulius",
+        "authorUsername": "theiulius",
+        "status": "approved",
+        "createdAt": "2026-11-16T12:22:33.458Z"
       }
     ],
     "timetable": [
