@@ -33497,7 +33497,7 @@
     "lastUpdated": "2026-11-16T15:36:50.474Z"
   },
   "platform": {
-    "updatedAt": 1794845829456,
+    "updatedAt": 1794846018454,
     "announcement": {
       "text": "მათემატიკის დამოუკიდებელი ხვალ!",
       "active": true,
@@ -34008,6 +34008,34 @@
         "authorUsername": "dgi09",
         "status": "approved",
         "createdAt": "2026-11-16T12:36:26.619Z"
+      },
+      {
+        "id": "hw_1794846016417",
+        "date": "2026-11-17",
+        "displayDate": "17 ნოემბერი",
+        "dayOfWeek": "სამშაბათი",
+        "subject": "მათემატიკა",
+        "teacher": "ნანა ჯაფარიძე",
+        "title": "საკლასო წერა!  ალგებრა: იმუშავეთ 33-55",
+        "notes": "",
+        "authorName": "theiulius",
+        "authorUsername": "theiulius",
+        "status": "approved",
+        "createdAt": "2026-11-16T16:20:16.417Z"
+      },
+      {
+        "id": "hw_1794846018454",
+        "date": "2026-11-17",
+        "displayDate": "17 ნოემბერი",
+        "dayOfWeek": "სამშაბათი",
+        "subject": "მათემატიკა",
+        "teacher": "ნანა ჯაფარიძე",
+        "title": "საკლასო წერა!  ალგებრა: იმუშავეთ 33-55",
+        "notes": "",
+        "authorName": "theiulius",
+        "authorUsername": "theiulius",
+        "status": "approved",
+        "createdAt": "2026-11-16T16:20:18.454Z"
       }
     ],
     "timetable": [
@@ -34666,7 +34694,7 @@
         "isModerator": false,
         "pwaInstalled": true,
         "pwaInstalledAt": "2026-11-15T11:54:53.972Z",
-        "pwaDevice": "PC / Mac",
+        "pwaDevice": "iPhone / iOS",
         "tokens": [
           "d960deb21ee3bb5656bd00a111646442b5f8836e7c51ea3e911b610f40de104b",
           "eea7381db6dcffa9ba1646980e39934280a705c5a0bfbf7efa0c4cd2adb5f17a",
@@ -35014,7 +35042,7 @@
         "canModerate": true,
         "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
         "isStandalone": true,
-        "updatedAt": "2026-11-16T16:17:09.456Z"
+        "updatedAt": "2026-11-16T12:21:17.264Z"
       }
     ]
   }
