@@ -39,25 +39,18 @@ app.use('/api', (req: Request, res: Response, next: any) => {
   if (!acceptEnc.includes('gzip')) return next();
 
   const origJson = res.json.bind(res);
+  const origSend = res.send.bind(res);
   res.json = ((body: any) => {
     try {
       const jsonStr = JSON.stringify(body);
       if (jsonStr.length < 1024) {
         return origJson(body);
       }
-      zlib.gzip(Buffer.from(jsonStr, 'utf-8'), { level: 6 }, (err, gz) => {
-        if (res.headersSent) return;
-        if (err) {
-          origJson(body);
-          return;
-        }
-        res.setHeader('Content-Type', 'application/json; charset=utf-8');
-        res.setHeader('Content-Encoding', 'gzip');
-        res.setHeader('Vary', 'Accept-Encoding');
-        res.setHeader('Content-Length', String(gz.byteLength));
-        res.end(gz);
-      });
-      return res;
+      const gz = zlib.gzipSync(Buffer.from(jsonStr, 'utf-8'), { level: 6 });
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Vary', 'Accept-Encoding');
+      return origSend(gz);
     } catch {
       return origJson(body);
     }
@@ -2219,6 +2212,7 @@ let lastLocalWriteTime = 0;
 let isCommittingToGitHub = false;
 let pendingCommitAfterCurrent = false;
 let pendingCommitReason = '';
+let lastSyncedGithubSha: string | null = null;
 
 export function applyFixtureEventsToPlayers(
   fixture: Fixture,
@@ -2908,26 +2902,43 @@ export async function syncDatabaseFromGitHub(explicitToken?: string, force: bool
     const filePath = 'data/db.json';
     let remoteData: any = null;
 
-    // Method 1: Try GitHub REST API if token is configured
+    // Method 1: Check lightweight directory metadata first for sha, then fetch raw file only when needed
     if (token) {
       try {
-        const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
+        const dirRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data?ref=${branch}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: 'application/vnd.github.v3+json',
             'User-Agent': '11-5-Class-Direction-App',
           },
         });
-
-        if (getRes.ok) {
-          const getJson: any = await getRes.json();
-          if (getJson.content) {
-            const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
+        let remoteSha: string | null = null;
+        if (dirRes.ok) {
+          const dirItems: any = await dirRes.json();
+          if (Array.isArray(dirItems)) {
+            const dbEntry = dirItems.find((item: any) => item?.name === 'db.json');
+            if (dbEntry?.sha) remoteSha = dbEntry.sha;
+          }
+        }
+        if (remoteSha && lastSyncedGithubSha === remoteSha && !force) {
+          return { success: true, changed: false };
+        }
+        const rawApiRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3.raw',
+            'User-Agent': '11-5-Class-Direction-App',
+          },
+        });
+        if (rawApiRes.ok) {
+          const remoteRaw = await rawApiRes.text();
+          if (remoteRaw && remoteRaw.trim().startsWith('{')) {
             remoteData = JSON.parse(remoteRaw);
-            console.log('[GitHub Sync] Retrieved latest database via GitHub REST API.');
+            if (remoteSha) lastSyncedGithubSha = remoteSha;
+            console.log('[GitHub Sync] Retrieved latest database via GitHub REST raw API.');
           }
         } else {
-          console.warn(`[GitHub Sync] GitHub REST API returned HTTP ${getRes.status}. Attempting fallbacks...`);
+          console.warn(`[GitHub Sync] GitHub REST API returned HTTP ${rawApiRes.status}. Attempting fallbacks...`);
         }
       } catch (apiErr: any) {
         console.warn('[GitHub Sync] GitHub REST API request failed:', apiErr?.message || apiErr);
@@ -3038,37 +3049,47 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
 
   isCommittingToGitHub = true;
   try {
-    // 1. Fetch current file SHA from GitHub so we can update it without a conflict
-    const getRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
+    // 1. Fetch lightweight directory listing (~300 bytes) to obtain current db.json SHA without downloading 28MB+ base64
+    let sha: string | undefined;
+    const dirRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/data?ref=${branch}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: 'application/vnd.github.v3+json',
         'User-Agent': '11-5-Class-Direction-App',
       },
     });
+    if (dirRes.ok) {
+      const dirItems: any = await dirRes.json();
+      if (Array.isArray(dirItems)) {
+        const dbEntry = dirItems.find((item: any) => item?.name === 'db.json');
+        if (dbEntry?.sha) sha = dbEntry.sha;
+      }
+    }
 
-    let sha: string | undefined;
-    if (getRes.ok) {
-      const getJson: any = await getRes.json();
-      sha = getJson.sha;
-
-      // CRITICAL DATA PRESERVATION GUARD:
-      // Merge remote database into local BEFORE committing!
-      // This guarantees that any matches, stats, or users that exist on GitHub will NEVER be wiped
-      // by a local in-memory instance that started with an older database state.
-      if (getJson.content) {
-        try {
-          const remoteRaw = Buffer.from(getJson.content, 'base64').toString('utf-8');
-          const remoteData = JSON.parse(remoteRaw);
-          const local = db.getData();
-          const changed = mergeDatabases(local, remoteData);
-          if (changed) {
-            console.log('[GitHub Commit Guard] Merged remote changes into local database before committing to prevent regression.');
-            db.saveSilent();
+    // Only download & merge remote db.json if remote SHA actually diverged from our last known SHA
+    if (sha && sha !== lastSyncedGithubSha) {
+      try {
+        const rawRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3.raw',
+            'User-Agent': '11-5-Class-Direction-App',
+          },
+        });
+        if (rawRes.ok) {
+          const remoteRaw = await rawRes.text();
+          if (remoteRaw && remoteRaw.trim().startsWith('{')) {
+            const remoteData = JSON.parse(remoteRaw);
+            const local = db.getData();
+            const changed = mergeDatabases(local, remoteData);
+            if (changed) {
+              console.log('[GitHub Commit Guard] Merged remote changes into local database before committing.');
+              db.saveSilent();
+            }
           }
-        } catch (mergeErr) {
-          console.warn('[GitHub Commit Guard] Non-fatal error merging remote data:', mergeErr);
         }
+      } catch (mergeErr) {
+        console.warn('[GitHub Commit Guard] Non-fatal error merging remote data:', mergeErr);
       }
     }
 
@@ -3099,6 +3120,9 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
       return { success: false, error: putJson?.message || 'Failed to commit to GitHub' };
     }
 
+    if (putJson?.content?.sha) {
+      lastSyncedGithubSha = putJson.content.sha;
+    }
     console.log(`Successfully committed database to GitHub: "${commitMsg}"`);
     hasPendingLocalChanges = false;
     return { success: true, commitUrl: putJson.commit?.html_url };

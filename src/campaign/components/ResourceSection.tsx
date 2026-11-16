@@ -738,7 +738,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
           content: resContent.trim() || undefined,
           linkUrl: resLink.trim() || undefined,
           attachmentName: firstAtt?.name || undefined,
-          attachmentDataUrl: firstAtt?.dataUrl || undefined,
+          attachmentDataUrl: attachments.length > 0 ? undefined : firstAtt?.dataUrl || undefined,
           attachments,
           resourceType: resType,
         });
@@ -756,7 +756,7 @@ export const ResourceSection: React.FC<ResourceSectionProps> = ({
         content: resContent.trim() || undefined,
         linkUrl: resLink.trim() || undefined,
         attachmentName: firstAtt?.name || undefined,
-        attachmentDataUrl: firstAtt?.dataUrl || undefined,
+        attachmentDataUrl: attachments.length > 0 ? undefined : firstAtt?.dataUrl || undefined,
         attachments: attachments.length > 0 ? attachments : undefined,
         resourceType: resType,
         subject: defaultSubject,

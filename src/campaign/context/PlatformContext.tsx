@@ -529,21 +529,42 @@ export const PlatformProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   // --- CRUD Mutations (apply returned server patch directly to eliminate blocking /state re-fetches) ---
   const runPlatformMutation = useCallback(
     async (url: string, method: string, body?: unknown): Promise<{ ok: boolean; data: any }> => {
-      try {
-        const res = await fetch(url, {
-          method,
-          headers: getHeaders(),
-          ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (res.ok) {
-          applyServerPatch(data);
-          return { ok: true, data };
+      const payloadStr = body !== undefined ? JSON.stringify(body) : undefined;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const res = await fetch(url, {
+            method,
+            headers: getHeaders(),
+            ...(payloadStr !== undefined ? { body: payloadStr } : {}),
+          });
+          if (res.status >= 500 && attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 1200));
+            continue;
+          }
+          const data = await res.json().catch(() => ({}));
+          if (res.ok) {
+            applyServerPatch(data);
+            return { ok: true, data };
+          }
+          return {
+            ok: false,
+            data: {
+              ...data,
+              error: data?.error || `სერვერის შეცდომა (HTTP ${res.status})`,
+            },
+          };
+        } catch {
+          if (attempt === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 1200));
+            continue;
+          }
+          return {
+            ok: false,
+            data: { error: 'სერვერთან კავშირი გაწყდა — სცადეთ თავიდან.' },
+          };
         }
-        return { ok: false, data };
-      } catch {
-        return { ok: false, data: {} };
       }
+      return { ok: false, data: {} };
     },
     [getHeaders, applyServerPatch]
   );
