@@ -33376,7 +33376,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 128,
+    "visits": 129,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33494,10 +33494,10 @@
         }
       }
     },
-    "lastUpdated": "2026-11-16T13:22:49.617Z"
+    "lastUpdated": "2026-11-16T13:49:28.009Z"
   },
   "platform": {
-    "updatedAt": 1794835435858,
+    "updatedAt": 1794836972152,
     "announcement": {
       "text": "მათემატიკის დამოუკიდებელი ხვალ!",
       "active": true,
@@ -34666,7 +34666,7 @@
         "isModerator": false,
         "pwaInstalled": true,
         "pwaInstalledAt": "2026-11-15T11:54:53.972Z",
-        "pwaDevice": "PC / Mac",
+        "pwaDevice": "iPhone / iOS",
         "tokens": [
           "d960deb21ee3bb5656bd00a111646442b5f8836e7c51ea3e911b610f40de104b",
           "eea7381db6dcffa9ba1646980e39934280a705c5a0bfbf7efa0c4cd2adb5f17a",
@@ -34986,7 +34986,7 @@
         "canModerate": true,
         "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1",
         "isStandalone": true,
-        "updatedAt": "2026-11-15T20:06:53.756Z"
+        "updatedAt": "2026-11-16T13:49:32.152Z"
       },
       {
         "endpoint": "https://web.push.apple.com/QMg9x9a7zVvazjWjyqx0mZqh1T4eEg1UP41swqEfqR7lklzz_oaN7hAW_o0NYIAe8PDddO8N3vLcjhURlkLAYCrvI63RukUucLGBRymwL_KuxZ2g_susVJL5dvXevGlzGQKXAZP3OckQitHeK4p5DO_qceS2nHSC0iwFXzL2zlQ",
