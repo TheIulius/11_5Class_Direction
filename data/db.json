@@ -33496,7 +33496,7 @@
     "lastUpdated": "2026-11-16T12:41:27.061Z"
   },
   "platform": {
-    "updatedAt": 1794833596909,
+    "updatedAt": 1794833710833,
     "announcement": {
       "text": "მათემატიკის დამოუკიდებელი ხვალ!",
       "active": true,
@@ -33905,6 +33905,26 @@
           ],
           "recommendation": "გადახედეთ მასალებს და დასვით კითხვები კომენტარებში."
         }
+      },
+      {
+        "id": "ev_1794833113419",
+        "title": "მათემატიკის დამოუკიდებელი",
+        "date": "2026-11-17",
+        "time": "10:00 - 10:45",
+        "mainCategory": "სკოლა",
+        "category": "დამოუკიდებელი",
+        "description": "გაიმეორეთ მასალა, მოიტანეთ რვეულები!",
+        "location": "კომაროვი, 11/5 აუდიტორია",
+        "teacher": "ნანა ჯაფარიძე",
+        "aiAnalysis": {
+          "difficultyScore": "7/10",
+          "estimatedHours": "2 საათი",
+          "strategy": "გაიმეორეთ მასალა, მოიტანეთ რვეულები!",
+          "keyPoints": [
+            "გადახედეთ მიმაგრებულ კონსპექტებსა და კომენტარებს"
+          ],
+          "recommendation": "გადახედეთ მასალებს და დასვით კითხვები კომენტარებში."
+        }
       }
     ],
     "homeworks": [
@@ -33976,9 +33996,9 @@
       },
       {
         "id": "hw_1794832586619",
-        "date": "2026-11-17",
-        "displayDate": "17 ნოემბერი",
-        "dayOfWeek": "სამშაბათი",
+        "date": "2026-11-19",
+        "displayDate": "19 ნოემბერი",
+        "dayOfWeek": "ხუთშაბათი",
         "subject": "მათემატიკა",
         "teacher": "ნანა ჯაფარიძე",
         "title": "ალგებრა: 14.39-56 თოფურია",
@@ -34986,7 +35006,7 @@
         "canModerate": true,
         "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Safari/605.1.15",
         "isStandalone": true,
-        "updatedAt": "2026-11-16T12:52:37.926Z"
+        "updatedAt": "2026-11-16T12:21:17.264Z"
       }
     ]
   }
