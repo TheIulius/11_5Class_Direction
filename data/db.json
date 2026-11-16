@@ -33497,7 +33497,7 @@
     "lastUpdated": "2026-11-16T13:22:49.617Z"
   },
   "platform": {
-    "updatedAt": 1794835372022,
+    "updatedAt": 1794835435858,
     "announcement": {
       "text": "მათემატიკის დამოუკიდებელი ხვალ!",
       "active": true,
@@ -34779,14 +34779,18 @@
         "fullName": "ლიზი ჩაჩუა",
         "passwordHash": "3cfa40eac6277b4b8c9d1995f6b61a18fd7ef0c79096680f53ec491f106cb7f9aaacc1e44ac74d09cbb6342c5613431bd143e9ba54ad3faf65a4374cb61fa2de",
         "salt": "630482b4303dcf6f8d7ebe1ed5b0a8b7",
-        "token": "4b26ddff9dc73d8caf5f2340733495df2efaa6eb55381ede463a725a5c8845b0",
+        "token": "e2ec857837a4d16a94c0702b9ce9118c8f91fe23e80142cf4198575fb19347ad",
         "role": "user",
         "isAdmin": false,
         "isModerator": false,
         "createdAt": "2026-11-15T11:01:21.083Z",
         "pwaInstalled": true,
         "pwaInstalledAt": "2026-11-15T11:49:10.203Z",
-        "pwaDevice": "iPhone / iOS"
+        "pwaDevice": "iPhone / iOS",
+        "tokens": [
+          "4b26ddff9dc73d8caf5f2340733495df2efaa6eb55381ede463a725a5c8845b0",
+          "e2ec857837a4d16a94c0702b9ce9118c8f91fe23e80142cf4198575fb19347ad"
+        ]
       },
       "user_1794740515692_678": {
         "id": "user_1794740515692_678",
@@ -34934,11 +34938,13 @@
           "p256dh": "BEaU34Iw78dtugcjcrRbHG4ZifEQWYo6UToSp21XwavpIvJ2AMob_3lIxca5KKzWuAUwl18ek7s2mp30UeiCMXo",
           "auth": "P7yB0HxSYP5sUMyxsK1vfg"
         },
+        "userId": "user_1794740481082_806",
+        "username": "lizichachua",
         "role": "user",
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/157.0.0.0 Safari/537.36",
         "isStandalone": false,
-        "updatedAt": "2026-11-16T13:22:52.022Z"
+        "updatedAt": "2026-11-16T13:23:55.858Z"
       },
       {
         "endpoint": "https://web.push.apple.com/QBuyBLHep8uOLm76JfR46XTbwFIuZPdvtntaavx_efVrJTj32iIRveg3QD1iIgHciuSPrbBvarxHWCa6uyWSlhuQ9ha2TXjWoV8G-UP_Q3W6Jn4ujp4NUpDNR3c5DwBPy4HsXUipKZPcp0AqYr7L9sly5VqaD4_n--HBmi0eNcw",
