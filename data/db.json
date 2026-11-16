@@ -33376,7 +33376,7 @@
   "lineupVisibility": "auto",
   "pendingPhotos": [],
   "analytics": {
-    "visits": 125,
+    "visits": 126,
     "quizClicks": 12,
     "uniqueIps": [
       "5c61fec660696b24",
@@ -33493,10 +33493,10 @@
         }
       }
     },
-    "lastUpdated": "2026-11-16T12:39:57.558Z"
+    "lastUpdated": "2026-11-16T12:41:27.061Z"
   },
   "platform": {
-    "updatedAt": 1794832882271,
+    "updatedAt": 1794832888558,
     "announcement": {
       "text": "დააყენე app-ად & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34922,7 +34922,7 @@
         "canModerate": false,
         "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.0.1 Mobile/15E148 Safari/604.1",
         "isStandalone": true,
-        "updatedAt": "2026-11-15T11:49:59.618Z"
+        "updatedAt": "2026-11-16T12:41:28.558Z"
       },
       {
         "endpoint": "https://web.push.apple.com/QK0JyCJODh4qoa-nyP13l2BlVdA3q2_toDM4Go_ICfHxFRQi4pF9QCbVHHI-bfDG4AdRT7EXBeAbJ5VilrzugytAtbV5zjBDL8kBlXWOk6Z9YqU4rCSsRJIAHj-pxR6164UOINaPOZZKJP0tDwC8SD32YbLvYOaXG3D0AxqTQmg",
