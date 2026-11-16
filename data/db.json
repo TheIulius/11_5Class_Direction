@@ -33496,7 +33496,7 @@
     "lastUpdated": "2026-11-16T12:36:10.307Z"
   },
   "platform": {
-    "updatedAt": 1794831766633,
+    "updatedAt": 1794832586619,
     "announcement": {
       "text": "დააყენე app-ად & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -33973,6 +33973,20 @@
         "authorUsername": "theiulius",
         "status": "approved",
         "createdAt": "2026-11-15T09:23:00.082Z"
+      },
+      {
+        "id": "hw_1794832586619",
+        "date": "2026-11-17",
+        "displayDate": "17 ნოემბერი",
+        "dayOfWeek": "სამშაბათი",
+        "subject": "მათემატიკა",
+        "teacher": "ნანა ჯაფარიძე",
+        "title": "14.39-56 თოფურია",
+        "notes": "",
+        "authorName": "dgi09",
+        "authorUsername": "dgi09",
+        "status": "approved",
+        "createdAt": "2026-11-16T12:36:26.619Z"
       }
     ],
     "timetable": [
