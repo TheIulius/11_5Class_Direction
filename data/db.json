@@ -33496,7 +33496,7 @@
     "lastUpdated": "2026-11-16T12:39:57.558Z"
   },
   "platform": {
-    "updatedAt": 1794832759836,
+    "updatedAt": 1794832809863,
     "announcement": {
       "text": "დააყენე app-ად & ჩართე შეტყობინებები. დააწექი -> 🔔",
       "active": true,
@@ -34666,15 +34666,19 @@
         "fullName": "დავით გიორგი ინანეიშვილი",
         "passwordHash": "5f7fe8475417e2bd493f98b75ce0d327b7fd9d10547c0539ca156389a9309cd61addea80deec28e338caba0049d7468d6085a059ec8e22d9fae95c040e2cce71",
         "salt": "6c6f59559d7a02092e794c171dabb6c4",
-        "token": "9d74283ba755e948073b4bfaff70a71a79edb426c101a8fcab5ae3de585f3df9",
+        "token": "fd42c41d6e266b903861e647d1962eedf503291c69fb22034f0b127767b56650",
         "role": "moderator",
         "isAdmin": false,
         "isModerator": true,
         "createdAt": "2026-11-15T10:30:48.317Z",
         "tokens": [
           "758b65915d71975c0c5dd238be00994ad7a94a5a1265169dcba9f9a7e1ec389e",
-          "9d74283ba755e948073b4bfaff70a71a79edb426c101a8fcab5ae3de585f3df9"
-        ]
+          "9d74283ba755e948073b4bfaff70a71a79edb426c101a8fcab5ae3de585f3df9",
+          "fd42c41d6e266b903861e647d1962eedf503291c69fb22034f0b127767b56650"
+        ],
+        "pwaInstalled": true,
+        "pwaInstalledAt": "2026-11-16T12:40:09.863Z",
+        "pwaDevice": "iPhone / iOS"
       },
       "user_1794739215210_938": {
         "id": "user_1794739215210_938",
