@@ -4692,6 +4692,39 @@ export function initPlatformCMS(data: DatabaseSchema): PlatformCMSData {
     }
   }
 
+  // Rename @ikakabadze989@gmail.com -> @iraklius (and normalize author references)
+  const hasIrakliusAlready = Object.values(p.users).some(
+    (u) => u?.username && u.username.trim().toLowerCase() === 'iraklius'
+  );
+  if (!hasIrakliusAlready) {
+    const oldAcc = Object.values(p.users).find(
+      (u) => u?.username && u.username.trim().toLowerCase() === 'ikakabadze989@gmail.com'
+    );
+    if (oldAcc) {
+      oldAcc.username = 'iraklius';
+    }
+  }
+  const normalizeOldIka = (val?: string) =>
+    val && val.trim().toLowerCase() === 'ikakabadze989@gmail.com';
+  for (const r of p.resources) {
+    if (normalizeOldIka(r.authorUsername)) r.authorUsername = 'iraklius';
+    if (normalizeOldIka(r.approvedBy)) r.approvedBy = 'iraklius';
+    if (normalizeOldIka(r.authorName)) r.authorName = 'Irakli Kakabadze';
+  }
+  for (const hw of p.homeworks as any[]) {
+    if (normalizeOldIka(hw?.authorUsername)) hw.authorUsername = 'iraklius';
+    if (normalizeOldIka(hw?.authorName)) hw.authorName = 'Irakli Kakabadze';
+  }
+  for (const c of p.comments) {
+    if (normalizeOldIka(c.authorUsername)) c.authorUsername = 'iraklius';
+    if (normalizeOldIka(c.authorName)) c.authorName = 'Irakli Kakabadze';
+  }
+  if (Array.isArray(p.pushSubscriptions)) {
+    for (const s of p.pushSubscriptions) {
+      if (normalizeOldIka(s.username)) s.username = 'iraklius';
+    }
+  }
+
   // Ensure VAPID keys & pushSubscriptions exist for Web Push Notifications (configure once per keypair)
   if (!p.vapidKeys || !p.vapidKeys.publicKey || !p.vapidKeys.privateKey) {
     const generated = webpush.generateVAPIDKeys();
@@ -6536,12 +6569,23 @@ async function startServer() {
             (acc?.username && acc.username.trim().toLowerCase() === 'dgi')
         )
     );
+    const hadOldIkakabadze = Boolean(
+      data.platform?.users &&
+        Object.values(data.platform.users).some(
+          (acc) => acc?.username && acc.username.trim().toLowerCase() === 'ikakabadze989@gmail.com'
+        )
+    );
     initPlatformCMS(data);
     applyPositionChangesAndRemediation(data);
     const statsSynced = syncAllFinishedFixturesStats(data);
     recalculateAllManagersLeaguePoints(data);
-    if (hadDgiBefore) {
-      savePlatformCMS(data, 'Removed admin account @dgi');
+    if (hadDgiBefore || hadOldIkakabadze) {
+      savePlatformCMS(
+        data,
+        hadOldIkakabadze
+          ? 'Renamed @ikakabadze989@gmail.com to @iraklius'
+          : 'Removed admin account @dgi'
+      );
     } else {
       db.saveSilent();
     }
