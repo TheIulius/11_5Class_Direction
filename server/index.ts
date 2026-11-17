@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import fs from 'node:fs';
 import crypto from 'node:crypto';
 import path from 'node:path';
 import zlib from 'node:zlib';
@@ -182,8 +183,8 @@ app.post('/api/analytics/visit', (req: Request, res: Response) => {
   a.visits = (a.visits || 0) + 1;
   registerClientIp(a, req);
   a.lastUpdated = new Date().toISOString();
-  db.save('Analytics: new site visit');
-  scheduleAutoSyncToGitHub('Analytics: new site visit', false, 5000);
+  db.saveSilent();
+  scheduleAutoSyncToGitHub('Analytics: new site visit', false, 120000);
   res.json(a);
 });
 
@@ -193,8 +194,8 @@ app.post('/api/analytics/quiz-click', (req: Request, res: Response) => {
   a.quizClicks = (a.quizClicks || 0) + 1;
   registerClientIp(a, req);
   a.lastUpdated = new Date().toISOString();
-  db.save('Analytics: quiz click');
-  scheduleAutoSyncToGitHub('Analytics: quiz click', false, 5000);
+  db.saveSilent();
+  scheduleAutoSyncToGitHub('Analytics: quiz click', false, 120000);
   res.json(a);
 });
 
@@ -324,8 +325,8 @@ app.post('/api/analytics/event', (req: Request, res: Response) => {
     }
 
     a.lastUpdated = new Date().toISOString();
-    db.save('Analytics event: ' + (event || 'unknown'));
-    scheduleAutoSyncToGitHub('Analytics event: ' + (event || 'unknown'));
+    db.saveSilent();
+    scheduleAutoSyncToGitHub('Analytics event: ' + (event || 'unknown'), false, 120000);
   } catch (err) {
     console.error('[Analytics Event Error]', err);
   }
@@ -3141,6 +3142,8 @@ export async function commitDbToGitHub(message: string, explicitToken?: string):
   }
 }
 
+let scheduledSyncDueAt = 0;
+
 export function scheduleAutoSyncToGitHub(reason: string, immediate: boolean = false, customDelay?: number) {
   hasPendingLocalChanges = true;
   lastLocalWriteTime = Date.now();
@@ -3148,9 +3151,19 @@ export function scheduleAutoSyncToGitHub(reason: string, immediate: boolean = fa
   const token = runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
   if (!token) return;
 
-  if (autoSyncTimer) clearTimeout(autoSyncTimer);
   const delay = customDelay !== undefined ? customDelay : (immediate ? 50 : 2500); // 2.5s debounce for batch edits
+  const dueAt = Date.now() + delay;
+
+  // Do not push back an already-scheduled earlier sync with a low-priority long delay (e.g. analytics 120s)
+  if (autoSyncTimer && scheduledSyncDueAt > 0 && dueAt > scheduledSyncDueAt + 500) {
+    return;
+  }
+
+  if (autoSyncTimer) clearTimeout(autoSyncTimer);
+  scheduledSyncDueAt = dueAt;
   autoSyncTimer = setTimeout(async () => {
+    autoSyncTimer = null;
+    scheduledSyncDueAt = 0;
     try {
       await commitDbToGitHub(`Data sync: ${reason}`);
     } catch (e) {
@@ -4883,28 +4896,306 @@ function buildAttachmentUrl(
   }`;
 }
 
+const ATTACHMENTS_DIR = path.join(
+  process.env.DATA_DIR || path.join(process.cwd(), 'data'),
+  'attachments'
+);
+
+interface StoredAttachmentItem {
+  name: string;
+  dataUrl: string;
+  size?: number;
+  mimeType?: string;
+}
+
+interface StoredAttachmentBlob {
+  attachments?: StoredAttachmentItem[];
+  attachmentDataUrl?: string;
+  attachmentName?: string;
+}
+
+const ATTACHMENT_LRU = new Map<string, StoredAttachmentBlob>();
+const MAX_LRU_RESOURCES = 6;
+
+function safeAttachmentId(resId: string): string {
+  return String(resId || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+}
+
+function getCachedBlob(resId: string): StoredAttachmentBlob | undefined {
+  const hit = ATTACHMENT_LRU.get(resId);
+  if (!hit) return undefined;
+  ATTACHMENT_LRU.delete(resId);
+  ATTACHMENT_LRU.set(resId, hit);
+  return hit;
+}
+
+function setCachedBlob(resId: string, blob: StoredAttachmentBlob): void {
+  if (ATTACHMENT_LRU.has(resId)) ATTACHMENT_LRU.delete(resId);
+  ATTACHMENT_LRU.set(resId, blob);
+  while (ATTACHMENT_LRU.size > MAX_LRU_RESOURCES) {
+    const oldestKey = ATTACHMENT_LRU.keys().next().value;
+    if (!oldestKey) break;
+    ATTACHMENT_LRU.delete(oldestKey);
+  }
+}
+
+async function writeAttachmentBlobLocal(resId: string, blob: StoredAttachmentBlob): Promise<void> {
+  setCachedBlob(resId, blob);
+  try {
+    await fs.promises.mkdir(ATTACHMENTS_DIR, { recursive: true });
+    const filePath = path.join(ATTACHMENTS_DIR, `${safeAttachmentId(resId)}.json`);
+    const tmpPath = filePath + '.tmp';
+    await fs.promises.writeFile(tmpPath, JSON.stringify(blob), 'utf-8');
+    await fs.promises.rename(tmpPath, filePath);
+  } catch (err) {
+    console.warn(`[Attachments] Failed to write local blob ${resId}:`, err);
+  }
+}
+
+async function uploadAttachmentBlobToGitHub(resId: string, blob: StoredAttachmentBlob): Promise<boolean> {
+  const token = runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
+  if (!token) return false;
+  const owner = process.env.GITHUB_OWNER || 'TheIulius';
+  const repo = process.env.GITHUB_REPO || '11_5Class_Direction';
+  const branch = process.env.GITHUB_BRANCH || 'data';
+  const relPath = `data/attachments/${safeAttachmentId(resId)}.json`;
+
+  try {
+    let sha: string | undefined;
+    const checkRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${relPath}?ref=${branch}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': '11-5-Class-Direction-App',
+        },
+      }
+    );
+    if (checkRes.ok) {
+      const checkJson: any = await checkRes.json().catch(() => ({}));
+      sha = checkJson?.sha;
+    }
+
+    const base64Content = Buffer.from(JSON.stringify(blob), 'utf-8').toString('base64');
+    const putRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${relPath}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': '11-5-Class-Direction-App',
+      },
+      body: JSON.stringify({
+        message: `Store attachment blob ${safeAttachmentId(resId)} [skip ci]`,
+        content: base64Content,
+        sha,
+        branch,
+      }),
+    });
+    if (!putRes.ok) {
+      const errJson: any = await putRes.json().catch(() => ({}));
+      console.warn(`[Attachments] GitHub upload failed for ${resId}:`, errJson?.message || putRes.status);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn(`[Attachments] GitHub upload exception for ${resId}:`, err);
+    return false;
+  }
+}
+
+async function deleteAttachmentBlob(resId: string): Promise<void> {
+  ATTACHMENT_LRU.delete(resId);
+  try {
+    const filePath = path.join(ATTACHMENTS_DIR, `${safeAttachmentId(resId)}.json`);
+    if (fs.existsSync(filePath)) {
+      await fs.promises.unlink(filePath).catch(() => {});
+    }
+  } catch {}
+
+  const token = runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
+  if (!token) return;
+  const owner = process.env.GITHUB_OWNER || 'TheIulius';
+  const repo = process.env.GITHUB_REPO || '11_5Class_Direction';
+  const branch = process.env.GITHUB_BRANCH || 'data';
+  const relPath = `data/attachments/${safeAttachmentId(resId)}.json`;
+  try {
+    const checkRes = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}/contents/${relPath}?ref=${branch}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': '11-5-Class-Direction-App',
+        },
+      }
+    );
+    if (!checkRes.ok) return;
+    const checkJson: any = await checkRes.json().catch(() => ({}));
+    if (!checkJson?.sha) return;
+    await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${relPath}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+        'User-Agent': '11-5-Class-Direction-App',
+      },
+      body: JSON.stringify({
+        message: `Delete attachment blob ${safeAttachmentId(resId)} [skip ci]`,
+        sha: checkJson.sha,
+        branch,
+      }),
+    }).catch(() => {});
+  } catch {}
+}
+
+async function loadResourceAttachmentBlob(resId: string): Promise<StoredAttachmentBlob | null> {
+  const cached = getCachedBlob(resId);
+  if (cached) return cached;
+
+  const filePath = path.join(ATTACHMENTS_DIR, `${safeAttachmentId(resId)}.json`);
+  try {
+    if (fs.existsSync(filePath)) {
+      const raw = await fs.promises.readFile(filePath, 'utf-8');
+      const parsed = JSON.parse(raw) as StoredAttachmentBlob;
+      setCachedBlob(resId, parsed);
+      return parsed;
+    }
+  } catch {}
+
+  // Fallback to inline data inside db.data if still present
+  const data = db.getData();
+  const inlineRes = data.platform?.resources?.find((r) => r.id === resId);
+  if (inlineRes) {
+    const hasInlineAtts =
+      Array.isArray(inlineRes.attachments) &&
+      inlineRes.attachments.some((a) => typeof a.dataUrl === 'string' && a.dataUrl.startsWith('data:'));
+    if (hasInlineAtts || (inlineRes.attachmentDataUrl && inlineRes.attachmentDataUrl.startsWith('data:'))) {
+      return {
+        attachments: hasInlineAtts ? (inlineRes.attachments as StoredAttachmentItem[]) : undefined,
+        attachmentDataUrl: inlineRes.attachmentDataUrl,
+        attachmentName: inlineRes.attachmentName,
+      };
+    }
+  }
+
+  // Fallback to GitHub data branch
+  const owner = process.env.GITHUB_OWNER || 'TheIulius';
+  const repo = process.env.GITHUB_REPO || '11_5Class_Direction';
+  const branch = process.env.GITHUB_BRANCH || 'data';
+  const relPath = `data/attachments/${safeAttachmentId(resId)}.json`;
+  const token = runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken();
+
+  try {
+    const rawRes = await fetch(`https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${relPath}`, {
+      headers: { 'User-Agent': '11-5-Class-Direction-App' },
+    });
+    if (rawRes.ok) {
+      const parsed = (await rawRes.json()) as StoredAttachmentBlob;
+      void writeAttachmentBlobLocal(resId, parsed);
+      return parsed;
+    }
+  } catch {}
+
+  if (token) {
+    try {
+      const apiRes = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/contents/${relPath}?ref=${branch}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3.raw',
+            'User-Agent': '11-5-Class-Direction-App',
+          },
+        }
+      );
+      if (apiRes.ok) {
+        const parsed = (await apiRes.json()) as StoredAttachmentBlob;
+        void writeAttachmentBlobLocal(resId, parsed);
+        return parsed;
+      }
+    } catch {}
+  }
+
+  return null;
+}
+
+function stripInlineResourceData(r: PlatformResource): void {
+  if (Array.isArray(r.attachments)) {
+    r.attachments = r.attachments.map((att) => ({
+      name: att.name,
+      size: att.size,
+      mimeType: att.mimeType || parseDataUrlMime(att.dataUrl),
+    })) as any;
+  }
+  if (r.attachmentDataUrl && r.attachmentDataUrl.startsWith('data:')) {
+    delete r.attachmentDataUrl;
+  }
+}
+
+async function migrateLegacyInlineAttachmentsInBackground(): Promise<void> {
+  const data = db.getData();
+  const p = initPlatformCMS(data);
+  const hasToken = Boolean(runtimeGithubToken || process.env.GITHUB_TOKEN || loadStoredGithubToken());
+
+  const targets = p.resources.filter(
+    (r) =>
+      (Array.isArray(r.attachments) &&
+        r.attachments.some((a) => typeof a.dataUrl === 'string' && a.dataUrl.startsWith('data:'))) ||
+      (typeof r.attachmentDataUrl === 'string' && r.attachmentDataUrl.startsWith('data:'))
+  );
+
+  if (targets.length === 0) return;
+  console.log(`[Attachments] Migrating ${targets.length} legacy inline resource(s) out of db.json...`);
+
+  let offloadedAny = false;
+  for (const r of targets) {
+    const blob: StoredAttachmentBlob = {
+      attachments:
+        Array.isArray(r.attachments) && r.attachments.length > 0
+          ? (r.attachments.filter((a) => a.dataUrl) as StoredAttachmentItem[])
+          : undefined,
+      attachmentDataUrl: r.attachmentDataUrl,
+      attachmentName: r.attachmentName,
+    };
+    await writeAttachmentBlobLocal(r.id, blob);
+    if (hasToken) {
+      const ok = await uploadAttachmentBlobToGitHub(r.id, blob);
+      if (!ok) {
+        console.warn(`[Attachments] Skipping strip for ${r.id} until GitHub blob upload succeeds.`);
+        continue;
+      }
+    }
+    stripInlineResourceData(r);
+    offloadedAny = true;
+  }
+
+  if (offloadedAny) {
+    savePlatformCMS(data, 'Offloaded legacy resource attachments out of db.json');
+    console.log('[Attachments] Legacy inline attachments offloaded successfully.');
+  }
+}
+
 function serializeResourceForClient(r: PlatformResource): PlatformResource {
   const rawAtts = Array.isArray(r.attachments) ? r.attachments : undefined;
   const serializedAtts = rawAtts?.map((att, idx) => {
-    const isInline = typeof att.dataUrl === 'string' && att.dataUrl.startsWith('data:');
+    const needsProxyUrl = !att.dataUrl || att.dataUrl.startsWith('data:');
     return {
       ...att,
       mimeType: att.mimeType || parseDataUrlMime(att.dataUrl),
-      dataUrl: isInline ? buildAttachmentUrl(r.id, idx, att) : att.dataUrl,
+      dataUrl: needsProxyUrl ? buildAttachmentUrl(r.id, idx, att) : att.dataUrl,
     };
   });
 
   const legacyIsInline =
     typeof r.attachmentDataUrl === 'string' && r.attachmentDataUrl.startsWith('data:');
   let serializedLegacyUrl = r.attachmentDataUrl;
-  if (legacyIsInline) {
-    serializedLegacyUrl = buildAttachmentUrl(
-      r.id,
-      0,
-      rawAtts?.[0] || { name: r.attachmentName }
-    );
-  } else if (!serializedLegacyUrl && serializedAtts && serializedAtts.length > 0) {
+  if (serializedAtts && serializedAtts.length > 0) {
     serializedLegacyUrl = serializedAtts[0].dataUrl;
+  } else if (legacyIsInline || (!serializedLegacyUrl && r.attachmentName)) {
+    serializedLegacyUrl = buildAttachmentUrl(r.id, 0, { name: r.attachmentName });
   }
 
   return {
@@ -4914,39 +5205,46 @@ function serializeResourceForClient(r: PlatformResource): PlatformResource {
   };
 }
 
-function resolveEditedResourceAttachments(
+async function resolveEditedResourceAttachments(
   existing: PlatformResource,
   bodyAttachments: any[]
-) {
+): Promise<StoredAttachmentItem[]> {
   const urlPrefix = `/api/platform/resources/${encodeURIComponent(existing.id)}/attachment/`;
   const altPrefix = `/api/platform/resources/${existing.id}/attachment/`;
+  let existingBlob: StoredAttachmentBlob | null | undefined;
 
-  return bodyAttachments
-    .filter((a: any) => a && a.name && a.dataUrl)
-    .map((a: any) => {
-      let resolvedDataUrl = String(a.dataUrl);
-      let matchedOriginal: { dataUrl?: string; size?: number; mimeType?: string } | undefined;
+  const resolved: StoredAttachmentItem[] = [];
+  for (const a of bodyAttachments) {
+    if (!a || !a.name || !a.dataUrl) continue;
+    let resolvedDataUrl = String(a.dataUrl);
+    let matchedOriginal: { dataUrl?: string; size?: number; mimeType?: string } | undefined;
 
-      if (resolvedDataUrl.startsWith(urlPrefix) || resolvedDataUrl.startsWith(altPrefix)) {
-        const match = resolvedDataUrl.match(/\/attachment\/(\d+)/);
-        const origIdx = match ? Number(match[1]) : -1;
-        if (origIdx >= 0 && Array.isArray(existing.attachments) && existing.attachments[origIdx]) {
-          matchedOriginal = existing.attachments[origIdx];
-        } else if (origIdx === 0 && existing.attachmentDataUrl) {
-          matchedOriginal = { dataUrl: existing.attachmentDataUrl };
-        }
-        if (matchedOriginal?.dataUrl) {
-          resolvedDataUrl = matchedOriginal.dataUrl;
-        }
+    if (resolvedDataUrl.startsWith(urlPrefix) || resolvedDataUrl.startsWith(altPrefix)) {
+      const match = resolvedDataUrl.match(/\/attachment\/(\d+)/);
+      const origIdx = match ? Number(match[1]) : -1;
+      if (existingBlob === undefined) {
+        existingBlob = await loadResourceAttachmentBlob(existing.id);
       }
+      if (origIdx >= 0 && existingBlob?.attachments?.[origIdx]) {
+        matchedOriginal = existingBlob.attachments[origIdx];
+      } else if (origIdx >= 0 && Array.isArray(existing.attachments) && existing.attachments[origIdx]) {
+        matchedOriginal = existing.attachments[origIdx];
+      } else if (origIdx === 0 && (existingBlob?.attachmentDataUrl || existing.attachmentDataUrl)) {
+        matchedOriginal = { dataUrl: existingBlob?.attachmentDataUrl || existing.attachmentDataUrl };
+      }
+      if (matchedOriginal?.dataUrl) {
+        resolvedDataUrl = matchedOriginal.dataUrl;
+      }
+    }
 
-      return {
-        name: String(a.name).trim(),
-        dataUrl: resolvedDataUrl,
-        size: typeof a.size === 'number' ? a.size : matchedOriginal?.size,
-        mimeType: a.mimeType ? String(a.mimeType) : matchedOriginal?.mimeType,
-      };
+    resolved.push({
+      name: String(a.name).trim(),
+      dataUrl: resolvedDataUrl,
+      size: typeof a.size === 'number' ? a.size : matchedOriginal?.size,
+      mimeType: a.mimeType ? String(a.mimeType) : matchedOriginal?.mimeType,
     });
+  }
+  return resolved;
 }
 
 async function sendPlatformPushNotification(
@@ -5897,7 +6195,7 @@ app.put('/api/platform/timetable', (req: Request, res: Response) => {
 });
 
 // 9. Study Resources / Summaries (კონსპექტები & მასალები) — Binary Attachment Serving + CRUD
-app.get('/api/platform/resources/:id/attachment/:index', (req: Request, res: Response) => {
+app.get('/api/platform/resources/:id/attachment/:index', async (req: Request, res: Response) => {
   const { id, index } = req.params;
   const idx = Number(index);
   if (!Number.isInteger(idx) || idx < 0) {
@@ -5911,8 +6209,13 @@ app.get('/api/platform/resources/:id/attachment/:index', (req: Request, res: Res
     return res.status(404).json({ error: 'მასალა ვერ მოიძებნა.' });
   }
 
+  const blob = await loadResourceAttachmentBlob(id);
   const att =
-    Array.isArray(resource.attachments) && resource.attachments.length > 0
+    blob?.attachments && blob.attachments.length > 0
+      ? blob.attachments[idx]
+      : idx === 0 && blob?.attachmentDataUrl
+      ? { name: blob.attachmentName || resource.attachmentName || 'file', dataUrl: blob.attachmentDataUrl }
+      : Array.isArray(resource.attachments) && resource.attachments.length > 0
       ? resource.attachments[idx]
       : idx === 0 && resource.attachmentDataUrl
       ? { name: resource.attachmentName || 'file', dataUrl: resource.attachmentDataUrl }
@@ -6003,20 +6306,43 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
   const data = db.getData();
   const p = initPlatformCMS(data);
 
+  const newResourceId = 'res_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+  const hasAttachments = Boolean(
+    (parsedAttachments && parsedAttachments.length > 0) || body.attachmentDataUrl
+  );
+
+  if (hasAttachments) {
+    const blob: StoredAttachmentBlob = {
+      attachments:
+        parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments : undefined,
+      attachmentDataUrl:
+        parsedAttachments && parsedAttachments.length > 0
+          ? undefined
+          : body.attachmentDataUrl
+          ? String(body.attachmentDataUrl)
+          : undefined,
+      attachmentName: body.attachmentName ? String(body.attachmentName).trim() : firstAtt?.name,
+    };
+    void writeAttachmentBlobLocal(newResourceId, blob);
+    void uploadAttachmentBlobToGitHub(newResourceId, blob);
+  }
+
   const newResource: PlatformResource = {
-    id: 'res_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+    id: newResourceId,
     title: body.title ? String(body.title).trim() : '',
     description: body.description ? String(body.description).trim() : '',
     content: body.content ? String(body.content).trim() : undefined,
     linkUrl: body.linkUrl ? String(body.linkUrl).trim() : undefined,
     attachmentName: body.attachmentName ? String(body.attachmentName).trim() : firstAtt?.name,
-    // Do not duplicate attachments[0].dataUrl into legacy attachmentDataUrl when attachments array exists
-    attachmentDataUrl: parsedAttachments && parsedAttachments.length > 0
-      ? undefined
-      : body.attachmentDataUrl
-      ? String(body.attachmentDataUrl)
-      : undefined,
-    attachments: parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments : undefined,
+    // Keep db.json lightweight (~1.5 MB total): store metadata only in db.data while binary blobs live in data/attachments/
+    attachments:
+      parsedAttachments && parsedAttachments.length > 0
+        ? (parsedAttachments.map((a: any) => ({
+            name: a.name,
+            size: a.size,
+            mimeType: a.mimeType || parseDataUrlMime(a.dataUrl),
+          })) as any)
+        : undefined,
     resourceType: body.resourceType || 'კონსპექტი',
     subject: body.subject ? String(body.subject).trim() : 'ზოგადი',
     targetType: body.targetType || 'general',
@@ -6050,7 +6376,7 @@ app.post('/api/platform/resources', (req: Request, res: Response) => {
   });
 });
 
-app.put('/api/platform/resources/:id', (req: Request, res: Response) => {
+app.put('/api/platform/resources/:id', async (req: Request, res: Response) => {
   const auth = getPlatformAuthUser(req);
   if (!auth) {
     return res.status(401).json({ error: 'ავტორიზაცია სავალდებულოა.' });
@@ -6068,10 +6394,21 @@ app.put('/api/platform/resources/:id', (req: Request, res: Response) => {
   }
 
   const parsedAttachments = Array.isArray(body.attachments)
-    ? resolveEditedResourceAttachments(existing, body.attachments)
-    : existing.attachments;
+    ? await resolveEditedResourceAttachments(existing, body.attachments)
+    : undefined;
 
   const firstAtt = parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments[0] : undefined;
+
+  if (parsedAttachments && parsedAttachments.length > 0) {
+    const blob: StoredAttachmentBlob = {
+      attachments: parsedAttachments,
+      attachmentName: firstAtt?.name,
+    };
+    void writeAttachmentBlobLocal(id, blob);
+    void uploadAttachmentBlobToGitHub(id, blob);
+  } else if (Array.isArray(body.attachments) && body.attachments.length === 0) {
+    void deleteAttachmentBlob(id);
+  }
 
   p.resources[idx] = {
     ...existing,
@@ -6080,9 +6417,19 @@ app.put('/api/platform/resources/:id', (req: Request, res: Response) => {
     content: body.content !== undefined ? (body.content ? String(body.content).trim() : undefined) : existing.content,
     linkUrl: body.linkUrl !== undefined ? (body.linkUrl ? String(body.linkUrl).trim() : undefined) : existing.linkUrl,
     resourceType: body.resourceType || existing.resourceType,
-    attachments: parsedAttachments && parsedAttachments.length > 0 ? parsedAttachments : undefined,
-    attachmentName: firstAtt?.name,
-    attachmentDataUrl: parsedAttachments && parsedAttachments.length > 0 ? undefined : existing.attachmentDataUrl,
+    attachments:
+      parsedAttachments !== undefined
+        ? parsedAttachments.length > 0
+          ? (parsedAttachments.map((a) => ({
+              name: a.name,
+              size: a.size,
+              mimeType: a.mimeType || parseDataUrlMime(a.dataUrl),
+            })) as any)
+          : undefined
+        : existing.attachments,
+    attachmentName:
+      parsedAttachments !== undefined ? firstAtt?.name : existing.attachmentName,
+    attachmentDataUrl: parsedAttachments !== undefined ? undefined : existing.attachmentDataUrl,
   };
 
   savePlatformCMS(data, `Resource updated: ${p.resources[idx].title || id}`);
@@ -6138,6 +6485,7 @@ app.delete('/api/platform/resources/:id', (req: Request, res: Response) => {
     return res.status(403).json({ error: 'მხოლოდ ავტორს, მოდერატორს ან ადმინს შეუძლია წაშლა.' });
   }
   p.resources = p.resources.filter((r) => r.id !== id);
+  void deleteAttachmentBlob(id);
   savePlatformCMS(data, `Resource deleted: ${target.title}`);
   res.json({ success: true, resources: p.resources.map(serializeResourceForClient) });
 });
@@ -6596,6 +6944,9 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log(`Premier League Fantasy server running on port ${PORT}`);
+    setTimeout(() => {
+      void migrateLegacyInlineAttachmentsInBackground();
+    }, 1500);
   });
 }
 
